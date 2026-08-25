@@ -4,17 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PK Camp</title>
-<meta name="description" content="Notes, tools, and research on Pokémon games.">
+<meta name="description" content="Tools and updates for Pokémon collectors and researchers.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>&#x26FA;</text></svg>">
 <style>
   :root {
-    --bg:      #f6f4ee;
-    --panel:   #fffdf7;
-    --ink:     #23211c;
-    --muted:   #6b665c;
-    --rule:    #ddd8c9;
-    --accent:  #9a3b2e;
-    --link:    #2f5d84;
+    --bg:     #f6f4ee;
+    --panel:  #fffdf7;
+    --ink:    #23211c;
+    --muted:  #6b665c;
+    --rule:   #ddd8c9;
+    --accent: #9a3b2e;
+    --link:   #2f5d84;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -32,113 +32,156 @@
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
-    padding: 2rem 1.25rem 4rem;
     background: var(--bg);
     color: var(--ink);
     font: 16px/1.65 ui-serif, Georgia, "Iowan Old Style", Palatino, serif;
   }
-  .wrap { max-width: 44rem; margin: 0 auto; }
-
-  header { border-bottom: 3px double var(--rule); padding-bottom: 1.25rem; }
-  h1 {
-    margin: 0;
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-size: clamp(1.9rem, 6vw, 2.6rem);
-    letter-spacing: -0.02em;
-    color: var(--accent);
-  }
-  .tagline { margin: .4rem 0 0; color: var(--muted); font-style: italic; }
-
-  nav { margin-top: 1rem; font-family: ui-monospace, Menlo, monospace; font-size: .85rem; }
-  nav a { margin-right: 1rem; white-space: nowrap; }
-
-  h2 {
-    margin: 2.5rem 0 .75rem;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: 1.05rem;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--muted);
-  }
-
   a { color: var(--link); text-underline-offset: 2px; }
   a:hover { color: var(--accent); }
 
-  ul.entries { list-style: none; margin: 0; padding: 0; }
-  ul.entries li {
+  .layout {
+    max-width: 58rem;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 4rem;
+    display: grid;
+    grid-template-columns: 13rem 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  /* ---- sidebar ---- */
+  .sidebar { position: sticky; top: 2.5rem; }
+  .brand {
+    margin: 0;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 1.6rem;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+  }
+  .brand a { color: inherit; text-decoration: none; }
+  .tagline {
+    margin: .35rem 0 1.75rem;
+    color: var(--muted);
+    font-size: .9rem;
+    font-style: italic;
+  }
+  .sidebar h2 {
+    margin: 0 0 .6rem;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: .4rem;
+  }
+  .sidebar ul { list-style: none; margin: 0; padding: 0; }
+  .sidebar li { margin-bottom: .7rem; }
+  .sidebar li a { text-decoration: none; font-weight: 600; }
+  .sidebar li a:hover { text-decoration: underline; }
+  .sidebar li span {
+    display: block;
+    color: var(--muted);
+    font-size: .8rem;
+    line-height: 1.45;
+    font-weight: normal;
+  }
+
+  /* ---- main feed ---- */
+  main h2 {
+    margin: 0 0 1.25rem;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: .4rem;
+  }
+  article {
     background: var(--panel);
     border: 1px solid var(--rule);
-    border-radius: 4px;
-    padding: .8rem 1rem;
-    margin-bottom: .6rem;
+    border-radius: 5px;
+    padding: 1.1rem 1.3rem 1.2rem;
+    margin-bottom: 1.1rem;
   }
-  ul.entries .title { font-weight: 600; }
-  ul.entries .desc { display: block; color: var(--muted); font-size: .92rem; }
-
-  dl.updates { margin: 0; }
-  dl.updates dt {
+  article time {
+    display: block;
     font-family: ui-monospace, Menlo, monospace;
-    font-size: .8rem;
+    font-size: .75rem;
     color: var(--muted);
-    margin-top: .8rem;
+    margin-bottom: .5rem;
   }
-  dl.updates dd { margin: .1rem 0 0; }
+  article h3 { margin: 0 0 .5rem; font-size: 1.15rem; line-height: 1.35; }
+  article p { margin: 0 0 .75rem; }
+  article p:last-child { margin-bottom: 0; }
+  .tags { font-family: ui-monospace, Menlo, monospace; font-size: .78rem; color: var(--muted); }
 
   footer {
-    margin-top: 3rem;
+    grid-column: 1 / -1;
+    margin-top: 2rem;
     padding-top: 1.25rem;
     border-top: 1px solid var(--rule);
     color: var(--muted);
-    font-size: .85rem;
+    font-size: .82rem;
+  }
+
+  @media (max-width: 46rem) {
+    .layout { grid-template-columns: 1fr; gap: 2rem; padding-top: 1.75rem; }
+    .sidebar { position: static; }
   }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="layout">
 
-  <header>
-    <h1>PK&nbsp;Camp</h1>
-    <p class="tagline">Notes, tools, and research on Pokémon games.</p>
-    <nav>
-      <a href="#projects">Projects</a>
-      <a href="#notes">Notes</a>
-      <a href="#updates">Updates</a>
-      <a href="#about">About</a>
-    </nav>
-  </header>
+  <aside class="sidebar">
+    <h1 class="brand"><a href="./">PK&nbsp;Camp</a></h1>
+    <p class="tagline">Tools and updates for Pokémon collectors.</p>
 
-  <h2 id="projects">Projects</h2>
-  <ul class="entries">
-    <li>
-      <span class="title">FRLG Mystery Gift over Local Wireless</span>
-      <span class="desc">Recreating FireRed/LeafGreen Wonder Card distributions on real hardware.</span>
-    </li>
-    <li>
-      <span class="title">Ribbon Helper</span>
-      <span class="desc">Tracking which ribbons are obtainable, and where.</span>
-    </li>
-    <li>
-      <span class="title">Frontier Champions</span>
-      <span class="desc">Battle Frontier data and analysis.</span>
-    </li>
-  </ul>
+    <h2>Projects</h2>
+    <ul>
+      <li>
+        <a href="./">PK Camp</a>
+        <span>Mystery Event for unmodded FireRed &amp; LeafGreen.</span>
+      </li>
+      <li>
+        <a href="https://ribbon-helper.guide/">Ribbon Helper</a>
+        <span>Battle and contest lookup for ribbon collecting.</span>
+      </li>
+    </ul>
+  </aside>
 
-  <h2 id="notes">Notes</h2>
-  <p>Longer write-ups will live here. Nothing published yet.</p>
+  <main>
+    <h2>Updates</h2>
 
-  <h2 id="updates">Updates</h2>
-  <dl class="updates">
-    <dt>2026-08-24</dt>
-    <dd>Site goes up.</dd>
-  </dl>
+    <article>
+      <time datetime="2026-08-25">2026-08-25</time>
+      <h3>Mystery Event prototype, live at Pokémon Worlds / XP</h3>
+      <p>
+        We have a working prototype of Mystery Event for an unmodded Switch or
+        Switch&nbsp;2 FireRed&nbsp;/&nbsp;LeafGreen game. Come to Pokémon Worlds&nbsp;/&nbsp;XP
+        in San Francisco to get an exclusive look!
+      </p>
+      <p>
+        Demo: <a href="https://www.youtube.com/watch?v=lUWbs-ozJnE">youtube.com/watch?v=lUWbs-ozJnE</a>
+      </p>
+    </article>
 
-  <h2 id="about">About</h2>
-  <p>
-    PK Camp is a personal site for documenting Pokémon game internals — the kind of
-    detail that gets lost in forum threads. Everything here is hand-written and
-    hosted on GitHub Pages.
-  </p>
-  <p>Source: <a href="https://github.com/MercuryEnigma/pkcamp">github.com/MercuryEnigma/pkcamp</a></p>
+    <article>
+      <time datetime="2026-08-25">2026-08-25</time>
+      <h3>Ribbon Helper is live</h3>
+      <p>
+        For those looking to #ribbonmaster their cherished Pokémon before
+        #PokemonBank closes down, I created a tool to help look up battle and
+        contest info to make it as accessible as possible.
+      </p>
+      <p>
+        <a href="https://ribbon-helper.guide/">ribbon-helper.guide</a>
+      </p>
+      <p class="tags">#ribbonmaster #PokemonBank</p>
+    </article>
+  </main>
 
   <footer>
     Pokémon is © Nintendo / Creatures Inc. / GAME FREAK inc.
