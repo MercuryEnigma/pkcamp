@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PK Camp</title>
+<meta name="description" content="Notes, tools, and research on Pokémon games.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>&#x26FA;</text></svg>">
+<style>
+  :root {
+    --bg:      #f6f4ee;
+    --panel:   #fffdf7;
+    --ink:     #23211c;
+    --muted:   #6b665c;
+    --rule:    #ddd8c9;
+    --accent:  #9a3b2e;
+    --link:    #2f5d84;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:     #16181c;
+      --panel:  #1d2026;
+      --ink:    #e4e2dc;
+      --muted:  #9a968c;
+      --rule:   #2f333b;
+      --accent: #e08a6e;
+      --link:   #7fb2dd;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    padding: 2rem 1.25rem 4rem;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.65 ui-serif, Georgia, "Iowan Old Style", Palatino, serif;
+  }
+  .wrap { max-width: 44rem; margin: 0 auto; }
+
+  header { border-bottom: 3px double var(--rule); padding-bottom: 1.25rem; }
+  h1 {
+    margin: 0;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: clamp(1.9rem, 6vw, 2.6rem);
+    letter-spacing: -0.02em;
+    color: var(--accent);
+  }
+  .tagline { margin: .4rem 0 0; color: var(--muted); font-style: italic; }
+
+  nav { margin-top: 1rem; font-family: ui-monospace, Menlo, monospace; font-size: .85rem; }
+  nav a { margin-right: 1rem; white-space: nowrap; }
+
+  h2 {
+    margin: 2.5rem 0 .75rem;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+  }
+
+  a { color: var(--link); text-underline-offset: 2px; }
+  a:hover { color: var(--accent); }
+
+  ul.entries { list-style: none; margin: 0; padding: 0; }
+  ul.entries li {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: .8rem 1rem;
+    margin-bottom: .6rem;
+  }
+  ul.entries .title { font-weight: 600; }
+  ul.entries .desc { display: block; color: var(--muted); font-size: .92rem; }
+
+  dl.updates { margin: 0; }
+  dl.updates dt {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: .8rem;
+    color: var(--muted);
+    margin-top: .8rem;
+  }
+  dl.updates dd { margin: .1rem 0 0; }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: .85rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>PK&nbsp;Camp</h1>
+    <p class="tagline">Notes, tools, and research on Pokémon games.</p>
+    <nav>
+      <a href="#projects">Projects</a>
+      <a href="#notes">Notes</a>
+      <a href="#updates">Updates</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+
+  <h2 id="projects">Projects</h2>
+  <ul class="entries">
+    <li>
+      <span class="title">FRLG Mystery Gift over Local Wireless</span>
+      <span class="desc">Recreating FireRed/LeafGreen Wonder Card distributions on real hardware.</span>
+    </li>
+    <li>
+      <span class="title">Ribbon Helper</span>
+      <span class="desc">Tracking which ribbons are obtainable, and where.</span>
+    </li>
+    <li>
+      <span class="title">Frontier Champions</span>
+      <span class="desc">Battle Frontier data and analysis.</span>
+    </li>
+  </ul>
+
+  <h2 id="notes">Notes</h2>
+  <p>Longer write-ups will live here. Nothing published yet.</p>
+
+  <h2 id="updates">Updates</h2>
+  <dl class="updates">
+    <dt>2026-08-24</dt>
+    <dd>Site goes up.</dd>
+  </dl>
+
+  <h2 id="about">About</h2>
+  <p>
+    PK Camp is a personal site for documenting Pokémon game internals — the kind of
+    detail that gets lost in forum threads. Everything here is hand-written and
+    hosted on GitHub Pages.
+  </p>
+  <p>Source: <a href="https://github.com/MercuryEnigma/pkcamp">github.com/MercuryEnigma/pkcamp</a></p>
+
+  <footer>
+    Pokémon is © Nintendo / Creatures Inc. / GAME FREAK inc.
+    This is an unofficial fan site with no affiliation.
+  </footer>
+
+</div>
+</body>
+</html>
