@@ -6,129 +6,264 @@
 <title>PK Camp</title>
 <meta name="description" content="Tools and updates for Pokémon collectors and researchers.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>&#x26FA;</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Baloo+2:wght@600;700;800&family=Nunito:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:     #f6f4ee;
-    --panel:  #fffdf7;
-    --ink:    #23211c;
-    --muted:  #6b665c;
-    --rule:   #ddd8c9;
-    --accent: #9a3b2e;
-    --link:   #2f5d84;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg:     #16181c;
-      --panel:  #1d2026;
-      --ink:    #e4e2dc;
-      --muted:  #9a968c;
-      --rule:   #2f333b;
-      --accent: #e08a6e;
-      --link:   #7fb2dd;
-    }
+    --bg:       #1d5a91;   /* flat page background, no gradient or motion */
+    --ink:      #0e1428;   /* outline black */
+    --card:     #232b4a;
+    --card-hi:  #2c3559;
+    --text:     #eef1ff;
+    --muted:    #a9b3d9;
+    --deep:     #17307a;
+    --sun:      #ffd23f;
+    --flame:    #ff6a2b;
+    --berry:    #e33b6d;
+    --grass:    #6fce4e;
+    --grape:    #8a5cf6;
+    --sky:      #8fd6ff;
+    --shadow:   0 6px 0 rgba(8,12,28,.9);
   }
 
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; overflow-x: clip; }
+
   body {
     margin: 0;
     background: var(--bg);
-    color: var(--ink);
-    font: 16px/1.65 ui-serif, Georgia, "Iowan Old Style", Palatino, serif;
+    color: var(--text);
+    font: 17px/1.6 "Nunito", "Trebuchet MS", Verdana, system-ui, sans-serif;
+    font-weight: 600;
   }
-  a { color: var(--link); text-underline-offset: 2px; }
-  a:hover { color: var(--accent); }
+
+  a { color: var(--sky); text-decoration-thickness: 3px; text-underline-offset: 3px; }
+  a:hover { color: var(--sun); }
 
   .layout {
-    max-width: 58rem;
+    max-width: 64rem;
     margin: 0 auto;
-    padding: 2.5rem 1.25rem 4rem;
+    padding: 2rem 1.25rem 4rem;
     display: grid;
-    grid-template-columns: 13rem 1fr;
-    gap: 3rem;
+    grid-template-columns: 17rem 1fr;
+    gap: 2rem;
     align-items: start;
   }
 
-  /* ---- sidebar ---- */
-  .sidebar { position: sticky; top: 2.5rem; }
+  /* ---------- shared chunky panel ---------- */
+  .panel {
+    background: var(--card);
+    border: 4px solid var(--ink);
+    border-radius: 20px;
+    box-shadow: var(--shadow), 0 14px 26px rgba(4,8,24,.35);
+    position: relative;
+    overflow: hidden;
+  }
+  /* soft top sheen, kept subtle so dark panels stay readable */
+  .panel::after {
+    content: "";
+    position: absolute;
+    inset: 4px 4px auto;
+    height: 42%;
+    border-radius: 14px 14px 60% 60% / 14px 14px 22px 22px;
+    background: linear-gradient(rgba(255,255,255,.14), rgba(255,255,255,0));
+    pointer-events: none;
+  }
+
+  /* ---------- sidebar ---------- */
+  .sidebar { position: sticky; top: 1.5rem; }
+
   .brand {
-    margin: 0;
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 1.6rem;
-    letter-spacing: -0.02em;
-    color: var(--accent);
+    margin: 0 0 .1rem;
+    font-family: "Luckiest Guy", "Baloo 2", Impact, fantasy;
+    font-weight: 400;
+    font-size: clamp(2.6rem, 7vw, 3.4rem);
+    line-height: .95;
+    letter-spacing: .02em;
+    text-align: center;
+    transform: rotate(-3deg);
+    filter: drop-shadow(0 6px 0 rgba(8,12,28,.9)) drop-shadow(0 12px 14px rgba(0,0,0,.35));
   }
-  .brand a { color: inherit; text-decoration: none; }
+  .brand a {
+    display: inline-block;
+    text-decoration: none;
+    background: linear-gradient(#fff6b0 8%, var(--sun) 45%, var(--flame) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-stroke: 7px var(--ink);
+    paint-order: stroke fill;
+    transition: transform .15s ease;
+  }
+  .brand a:hover { transform: scale(1.05) rotate(1.5deg); }
+
   .tagline {
-    margin: .35rem 0 1.75rem;
-    color: var(--muted);
-    font-size: .9rem;
-    font-style: italic;
+    margin: 1rem 0 1.5rem;
+    padding: .75rem .9rem;
+    text-align: center;
+    font-size: .88rem;
+    line-height: 1.45;
+    color: var(--text);
+    background: var(--card);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
   }
-  .sidebar h2 {
-    margin: 0 0 .6rem;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: .75rem;
+  .tagline strong { color: var(--sun); }
+
+  .sidebar .panel { padding: 0 0 1rem; }
+
+  /* section banner used in sidebar + main */
+  .banner {
+    margin: 0 0 1rem;
+    padding: .55rem 1rem .65rem;
+    font-family: "Luckiest Guy", "Baloo 2", Impact, fantasy;
+    font-weight: 400;
+    font-size: 1.15rem;
+    letter-spacing: .06em;
     text-transform: uppercase;
-    letter-spacing: .1em;
-    color: var(--muted);
-    border-bottom: 1px solid var(--rule);
-    padding-bottom: .4rem;
+    color: #fff;
+    text-shadow: 0 3px 0 rgba(8,12,28,.85);
+    background: linear-gradient(var(--berry), #b21f4c);
+    border-bottom: 4px solid var(--ink);
+    position: relative;
+    z-index: 1;
   }
-  .sidebar ul { list-style: none; margin: 0; padding: 0; }
-  .sidebar li { margin-bottom: .7rem; }
-  .sidebar li a { text-decoration: none; font-weight: 600; }
-  .sidebar li a:hover { text-decoration: underline; }
+  main .banner { background: linear-gradient(var(--grape), #5a2fd0); }
+  .panel > .banner { border-radius: 16px 16px 0 0; }
+
+  .sidebar ul { list-style: none; margin: 0; padding: 0 .9rem; position: relative; z-index: 1; }
+  .sidebar li { margin-bottom: .8rem; }
+  .sidebar li:last-child { margin-bottom: 0; }
+
+  .sidebar li a {
+    display: block;
+    padding: .55rem .8rem;
+    font-family: "Baloo 2", "Nunito", sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    line-height: 1.2;
+    color: var(--ink);
+    text-decoration: none;
+    background: linear-gradient(#ffffff 0%, #d8f3c6 45%, var(--grass) 100%);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    box-shadow: 0 4px 0 rgba(8,12,28,.9);
+    transition: transform .1s ease, box-shadow .1s ease, filter .1s ease;
+  }
+  .sidebar li a:hover {
+    filter: saturate(1.25) brightness(1.05);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 rgba(8,12,28,.9);
+  }
+  .sidebar li a:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 rgba(8,12,28,.9);
+  }
   .sidebar li span {
     display: block;
-    color: var(--muted);
-    font-size: .8rem;
+    margin: .4rem .2rem 0;
+    font-size: .82rem;
     line-height: 1.45;
-    font-weight: normal;
+    font-weight: 600;
+    color: var(--muted);
   }
 
-  /* ---- main feed ---- */
-  main h2 {
-    margin: 0 0 1.25rem;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: .75rem;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: var(--muted);
-    border-bottom: 1px solid var(--rule);
-    padding-bottom: .4rem;
-  }
-  article {
-    background: var(--panel);
-    border: 1px solid var(--rule);
-    border-radius: 5px;
-    padding: 1.1rem 1.3rem 1.2rem;
-    margin-bottom: 1.1rem;
-  }
+  /* ---------- main feed ---------- */
+  main { display: grid; gap: 1.4rem; }
+  main .panel { padding: 0 0 1.25rem; }
+
+  article .body { padding: 0 1.25rem; position: relative; z-index: 1; }
+
   article time {
-    display: block;
-    font-family: ui-monospace, Menlo, monospace;
-    font-size: .75rem;
-    color: var(--muted);
-    margin-bottom: .5rem;
+    display: inline-block;
+    margin: -.35rem 0 .7rem -.35rem;
+    padding: .3rem .7rem;
+    font-family: "Baloo 2", monospace;
+    font-weight: 800;
+    font-size: .8rem;
+    letter-spacing: .05em;
+    color: var(--ink);
+    background: linear-gradient(#fff3ad, var(--sun));
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    box-shadow: 0 3px 0 rgba(8,12,28,.9);
+    transform: rotate(-1.5deg);
   }
-  article h3 { margin: 0 0 .5rem; font-size: 1.15rem; line-height: 1.35; }
-  article p { margin: 0 0 .75rem; }
-  article p:last-child { margin-bottom: 0; }
-  .tags { font-family: ui-monospace, Menlo, monospace; font-size: .78rem; color: var(--muted); }
 
+  article h3 {
+    margin: 0 0 .6rem;
+    font-family: "Baloo 2", "Nunito", sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    line-height: 1.15;
+    color: var(--sun);
+    text-shadow: 0 3px 0 rgba(8,12,28,.55);
+  }
+
+  article p { margin: 0 0 .8rem; }
+  article p:last-child { margin-bottom: 0; }
+
+  article .go {
+    display: inline-block;
+    padding: .5rem 1.1rem;
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 800;
+    color: #fff;
+    text-decoration: none;
+    text-shadow: 0 2px 0 rgba(8,12,28,.6);
+    background: linear-gradient(#ff9a5c, var(--flame) 55%, #e04a12);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    box-shadow: 0 5px 0 rgba(8,12,28,.9);
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  article .go:hover { transform: translateY(-2px); box-shadow: 0 7px 0 rgba(8,12,28,.9); color: #fff; }
+  article .go:active { transform: translateY(5px); box-shadow: 0 0 0 rgba(8,12,28,.9); }
+
+  /* NEW! starburst sticker (static — no animation) */
+  .sticker {
+    position: absolute;
+    top: -20px;
+    right: -12px;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 86px;
+    height: 86px;
+    font-family: "Luckiest Guy", Impact, fantasy;
+    font-size: .9rem;
+    color: #fff;
+    text-shadow: 0 2px 0 rgba(8,12,28,.8);
+    background: var(--berry);
+    clip-path: polygon(50% 0%,61% 22%,85% 15%,80% 39%,100% 50%,80% 61%,85% 85%,61% 78%,50% 100%,39% 78%,15% 85%,20% 61%,0% 50%,20% 39%,15% 15%,39% 22%);
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,.45));
+    transform: rotate(12deg);
+  }
+  .has-sticker { overflow: visible; }
+  .has-sticker::after { border-radius: 14px 14px 60% 60% / 14px 14px 22px 22px; }
+
+  /* ---------- footer ---------- */
   footer {
     grid-column: 1 / -1;
-    margin-top: 2rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--rule);
+    margin-top: 1.5rem;
+    padding: 1rem 1.25rem;
+    text-align: center;
+    font-size: .8rem;
     color: var(--muted);
-    font-size: .82rem;
+    background: var(--card);
+    border: 3px solid var(--ink);
+    border-radius: 16px;
+  }
+  footer a { color: var(--sun); }
+
+  @media (max-width: 52rem) {
+    .layout { grid-template-columns: 1fr; padding-top: 1.25rem; }
+    .sidebar { position: static; }
   }
 
-  @media (max-width: 46rem) {
-    .layout { grid-template-columns: 1fr; gap: 2rem; padding-top: 1.75rem; }
-    .sidebar { position: static; }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
   }
 </style>
 </head>
@@ -137,50 +272,52 @@
 
   <aside class="sidebar">
     <h1 class="brand"><a href="./">PK&nbsp;Camp</a></h1>
-    <p class="tagline">Tools and updates for Retro Pokémon enjoyers. Managed by MercuryEnigma</p>
+    <p class="tagline">Tools and updates for Retro Pokémon enjoyers.<br>Managed by <strong>MercuryEnigma</strong></p>
 
-    <h2>Projects</h2>
-    <ul>
-      <li>
-        <a href="https://www.youtube.com/watch?v=lUWbs-ozJnE">Mystery Event on Switch FrLg</a>
-        <span>Mystery Event for unmodded FireRed &amp; LeafGreen on the Switch systems.</span>
-      </li>
-      <li>
-        <a href="https://ribbon-helper.guide/">Ribbon Helper</a>
-        <span>Battle and contest lookup tool for ribbon collecting.</span>
-      </li>
-    </ul>
+    <div class="panel">
+      <h2 class="banner">Projects</h2>
+      <ul>
+        <li>
+          <a href="https://www.youtube.com/watch?v=lUWbs-ozJnE">Mystery Event on Switch FrLg</a>
+          <span>Mystery Event for unmodded FireRed &amp; LeafGreen on the Switch systems.</span>
+        </li>
+        <li>
+          <a href="https://ribbon-helper.guide/">Ribbon Helper</a>
+          <span>Battle and contest lookup tool for ribbon collecting.</span>
+        </li>
+      </ul>
+    </div>
   </aside>
 
   <main>
-    <h2>Updates</h2>
-
-    <article>
-      <time datetime="2026-08-19">2026-08-19</time>
-      <h3>Mystery Event prototype, live at Pokémon Worlds / XP</h3>
-      <p>
-        We have a working prototype of Mystery Event for an unmodded Switch or
-        Switch&nbsp;2 FireRed&nbsp;/&nbsp;LeafGreen game. Come to Pokémon Worlds&nbsp;/&nbsp;XP
-        in San Francisco to get an exclusive look!
-      </p>
-      <p>
-        Demo: <a href="https://www.youtube.com/watch?v=lUWbs-ozJnE">youtube.com/watch?v=lUWbs-ozJnE</a>
-      </p>
+    <article class="panel has-sticker">
+      <span class="sticker" aria-hidden="true">NEW!</span>
+      <h2 class="banner">Updates</h2>
+      <div class="body">
+        <time datetime="2026-08-19">2026-08-19</time>
+        <h3>Mystery Event prototype, live at Pokémon Worlds / XP</h3>
+        <p>
+          We have a working prototype of Mystery Event for an unmodded Switch or
+          Switch&nbsp;2 FireRed&nbsp;/&nbsp;LeafGreen game. Come to Pokémon Worlds&nbsp;/&nbsp;XP
+          in San Francisco to get an exclusive look!
+        </p>
+        <p><a class="go" href="https://www.youtube.com/watch?v=lUWbs-ozJnE">Watch the demo &rarr;</a></p>
+      </div>
     </article>
 
-    <article>
-      <time datetime="2026-08-25">2026-08-25</time>
-      <h3>Ribbon Helper is live</h3>
-      <p>
-        For those looking to ribbon master their cherished Pokémon before
-        Pokemon Bank closes down, I created a tool to help look up battle and
-        contest info to make it as accessible as possible. There is also a full
-        set of guides for all ribbons, resources for figuring out which games
-        Pokemon can go to, and a tool to create a single HOME screenshot.
-      </p>
-      <p>
-        <a href="https://ribbon-helper.guide/">ribbon-helper.guide</a>
-      </p>
+    <article class="panel">
+      <div class="body" style="padding-top:1.25rem">
+        <time datetime="2026-08-14">2026-08-14</time>
+        <h3>Ribbon Helper is live</h3>
+        <p>
+          For those looking to ribbon master their cherished Pokémon before
+          Pokemon Bank closes down, I created a tool to help look up battle and
+          contest info to make it as accessible as possible. There is also a full
+          set of guides for all ribbons, resources for figuring out which games
+          Pokemon can go to, and a tool to create a single HOME screenshot.
+        </p>
+        <p><a class="go" href="https://ribbon-helper.guide/">Open Ribbon Helper &rarr;</a></p>
+      </div>
     </article>
   </main>
 
