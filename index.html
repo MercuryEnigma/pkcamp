@@ -129,7 +129,7 @@
     position: relative;
     z-index: 1;
   }
-  main .banner { background: linear-gradient(var(--grape), #5a2fd0); }
+  main .banner { background: linear-gradient(var(--grape), #5a2fd0); margin-bottom: 0; }
   .panel > .banner { border-radius: 16px 16px 0 0; }
 
   .sidebar ul { list-style: none; margin: 0; padding: 0 .9rem; position: relative; z-index: 1; }
@@ -173,7 +173,7 @@
   main { display: grid; gap: 1.4rem; }
   main .panel { padding: 0 0 1.25rem; }
 
-  article .body { padding: 0 1.25rem; position: relative; z-index: 1; }
+  article .body { padding: 1.15rem 1.25rem 0; position: relative; z-index: 1; }
 
   article time {
     display: inline-block;
@@ -199,6 +199,26 @@
     line-height: 1.15;
     color: var(--sun);
     text-shadow: 0 3px 0 rgba(8,12,28,.55);
+  }
+
+  /* embedded video, chunky TV-screen framing */
+  .video {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    margin: 0 0 .9rem;
+    background: #000;
+    border: 4px solid var(--ink);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 5px 0 rgba(8,12,28,.9);
+  }
+  .video iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
   }
 
   article p { margin: 0 0 .8rem; }
@@ -294,19 +314,71 @@
       <span class="sticker" aria-hidden="true">NEW!</span>
       <h2 class="banner">Updates</h2>
       <div class="body">
+        <time datetime="2026-08-25">2026-08-25</time>
+        <h3>Mystery Gift live at Pokémon Worlds / XP!</h3>
+        <p>
+          Coming to San Francisco for Pokemon Worlds / XP? Come find the
+          first-of-its-kind mystery gift distribution for Switch FireRed/LeafGreen!
+          Receive a rare egg that unlocks a LEGENDARY experience!
+        </p>
+        <p>
+          Make sure you unlock Mystery Gift first. Go the any PokeMart and interact with
+          the questionnaire on the counter and put in: LINK	TOGETHER	WITH	ALL
+        </p>
+        <p>
+          NOTE: This is a fan-made project. I'm taking huge care to test and make sure
+          it is as proper and bug-free as possible. But as with all non-official methods,
+          there is always a small chance for unintended behavior, so use at your own risk.
+        </p>
+        <div class="video">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/QaGGz4NHxs0"
+            title="Discover this fan-made Mystery Gift at Pokemon Worlds in SF"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen></iframe>
+        </div>
+        <p><a class="go" href="https://www.youtube.com/watch?v=QaGGz4NHxs0">Watch on YouTube &rarr;</a></p>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="body">
         <time datetime="2026-08-19">2026-08-19</time>
-        <h3>Mystery Event prototype, live at Pokémon Worlds / XP</h3>
+        <h3>Working Mystery Gift prototype</h3>
         <p>
           We have a working prototype of Mystery Event for an unmodded Switch or
           Switch&nbsp;2 FireRed&nbsp;/&nbsp;LeafGreen game. Come to Pokémon Worlds&nbsp;/&nbsp;XP
           in San Francisco to get an exclusive look!
         </p>
-        <p><a class="go" href="https://www.youtube.com/watch?v=lUWbs-ozJnE">Watch the demo &rarr;</a></p>
+
+        <p>
+          This was acheived by building off of 
+          <a href="https://github.com/tornadus/frlg-ldn-trade">tornadus's FRLG LDN trade project</a>.
+          By extending this project to support hosting trades and wireless adapter interactions,
+          we can now send custom mystery gift events to stock, unmodded Switch 1 and Switch 2
+          FireRed / LeafGreen games with a simple linux and Wifi-USB adapter! 
+        </p>
+
+        <p>
+          More details will come up as the team works on streamlining it so it is easy for anyone to try!
+        </p>
+        <div class="video">
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/lUWbs-ozJnE"
+            title="Mystery Event on Switch FireRed / LeafGreen — prototype demo"
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen></iframe>
+        </div>
+        <p><a class="go" href="https://www.youtube.com/watch?v=lUWbs-ozJnE">Watch on YouTube &rarr;</a></p>
       </div>
     </article>
 
     <article class="panel">
-      <div class="body" style="padding-top:1.25rem">
+      <div class="body">
         <time datetime="2026-08-14">2026-08-14</time>
         <h3>Ribbon Helper is live</h3>
         <p>
