@@ -1,26 +1,33 @@
-# pkcamp
+# React + TypeScript + Vite
 
 Source for [mercuryenigma.github.io/pkcamp](https://mercuryenigma.github.io/pkcamp) —
 a static site about Pokémon game internals.
 
-## Structure
+Currently, two official plugins are available:
 
-- `index.html` — the whole site, for now. Plain HTML with inline CSS, no build step.
-- `.nojekyll` — tells GitHub Pages to serve files as-is instead of running Jekyll.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Local preview
+## React Compiler
 
-```sh
-python3 -m http.server 8000
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the Oxlint configuration
+
+If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+
+```json
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "options": {
+    "typeAware": true
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  }
+}
 ```
 
-Then open <http://localhost:8000>.
-
-## Deploying
-
-This is a GitHub Pages *project* site, so it publishes under a `/pkcamp/` path prefix.
-Enable it once under **Settings → Pages → Source: Deploy from a branch → `main` / `/ (root)`**,
-then every push to `main` redeploys.
-
-Because of the path prefix, internal links must be relative (`notes/foo.html`) or
-prefixed (`/pkcamp/notes/foo.html`) — a root-absolute `/notes/foo.html` will 404.
+See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
