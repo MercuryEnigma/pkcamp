@@ -6,5 +6,5 @@ i18next.use(initReactI18next).init({
   resources: { en: { translation: en } },
   lng: 'en',
   fallbackLng: 'en',
-  interpolation: { escapeVale: false },
+  interpolation: { escapeValue: false },
 })
