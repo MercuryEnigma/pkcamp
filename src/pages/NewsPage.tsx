@@ -1,4 +1,4 @@
-export function PatchNotes() {
+export function NewsPage() {
     const html = `<div class="layout">
 
   <aside class="sidebar">
@@ -154,6 +154,6 @@ export function PatchNotes() {
 `;
 
     return (
-        <div dangerouslySetInnerHTML={{ _html: hmtl }} />
+        <div dangerouslySetInnerHTML={{ __html: html }} />
     );
 }

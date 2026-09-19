@@ -1,0 +1,13 @@
+{
+  "areas": {
+    "pokemon": "Pokémon",
+    "pokedex": "Pokédex",
+    "shop": "Shop",
+    "safari": "Safari Zone",
+    "pelago": "Pelago Zone",
+    "options": "Options"
+  },
+  "options_headers": {
+    "news_page": "News & Updates"
+  }
+}
