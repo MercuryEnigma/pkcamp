@@ -14,6 +14,11 @@ import { getStoredSpriteSourceId } from './spritePreference'
 import { DEFAULT_SPRITE_SOURCE_ID, SPRITE_SOURCES } from './spriteSources'
 
 type StorageMode = 'view' | 'moveOne' | 'groupMove'
+const MODE_ACTIVE_CLASS: Record<StorageMode, string> = {
+  view: 'camp-mode-btn--active-view',
+  moveOne: 'camp-mode-btn--active-move',
+  groupMove: 'camp-mode-btn--active-group',
+}
 type StoragePage =
   | { kind: 'box'; boxIndex: number; label: string; slots: SaveSlot[] }
   | { kind: 'party'; label: 'Party'; slots: SaveSlot[] }
@@ -117,7 +122,7 @@ export function PokemonStorageView({
     null
   )
   const [message, setMessage] = useState(
-    'Select a Pokémon to view its details.'
+    'Choose a camper to view their details.'
   )
 
   useEffect(() => {
@@ -156,7 +161,7 @@ export function PokemonStorageView({
     setMode(nextMode)
     cancelMove(
       nextMode === 'view'
-        ? 'Select a Pokémon to view its details.'
+        ? 'Choose a camper to view their details.'
         : nextMode === 'moveOne'
           ? 'Select a Pokémon from either panel, then choose its destination.'
           : 'Select two corners of a group, then choose its top-left destination.'
@@ -419,7 +424,7 @@ export function PokemonStorageView({
     if (mode === 'view') {
       const pokemon = transferAt(locationInArea(area, slot))?.pokemon ?? null
       setSelected(pokemon)
-      setMessage('Select a Pokémon to view its details.')
+      setMessage('Choose a camper to view their details.')
       return
     }
     if (mode === 'moveOne') {
@@ -468,7 +473,7 @@ export function PokemonStorageView({
               else {
                 setSelected(slot)
                 if (slot === null)
-                  setMessage('Select a Pokémon to view its details.')
+                  setMessage('Choose a camper to view their details.')
               }
             }}
           />
@@ -490,7 +495,16 @@ export function PokemonStorageView({
             ←
           </button>
           <strong className="camp-box-label">
-            {page.label} [# {pageIndex + 1}]
+            <span className="camp-location-kicker">
+              {page.kind === 'party'
+                ? 'Current Party'
+                : `Room ${page.boxIndex + 1} of ${game.boxes.length}`}
+            </span>
+            <span className="camp-location-name">
+              {page.kind === 'party'
+                ? `${page.slots.filter(Boolean).length}/${page.slots.length} Pokémon`
+                : `${page.label} · ${page.slots.filter(Boolean).length}/${page.slots.length} campers`}
+            </span>
           </strong>
           <button
             type="button"
@@ -525,7 +539,7 @@ export function PokemonStorageView({
             <button
               type="button"
               key={value}
-              className={`camp-mode-btn${mode === value ? ' camp-mode-btn--active' : ''}`}
+              className={`camp-mode-btn${mode === value ? ` ${MODE_ACTIVE_CLASS[value]}` : ''}`}
               disabled={page.kind === 'party' && value !== 'view'}
               onClick={() => chooseMode(value)}
             >
@@ -564,13 +578,29 @@ export function PokemonStorageView({
               <strong className="camp-box-label">
                 {rightIsLocal ? (
                   <>
-                    Camping Box {rightLocalBoxIndex + 1} (
-                    {rightLocalBoxIndex + 1}/{localBoxCount})
+                    <span className="camp-location-kicker">
+                      Camp Site {rightLocalBoxIndex + 1} of {localBoxCount}
+                    </span>
+                    <span className="camp-location-name">
+                      {
+                        localSlots.slice(
+                          rightLocalBoxIndex * COLUMNS * ROWS,
+                          (rightLocalBoxIndex + 1) * COLUMNS * ROWS
+                        ).filter(Boolean).length
+                      }
+                      /{COLUMNS * ROWS} campers
+                    </span>
                   </>
                 ) : (
                   <>
-                    {game.boxes[rightPageIndex].name} ({rightPageIndex + 1}/
-                    {game.boxes.length})
+                    <span className="camp-location-kicker">
+                      Room {rightPageIndex + 1} of {game.boxes.length}
+                    </span>
+                    <span className="camp-location-name">
+                      {game.boxes[rightPageIndex].name} ·{' '}
+                      {game.boxes[rightPageIndex].slots.filter(Boolean).length}/
+                      {game.boxes[rightPageIndex].slots.length} campers
+                    </span>
                   </>
                 )}
               </strong>
@@ -610,10 +640,10 @@ export function PokemonStorageView({
             </div>
           </>
         ) : selected ? (
-          <PokemonDetails pokemon={selected} />
+          <PokemonDetails pokemon={selected} resolver={resolver} />
         ) : (
           <div className="camp-panel camp-details-empty">
-            Select a Pokémon to view its details.
+            Choose a camper to view their details.
           </div>
         )}
       </section>

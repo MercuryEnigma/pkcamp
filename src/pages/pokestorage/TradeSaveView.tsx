@@ -49,11 +49,13 @@ function tradeStatus(event: TradeDeviceEvent): string | null {
 export function TradeSaveView({
   gameId,
   onBack,
-  onOrganize,
+  onReturnToLodge,
+  onManageBackup,
 }: {
   gameId: Gen3GameId
   onBack: () => void
-  onOrganize: () => void
+  onReturnToLodge: () => void
+  onManageBackup: () => void
 }) {
   const { adapter, loading: adapterLoading, error: adapterError } = usePkHex()
   const [game, setGame] = useState<SaveGame | null>(null)
@@ -111,7 +113,9 @@ export function TradeSaveView({
       })
       .catch((cause: unknown) => {
         if (!cancelled) {
-          setMessage(`The saved backup could not be opened: ${describeError(cause)}`)
+          setMessage(
+            `The saved backup could not be opened: ${describeError(cause)}`
+          )
         }
       })
       .finally(() => {
@@ -139,12 +143,10 @@ export function TradeSaveView({
   const box = game?.boxes[boxIndex] ?? null
   const selected =
     game && selectedLocation
-      ? game.boxes[selectedLocation.box]?.slots[selectedLocation.slot] ?? null
+      ? (game.boxes[selectedLocation.box]?.slots[selectedLocation.slot] ?? null)
       : null
 
-  const companionFor = (
-    location: BoxLocation
-  ): PokemonNode | null => {
+  const companionFor = (location: BoxLocation): PokemonNode | null => {
     if (!game) return null
     for (const [candidateBox, candidate] of game.boxes.entries()) {
       for (const [candidateSlot, pokemon] of candidate.slots.entries()) {
@@ -187,7 +189,9 @@ export function TradeSaveView({
       })
       setBoxIndex(0)
       setSelectedLocation(null)
-      setMessage(`${GAME_LABEL[gameId]} backup saved. Select a Pokémon to trade.`)
+      setMessage(
+        `${GAME_LABEL[gameId]} backup saved. Select a Pokémon to trade.`
+      )
     } catch (cause) {
       setMessage(describeError(cause))
     }
@@ -346,14 +350,27 @@ export function TradeSaveView({
     onBack()
   }
 
-  const handleOrganize = () => {
+  const handleReturnToLodge = () => {
     if (busy && !window.confirm('Cancel the active trade and switch pages?')) {
       return
     }
     operationAbortRef.current?.abort()
     esp32TradeDevice.cancelTrade()
     void esp32TradeDevice.disconnect()
-    onOrganize()
+    onReturnToLodge()
+  }
+
+  const handleManageBackup = () => {
+    if (
+      busy &&
+      !window.confirm('Cancel the active trade and visit the Camp Office?')
+    ) {
+      return
+    }
+    operationAbortRef.current?.abort()
+    esp32TradeDevice.cancelTrade()
+    void esp32TradeDevice.disconnect()
+    onManageBackup()
   }
 
   return (
@@ -364,15 +381,18 @@ export function TradeSaveView({
             ← Back
           </button>
           <div className="camp-page-heading">
-            <p className="camp-eyebrow">Trade · Generation 3</p>
-            <h1 className="camp-title">{GAME_LABEL[gameId]}</h1>
+            <p className="camp-eyebrow">Trading Post · GBA Lodge</p>
+            <h1 className="camp-title">{GAME_LABEL[gameId]} Cabin</h1>
+            <p className="camp-page-subtitle">
+              Choose a Pokémon from one of this Cabin&apos;s Rooms.
+            </p>
           </div>
           <button
             type="button"
             className="camp-back camp-page-action"
-            onClick={handleOrganize}
+            onClick={handleReturnToLodge}
           >
-            Organize →
+            Lodges →
           </button>
         </header>
 
@@ -438,20 +458,26 @@ export function TradeSaveView({
                         className="camp-nav-btn"
                         onClick={() => cycleBox(-1)}
                         disabled={busy}
-                        aria-label="Previous box"
+                        aria-label="Previous Room"
                       >
                         ←
                       </button>
                       <strong className="camp-box-label">
-                        {box?.name ?? `Box ${boxIndex + 1}`} ({boxIndex + 1}/
-                        {game.boxes.length})
+                        <span className="camp-location-kicker">
+                          Room {boxIndex + 1} of {game.boxes.length}
+                        </span>
+                        <span className="camp-location-name">
+                          {box?.name ?? `Box ${boxIndex + 1}`} ·{' '}
+                          {box?.slots.filter(Boolean).length ?? 0}/
+                          {box?.slots.length ?? 30} campers
+                        </span>
                       </strong>
                       <button
                         type="button"
                         className="camp-nav-btn"
                         onClick={() => cycleBox(1)}
                         disabled={busy}
-                        aria-label="Next box"
+                        aria-label="Next Room"
                       >
                         →
                       </button>
@@ -484,7 +510,10 @@ export function TradeSaveView({
                   <section className="camp-storage-right camp-storage-right--details">
                     {selected ? (
                       <>
-                        <PokemonDetails pokemon={selected} />
+                        <PokemonDetails
+                          pokemon={selected}
+                          resolver={resolver}
+                        />
                         {busy ? (
                           <button
                             type="button"
@@ -511,7 +540,7 @@ export function TradeSaveView({
                       </>
                     ) : (
                       <div className="camp-panel camp-details-empty">
-                        Select a boxed Pokémon to trade.
+                        Choose a Pokémon from this Room to trade.
                       </div>
                     )}
                   </section>
@@ -520,15 +549,13 @@ export function TradeSaveView({
                 {!busy && (
                   <div className="camp-backup-actions">
                     <span className="camp-backup-actions-left">
-                      <label className="camp-upload-btn">
-                        Replace backup
-                        <input
-                          className="camp-file-input--hidden"
-                          type="file"
-                          accept=".sav"
-                          onChange={handleBackupUpload}
-                        />
-                      </label>
+                      <button
+                        type="button"
+                        className="camp-upload-btn"
+                        onClick={handleManageBackup}
+                      >
+                        Manage backup in Camp Office
+                      </button>
                     </span>
                   </div>
                 )}

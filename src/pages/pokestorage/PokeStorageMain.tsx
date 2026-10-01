@@ -11,8 +11,8 @@ import { TradePokemonView } from './TradePokemonView'
 import { TradeSaveView } from './TradeSaveView'
 
 /**
- * The Camp Zone -> onwards flow: activity list -> Organize generation
- * select -> Gen 3's game select -> the actual save viewer. This component is
+ * The Camp Zone -> onwards flow: activity list -> lodge select -> the GBA
+ * Lodge's Cabin directory -> the actual save viewer. This component is
  * the entry point rendered by (read-only, outside this directory's scope)
  * PokeStorage.tsx, so navigation from Camp Zone downward lives entirely here.
  */
@@ -39,7 +39,7 @@ export function PokeStorageMain({
     case 'activities':
       return (
         <CampActivities
-          onSelectOrganize={() => setScreen({ name: 'generationSelect' })}
+          onSelectLodges={() => setScreen({ name: 'generationSelect' })}
           onSelectTrade={() => setScreen({ name: 'tradeGenerationSelect' })}
           onSelectSettings={() => setScreen({ name: 'settings' })}
         />
@@ -71,6 +71,7 @@ export function PokeStorageMain({
           onTrade={() =>
             setScreen({ name: 'tradeSave', gameId: screen.gameId })
           }
+          onManageBackup={() => setScreen({ name: 'settings' })}
           onUnsavedChangesChange={onUnsavedChangesChange}
         />
       )
@@ -109,9 +110,10 @@ export function PokeStorageMain({
         <TradeSaveView
           gameId={screen.gameId}
           onBack={() => setScreen({ name: 'tradeGameSelect' })}
-          onOrganize={() =>
+          onReturnToLodge={() =>
             setScreen({ name: 'saveViewer', gameId: screen.gameId })
           }
+          onManageBackup={() => setScreen({ name: 'settings' })}
         />
       )
   }

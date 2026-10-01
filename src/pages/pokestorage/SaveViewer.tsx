@@ -34,11 +34,13 @@ export function SaveViewer({
   gameId,
   onBack,
   onTrade,
+  onManageBackup,
   onUnsavedChangesChange,
 }: {
   gameId: Gen3GameId
   onBack: () => void
   onTrade: () => void
+  onManageBackup: () => void
   onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
 }) {
   const { adapter, loading, error } = usePkHex()
@@ -230,37 +232,6 @@ export function SaveViewer({
     }
   }
 
-  const handleRemoveBackup = () => {
-    if (
-      !window.confirm(
-        `Remove the saved backup for ${GAME_LABEL[gameId]}? This cannot be undone.`
-      )
-    )
-      return
-    saveLibrary.discardSave(gameId)
-    loadedBytesRef.current = null
-    setGameDirty(false)
-    setSelectedPokemon(null)
-    setGame((previous) => {
-      previous?.dispose()
-      return null
-    })
-  }
-
-  const handleExportBackup = () => {
-    if (!game) return
-    const bytes = game.toBytes()
-    const blob = new Blob([bytes.slice()], {
-      type: 'application/octet-stream',
-    })
-    const url = URL.createObjectURL(blob)
-    const anchor = document.createElement('a')
-    anchor.href = url
-    anchor.download = `${gameId}.sav`
-    anchor.click()
-    URL.revokeObjectURL(url)
-  }
-
   const handleBack = () => {
     if (
       hasUnsavedChanges &&
@@ -283,6 +254,17 @@ export function SaveViewer({
     onTrade()
   }
 
+  const handleManageBackup = () => {
+    if (
+      hasUnsavedChanges &&
+      !window.confirm('You have unsaved changes. Leave without saving them?')
+    ) {
+      return
+    }
+    onUnsavedChangesChange?.(false)
+    onManageBackup()
+  }
+
   return (
     <div className="camp-root">
       <div className="camp-content">
@@ -291,15 +273,16 @@ export function SaveViewer({
             ← Back
           </button>
           <div className="camp-page-heading">
-            <p className="camp-eyebrow">Generation 3</p>
-            <h1 className="camp-title">{GAME_LABEL[gameId]}</h1>
+            <p className="camp-eyebrow">GBA Lodge · Game Cabin</p>
+            <h1 className="camp-title">{GAME_LABEL[gameId]} Cabin</h1>
+            <p className="camp-page-subtitle">Generation 3 game save</p>
           </div>
           <button
             type="button"
             className="camp-back camp-page-action"
             onClick={handleTrade}
           >
-            Trade →
+            Trading Post
           </button>
         </header>
 
@@ -380,26 +363,10 @@ export function SaveViewer({
                     <span className="camp-backup-actions-left">
                       <button
                         type="button"
-                        className="camp-upload-btn camp-danger-btn"
-                        onClick={handleRemoveBackup}
-                      >
-                        Remove backup
-                      </button>
-                      <label className="camp-upload-btn">
-                        Replace backup
-                        <input
-                          className="camp-file-input--hidden"
-                          type="file"
-                          accept=".sav"
-                          onChange={handleFileUpload}
-                        />
-                      </label>
-                      <button
-                        type="button"
                         className="camp-upload-btn"
-                        onClick={handleExportBackup}
+                        onClick={handleManageBackup}
                       >
-                        Export backup
+                        Manage backup in Camp Office
                       </button>
                     </span>
                     {selectedPokemon && (

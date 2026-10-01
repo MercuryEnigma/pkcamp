@@ -1,11 +1,11 @@
 import { ZoneCard } from './ZoneCard'
 
 export function CampActivities({
-  onSelectOrganize,
+  onSelectLodges,
   onSelectTrade,
   onSelectSettings,
 }: {
-  onSelectOrganize: () => void
+  onSelectLodges: () => void
   onSelectTrade: () => void
   onSelectSettings: () => void
 }) {
@@ -13,23 +13,30 @@ export function CampActivities({
     <div className="camp-root">
       <div className="camp-content">
         <p className="camp-eyebrow">Camp Zone</p>
-        <h1 className="camp-title">Camp ground activities</h1>
+        <h1 className="camp-title">Where would you like to go?</h1>
+        <p className="camp-subtitle">
+          Visit a lodge, trade Pokémon, or stop by the Camp Office.
+        </p>
         <ZoneCard
           primary
-          label="Organize"
-          sublabel="View parties & boxes"
-          onClick={onSelectOrganize}
+          label="Lodges"
+          sublabel="Go camping and organize your Pokémon"
+          onClick={onSelectLodges}
         />
-        <div className="camp-grid">
-          <ZoneCard label="Trade" onClick={onSelectTrade} />
-          <ZoneCard label="Transfer" comingSoon />
+        <div className="camp-grid camp-grid--wide">
+          <ZoneCard
+            label="Trading Post"
+            sublabel="Trade with connected games"
+            onClick={onSelectTrade}
+          />
+          <ZoneCard label="Transfer Station" comingSoon />
         </div>
         <button
           type="button"
           className="camp-settings-btn"
           onClick={onSelectSettings}
         >
-          Poké Storage Settings
+          Camp Office · Settings: backups &amp; appearance
         </button>
       </div>
     </div>

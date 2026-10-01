@@ -5,7 +5,7 @@
  * as the same campground "menu" rather than three different UI patterns.
  * `comingSoon` renders it disabled with a badge rather than omitting it, so
  * the full roster stays visible. `primary` makes it the one featured, full-
- * width option on a screen (e.g. "Organize" on the activities menu) so the
+ * width option on a screen (e.g. "Lodges" on the activities menu) so the
  * most important choice doesn't have to compete visually with the rest.
  */
 export function ZoneCard({
@@ -33,7 +33,7 @@ export function ZoneCard({
       title={title}
     >
       <span className="camp-card-label">{label}</span>
-      {sublabel && !comingSoon && <span className="camp-card-sub">{sublabel}</span>}
+      {sublabel && <span className="camp-card-sub">{sublabel}</span>}
       {comingSoon && <span className="camp-badge-soon">Coming soon</span>}
     </button>
   )

@@ -161,7 +161,7 @@ export function LocalPokemonView({
     if (!file || !adapter) return
 
     if (!file.name.toLowerCase().endsWith(FILE_EXTENSION)) {
-      setMessage(`Choose a ${FILE_EXTENSION} file for the Gen 3 collection.`)
+      setMessage(`Choose a ${FILE_EXTENSION} file for your Camping Pokémon.`)
       return
     }
 
@@ -171,7 +171,7 @@ export function LocalPokemonView({
       const slot = entries.indexOf(null)
       if (slot < 0) {
         throw new Error(
-          'Camping Pokémon is full. Add another box in Poké Storage Settings.'
+          'Camping Pokémon is full. Add another Camp Site in the Camp Office.'
         )
       }
       const stored: StoredPokemonFile = {
@@ -241,8 +241,11 @@ export function LocalPokemonView({
             ← Back
           </button>
           <div className="camp-page-heading">
-            <p className="camp-eyebrow">Generation 3</p>
+            <p className="camp-eyebrow">GBA Lodge · Camp Sites</p>
             <h1 className="camp-title">Camping Pokémon</h1>
+            <p className="camp-page-subtitle">
+              Pokémon staying at camp outside a game save.
+            </p>
           </div>
           <span className="camp-page-header-spacer" aria-hidden="true" />
         </header>
@@ -279,18 +282,24 @@ export function LocalPokemonView({
                     type="button"
                     className="camp-nav-btn"
                     onClick={() => cycleBox(-1)}
-                    aria-label="Previous Camping Pokémon box"
+                    aria-label="Previous Camp Site"
                   >
                     ←
                   </button>
                   <strong className="camp-box-label">
-                    Camping Box {boxIndex + 1} ({boxIndex + 1}/{boxCount})
+                    <span className="camp-location-kicker">
+                      Camp Site {boxIndex + 1} of {boxCount}
+                    </span>
+                    <span className="camp-location-name">
+                      {visibleEntries.filter(Boolean).length}/
+                      {CAMPING_POKEMON_BOX_SIZE} campers
+                    </span>
                   </strong>
                   <button
                     type="button"
                     className="camp-nav-btn"
                     onClick={() => cycleBox(1)}
-                    aria-label="Next Camping Pokémon box"
+                    aria-label="Next Camp Site"
                   >
                     →
                   </button>
@@ -317,14 +326,14 @@ export function LocalPokemonView({
               <section className="camp-storage-right camp-storage-right--details">
                 {selected ? (
                   <>
-                    <PokemonDetails pokemon={selected.pokemon} />
+                    <PokemonDetails pokemon={selected.pokemon} resolver={resolver} />
                     <p className="camp-local-filename">
                       {selected.file.fileName}
                     </p>
                   </>
                 ) : (
                   <div className="camp-panel camp-details-empty">
-                    Select a Pokémon to view its details.
+                    Choose a camper to view their details.
                   </div>
                 )}
               </section>

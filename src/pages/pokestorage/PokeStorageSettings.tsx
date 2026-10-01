@@ -3,7 +3,12 @@ import {
   localPokemonLibrary,
   type StoredPokemonFile,
 } from '../../services/localPokemonLibrary'
-import type { Generation } from '../../services/saveLibrary'
+import {
+  ROSTER,
+  saveLibrary,
+  type Gen3GameId,
+  type Generation,
+} from '../../services/saveLibrary'
 import {
   initializeSpriteResolver,
   type SpriteRequest,
@@ -20,8 +25,11 @@ import {
 } from './spritePreference'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from './spriteDisplay'
 import { DEFAULT_SPRITE_SOURCE_ID, SPRITE_SOURCES } from './spriteSources'
+import { GAME_LABEL } from './gameDisplay'
+import { usePkHex } from '../context/PkHexProvider'
 
 const GENERATIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
+const GEN_3_GAMES = ROSTER[3] as readonly Gen3GameId[]
 
 /**
  * Five requests picked to exercise the axes a sprite source can differ on:
@@ -68,6 +76,27 @@ const SPRITE_SHOWCASE: ReadonlyArray<{
 
 type Collections = Map<Generation, (StoredPokemonFile | null)[]>
 type BoxCounts = Record<Generation, number>
+type BackupStatus = { hasSave: boolean; updatedAt: Date | null }
+
+function backupStatuses(): Record<Gen3GameId, BackupStatus> {
+  return Object.fromEntries(
+    GEN_3_GAMES.map((gameId) => [
+      gameId,
+      {
+        hasSave: saveLibrary.getSave(gameId) !== null,
+        updatedAt: saveLibrary.getSaveUpdatedAt(gameId),
+      },
+    ])
+  ) as Record<Gen3GameId, BackupStatus>
+}
+
+function formatBackupDate(date: Date): string {
+  return new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(date)
+}
 
 function storedBoxCounts(): BoxCounts {
   return Object.fromEntries(
@@ -78,7 +107,16 @@ function storedBoxCounts(): BoxCounts {
   ) as BoxCounts
 }
 
+type SettingsTab = 'backups' | 'sprites' | 'campsites'
+const SETTINGS_TABS: ReadonlyArray<{ id: SettingsTab; label: string }> = [
+  { id: 'backups', label: 'Save Backups' },
+  { id: 'campsites', label: 'Camp Sites' },
+  { id: 'sprites', label: 'Sprite Source' },
+]
+
 export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
+  const { adapter } = usePkHex()
+  const [tab, setTab] = useState<SettingsTab>('backups')
   const [spriteSourceId, setSpriteSourceId] = useState(
     () => getStoredSpriteSourceId() ?? DEFAULT_SPRITE_SOURCE_ID
   )
@@ -87,6 +125,10 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
   const [collections, setCollections] = useState<Collections | null>(null)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [backups, setBackups] = useState<Record<
+    Gen3GameId,
+    BackupStatus
+  > | null>(null)
 
   const selectedSpriteSource = useMemo(
     () =>
@@ -107,6 +149,9 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
 
   useEffect(() => {
     let cancelled = false
+    void saveLibrary.whenReady().then(() => {
+      if (!cancelled) setBackups(backupStatuses())
+    })
     Promise.all(
       GENERATIONS.map(
         async (generation) =>
@@ -124,6 +169,54 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
       cancelled = true
     }
   }, [])
+
+  const handleBackupUpload = async (
+    gameId: Gen3GameId,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file || !adapter) return
+
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer())
+      const loaded = adapter.load(bytes)
+      loaded.dispose()
+      saveLibrary.updateSave(gameId, bytes)
+      setBackups(backupStatuses())
+      setMessage(`${GAME_LABEL[gameId]} Cabin backup saved.`)
+    } catch (cause) {
+      setMessage(
+        cause instanceof Error ? cause.message : 'Unable to open that backup.'
+      )
+    }
+  }
+
+  const handleBackupExport = (gameId: Gen3GameId) => {
+    const bytes = saveLibrary.getSave(gameId)
+    if (!bytes) return
+    const blob = new Blob([bytes.slice()], {
+      type: 'application/octet-stream',
+    })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `${gameId}.sav`
+    anchor.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleBackupRemove = (gameId: Gen3GameId) => {
+    if (
+      !window.confirm(
+        `Remove the saved backup for ${GAME_LABEL[gameId]} Cabin? This cannot be undone.`
+      )
+    )
+      return
+    saveLibrary.discardSave(gameId)
+    setBackups(backupStatuses())
+    setMessage(`${GAME_LABEL[gameId]} Cabin backup removed.`)
+  }
 
   const minimumBoxCounts = useMemo(() => {
     return Object.fromEntries(
@@ -164,7 +257,7 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
         )
       }
       setStoredSpriteSourceId(spriteSourceId)
-      setMessage('Poké Storage settings saved.')
+      setMessage('Camp Office settings saved.')
     } catch (cause) {
       setMessage(cause instanceof Error ? cause.message : String(cause))
     } finally {
@@ -180,14 +273,95 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
             ← Back
           </button>
           <div className="camp-page-heading">
-            <p className="camp-eyebrow">Camp Zone</p>
-            <h1 className="camp-title">Poké Storage Settings</h1>
+            <p className="camp-eyebrow">Camp Zone · Camp Office</p>
+            <h1 className="camp-title">Camp management</h1>
+            <p className="camp-page-subtitle">
+              Manage save backups, Camp Sites, and appearance.
+            </p>
           </div>
           <span className="camp-page-header-spacer" aria-hidden="true" />
         </header>
 
         <div className="camp-panel camp-settings-panel">
+          <div className="camp-settings-tabs" role="tablist" aria-label="Camp Office section">
+            {SETTINGS_TABS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={tab === item.id}
+                className={`camp-settings-tab${tab === item.id ? ' camp-settings-tab--active' : ''}`}
+                onClick={() => setTab(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          {tab === 'backups' && (
           <section className="camp-settings-section">
+            <h2>Save Backups</h2>
+            <p>Manage the game saves assigned to GBA Lodge Cabins.</p>
+            <div className="camp-backup-list">
+              {GEN_3_GAMES.map((gameId) => {
+                const status = backups?.[gameId]
+                return (
+                  <div className="camp-backup-row" key={gameId}>
+                    <span className="camp-backup-meta">
+                      <strong>{GAME_LABEL[gameId]} Cabin</strong>
+                      <small>
+                        {backups === null
+                          ? 'Checking…'
+                          : status?.hasSave
+                            ? status.updatedAt
+                              ? `Updated ${formatBackupDate(status.updatedAt)}`
+                              : 'Backup saved'
+                            : 'No backup on file'}
+                      </small>
+                    </span>
+                    <span className="camp-backup-row-actions">
+                      <label className="camp-upload-btn">
+                        {status?.hasSave ? 'Replace' : 'Upload'}
+                        <input
+                          className="camp-file-input--hidden"
+                          type="file"
+                          accept=".sav"
+                          disabled={!adapter}
+                          onChange={(event) =>
+                            void handleBackupUpload(gameId, event)
+                          }
+                        />
+                      </label>
+                      {status?.hasSave && (
+                        <>
+                          <button
+                            type="button"
+                            className="camp-upload-btn"
+                            onClick={() => handleBackupExport(gameId)}
+                          >
+                            Export
+                          </button>
+                          <button
+                            type="button"
+                            className="camp-upload-btn camp-danger-btn"
+                            onClick={() => handleBackupRemove(gameId)}
+                          >
+                            Remove
+                          </button>
+                        </>
+                      )}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+          )}
+
+          {tab === 'sprites' && (
+          <section className="camp-settings-section">
+            <h2>Appearance</h2>
+            <p>Choose how Pokémon appear throughout the Camp Zone.</p>
             <label className="camp-settings-field">
               <span>Sprite resource</span>
               <select
@@ -227,11 +401,13 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
               View {selectedSpriteSource.label.split(' — ')[0]} resource ↗
             </a>
           </section>
+          )}
 
+          {tab === 'campsites' && (
           <section className="camp-settings-section">
-            <h2>Camping Pokémon Campsites</h2>
+            <h2>Camp Sites</h2>
             <p>
-              Each campsite adds 30 Camping Pokémon slots to that generation.
+              Each Camp Site adds 30 Camping Pokémon spaces to that lodge.
             </p>
             <label className="camp-settings-field">
               <span>Generation</span>
@@ -252,7 +428,7 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
               </select>
             </label>
             <label className="camp-settings-field">
-              <span>Number of campsites</span>
+              <span>Number of Camp Sites</span>
               <input
                 className="camp-number-input"
                 type="number"
@@ -269,9 +445,13 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
                   }))
                 }}
               />
-              <small>Need at least {selectedMinimum} campsites.</small>
+              <small>
+                Need at least {selectedMinimum} Camp Site
+                {selectedMinimum === 1 ? '' : 's'}.
+              </small>
             </label>
           </section>
+          )}
 
           {message && <p className="camp-status">{message}</p>}
           <button

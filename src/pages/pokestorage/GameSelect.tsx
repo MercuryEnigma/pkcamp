@@ -78,9 +78,20 @@ export function GameSelect({
           </button>
           <div className="camp-page-heading">
             <p className="camp-eyebrow">
-              {activity === 'trade' ? 'Trade' : 'Organize'}
+              {activity === 'trade'
+                ? 'Trading Post · GBA Lodge'
+                : 'Camp Zone · GBA Lodge'}
             </p>
-            <h1 className="camp-title">Generation 3</h1>
+            <h1 className="camp-title">
+              {activity === 'trade'
+                ? 'Choose a Pokémon source'
+                : 'Welcome to the GBA Lodge'}
+            </h1>
+            <p className="camp-page-subtitle">
+              {activity === 'trade'
+                ? 'Select a game cabin or your Camping Pokémon.'
+                : 'Choose a game cabin or go camping with your Pokémon.'}
+            </p>
           </div>
           <span className="camp-page-header-spacer" aria-hidden="true" />
         </header>
@@ -94,23 +105,23 @@ export function GameSelect({
                   ? status.updatedAt
                     ? formatBackupDate(status.updatedAt)
                     : 'Backup saved'
-                  : 'Upload backup'
+                  : 'Upload'
 
             return (
               <ZoneCard
                 key={gameId}
-                label={GAME_LABEL[gameId]}
+                label={`${GAME_LABEL[gameId]} Cabin`}
                 sublabel={meta}
                 onClick={() => onSelectGame(gameId)}
               />
             )
           })}
           <ZoneCard
-            label="Camping Pokémon"
+            label="Camp Sites"
             sublabel={
               activity === 'trade'
                 ? 'Trade with FireRed or LeafGreen on Switch'
-                : undefined
+                : 'camping GBA Pokemon'
             }
             onClick={onSelectLocalPokemon}
           />

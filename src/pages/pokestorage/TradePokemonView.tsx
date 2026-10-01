@@ -317,8 +317,11 @@ export function TradePokemonView({ onBack }: { onBack: () => void }) {
             ← Back
           </button>
           <div className="camp-page-heading">
-            <p className="camp-eyebrow">Trade · Generation 3</p>
+            <p className="camp-eyebrow">Trading Post · GBA Lodge</p>
             <h1 className="camp-title">Camping Pokémon</h1>
+            <p className="camp-page-subtitle">
+              Choose a Pokémon from a Camp Site to trade.
+            </p>
           </div>
           <span className="camp-page-header-spacer" aria-hidden="true" />
         </header>
@@ -367,19 +370,25 @@ export function TradePokemonView({ onBack }: { onBack: () => void }) {
                     className="camp-nav-btn"
                     onClick={() => cycleBox(-1)}
                     disabled={busy}
-                    aria-label="Previous Camping Pokémon box"
+                    aria-label="Previous Camp Site"
                   >
                     ←
                   </button>
                   <strong className="camp-box-label">
-                    Camping Box {boxIndex + 1} ({boxIndex + 1}/{boxCount})
+                    <span className="camp-location-kicker">
+                      Camp Site {boxIndex + 1} of {boxCount}
+                    </span>
+                    <span className="camp-location-name">
+                      {visibleEntries.filter(Boolean).length}/
+                      {CAMPING_POKEMON_BOX_SIZE} campers
+                    </span>
                   </strong>
                   <button
                     type="button"
                     className="camp-nav-btn"
                     onClick={() => cycleBox(1)}
                     disabled={busy}
-                    aria-label="Next Camping Pokémon box"
+                    aria-label="Next Camp Site"
                   >
                     →
                   </button>
@@ -412,7 +421,7 @@ export function TradePokemonView({ onBack }: { onBack: () => void }) {
               <section className="camp-storage-right camp-storage-right--details">
                 {selected ? (
                   <>
-                    <PokemonDetails pokemon={selected.pokemon} />
+                    <PokemonDetails pokemon={selected.pokemon} resolver={resolver} />
                     {busy ? (
                       <button
                         type="button"
