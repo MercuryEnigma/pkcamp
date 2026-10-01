@@ -1,0 +1,53 @@
+<!--
+  Builds the vendored PKHeX.Facade (MIT) for the wasm bundle.
+
+  Why this project exists instead of referencing
+  external/PKHeX.Everywhere/src/PKHeX.Facade/PKHeX.Facade.csproj directly:
+
+  1. That csproj carries a ProjectReference to PKHeX-Plugins/PKHeX.Core.AutoMod,
+     a second large submodule that upstream pkhex-wasm deliberately does not
+     check out ("PKHeX-Plugins is not referenced" - README). Only two Facade
+     files need it, and nothing else in Facade uses them, so they are excluded
+     here and the submodule stays unfetched.
+  2. Compiling the sources through our own project file keeps the vendored
+     submodule pristine - no edits inside external/, so its pinned commit
+     still describes exactly what is on disk.
+
+  Both exclusions are logged in MODIFICATIONS.md. The assembly name stays
+  PKHeX.Facade so the code is the upstream library, just built narrower.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>PKHeX.Facade</AssemblyName>
+    <RootNamespace>PKHeX.Facade</RootNamespace>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- Upstream Facade code is not warning-clean under our settings; it is
+         third-party source compiled as-is, so warnings are not errors here. -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>$(NoWarn);CS8618;CS8601;CS8604</NoWarn>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <FacadeDir>..\..\external\PKHeX.Everywhere\src\PKHeX.Facade\</FacadeDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="$(FacadeDir)**\*.cs" />
+    <Compile Include="*.cs" />
+    <!-- The only two files requiring PKHeX.Core.AutoMod (see header). -->
+    <Compile Remove="$(FacadeDir)AutoLegality.cs" />
+    <Compile Remove="$(FacadeDir)Extensions\PokemonExtensions.cs" />
+    <!-- Never pull in build output of the submodule's own compilations. -->
+    <Compile Remove="$(FacadeDir)obj\**\*.cs" />
+    <Compile Remove="$(FacadeDir)bin\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\external\PKHeX.Everywhere\external\PKHeX\PKHeX.Core\PKHeX.Core.csproj" />
+  </ItemGroup>
+
+</Project>

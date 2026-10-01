@@ -7,11 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "sprites:generate": "node scripts/generate-sprite-catalog.mjs && node scripts/generate-pokemondb-catalog.mjs && node scripts/generate-pmdcollab-catalog.mjs",
+    "build:pkhex-wasm": "cd vendor/pkhex-wasm && npm --prefix tools/package ci && node tools/package/build-package.mjs --version 0.2.0 && rm -rf dist && cp -R artifacts/pkg-dist/package dist"
   },
   "dependencies": {
     "i18next": "^26.4.2",
-    "pkhex-wasm": "file:../../Downloads/pkhex-wasm-0.1.0.tgz",
+    "pkhex-wasm": "file:./vendor/pkhex-wasm/dist",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-i18next": "^17.0.14",
@@ -23,8 +26,10 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
+    "playwright": "^1.63.0",
     "prettier": "^3.9.8",
     "typescript": "~6.0.2",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "vitest": "^4.1.11"
   }
 }

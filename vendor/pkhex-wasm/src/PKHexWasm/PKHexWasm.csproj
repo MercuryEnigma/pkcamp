@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\external\PKHeX.Everywhere\external\PKHeX\PKHeX.Core\PKHeX.Core.csproj" />
+    <!-- PKHeX.Facade (MIT), built narrower by our own project file. The
+         binding delegates version identity, positional box/party projection,
+         form, egg state and .pkm file IO to it. -->
+    <ProjectReference Include="..\PKHeX.Facade.Wasm\PKHeX.Facade.Wasm.csproj" />
+  </ItemGroup>
+
+</Project>

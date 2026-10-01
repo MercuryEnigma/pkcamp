@@ -1,9 +1,13 @@
 import { PokeStorageMain } from './pokestorage/PokeStorageMain'
 
-export function PokeStorage() {
+export function PokeStorage({
+  onUnsavedChangesChange,
+}: {
+  onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
+}) {
   return (
     <>
-      <PokeStorageMain />
+      <PokeStorageMain onUnsavedChangesChange={onUnsavedChangesChange} />
     </>
   )
 }

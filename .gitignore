@@ -24,3 +24,11 @@ dist-ssr
 *.sw?
 ROADMAP.md
 src/pages/pokestorage/ROADMAP.md
+
+# Local test fixtures — real save/Pokémon data, never commit personal saves
+src/assets/saves/
+
+# Vendored pkhex-wasm: upstream submodules are re-fetched at their pinned
+# commits (see vendor/pkhex-wasm/FORK_NOTES.md), not committed — they carry
+# their own .git and would otherwise land as embedded repos.
+vendor/pkhex-wasm/external/
