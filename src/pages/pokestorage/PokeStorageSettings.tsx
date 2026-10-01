@@ -107,12 +107,27 @@ function storedBoxCounts(): BoxCounts {
   ) as BoxCounts
 }
 
-type SettingsTab = 'backups' | 'sprites' | 'campsites'
+type SettingsTab = 'backups' | 'appearance' | 'campsites'
 const SETTINGS_TABS: ReadonlyArray<{ id: SettingsTab; label: string }> = [
   { id: 'backups', label: 'Save Backups' },
   { id: 'campsites', label: 'Camp Sites' },
-  { id: 'sprites', label: 'Sprite Source' },
+  { id: 'appearance', label: 'Appearance' },
 ]
+
+/** Generation ranges as the player actually encounters them: a physical
+ * Lodge, not the old gen-number organization the rest of the Camp Zone has
+ * moved away from. */
+const GENERATION_LODGE_LABEL: Record<Generation, string> = {
+  1: 'Game Boy Lodge',
+  2: 'Game Boy Lodge',
+  3: 'GBA Lodge',
+  4: 'DS Lodge',
+  5: 'DS Lodge',
+  6: '3DS Lodge',
+  7: '3DS Lodge',
+  8: 'Switch Lodge',
+  9: 'Switch Lodge',
+}
 
 export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
   const { adapter } = usePkHex()
@@ -283,7 +298,11 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
         </header>
 
         <div className="camp-panel camp-settings-panel">
-          <div className="camp-settings-tabs" role="tablist" aria-label="Camp Office section">
+          <div
+            className="camp-settings-tabs"
+            role="tablist"
+            aria-label="Camp Office section"
+          >
             {SETTINGS_TABS.map((item) => (
               <button
                 key={item.id}
@@ -299,158 +318,161 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
           </div>
 
           {tab === 'backups' && (
-          <section className="camp-settings-section">
-            <h2>Save Backups</h2>
-            <p>Manage the game saves assigned to GBA Lodge Cabins.</p>
-            <div className="camp-backup-list">
-              {GEN_3_GAMES.map((gameId) => {
-                const status = backups?.[gameId]
-                return (
-                  <div className="camp-backup-row" key={gameId}>
-                    <span className="camp-backup-meta">
-                      <strong>{GAME_LABEL[gameId]} Cabin</strong>
-                      <small>
-                        {backups === null
-                          ? 'Checking…'
-                          : status?.hasSave
-                            ? status.updatedAt
-                              ? `Updated ${formatBackupDate(status.updatedAt)}`
-                              : 'Backup saved'
-                            : 'No backup on file'}
-                      </small>
-                    </span>
-                    <span className="camp-backup-row-actions">
-                      <label className="camp-upload-btn">
-                        {status?.hasSave ? 'Replace' : 'Upload'}
-                        <input
-                          className="camp-file-input--hidden"
-                          type="file"
-                          accept=".sav"
-                          disabled={!adapter}
-                          onChange={(event) =>
-                            void handleBackupUpload(gameId, event)
-                          }
-                        />
-                      </label>
-                      {status?.hasSave && (
-                        <>
-                          <button
-                            type="button"
-                            className="camp-upload-btn"
-                            onClick={() => handleBackupExport(gameId)}
-                          >
-                            Export
-                          </button>
-                          <button
-                            type="button"
-                            className="camp-upload-btn camp-danger-btn"
-                            onClick={() => handleBackupRemove(gameId)}
-                          >
-                            Remove
-                          </button>
-                        </>
-                      )}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </section>
+            <section className="camp-settings-section">
+              <h2>Save Backups</h2>
+              <p>Manage the game saves assigned to GBA Lodge Cabins.</p>
+              <div className="camp-backup-list">
+                {GEN_3_GAMES.map((gameId) => {
+                  const status = backups?.[gameId]
+                  return (
+                    <div className="camp-backup-row" key={gameId}>
+                      <span className="camp-backup-meta">
+                        <strong>{GAME_LABEL[gameId]} Cabin</strong>
+                        <small>
+                          {backups === null
+                            ? 'Checking…'
+                            : status?.hasSave
+                              ? status.updatedAt
+                                ? `Updated ${formatBackupDate(status.updatedAt)}`
+                                : 'Backup saved'
+                              : 'No backup save'}
+                        </small>
+                      </span>
+                      <span className="camp-backup-row-actions">
+                        <label className="camp-upload-btn">
+                          {status?.hasSave ? 'Replace' : 'Upload'}
+                          <input
+                            className="camp-file-input--hidden"
+                            type="file"
+                            accept=".sav"
+                            disabled={!adapter}
+                            onChange={(event) =>
+                              void handleBackupUpload(gameId, event)
+                            }
+                          />
+                        </label>
+                        {status?.hasSave && (
+                          <>
+                            <button
+                              type="button"
+                              className="camp-upload-btn"
+                              onClick={() => handleBackupExport(gameId)}
+                            >
+                              Export
+                            </button>
+                            <button
+                              type="button"
+                              className="camp-upload-btn camp-danger-btn"
+                              onClick={() => handleBackupRemove(gameId)}
+                            >
+                              Remove
+                            </button>
+                          </>
+                        )}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </section>
           )}
 
-          {tab === 'sprites' && (
-          <section className="camp-settings-section">
-            <h2>Appearance</h2>
-            <p>Choose how Pokémon appear throughout the Camp Zone.</p>
-            <label className="camp-settings-field">
-              <span>Sprite resource</span>
-              <select
-                className="camp-select"
-                value={spriteSourceId}
-                onChange={(event) => setSpriteSourceId(event.target.value)}
+          {tab === 'appearance' && (
+            <section className="camp-settings-section">
+              <h2>Appearance</h2>
+              <p>Choose how Pokémon appear throughout the Camp Zone.</p>
+              <label className="camp-settings-field">
+                <span>Sprite resource</span>
+                <select
+                  className="camp-select"
+                  value={spriteSourceId}
+                  onChange={(event) => setSpriteSourceId(event.target.value)}
+                >
+                  {SPRITE_SOURCES.map((source) => (
+                    <option key={source.id} value={source.id}>
+                      {source.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="camp-sprite-preview-row">
+                {SPRITE_SHOWCASE.map(({ key, label, request }) => {
+                  const display = resolveSpriteDisplay(spriteResolver, request)
+                  return (
+                    <div className="camp-sprite-preview-item" key={key}>
+                      <img
+                        className="camp-sprite-preview-img"
+                        src={spriteDisplayImageSrc(display)}
+                        alt={display.label}
+                        title={display.label}
+                      />
+                      <span className="camp-sprite-preview-label">{label}</span>
+                    </div>
+                  )
+                })}
+              </div>
+              <a
+                className="camp-sprite-source-link"
+                href={selectedSpriteSource.homepage}
+                target="_blank"
+                rel="noreferrer"
               >
-                {SPRITE_SOURCES.map((source) => (
-                  <option key={source.id} value={source.id}>
-                    {source.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <div className="camp-sprite-preview-row">
-              {SPRITE_SHOWCASE.map(({ key, label, request }) => {
-                const display = resolveSpriteDisplay(spriteResolver, request)
-                return (
-                  <div className="camp-sprite-preview-item" key={key}>
-                    <img
-                      className="camp-sprite-preview-img"
-                      src={spriteDisplayImageSrc(display)}
-                      alt={display.label}
-                      title={display.label}
-                    />
-                    <span className="camp-sprite-preview-label">{label}</span>
-                  </div>
-                )
-              })}
-            </div>
-            <a
-              className="camp-sprite-source-link"
-              href={selectedSpriteSource.homepage}
-              target="_blank"
-              rel="noreferrer"
-            >
-              View {selectedSpriteSource.label.split(' — ')[0]} resource ↗
-            </a>
-          </section>
+                View {selectedSpriteSource.label.split(' — ')[0]} resource ↗
+              </a>
+            </section>
           )}
 
           {tab === 'campsites' && (
-          <section className="camp-settings-section">
-            <h2>Camp Sites</h2>
-            <p>
-              Each Camp Site adds 30 Camping Pokémon spaces to that lodge.
-            </p>
-            <label className="camp-settings-field">
-              <span>Generation</span>
-              <select
-                className="camp-select"
-                value={selectedGeneration}
-                onChange={(event) =>
-                  setSelectedGeneration(
-                    Number.parseInt(event.target.value, 10) as Generation
-                  )
-                }
-              >
-                {GENERATIONS.map((generation) => (
-                  <option key={generation} value={generation}>
-                    Generation {generation}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="camp-settings-field">
-              <span>Number of Camp Sites</span>
-              <input
-                className="camp-number-input"
-                type="number"
-                min={selectedMinimum}
-                step={1}
-                value={Math.max(boxCounts[selectedGeneration], selectedMinimum)}
-                disabled={!collections || saving}
-                onChange={(event) => {
-                  const next =
-                    Number.parseInt(event.target.value, 10) || selectedMinimum
-                  setBoxCounts((current) => ({
-                    ...current,
-                    [selectedGeneration]: Math.max(selectedMinimum, next),
-                  }))
-                }}
-              />
-              <small>
-                Need at least {selectedMinimum} Camp Site
-                {selectedMinimum === 1 ? '' : 's'}.
-              </small>
-            </label>
-          </section>
+            <section className="camp-settings-section">
+              <h2>Camp Sites</h2>
+              <p>
+                Each Camp Site adds 30 Camping Pokémon spaces to that lodge.
+              </p>
+              <label className="camp-settings-field">
+                <span>Lodge</span>
+                <select
+                  className="camp-select"
+                  value={selectedGeneration}
+                  onChange={(event) =>
+                    setSelectedGeneration(
+                      Number.parseInt(event.target.value, 10) as Generation
+                    )
+                  }
+                >
+                  {GENERATIONS.map((generation) => (
+                    <option key={generation} value={generation}>
+                      {GENERATION_LODGE_LABEL[generation]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="camp-settings-field">
+                <span>Number of Camp Sites</span>
+                <input
+                  className="camp-number-input"
+                  type="number"
+                  min={selectedMinimum}
+                  step={1}
+                  value={Math.max(
+                    boxCounts[selectedGeneration],
+                    selectedMinimum
+                  )}
+                  disabled={!collections || saving}
+                  onChange={(event) => {
+                    const next =
+                      Number.parseInt(event.target.value, 10) || selectedMinimum
+                    setBoxCounts((current) => ({
+                      ...current,
+                      [selectedGeneration]: Math.max(selectedMinimum, next),
+                    }))
+                  }}
+                />
+                <small>
+                  Need at least {selectedMinimum} Camp Site
+                  {selectedMinimum === 1 ? '' : 's'}.
+                </small>
+              </label>
+            </section>
           )}
 
           {message && <p className="camp-status">{message}</p>}

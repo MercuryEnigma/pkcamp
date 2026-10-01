@@ -70,7 +70,10 @@ export function TradeSaveView({
   const [revision, setRevision] = useState(0)
   const [needsKeys, setNeedsKeys] = useState(false)
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState('Select a Pokémon to trade.')
+  // Empty by default -- the header subtitle already explains what to do.
+  // This is reserved for live ESP32/trade status once something's actually
+  // happening (connecting, trade in progress, errors), not restated instructions.
+  const [message, setMessage] = useState('')
   const operationAbortRef = useRef<AbortController | null>(null)
   const gameRef = useRef<SaveGame | null>(null)
 
@@ -420,15 +423,19 @@ export function TradeSaveView({
                     onChange={handleBackupUpload}
                   />
                 </label>
-                <p className="camp-status" aria-live="polite">
-                  {message}
-                </p>
+                {message && (
+                  <p className="camp-status" aria-live="polite">
+                    {message}
+                  </p>
+                )}
               </div>
             ) : (
               <>
-                <p className="camp-status" aria-live="polite">
-                  {message}
-                </p>
+                {message && (
+                  <p className="camp-status" aria-live="polite">
+                    {message}
+                  </p>
+                )}
 
                 {needsKeys && (
                   <div className="camp-trade-setup">

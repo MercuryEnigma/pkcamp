@@ -184,6 +184,51 @@
   font-size: 0.9rem;
 }
 
+/* The one full-screen tap target before the Camp Zone menu -- a <button>
+   so it's keyboard/screen-reader accessible for free, with the native
+   button chrome reset back to plain .camp-root styling. */
+.camp-splash {
+  appearance: none;
+  width: 100%;
+  font: inherit;
+  cursor: pointer;
+  justify-content: center;
+}
+
+.camp-splash-content {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.3rem;
+  padding: 3rem 1.5rem;
+}
+
+.camp-splash-title {
+  margin: 0.1rem 0 0.6rem;
+  font-size: 3.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--camp-leaf);
+}
+
+.camp-splash-tap {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--camp-muted);
+  animation: camp-splash-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes camp-splash-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 .camp-back {
   display: inline-flex;
   align-items: center;
@@ -263,15 +308,21 @@
   animation: camp-bubble-pop 0.22s ease;
 }
 
-/* Dims via muted text color rather than opacity, since opacity would let
-   the vivid page background blend through the panel and shift its hue. */
+/* Dims via muted text color and a flatter board-colored fill rather than
+   opacity, since opacity would let the vivid page background blend through
+   the panel and shift its hue. Deliberately recedes further than before so
+   the one real destination (e.g. GBA Lodge) is unmistakably the available
+   option, not just another tile in the row. */
 .camp-card--soon {
   cursor: default;
   color: var(--camp-muted);
+  background: var(--camp-board);
+  border-color: var(--camp-border-soft);
+  box-shadow: none;
 }
 .camp-card--soon:hover {
-  background: var(--camp-panel);
-  border-color: var(--camp-panel-border);
+  background: var(--camp-board);
+  border-color: var(--camp-border-soft);
 }
 
 /* The one featured, full-width option on a menu screen (e.g. "Lodges"
@@ -1217,9 +1268,9 @@
 }
 
 .camp-settings-tab--active {
-  border-color: var(--camp-select-blue);
-  background: var(--camp-select-blue-soft);
-  box-shadow: inset 0 0 0 1px var(--camp-select-blue);
+  border-color: var(--camp-leaf);
+  background: var(--camp-leaf);
+  color: #fff;
 }
 
 .camp-settings-section {
@@ -1235,6 +1286,10 @@
 .camp-settings-section h2 {
   margin: 0 0 0.35rem;
   font-size: 1rem;
+  /* Explicit color, not inherited: a global (non-.camp-scoped) h1/h2 rule
+     elsewhere in the app sets a light color in dark mode, which read as
+     nearly invisible against this card's cream background. */
+  color: var(--camp-leaf);
 }
 
 .camp-settings-section > p {

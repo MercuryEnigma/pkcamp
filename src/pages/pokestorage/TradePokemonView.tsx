@@ -80,7 +80,10 @@ export function TradePokemonView({ onBack }: { onBack: () => void }) {
   const [pendingTradeId, setPendingTradeId] = useState<string | null>(null)
   const [needsKeys, setNeedsKeys] = useState(false)
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState('Select a Camping Pokémon to trade.')
+  // Empty by default -- the header subtitle already explains what to do.
+  // This is reserved for live ESP32/trade status once something's actually
+  // happening (connecting, trade in progress, errors), not restated instructions.
+  const [message, setMessage] = useState('')
   const operationAbortRef = useRef<AbortController | null>(null)
 
   const resolver = useMemo(() => {
@@ -338,9 +341,11 @@ export function TradePokemonView({ onBack }: { onBack: () => void }) {
 
         {!adapterLoading && !adapterError && !loadingFiles && (
           <div className="camp-panel">
-            <p className="camp-status" aria-live="polite">
-              {message}
-            </p>
+            {message && (
+              <p className="camp-status" aria-live="polite">
+                {message}
+              </p>
+            )}
 
             {needsKeys && (
               <div className="camp-trade-setup">

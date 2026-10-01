@@ -7,6 +7,7 @@ import { GenerationSelect } from './GenerationSelect'
 import { LocalPokemonView } from './LocalPokemonView'
 import { PokeStorageSettings } from './PokeStorageSettings'
 import { SaveViewer } from './SaveViewer'
+import { Splash } from './Splash'
 import { TradePokemonView } from './TradePokemonView'
 import { TradeSaveView } from './TradeSaveView'
 
@@ -17,6 +18,7 @@ import { TradeSaveView } from './TradeSaveView'
  * PokeStorage.tsx, so navigation from Camp Zone downward lives entirely here.
  */
 type Screen =
+  | { name: 'splash' }
   | { name: 'activities' }
   | { name: 'generationSelect' }
   | { name: 'gameSelect' }
@@ -33,9 +35,11 @@ export function PokeStorageMain({
 }: {
   onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
 }) {
-  const [screen, setScreen] = useState<Screen>({ name: 'activities' })
+  const [screen, setScreen] = useState<Screen>({ name: 'splash' })
 
   switch (screen.name) {
+    case 'splash':
+      return <Splash onStart={() => setScreen({ name: 'activities' })} />
     case 'activities':
       return (
         <CampActivities

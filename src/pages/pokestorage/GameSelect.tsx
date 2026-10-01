@@ -12,23 +12,12 @@ const GEN_3_GAMES = ROSTER[3] as readonly Gen3GameId[]
 
 type BackupStatus = { hasSave: boolean; updatedAt: Date | null }
 
-const MONTH_NAMES = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'June',
-  'July',
-  'Aug',
-  'Sept',
-  'Oct',
-  'Nov',
-  'Dec',
-] as const
-
 function formatBackupDate(date: Date): string {
-  return `${date.getFullYear()} ${MONTH_NAMES[date.getMonth()]} ${date.getDate()}`
+  return new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(date)
 }
 
 export function GameSelect({
@@ -103,9 +92,9 @@ export function GameSelect({
                 ? 'Checking…'
                 : status?.hasSave
                   ? status.updatedAt
-                    ? formatBackupDate(status.updatedAt)
+                    ? `Updated ${formatBackupDate(status.updatedAt)}`
                     : 'Backup saved'
-                  : 'Upload'
+                  : 'No backup · Upload'
 
             return (
               <ZoneCard
@@ -121,7 +110,7 @@ export function GameSelect({
             sublabel={
               activity === 'trade'
                 ? 'Trade with FireRed or LeafGreen on Switch'
-                : 'camping GBA Pokemon'
+                : 'Camping Pokémon'
             }
             onClick={onSelectLocalPokemon}
           />
