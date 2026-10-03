@@ -1,5 +1,8 @@
 import type { GameId } from "./types";
 
+/** `previousSave` holds the save that the most recent `updateSave` replaced. */
+export type ByteKind = "save" | "previousSave" | "rom";
+
 /**
  * Internal storage seam. `SaveLibrary` (the public API) is implemented in
  * terms of this narrower interface so a future backend — e.g. one backed by
@@ -15,9 +18,9 @@ export interface SaveLibraryBackend {
   /** Resolves once any durable state has been loaded into the read cache. */
   whenReady(): Promise<void>;
 
-  readBytes(gameId: GameId, kind: "save" | "rom"): Uint8Array | null;
-  writeBytes(gameId: GameId, kind: "save" | "rom", bytes: Uint8Array): void;
-  clearBytes(gameId: GameId, kind: "save" | "rom"): void;
+  readBytes(gameId: GameId, kind: ByteKind): Uint8Array | null;
+  writeBytes(gameId: GameId, kind: ByteKind, bytes: Uint8Array): void;
+  clearBytes(gameId: GameId, kind: ByteKind): void;
 
   appendHistory(gameId: GameId, entry: string): void;
   readHistory(gameId: GameId): string[];
@@ -30,29 +33,32 @@ export interface SaveLibraryBackend {
  * for the lifetime of the JS heap holding an instance.
  */
 export class InMemorySaveLibraryBackend implements SaveLibraryBackend {
-  private readonly saves = new Map<GameId, Uint8Array>();
-  private readonly roms = new Map<GameId, Uint8Array>();
+  private readonly stores: Record<ByteKind, Map<GameId, Uint8Array>> = {
+    save: new Map(),
+    previousSave: new Map(),
+    rom: new Map(),
+  };
   private readonly history = new Map<GameId, string[]>();
 
-  private store(kind: "save" | "rom"): Map<GameId, Uint8Array> {
-    return kind === "save" ? this.saves : this.roms;
+  private store(kind: ByteKind): Map<GameId, Uint8Array> {
+    return this.stores[kind];
   }
 
   whenReady(): Promise<void> {
     return Promise.resolve();
   }
 
-  readBytes(gameId: GameId, kind: "save" | "rom"): Uint8Array | null {
+  readBytes(gameId: GameId, kind: ByteKind): Uint8Array | null {
     return this.store(kind).get(gameId) ?? null;
   }
 
-  writeBytes(gameId: GameId, kind: "save" | "rom", bytes: Uint8Array): void {
+  writeBytes(gameId: GameId, kind: ByteKind, bytes: Uint8Array): void {
     // Copy defensively so a caller mutating their source array afterward
     // cannot silently corrupt what the library holds.
     this.store(kind).set(gameId, bytes.slice());
   }
 
-  clearBytes(gameId: GameId, kind: "save" | "rom"): void {
+  clearBytes(gameId: GameId, kind: ByteKind): void {
     this.store(kind).delete(gameId);
   }
 

@@ -6,7 +6,7 @@ import {
 } from './campingStoragePreference'
 
 describe('Camping Pokémon box sizing', () => {
-  it('defaults to one box and rounds occupied counts up by 30', () => {
+  it('needs at least one box and rounds occupied counts up by 30', () => {
     expect(minimumCampingBoxCount(0)).toBe(1)
     expect(minimumCampingBoxCount(30)).toBe(1)
     expect(minimumCampingBoxCount(31)).toBe(2)

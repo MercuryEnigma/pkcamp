@@ -16,11 +16,9 @@ const LODGE_CHOICES = [
 export function GenerationSelect({
   onBack,
   onSelectGeneration,
-  activity = 'storage',
 }: {
   onBack: () => void
   onSelectGeneration: (generation: 3) => void
-  activity?: 'storage' | 'trade'
 }) {
   return (
     <div className="camp-root">
@@ -30,16 +28,8 @@ export function GenerationSelect({
             ← Back
           </button>
           <div className="camp-page-heading">
-            <p className="camp-eyebrow">
-              {activity === 'trade'
-                ? 'Camp Zone · Trading Post'
-                : 'Camp Zone · Lodges'}
-            </p>
-            <h1 className="camp-title">
-              {activity === 'trade'
-                ? 'Which lodge are you trading from?'
-                : 'Choose a lodge'}
-            </h1>
+            <p className="camp-eyebrow">Camp Zone · Lodges</p>
+            <h1 className="camp-title">Choose a lodge</h1>
             <p className="camp-page-subtitle">
               Which Pokémon era is going camping?
             </p>

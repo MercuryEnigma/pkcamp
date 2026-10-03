@@ -94,6 +94,8 @@ export function PokemonStorageView({
   onGameChange,
   onLocalChange,
   onSelectedChange,
+  initialBox,
+  onBoxChange,
 }: {
   game: SaveGame
   localSlots: (CampingPokemonSlot | null)[]
@@ -102,6 +104,10 @@ export function PokemonStorageView({
   onGameChange: () => void
   onLocalChange: (slots: (CampingPokemonSlot | null)[]) => void
   onSelectedChange?: (pokemon: PokemonNode | null) => void
+  /** Box the left panel opens on. */
+  initialBox?: number
+  /** The left panel's box, or null while it shows the party. */
+  onBoxChange?: (box: number | null) => void
 }) {
   const [, setRevision] = useState(0)
   const pages: StoragePage[] = [
@@ -113,7 +119,9 @@ export function PokemonStorageView({
     })),
     { kind: 'party' as const, label: 'Party' as const, slots: game.party },
   ]
-  const [pageIndex, setPageIndex] = useState(0)
+  const [pageIndex, setPageIndex] = useState(() =>
+    initialBox !== undefined && initialBox < game.boxes.length ? initialBox : 0
+  )
   const [rightPageIndex, setRightPageIndex] = useState(0)
   const [selected, setSelected] = useState<PokemonNode | null>(null)
   const [mode, setMode] = useState<StorageMode>('view')
@@ -128,6 +136,11 @@ export function PokemonStorageView({
   useEffect(() => {
     onSelectedChange?.(selected)
   }, [selected, onSelectedChange])
+
+  const currentBox = pageIndex < game.boxes.length ? pageIndex : null
+  useEffect(() => {
+    onBoxChange?.(currentBox)
+  }, [currentBox, onBoxChange])
 
   const resolver = useMemo(() => {
     const sourceId = getStoredSpriteSourceId() ?? DEFAULT_SPRITE_SOURCE_ID
@@ -583,10 +596,12 @@ export function PokemonStorageView({
                     </span>
                     <span className="camp-location-name">
                       {
-                        localSlots.slice(
-                          rightLocalBoxIndex * COLUMNS * ROWS,
-                          (rightLocalBoxIndex + 1) * COLUMNS * ROWS
-                        ).filter(Boolean).length
+                        localSlots
+                          .slice(
+                            rightLocalBoxIndex * COLUMNS * ROWS,
+                            (rightLocalBoxIndex + 1) * COLUMNS * ROWS
+                          )
+                          .filter(Boolean).length
                       }
                       /{COLUMNS * ROWS} campers
                     </span>

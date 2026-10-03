@@ -2,10 +2,11 @@ import {
   Esp32TradeDevice,
   type Esp32TradeDeviceDependencies,
 } from './esp32TradeDevice.ts'
+import { GbLinkTradeDevice } from './gbLinkTradeDevice.ts'
 import {
-  GbLinkTradeDevice,
+  CampSiteTradeDevice,
   SaveBackupTradeDevice,
-} from './unsupportedTradeDevice.ts'
+} from './localTradeDevice.ts'
 import {
   TRADE_DEVICE_IDS,
   type TradeDevice,
@@ -40,12 +41,17 @@ export function createTradeDeviceService(options?: {
     new Esp32TradeDevice(options?.esp32),
     new GbLinkTradeDevice(),
     new SaveBackupTradeDevice(),
+    new CampSiteTradeDevice(),
   ])
 }
 
 export const esp32TradeDevice = new Esp32TradeDevice()
+export const gbLinkTradeDevice = new GbLinkTradeDevice()
+export const saveBackupTradeDevice = new SaveBackupTradeDevice()
+export const campSiteTradeDevice = new CampSiteTradeDevice()
 export const tradeDeviceService = new TradeDeviceService([
   esp32TradeDevice,
-  new GbLinkTradeDevice(),
-  new SaveBackupTradeDevice(),
+  gbLinkTradeDevice,
+  saveBackupTradeDevice,
+  campSiteTradeDevice,
 ])

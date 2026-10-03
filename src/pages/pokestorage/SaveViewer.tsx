@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { localPokemonLibrary } from '../../services/localPokemonLibrary'
 import type { PokemonNode, SaveGame } from '../../services/pkhex'
 import { saveLibrary, type Gen3GameId } from '../../services/saveLibrary'
 import { usePkHex } from '../context/PkHexProvider'
 import { GAME_LABEL } from './gameDisplay'
+import { GbaSavePanel } from './GbaSavePanel'
 import {
   CAMPING_POKEMON_BOX_SIZE,
   getStoredCampingBoxCount,
@@ -36,10 +37,13 @@ export function SaveViewer({
   onTrade,
   onManageBackup,
   onUnsavedChangesChange,
+  initialBox,
 }: {
   gameId: Gen3GameId
   onBack: () => void
-  onTrade: () => void
+  /** Receives the open box so the Trading Post can show it too. */
+  onTrade: (box?: number) => void
+  initialBox?: number
   onManageBackup: () => void
   onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
 }) {
@@ -47,6 +51,7 @@ export function SaveViewer({
   const [game, setGame] = useState<SaveGame | null>(null)
   const [gameDirty, setGameDirty] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [readingFromGba, setReadingFromGba] = useState(false)
   const [localDirty, setLocalDirty] = useState(false)
   const [localSlots, setLocalSlots] = useState<(CampingPokemonSlot | null)[]>(
     () =>
@@ -60,6 +65,7 @@ export function SaveViewer({
     null
   )
   const loadedBytesRef = useRef<Uint8Array | null>(null)
+  const boxRef = useRef<number | null>(initialBox ?? null)
   const hasUnsavedChanges = gameDirty || localDirty
 
   // Restore a previously persisted save for this game as soon as the adapter
@@ -184,21 +190,26 @@ export function SaveViewer({
     }
   }, [])
 
+  /** Opens `bytes` as an unsaved backup, as an upload does. */
+  const loadBackup = (bytes: Uint8Array) => {
+    if (!adapter) return
+    const save = adapter.load(bytes)
+    loadedBytesRef.current = bytes
+    setGameDirty(true)
+    setUploadError(null)
+    // Release the previously loaded save's WASM-side state before replacing it.
+    setGame((previous) => {
+      previous?.dispose()
+      return save
+    })
+  }
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !adapter) return
 
     try {
-      const bytes = new Uint8Array(await file.arrayBuffer())
-      const save = adapter.load(bytes)
-      loadedBytesRef.current = bytes
-      setGameDirty(true)
-      setUploadError(null)
-      // Release the previously loaded save's WASM-side state before replacing it.
-      setGame((previous) => {
-        previous?.dispose()
-        return save
-      })
+      loadBackup(new Uint8Array(await file.arrayBuffer()))
     } catch (cause) {
       setUploadError(
         cause instanceof Error
@@ -243,6 +254,10 @@ export function SaveViewer({
     onBack()
   }
 
+  const handleBoxChange = useCallback((box: number | null) => {
+    boxRef.current = box
+  }, [])
+
   const handleTrade = () => {
     if (
       hasUnsavedChanges &&
@@ -251,7 +266,7 @@ export function SaveViewer({
       return
     }
     onUnsavedChangesChange?.(false)
-    onTrade()
+    onTrade(boxRef.current ?? undefined)
   }
 
   const handleManageBackup = () => {
@@ -300,15 +315,36 @@ export function SaveViewer({
             {!game && (
               <div className="camp-upload-empty">
                 <p>No backup saved for {GAME_LABEL[gameId]}.</p>
-                <label className="camp-upload-btn camp-upload-btn--primary">
-                  Upload backup
-                  <input
-                    className="camp-file-input--hidden"
-                    type="file"
-                    accept=".sav"
-                    onChange={handleFileUpload}
+                {readingFromGba ? (
+                  <GbaSavePanel
+                    mode="read"
+                    gameId={gameId}
+                    onSave={(bytes) => {
+                      setReadingFromGba(false)
+                      loadBackup(bytes)
+                    }}
+                    onClose={() => setReadingFromGba(false)}
                   />
-                </label>
+                ) : (
+                  <div className="camp-local-actions">
+                    <label className="camp-upload-btn camp-upload-btn--primary">
+                      Upload backup
+                      <input
+                        className="camp-file-input--hidden"
+                        type="file"
+                        accept=".sav"
+                        onChange={handleFileUpload}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      className="camp-upload-btn"
+                      onClick={() => setReadingFromGba(true)}
+                    >
+                      Backup from GBA
+                    </button>
+                  </div>
+                )}
               </div>
             )}
             {game &&
@@ -358,6 +394,8 @@ export function SaveViewer({
                       setLocalDirty(true)
                     }}
                     onSelectedChange={setSelectedPokemon}
+                    initialBox={initialBox}
+                    onBoxChange={handleBoxChange}
                   />
                   <div className="camp-backup-actions">
                     <span className="camp-backup-actions-left">

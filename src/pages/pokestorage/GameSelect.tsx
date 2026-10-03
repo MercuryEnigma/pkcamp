@@ -24,12 +24,10 @@ export function GameSelect({
   onBack,
   onSelectGame,
   onSelectLocalPokemon,
-  activity = 'storage',
 }: {
   onBack: () => void
   onSelectGame: (gameId: Gen3GameId) => void
   onSelectLocalPokemon: () => void
-  activity?: 'storage' | 'trade'
 }) {
   const [backupStatuses, setBackupStatuses] = useState<Partial<
     Record<Gen3GameId, BackupStatus>
@@ -66,20 +64,10 @@ export function GameSelect({
             ← Back
           </button>
           <div className="camp-page-heading">
-            <p className="camp-eyebrow">
-              {activity === 'trade'
-                ? 'Trading Post · GBA Lodge'
-                : 'Camp Zone · GBA Lodge'}
-            </p>
-            <h1 className="camp-title">
-              {activity === 'trade'
-                ? 'Choose a Pokémon source'
-                : 'Welcome to the GBA Lodge'}
-            </h1>
+            <p className="camp-eyebrow">Camp Zone · GBA Lodge</p>
+            <h1 className="camp-title">Welcome to the GBA Lodge</h1>
             <p className="camp-page-subtitle">
-              {activity === 'trade'
-                ? 'Select a game cabin or your Camping Pokémon.'
-                : 'Choose a game cabin or go camping with your Pokémon.'}
+              Choose a game cabin or go camping with your Pokémon.
             </p>
           </div>
           <span className="camp-page-header-spacer" aria-hidden="true" />
@@ -107,11 +95,7 @@ export function GameSelect({
           })}
           <ZoneCard
             label="Camp Sites"
-            sublabel={
-              activity === 'trade'
-                ? 'Trade with FireRed or LeafGreen on Switch'
-                : 'Camping Pokémon'
-            }
+            sublabel="Camping Pokémon"
             onClick={onSelectLocalPokemon}
           />
         </div>

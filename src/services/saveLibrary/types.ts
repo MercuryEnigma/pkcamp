@@ -75,7 +75,15 @@ export interface SaveLibrary {
   getSave(gameId: GameId): Uint8Array | null;
   /** When the current save was last updated, or null if none is stored. */
   getSaveUpdatedAt(gameId: GameId): Date | null;
-  /** Replace the save bytes for a game slot and append a history entry. */
+  /**
+   * The save that the most recent `updateSave` replaced, or null if there is
+   * none. One backup is kept per game slot.
+   */
+  getPreviousSave(gameId: GameId): Uint8Array | null;
+  /**
+   * Replace the save bytes for a game slot and append a history entry. The
+   * save being replaced becomes the previous save.
+   */
   updateSave(gameId: GameId, sav: Uint8Array): void;
   /** Clear the save bytes for a game slot and append a history entry. */
   discardSave(gameId: GameId): void;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 import {
   localPokemonLibrary,
   type StoredPokemonFile,
@@ -26,6 +26,7 @@ import {
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from './spriteDisplay'
 import { DEFAULT_SPRITE_SOURCE_ID, SPRITE_SOURCES } from './spriteSources'
 import { GAME_LABEL } from './gameDisplay'
+import { GbaSavePanel } from './GbaSavePanel'
 import { usePkHex } from '../context/PkHexProvider'
 
 const GENERATIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
@@ -144,6 +145,10 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
     Gen3GameId,
     BackupStatus
   > | null>(null)
+  const [gbaAction, setGbaAction] = useState<{
+    gameId: Gen3GameId
+    mode: 'read' | 'write'
+  } | null>(null)
 
   const selectedSpriteSource = useMemo(
     () =>
@@ -205,6 +210,13 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
         cause instanceof Error ? cause.message : 'Unable to open that backup.'
       )
     }
+  }
+
+  const handleBackupRead = (gameId: Gen3GameId, bytes: Uint8Array) => {
+    saveLibrary.updateSave(gameId, bytes)
+    setGbaAction(null)
+    setBackups(backupStatuses())
+    setMessage(`${GAME_LABEL[gameId]} Cabin backup saved from GBA.`)
   }
 
   const handleBackupExport = (gameId: Gen3GameId) => {
@@ -325,52 +337,102 @@ export function PokeStorageSettings({ onBack }: { onBack: () => void }) {
                 {GEN_3_GAMES.map((gameId) => {
                   const status = backups?.[gameId]
                   return (
-                    <div className="camp-backup-row" key={gameId}>
-                      <span className="camp-backup-meta">
-                        <strong>{GAME_LABEL[gameId]} Cabin</strong>
-                        <small>
-                          {backups === null
-                            ? 'Checking…'
-                            : status?.hasSave
-                              ? status.updatedAt
-                                ? `Updated ${formatBackupDate(status.updatedAt)}`
-                                : 'Backup saved'
-                              : 'No backup save'}
-                        </small>
-                      </span>
-                      <span className="camp-backup-row-actions">
-                        <label className="camp-upload-btn">
-                          {status?.hasSave ? 'Replace' : 'Upload'}
-                          <input
-                            className="camp-file-input--hidden"
-                            type="file"
-                            accept=".sav"
-                            disabled={!adapter}
-                            onChange={(event) =>
-                              void handleBackupUpload(gameId, event)
-                            }
-                          />
-                        </label>
-                        {status?.hasSave && (
-                          <>
+                    <Fragment key={gameId}>
+                      <div className="camp-backup-row">
+                        <span className="camp-backup-meta">
+                          <strong>{GAME_LABEL[gameId]} Cabin</strong>
+                          <small>
+                            {backups === null
+                              ? 'Checking…'
+                              : status?.hasSave
+                                ? status.updatedAt
+                                  ? `Updated ${formatBackupDate(status.updatedAt)}`
+                                  : 'Backup saved'
+                                : 'No backup save'}
+                          </small>
+                        </span>
+                        <span className="camp-backup-row-actions">
+                          {backups !== null && (
                             <button
                               type="button"
                               className="camp-upload-btn"
-                              onClick={() => handleBackupExport(gameId)}
+                              disabled={gbaAction !== null}
+                              onClick={() =>
+                                setGbaAction({ gameId, mode: 'read' })
+                              }
                             >
-                              Export
+                              {status?.hasSave
+                                ? 'Replace from GBA'
+                                : 'Backup from GBA'}
                             </button>
-                            <button
-                              type="button"
-                              className="camp-upload-btn camp-danger-btn"
-                              onClick={() => handleBackupRemove(gameId)}
-                            >
-                              Remove
-                            </button>
-                          </>
-                        )}
-                      </span>
-                    </div>
+                          )}
+                          <label className="camp-upload-btn">
+                            {status?.hasSave ? 'Replace' : 'Upload'}
+                            <input
+                              className="camp-file-input--hidden"
+                              type="file"
+                              accept=".sav"
+                              disabled={!adapter}
+                              onChange={(event) =>
+                                void handleBackupUpload(gameId, event)
+                              }
+                            />
+                          </label>
+                          {status?.hasSave && (
+                            <>
+                              <button
+                                type="button"
+                                className="camp-upload-btn"
+                                disabled={gbaAction !== null}
+                                onClick={() =>
+                                  setGbaAction({ gameId, mode: 'write' })
+                                }
+                              >
+                                Overwrite to GBA
+                              </button>
+                              <button
+                                type="button"
+                                className="camp-upload-btn"
+                                onClick={() => handleBackupExport(gameId)}
+                              >
+                                Export
+                              </button>
+                              <button
+                                type="button"
+                                className="camp-upload-btn camp-danger-btn"
+                                onClick={() => handleBackupRemove(gameId)}
+                              >
+                                Remove
+                              </button>
+                            </>
+                          )}
+                        </span>
+                      </div>
+                      {gbaAction?.gameId === gameId &&
+                        (gbaAction.mode === 'read' ? (
+                          <GbaSavePanel
+                            mode="read"
+                            gameId={gameId}
+                            onSave={(bytes) => handleBackupRead(gameId, bytes)}
+                            onClose={() => setGbaAction(null)}
+                          />
+                        ) : (
+                          <GbaSavePanel
+                            mode="write"
+                            gameId={gameId}
+                            save={
+                              saveLibrary.getSave(gameId) ?? new Uint8Array()
+                            }
+                            onWritten={() => {
+                              setGbaAction(null)
+                              setMessage(
+                                `${GAME_LABEL[gameId]} cartridge save overwritten from the Cabin backup.`
+                              )
+                            }}
+                            onClose={() => setGbaAction(null)}
+                          />
+                        ))}
+                    </Fragment>
                   )
                 })}
               </div>

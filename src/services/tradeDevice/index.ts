@@ -6,15 +6,35 @@ export {
   type Esp32Transport,
 } from './esp32TradeDevice.ts'
 export {
+  campSiteTradeDevice,
   createTradeDeviceService,
   esp32TradeDevice,
+  gbLinkTradeDevice,
+  saveBackupTradeDevice,
   TradeDeviceService,
   tradeDeviceService,
 } from './service.ts'
 export {
   GbLinkTradeDevice,
+  type GbLinkTradeDeviceDependencies,
+} from './gbLinkTradeDevice.ts'
+export {
+  CampSiteTradeDevice,
   SaveBackupTradeDevice,
-} from './unsupportedTradeDevice.ts'
+  type CampSlot,
+  type SaveSlot,
+} from './localTradeDevice.ts'
+export {
+  revertTrade,
+  runTrade,
+  tradeAvailability,
+  tradeSideKey,
+  type RunTradeOptions,
+  type TradeAvailability,
+  type TradeDevices,
+  type TradeSide,
+  type TradeWrite,
+} from './tradeRoutes.ts'
 export {
   TRADE_DEVICE_IDS,
   TradeDeviceError,

@@ -1,13 +1,14 @@
-export const TRADE_DEVICE_IDS = ['esp32', 'gb-link', 'save-backup'] as const
+export const TRADE_DEVICE_IDS = [
+  'esp32',
+  'gb-link',
+  'save-backup',
+  'camp-site',
+] as const
 
 export type TradeDeviceId = (typeof TRADE_DEVICE_IDS)[number]
 
 export type TradeDeviceState =
-  | 'disconnected'
-  | 'connecting'
-  | 'connected'
-  | 'trading'
-  | 'disconnecting'
+  'disconnected' | 'connecting' | 'connected' | 'trading' | 'disconnecting'
 
 export type TradeParty = readonly (Uint8Array | null)[]
 
@@ -30,6 +31,7 @@ export type TradeDeviceEvent =
   | { type: 'declining'; value: boolean }
   | { type: 'room'; trades: number }
   | { type: 'trade-completed'; slot: number; received: Uint8Array }
+  | { type: 'hardware-trade-finished'; receivedAvailable: boolean }
 
 export interface TradeRequest {
   /** Exactly six positional PK3 slots. At least two must be occupied. */

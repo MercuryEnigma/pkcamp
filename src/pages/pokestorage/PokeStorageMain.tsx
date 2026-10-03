@@ -8,8 +8,7 @@ import { LocalPokemonView } from './LocalPokemonView'
 import { PokeStorageSettings } from './PokeStorageSettings'
 import { SaveViewer } from './SaveViewer'
 import { Splash } from './Splash'
-import { TradePokemonView } from './TradePokemonView'
-import { TradeSaveView } from './TradeSaveView'
+import { TradeView } from './TradeView'
 
 /**
  * The Camp Zone -> onwards flow: activity list -> lodge select -> the GBA
@@ -22,12 +21,9 @@ type Screen =
   | { name: 'activities' }
   | { name: 'generationSelect' }
   | { name: 'gameSelect' }
-  | { name: 'saveViewer'; gameId: Gen3GameId }
+  | { name: 'saveViewer'; gameId: Gen3GameId; initialBox?: number }
   | { name: 'localPokemon' }
-  | { name: 'tradeGenerationSelect' }
-  | { name: 'tradeGameSelect' }
-  | { name: 'tradePokemon' }
-  | { name: 'tradeSave'; gameId: Gen3GameId }
+  | { name: 'trade'; initialGameId?: Gen3GameId; initialBox?: number }
   | { name: 'settings' }
 
 export function PokeStorageMain({
@@ -44,7 +40,7 @@ export function PokeStorageMain({
       return (
         <CampActivities
           onSelectLodges={() => setScreen({ name: 'generationSelect' })}
-          onSelectTrade={() => setScreen({ name: 'tradeGenerationSelect' })}
+          onSelectTrade={() => setScreen({ name: 'trade' })}
           onSelectSettings={() => setScreen({ name: 'settings' })}
         />
       )
@@ -71,9 +67,14 @@ export function PokeStorageMain({
       return (
         <SaveViewer
           gameId={screen.gameId}
+          initialBox={screen.initialBox}
           onBack={() => setScreen({ name: 'gameSelect' })}
-          onTrade={() =>
-            setScreen({ name: 'tradeSave', gameId: screen.gameId })
+          onTrade={(box) =>
+            setScreen({
+              name: 'trade',
+              initialGameId: screen.gameId,
+              initialBox: box,
+            })
           }
           onManageBackup={() => setScreen({ name: 'settings' })}
           onUnsavedChangesChange={onUnsavedChangesChange}
@@ -86,38 +87,20 @@ export function PokeStorageMain({
           onUnsavedChangesChange={onUnsavedChangesChange}
         />
       )
-    case 'tradeGenerationSelect':
+    case 'trade':
       return (
-        <GenerationSelect
-          activity="trade"
-          onBack={() => setScreen({ name: 'activities' })}
-          onSelectGeneration={() => setScreen({ name: 'tradeGameSelect' })}
-        />
-      )
-    case 'tradeGameSelect':
-      return (
-        <GameSelect
-          activity="trade"
-          onBack={() => setScreen({ name: 'tradeGenerationSelect' })}
-          onSelectGame={(gameId) => setScreen({ name: 'tradeSave', gameId })}
-          onSelectLocalPokemon={() => setScreen({ name: 'tradePokemon' })}
-        />
-      )
-    case 'tradePokemon':
-      return (
-        <TradePokemonView
-          onBack={() => setScreen({ name: 'tradeGameSelect' })}
-        />
-      )
-    case 'tradeSave':
-      return (
-        <TradeSaveView
-          gameId={screen.gameId}
-          onBack={() => setScreen({ name: 'tradeGameSelect' })}
-          onReturnToLodge={() =>
-            setScreen({ name: 'saveViewer', gameId: screen.gameId })
+        <TradeView
+          initialGameId={screen.initialGameId}
+          initialBox={screen.initialBox}
+          onBack={(box) =>
+            screen.initialGameId
+              ? setScreen({
+                  name: 'saveViewer',
+                  gameId: screen.initialGameId,
+                  initialBox: box,
+                })
+              : setScreen({ name: 'activities' })
           }
-          onManageBackup={() => setScreen({ name: 'settings' })}
         />
       )
   }

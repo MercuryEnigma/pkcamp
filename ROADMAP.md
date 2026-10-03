@@ -106,11 +106,11 @@ static app, export its save, reload the page, restore that save, and continue.
 
 ### B. Switch and GBA hardware through switch.gblink.io
 
-- [~] Reproduce the current switch.gblink.io flow with supported physical GBA
+- [x] Reproduce the current switch.gblink.io flow with supported physical GBA
   and Switch hardware and record the required adapters, firmware, browsers,
   permissions, and user steps.
   -- Switch support added
-  -- no GBA
+  -- GBA support added (stock GB-Link firmware)
 - [x] Determine the supported integration boundary: redirect or companion
       workflow, reusable client package, documented protocol, or a direct
       browser integration. Do not assume the older ESP32-specific architecture.

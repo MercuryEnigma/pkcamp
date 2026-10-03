@@ -1,4 +1,4 @@
-import type { SaveLibraryBackend } from "./backend";
+import type { ByteKind, SaveLibraryBackend } from "./backend";
 import type { GameId } from "./types";
 
 const DB_NAME = "pkcamp-save-library";
@@ -19,7 +19,7 @@ function openDb(): Promise<IDBDatabase> {
   });
 }
 
-function byteKey(gameId: GameId, kind: "save" | "rom"): string {
+function byteKey(gameId: GameId, kind: ByteKind): string {
   return `${gameId}:${kind}`;
 }
 
@@ -112,18 +112,18 @@ export class IndexedDbSaveLibraryBackend implements SaveLibraryBackend {
       .catch((error) => console.error("IndexedDbSaveLibraryBackend: delete failed", error));
   }
 
-  readBytes(gameId: GameId, kind: "save" | "rom"): Uint8Array | null {
+  readBytes(gameId: GameId, kind: ByteKind): Uint8Array | null {
     return this.bytesCache.get(byteKey(gameId, kind)) ?? null;
   }
 
-  writeBytes(gameId: GameId, kind: "save" | "rom", bytes: Uint8Array): void {
+  writeBytes(gameId: GameId, kind: ByteKind, bytes: Uint8Array): void {
     const copy = bytes.slice();
     const key = byteKey(gameId, kind);
     this.bytesCache.set(key, copy);
     this.persist(BYTES_STORE, key, copy);
   }
 
-  clearBytes(gameId: GameId, kind: "save" | "rom"): void {
+  clearBytes(gameId: GameId, kind: ByteKind): void {
     const key = byteKey(gameId, kind);
     this.bytesCache.delete(key);
     this.deletePersisted(BYTES_STORE, key);

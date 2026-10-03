@@ -19,7 +19,7 @@ export function CampActivities({
         </p>
         <ZoneCard
           primary
-          label="Lodges"
+          label="Camp Lodges"
           sublabel="Go camping and organize your Pokémon"
           onClick={onSelectLodges}
         />

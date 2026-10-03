@@ -538,13 +538,130 @@
   font-size: 0.84rem;
 }
 
-.camp-trade-confirm {
-  margin-top: 0.75rem;
+/* Unified two-sided Trading Post. The wider board is limited to this page;
+   the rest of the Camp Zone keeps its compact notice-board width. */
+.camp-content--trade {
+  max-width: 72rem;
 }
 
-.camp-trade-confirm:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+.camp-trade-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.camp-trade-between {
+  align-self: center;
+  color: var(--camp-leaf);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.camp-trade-side {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 1rem;
+}
+
+.camp-trade-source-label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  color: var(--camp-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.camp-trade-source-select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--camp-panel-border);
+  border-radius: 6px;
+  background: var(--camp-panel);
+  color: var(--camp-text);
+  padding: 0.5rem;
+  font: inherit;
+}
+
+.camp-trade-picker,
+.camp-trade-hardware {
+  margin-top: 1rem;
+}
+
+.camp-trade-grid {
+  margin-top: 0.7rem;
+}
+
+.camp-trade-note {
+  margin: 0.75rem 0 0;
+  color: var(--camp-muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.camp-trade-hardware {
+  min-height: 13rem;
+  padding: 1.5rem 1rem;
+  border: 1px dashed var(--camp-panel-border);
+  border-radius: 8px;
+  background: rgba(166, 107, 61, 0.08);
+}
+
+.camp-trade-hardware > p {
+  margin: 0.6rem 0;
+  color: var(--camp-text);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.camp-trade-device-status {
+  display: inline-block;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(36, 82, 58, 0.12);
+  color: var(--camp-leaf);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.camp-trade-device-status--warning {
+  background: var(--camp-accent-soft);
+  color: var(--camp-danger);
+}
+
+.camp-trade-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.camp-trade-route-status {
+  margin: 0;
+  color: var(--camp-muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+@media (max-width: 48rem) {
+  .camp-content--trade {
+    padding-inline: 0.8rem;
+  }
+
+  .camp-trade-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .camp-trade-between {
+    justify-self: center;
+    transform: rotate(90deg);
+  }
 }
 
 .camp-danger-btn {
@@ -1321,6 +1438,25 @@
   padding-bottom: 0;
 }
 
+.camp-gba-read {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 32rem;
+  padding: 0.75rem;
+  border: 1px solid var(--camp-border-soft);
+  border-radius: 8px;
+}
+
+.camp-gba-read p {
+  margin: 0;
+}
+
+.camp-gba-read .camp-local-actions {
+  justify-content: flex-start;
+  margin-top: 0;
+}
+
 .camp-backup-meta {
   display: flex;
   min-width: 7rem;
@@ -1338,13 +1474,18 @@
 }
 
 .camp-backup-row-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
+  display: grid;
+  /* Fixed columns so every row's buttons share the same size and position. */
+  grid-template-columns: 8.5rem 5.5rem;
+  justify-content: end;
   gap: 0.35rem;
 }
 
 .camp-backup-row-actions .camp-upload-btn {
+  box-sizing: border-box;
+  width: 100%;
+  justify-content: center;
+  text-align: center;
   padding: 0.35rem 0.55rem;
   font-size: 0.74rem;
 }
@@ -1356,7 +1497,7 @@
   }
 
   .camp-backup-row-actions {
-    justify-content: flex-start;
+    justify-content: start;
   }
 }
 

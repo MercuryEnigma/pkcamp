@@ -8,14 +8,13 @@ import {
   type Esp32Transport,
   type TradeDeviceEvent,
 } from './index.ts'
+import { GbLinkTradeDevice as ImplementedGbLinkTradeDevice } from './gbLinkTradeDevice.ts'
 
 function pokemon(value: number): Uint8Array {
   return new Uint8Array([value])
 }
 
-function makeDependencies(options?: {
-  keysComplete?: boolean
-}): {
+function makeDependencies(options?: { keysComplete?: boolean }): {
   dependencies: Esp32TradeDeviceDependencies
   transport: Esp32Transport
   sessions: Esp32TradeSession[]
@@ -68,7 +67,7 @@ function makeDependencies(options?: {
 }
 
 describe('TradeDeviceService', () => {
-  it('registers ESP32 plus the two planned devices', () => {
+  it('registers the hardware and local trade devices', () => {
     const { dependencies } = makeDependencies()
     const service = createTradeDeviceService({ esp32: dependencies })
 
@@ -76,10 +75,13 @@ describe('TradeDeviceService', () => {
       'esp32',
       'gb-link',
       'save-backup',
+      'camp-site',
     ])
+    expect(service.get('save-backup').implemented).toBe(true)
+    expect(service.get('camp-site').implemented).toBe(true)
     expect(service.get('esp32').implemented).toBe(true)
-    expect(service.get('gb-link').implemented).toBe(false)
-    expect(service.get('save-backup').implemented).toBe(false)
+    expect(service.get('gb-link')).toBeInstanceOf(ImplementedGbLinkTradeDevice)
+    expect(service.get('gb-link').implemented).toBe(true)
   })
 })
 

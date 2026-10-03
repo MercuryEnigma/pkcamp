@@ -118,7 +118,7 @@ async function createRoot(options?: InitOptions): Promise<PKHex> {
 
   let mod: { dotnet: { create(): Promise<DotnetRuntime> } };
   try {
-    mod = await import(`${normalized}dotnet.js`);
+    mod = await import(/* @vite-ignore */ `${normalized}dotnet.js`);
   } catch (cause) {
     throw new Error(
       `pkhex-wasm: unable to load the wasm runtime from ${normalized}dotnet.js — ${

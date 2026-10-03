@@ -1,12 +1,13 @@
 import type { Generation } from '../../services/saveLibrary'
 
 export const CAMPING_POKEMON_BOX_SIZE = 30
-export const DEFAULT_CAMPING_BOX_COUNT = 1
+export const DEFAULT_CAMPING_BOX_COUNT = 10
+export const MIN_CAMPING_BOX_COUNT = 1
 
 const STORAGE_KEY_PREFIX = 'pkcamp:camping-box-count:gen-'
 
 function normalizeBoxCount(value: number): number {
-  if (!Number.isSafeInteger(value) || value < 1) {
+  if (!Number.isSafeInteger(value) || value < MIN_CAMPING_BOX_COUNT) {
     return DEFAULT_CAMPING_BOX_COUNT
   }
   return value
@@ -33,7 +34,7 @@ export function setStoredCampingBoxCount(
 
 export function minimumCampingBoxCount(itemCount: number): number {
   return Math.max(
-    DEFAULT_CAMPING_BOX_COUNT,
+    MIN_CAMPING_BOX_COUNT,
     Math.ceil(Math.max(0, itemCount) / CAMPING_POKEMON_BOX_SIZE)
   )
 }

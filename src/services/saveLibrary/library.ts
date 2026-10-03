@@ -44,7 +44,13 @@ export class InMemorySaveLibrary implements SaveLibrary {
     return Number.isNaN(updatedAt.getTime()) ? null : updatedAt;
   }
 
+  getPreviousSave(gameId: GameId): Uint8Array | null {
+    return this.backend.readBytes(gameId, "previousSave");
+  }
+
   updateSave(gameId: GameId, sav: Uint8Array): void {
+    const current = this.getSave(gameId);
+    if (current) this.backend.writeBytes(gameId, "previousSave", current);
     this.backend.writeBytes(gameId, "save", sav);
     this.log(gameId, "save updated");
   }

@@ -15,6 +15,6 @@ export type {
 } from "./types";
 export { ROSTER, ALL_GAME_IDS, generationOf } from "./roster";
 export { InMemorySaveLibrary, saveLibrary } from "./library";
-export type { SaveLibraryBackend } from "./backend";
+export type { ByteKind, SaveLibraryBackend } from "./backend";
 export { InMemorySaveLibraryBackend } from "./backend";
 export { IndexedDbSaveLibraryBackend } from "./indexedDbBackend";

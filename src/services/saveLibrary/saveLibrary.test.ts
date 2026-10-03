@@ -33,6 +33,21 @@ describe("SaveLibrary", () => {
     expect(library.getSave("ruby")).toBeNull();
   });
 
+  it("keeps the replaced save as the previous save", () => {
+    const library = makeLibrary();
+
+    library.updateSave("ruby", new Uint8Array([1]));
+    expect(library.getPreviousSave("ruby")).toBeNull();
+
+    library.updateSave("ruby", new Uint8Array([2]));
+    expect(library.getPreviousSave("ruby")).toEqual(new Uint8Array([1]));
+
+    library.updateSave("ruby", new Uint8Array([3]));
+    expect(library.getSave("ruby")).toEqual(new Uint8Array([3]));
+    expect(library.getPreviousSave("ruby")).toEqual(new Uint8Array([2]));
+    expect(library.getPreviousSave("sapphire")).toBeNull();
+  });
+
   it("reports when the current save was last updated", () => {
     const library = makeLibrary();
 
