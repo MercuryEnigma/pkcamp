@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { StoredPokemonFile } from '../../services/localPokemonLibrary'
+import type { CampPokemon } from '../../services/storage'
 import type {
   BoxLocation,
   PokemonMove,
@@ -7,11 +7,10 @@ import type {
   SaveGame,
   SaveSlot,
 } from '../../services/pkhex'
-import { initializeSpriteResolver } from '../../services/sprites'
 import { PokemonDetails } from './PokemonDetails'
 import { PokemonSlotIcon } from './PokemonSlotIcon'
-import { getStoredSpriteSourceId } from './spritePreference'
-import { DEFAULT_SPRITE_SOURCE_ID, SPRITE_SOURCES } from './spriteSources'
+import { useSpriteResolver } from './useStorage'
+import type { CampEntry } from './campPositions'
 
 type StorageMode = 'view' | 'moveOne' | 'groupMove'
 const MODE_ACTIVE_CLASS: Record<StorageMode, string> = {
@@ -26,14 +25,11 @@ type StorageArea = { kind: 'box'; box: number } | { kind: 'local'; box: number }
 type StorageLocation =
   { kind: 'box'; box: number; slot: number } | { kind: 'local'; slot: number }
 
-export interface CampingPokemonSlot {
-  file: StoredPokemonFile
-  pokemon: PokemonNode
-}
+export type CampingPokemonSlot = CampEntry
 
 interface TransferSlot {
   pokemon: PokemonNode
-  file: StoredPokemonFile | null
+  file: CampPokemon | null
 }
 
 interface GroupSelection {
@@ -142,16 +138,7 @@ export function PokemonStorageView({
     onBoxChange?.(currentBox)
   }, [currentBox, onBoxChange])
 
-  const resolver = useMemo(() => {
-    const sourceId = getStoredSpriteSourceId() ?? DEFAULT_SPRITE_SOURCE_ID
-    const source =
-      SPRITE_SOURCES.find((item) => item.id === sourceId) ?? SPRITE_SOURCES[0]
-    return initializeSpriteResolver({
-      sourceId: source.id,
-      manifest: source.manifest,
-      formAliases: source.formAliases,
-    })
-  }, [])
+  const resolver = useSpriteResolver()
 
   const gridWidth = `calc(${COLUMNS} * ${SLOT_SIZE}px + ${COLUMNS - 1} * ${SLOT_GAP_REM}rem)`
   const gridHeight = `calc(${ROWS} * ${SLOT_SIZE}px + ${ROWS - 1} * ${SLOT_GAP_REM}rem)`
@@ -214,15 +201,11 @@ export function PokemonStorageView({
     return entry === null ? null : { pokemon: entry.pokemon, file: entry.file }
   }
 
-  const localEntry = (
-    transfer: TransferSlot,
-    slot: number
-  ): CampingPokemonSlot => {
-    const file: StoredPokemonFile = transfer.file
-      ? { ...transfer.file, slot, bytes: transfer.file.bytes.slice() }
+  const localEntry = (transfer: TransferSlot): CampingPokemonSlot => {
+    const file: CampPokemon = transfer.file
+      ? { ...transfer.file, bytes: transfer.file.bytes.slice() }
       : {
           id: newLocalId(),
-          slot,
           fileName: pokemonFileName(transfer.pokemon),
           bytes: exportPokemonFile(transfer.pokemon),
           importedAt: new Date().toISOString(),
@@ -271,20 +254,20 @@ export function PokemonStorageView({
         gameChanged = true
       } else if (moveSource.kind === 'local' && location.kind === 'local') {
         nextLocal = localSlots.slice()
-        nextLocal[location.slot] = localEntry(source, location.slot)
+        nextLocal[location.slot] = localEntry(source)
         nextLocal[moveSource.slot] = destination
-          ? localEntry(destination, moveSource.slot)
+          ? localEntry(destination)
           : null
       } else if (moveSource.kind === 'box' && location.kind === 'local') {
         game.setBoxSlot(boxLocation(moveSource), destination?.pokemon ?? null)
         nextLocal = localSlots.slice()
-        nextLocal[location.slot] = localEntry(source, location.slot)
+        nextLocal[location.slot] = localEntry(source)
         gameChanged = true
       } else if (moveSource.kind === 'local' && location.kind === 'box') {
         game.setBoxSlot(boxLocation(location), source.pokemon)
         nextLocal = localSlots.slice()
         nextLocal[moveSource.slot] = destination
-          ? localEntry(destination, moveSource.slot)
+          ? localEntry(destination)
           : null
         gameChanged = true
       }
@@ -414,7 +397,7 @@ export function PokemonStorageView({
             game.setBoxSlot(boxLocation(to), pokemon?.pokemon ?? null)
             gameChanged = true
           } else {
-            nextLocal[to.slot] = pokemon ? localEntry(pokemon, to.slot) : null
+            nextLocal[to.slot] = pokemon ? localEntry(pokemon) : null
           }
         }
         const localChanged = pairs.some(

@@ -17,6 +17,8 @@ export interface GbLinkTransport {
   onStatus(listener: (status: number) => void): () => void
   /** Data-endpoint payloads from the adapter (e.g. `GetEmuTradeResult` replies). */
   onData(listener: (payload: Uint8Array) => void): () => void
+  /** Every status and data payload of any length, with its serial channel. */
+  onFrame(listener: (channel: number, payload: Uint8Array) => void): () => void
 }
 
 interface UsbTransferInResultLike {
@@ -33,7 +35,10 @@ interface UsbDeviceLike {
   open(): Promise<void>
   selectConfiguration(value: number): Promise<void>
   claimInterface(interfaceNumber: number): Promise<void>
-  transferIn(endpointNumber: number, length: number): Promise<UsbTransferInResultLike>
+  transferIn(
+    endpointNumber: number,
+    length: number
+  ): Promise<UsbTransferInResultLike>
   transferOut(
     endpointNumber: number,
     data: Uint8Array
@@ -106,6 +111,9 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
   private closing = false
   private readonly listeners = new Set<(status: number) => void>()
   private readonly dataListeners = new Set<(payload: Uint8Array) => void>()
+  private readonly frameListeners = new Set<
+    (channel: number, payload: Uint8Array) => void
+  >()
   private readonly decoder = new GbLinkSerialFrameDecoder()
   private readTasks: Promise<void>[] = []
 
@@ -130,7 +138,9 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     let webUsbError: unknown
     if (host.usb) {
       try {
-        await this.openUsb(await host.usb.requestDevice({ filters: USB_FILTERS }))
+        await this.openUsb(
+          await host.usb.requestDevice({ filters: USB_FILTERS })
+        )
         return
       } catch (error) {
         webUsbError = error
@@ -145,7 +155,10 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
       return
     }
 
-    throw webUsbError ?? new Error('This browser supports neither WebUSB nor Web Serial.')
+    throw (
+      webUsbError ??
+      new Error('This browser supports neither WebUSB nor Web Serial.')
+    )
   }
 
   async close(): Promise<void> {
@@ -213,6 +226,13 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     return () => this.dataListeners.delete(listener)
   }
 
+  onFrame(
+    listener: (channel: number, payload: Uint8Array) => void
+  ): () => void {
+    this.frameListeners.add(listener)
+    return () => this.frameListeners.delete(listener)
+  }
+
   private async openUsb(device: UsbDeviceLike): Promise<void> {
     this.usbDevice = device
     await device.open()
@@ -230,7 +250,9 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     this.serialPort = port
     await port.open({ baudRate: 115200 })
     if (!port.readable || !port.writable) {
-      throw new Error('The GB-Link serial port did not expose readable and writable streams.')
+      throw new Error(
+        'The GB-Link serial port did not expose readable and writable streams.'
+      )
     }
     this.serialReader = port.readable.getReader()
     this.serialWriter = port.writable.getWriter()
@@ -247,13 +269,15 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
   ): Promise<void> {
     if (!this.connected) throw new Error('The GB-Link is not connected.')
     if (this.currentKind === 'webserial') {
-      if (!this.serialWriter) throw new Error('The GB-Link serial writer is unavailable.')
+      if (!this.serialWriter)
+        throw new Error('The GB-Link serial writer is unavailable.')
       await this.serialWriter.write(
         encodeGbLinkSerialFrame(serialChannel, payload)
       )
       return
     }
-    if (!this.usbDevice) throw new Error('The GB-Link USB device is unavailable.')
+    if (!this.usbDevice)
+      throw new Error('The GB-Link USB device is unavailable.')
     const result = await this.usbDevice.transferOut(usbEndpoint, payload)
     if (result.status && result.status !== 'ok') {
       throw new Error(`GB-Link USB write failed: ${result.status}.`)
@@ -265,13 +289,18 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     if (!device) return
     try {
       while (this.connected && device === this.usbDevice) {
-        const result = await device.transferIn(STATUS_ENDPOINT, GB_LINK_MAX_PAYLOAD)
-        if (!result.data || result.data.byteLength !== 2) continue
-        const payload = new Uint8Array(
-          result.data.buffer,
-          result.data.byteOffset,
-          result.data.byteLength
+        const result = await device.transferIn(
+          STATUS_ENDPOINT,
+          GB_LINK_MAX_PAYLOAD
         )
+        if (!result.data || result.data.byteLength === 0) continue
+        const payload = new Uint8Array(
+          result.data.buffer.slice(
+            result.data.byteOffset,
+            result.data.byteOffset + result.data.byteLength
+          )
+        )
+        this.emitFrame(GB_LINK_SERIAL_CHANNEL.status, payload)
         this.emitStatus(statusFrom(payload))
       }
     } catch {
@@ -284,16 +313,19 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     if (!device) return
     try {
       while (this.connected && device === this.usbDevice) {
-        const result = await device.transferIn(DATA_ENDPOINT, GB_LINK_MAX_PAYLOAD)
+        const result = await device.transferIn(
+          DATA_ENDPOINT,
+          GB_LINK_MAX_PAYLOAD
+        )
         if (!result.data || result.data.byteLength === 0) continue
-        this.emitData(
-          new Uint8Array(
-            result.data.buffer.slice(
-              result.data.byteOffset,
-              result.data.byteOffset + result.data.byteLength
-            )
+        const payload = new Uint8Array(
+          result.data.buffer.slice(
+            result.data.byteOffset,
+            result.data.byteOffset + result.data.byteLength
           )
         )
+        this.emitFrame(GB_LINK_SERIAL_CHANNEL.data, payload)
+        this.emitData(payload)
       }
     } catch {
       if (!this.closing) this.connected = false
@@ -309,6 +341,7 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
         if (done) break
         if (!value) continue
         for (const frame of this.decoder.push(value)) {
+          this.emitFrame(frame.channel, frame.payload)
           if (frame.channel === GB_LINK_SERIAL_CHANNEL.status) {
             this.emitStatus(statusFrom(frame.payload))
           } else if (frame.channel === GB_LINK_SERIAL_CHANNEL.data) {
@@ -321,6 +354,10 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     } finally {
       if (!this.closing && reader === this.serialReader) this.connected = false
     }
+  }
+
+  private emitFrame(channel: number, payload: Uint8Array): void {
+    for (const listener of this.frameListeners) listener(channel, payload)
   }
 
   private emitData(payload: Uint8Array): void {

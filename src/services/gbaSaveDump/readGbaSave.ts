@@ -4,7 +4,9 @@ import type { GbLinkTransport } from '../tradeDevice/gbLinkTransport.ts'
 import { GbaCartClient } from './gbaCartClient.ts'
 import { delay, GbLinkWords } from './gbLinkWords.ts'
 import { multiboot } from './multiboot.ts'
-import dumperUrl from './vendor/gb-cart-doctor/gba-cart-dumper_mb.gba?url'
+// Inlined (about 80 KB of base64) so starting a read needs no network
+// request that could fail mid-flow.
+import dumperDataUrl from './vendor/gb-cart-doctor/gba-cart-dumper_mb.gba?url&inline'
 
 /** Game code prefixes; the fourth letter is the region. */
 export const GAME_CODE_PREFIX: Record<Gen3GameId, string> = {
@@ -23,19 +25,24 @@ export interface GbaSaveOptions {
   signal: AbortSignal
   onStatus?(message: string): void
   onProgress?(done: number, total: number): void
-  /** Defaults to fetching the vendored Cart Doctor dumper. */
+  /** Defaults to the vendored Cart Doctor dumper bundled with the app. */
   loadDumper?(): Promise<Uint8Array>
 }
 
 export interface WriteGbaSaveOptions extends GbaSaveOptions {
   /** The save to write over the cartridge's save. */
   save: Uint8Array
+  /**
+   * Keeps the save currently on the cartridge. The cartridge is only written
+   * after this resolves, so a failed backup leaves it untouched.
+   */
+  backUpCartridgeSave(save: Uint8Array): Promise<void>
 }
 
-async function fetchDumper(): Promise<Uint8Array> {
-  const response = await fetch(dumperUrl)
-  if (!response.ok) throw new Error('Could not load the GBA save tool.')
-  return new Uint8Array(await response.arrayBuffer())
+/** Decodes the bundled dumper from its base64 data URL. */
+async function bundledDumper(): Promise<Uint8Array> {
+  const base64 = dumperDataUrl.slice(dumperDataUrl.indexOf(',') + 1)
+  return Uint8Array.from(atob(base64), (char) => char.charCodeAt(0))
 }
 
 /**
@@ -44,7 +51,7 @@ async function fetchDumper(): Promise<Uint8Array> {
  */
 async function withCartridge<T>(
   transport: GbLinkTransport,
-  { gameId, signal, onStatus, loadDumper = fetchDumper }: GbaSaveOptions,
+  { gameId, signal, onStatus, loadDumper = bundledDumper }: GbaSaveOptions,
   operation: (cart: GbaCartClient) => Promise<T>
 ): Promise<T> {
   const dumper = await loadDumper()
@@ -60,9 +67,8 @@ async function withCartridge<T>(
     await transport.sendCommand(GB_LINK_COMMAND.setTimingConfig, TIMING_CONFIG)
     link.drain()
 
-    onStatus?.(
-      'Turn on the GBA with the cartridge inserted while holding START + SELECT.'
-    )
+    // The GBA is already waiting: it was turned on holding START + SELECT.
+    onStatus?.('Sending the save tool to the GBA…')
     await multiboot(link, dumper, signal)
 
     onStatus?.('Checking the cartridge…')
@@ -102,6 +108,13 @@ export function writeGbaSave(
   options: WriteGbaSaveOptions
 ): Promise<void> {
   return withCartridge(transport, options, async (cart) => {
+    options.onStatus?.('Backing up the cartridge save first…')
+    const cartridgeSave = await cart.dumpSave((done, total) =>
+      options.onStatus?.(
+        `Backing up the cartridge save first… ${Math.floor((done / total) * 100)}%`
+      )
+    )
+    await options.backUpCartridgeSave(cartridgeSave)
     options.onStatus?.('Sending the backup…')
     await cart.restoreSave(options.save, (done, total) => {
       options.onProgress?.(done, total)

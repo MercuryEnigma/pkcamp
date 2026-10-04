@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   GB_LINK_MAX_PAYLOAD,
   GbLinkSerialFrameDecoder,
+  MIN_GBA_SWITCH_FIRMWARE,
+  compareFirmwareVersions,
   encodeGbLinkSerialFrame,
 } from './gbLinkProtocol.ts'
 
@@ -49,5 +51,16 @@ describe('GB-Link serial framing', () => {
     expect(decoder.push(bytes)).toEqual([
       { channel: 2, payload: new Uint8Array([9, 8]) },
     ])
+  })
+})
+
+describe('compareFirmwareVersions', () => {
+  it('compares dotted numeric versions', () => {
+    expect(compareFirmwareVersions('2.2.7', '2.2.7')).toBe(0)
+    expect(compareFirmwareVersions('2.2.10', '2.2.7')).toBeGreaterThan(0)
+    expect(
+      compareFirmwareVersions('2.2.3', MIN_GBA_SWITCH_FIRMWARE)
+    ).toBeLessThan(0)
+    expect(compareFirmwareVersions('2.3', '2.2.9')).toBeGreaterThan(0)
   })
 })

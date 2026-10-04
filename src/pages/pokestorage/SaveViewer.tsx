@@ -1,15 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { localPokemonLibrary } from '../../services/localPokemonLibrary'
 import type { PokemonNode, SaveGame } from '../../services/pkhex'
-import { saveLibrary, type Gen3GameId } from '../../services/saveLibrary'
-import { usePkHex } from '../context/PkHexProvider'
+import type { Gen3GameId } from '../../services/saveLibrary'
+import {
+  DEFAULT_CAMP_SITE_COUNT,
+  storage,
+  type CampPokemon,
+} from '../../services/storage'
+import { usePkHex } from '../context/PkHexContext'
 import { GAME_LABEL } from './gameDisplay'
 import { GbaSavePanel } from './GbaSavePanel'
+import { assertSaveMatchesCabin } from './saveVersion'
 import {
-  CAMPING_POKEMON_BOX_SIZE,
-  getStoredCampingBoxCount,
-  resizeCampingSlots,
-} from './campingStoragePreference'
+  CAMP_SITE_SIZE,
+  campFromEntries,
+  loadCampEntries,
+} from './campPositions'
+import {
+  storageErrorMessage,
+  useStorageOffline,
+  useStorageProvider,
+} from './useStorage'
 import {
   PokemonStorageView,
   type CampingPokemonSlot,
@@ -48,16 +58,15 @@ export function SaveViewer({
   onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
 }) {
   const { adapter, loading, error } = usePkHex()
+  const { provider, ready } = useStorageProvider()
+  const offline = useStorageOffline()
   const [game, setGame] = useState<SaveGame | null>(null)
   const [gameDirty, setGameDirty] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [readingFromGba, setReadingFromGba] = useState(false)
   const [localDirty, setLocalDirty] = useState(false)
   const [localSlots, setLocalSlots] = useState<(CampingPokemonSlot | null)[]>(
-    () =>
-      new Array<null>(
-        getStoredCampingBoxCount(GENERATION) * CAMPING_POKEMON_BOX_SIZE
-      ).fill(null)
+    () => new Array<null>(DEFAULT_CAMP_SITE_COUNT * CAMP_SITE_SIZE).fill(null)
   )
   const [localLoading, setLocalLoading] = useState(true)
   const [localError, setLocalError] = useState<string | null>(null)
@@ -65,46 +74,63 @@ export function SaveViewer({
     null
   )
   const loadedBytesRef = useRef<Uint8Array | null>(null)
+  const campLoadedRef = useRef(false)
+  const unreadableCampRef = useRef<ReadonlyMap<number, CampPokemon>>(new Map())
   const boxRef = useRef<number | null>(initialBox ?? null)
   const hasUnsavedChanges = gameDirty || localDirty
 
-  // Restore a previously persisted save for this game as soon as the adapter
-  // is ready. Without this, IndexedDB persistence is invisible — bytes get
-  // written on load but nothing ever reads them back.
+  // Restore a previously stored save for this game as soon as the adapter
+  // and the active storage are ready, and again if the storage changes.
   useEffect(() => {
-    if (!adapter) return
+    if (!adapter || !ready) return
     let cancelled = false
 
-    void saveLibrary.whenReady().then(() => {
-      if (cancelled) return
-      const stored = saveLibrary.getSave(gameId)
-      if (!stored) return
-      try {
-        loadedBytesRef.current = stored
-        const restored = adapter.load(stored)
-        if (cancelled) {
-          restored.dispose()
+    provider
+      .getSave(gameId)
+      .then((stored) => {
+        if (cancelled) return
+        if (!stored) {
+          setGame((previous) => {
+            previous?.dispose()
+            return null
+          })
+          setGameDirty(false)
           return
         }
-        setGame((previous) => {
-          previous?.dispose()
-          return restored
-        })
-      } catch (err) {
-        // A previously-stored save that no longer parses (e.g. adapter
-        // changed) shouldn't crash the page — just fall back to the empty,
-        // manual-upload state.
-        console.error('Failed to restore stored save for', gameId, err)
-        setUploadError(
-          'Your stored backup could not be opened. Upload a new one.'
-        )
-      }
-    })
+        let restored: SaveGame | null = null
+        try {
+          loadedBytesRef.current = stored.bytes
+          restored = adapter.load(stored.bytes)
+          assertSaveMatchesCabin(gameId, restored)
+          if (cancelled) {
+            restored.dispose()
+            return
+          }
+          setGame((previous) => {
+            previous?.dispose()
+            return restored
+          })
+          setGameDirty(false)
+          setUploadError(null)
+        } catch (err) {
+          restored?.dispose()
+          // A previously-stored save that no longer parses (e.g. adapter
+          // changed) shouldn't crash the page — just fall back to the empty,
+          // manual-upload state.
+          console.error('Failed to restore stored save for', gameId, err)
+          setUploadError(
+            'Your stored backup could not be opened. Upload a new one.'
+          )
+        }
+      })
+      .catch((cause: unknown) => {
+        if (!cancelled) setUploadError(storageErrorMessage(cause))
+      })
 
     return () => {
       cancelled = true
     }
-  }, [adapter, gameId])
+  }, [adapter, gameId, provider, ready])
 
   // Fast Refresh can preserve a SaveGame created before the movement methods
   // were added. Rehydrate that stale object from the persisted source bytes so
@@ -133,26 +159,26 @@ export function SaveViewer({
   }, [adapter, game, gameId])
 
   useEffect(() => {
-    if (!adapter) return
+    if (!adapter || !ready) return
     let cancelled = false
-    setLocalLoading(true)
-    localPokemonLibrary
-      .getSlots(GENERATION)
-      .then((files) => {
+    campLoadedRef.current = false
+    provider
+      .getCamp(GENERATION)
+      .then((camp) => {
         if (cancelled) return
-        const slots = files.map((file) => {
-          if (file === null) return null
-          return { file, pokemon: adapter.importPokemonFile(file.bytes) }
-        })
-        setLocalSlots(
-          resizeCampingSlots(slots, getStoredCampingBoxCount(GENERATION))
+        const loaded = loadCampEntries(camp, adapter)
+        unreadableCampRef.current = loaded.unreadable
+        campLoadedRef.current = true
+        setLocalSlots(loaded.entries)
+        setLocalDirty(false)
+        setLocalError(
+          loaded.unreadable.size > 0
+            ? `${loaded.unreadable.size} stored Pokémon file${loaded.unreadable.size === 1 ? '' : 's'} could not be read.`
+            : null
         )
-        setLocalError(null)
       })
       .catch((cause: unknown) => {
-        if (!cancelled) {
-          setLocalError(cause instanceof Error ? cause.message : String(cause))
-        }
+        if (!cancelled) setLocalError(storageErrorMessage(cause))
       })
       .finally(() => {
         if (!cancelled) setLocalLoading(false)
@@ -160,7 +186,7 @@ export function SaveViewer({
     return () => {
       cancelled = true
     }
-  }, [adapter])
+  }, [adapter, provider, ready])
 
   useEffect(() => {
     onUnsavedChangesChange?.(hasUnsavedChanges)
@@ -183,7 +209,9 @@ export function SaveViewer({
   // Release WASM-side state when leaving this game, not just when replacing
   // it with a new upload.
   const gameRef = useRef<SaveGame | null>(null)
-  gameRef.current = game
+  useEffect(() => {
+    gameRef.current = game
+  }, [game])
   useEffect(() => {
     return () => {
       gameRef.current?.dispose()
@@ -194,6 +222,12 @@ export function SaveViewer({
   const loadBackup = (bytes: Uint8Array) => {
     if (!adapter) return
     const save = adapter.load(bytes)
+    try {
+      assertSaveMatchesCabin(gameId, save)
+    } catch (cause) {
+      save.dispose()
+      throw cause
+    }
     loadedBytesRef.current = bytes
     setGameDirty(true)
     setUploadError(null)
@@ -222,24 +256,34 @@ export function SaveViewer({
     }
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!game) return
     const bytes = game.toBytes()
-    saveLibrary.updateSave(gameId, bytes)
-    loadedBytesRef.current = bytes
-    setGameDirty(false)
+    try {
+      await storage.putSave(gameId, bytes)
+      loadedBytesRef.current = bytes
+      setGameDirty(false)
+      setUploadError(null)
+    } catch (cause) {
+      // Unsaved changes stay in the editor so the save can be retried.
+      setUploadError(storageErrorMessage(cause))
+    }
   }
 
   const handleSaveLocal = async () => {
+    if (!campLoadedRef.current) {
+      setLocalError('Camping Pokémon have not loaded, so they cannot be saved.')
+      return
+    }
     try {
-      await localPokemonLibrary.saveSlots(
+      await storage.saveCamp(
         GENERATION,
-        localSlots.map((entry) => entry?.file ?? null)
+        campFromEntries(localSlots, unreadableCampRef.current)
       )
       setLocalDirty(false)
       setLocalError(null)
     } catch (cause) {
-      setLocalError(cause instanceof Error ? cause.message : String(cause))
+      setLocalError(storageErrorMessage(cause))
     }
   }
 
@@ -309,6 +353,11 @@ export function SaveViewer({
           <p className="camp-status">Camping Pokémon: {localError}</p>
         )}
         {uploadError && <p className="camp-status">{uploadError}</p>}
+        {offline && (
+          <p className="camp-status">
+            Dropbox is unreachable. Saving is paused until it reconnects.
+          </p>
+        )}
 
         {!loading && !error && (
           <div className="camp-panel">
@@ -320,8 +369,10 @@ export function SaveViewer({
                     mode="read"
                     gameId={gameId}
                     onSave={(bytes) => {
+                      // Already stored by the panel, so it opens unchanged.
                       setReadingFromGba(false)
                       loadBackup(bytes)
+                      setGameDirty(false)
                     }}
                     onClose={() => setReadingFromGba(false)}
                   />
@@ -364,7 +415,8 @@ export function SaveViewer({
                           <button
                             type="button"
                             className="camp-save-btn"
-                            onClick={handleSave}
+                            disabled={offline}
+                            onClick={() => void handleSave()}
                           >
                             Save Game
                           </button>
@@ -373,7 +425,8 @@ export function SaveViewer({
                           <button
                             type="button"
                             className="camp-save-btn"
-                            onClick={handleSaveLocal}
+                            disabled={offline}
+                            onClick={() => void handleSaveLocal()}
                           >
                             Save Camping Pokémon
                           </button>

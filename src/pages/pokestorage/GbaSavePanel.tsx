@@ -1,17 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Gen3GameId } from '../../services/saveLibrary'
+import { storage } from '../../services/storage'
 import { gbLinkTradeDevice } from '../../services/tradeDevice'
-import { usePkHex } from '../context/PkHexProvider'
+import { usePkHex } from '../context/PkHexContext'
 import { GAME_LABEL } from './gameDisplay'
+import { assertSaveMatchesCabin } from './saveVersion'
+import { storageErrorMessage } from './useStorage'
 
 type GbaSavePanelProps = {
   gameId: Gen3GameId
   onClose(): void
 } & (
   | {
-      /** Read the cartridge save into PkCamp. */
+      /** Read the cartridge save into PkCamp's storage as the backup. */
       mode: 'read'
-      /** Receives a save that PKHeX has already opened successfully. */
+      /** Called with the save once PKHeX opened it and storage kept it. */
       onSave(bytes: Uint8Array): void
     }
   | {
@@ -40,18 +43,10 @@ export function GbaSavePanel(props: GbaSavePanelProps) {
 
   const start = async () => {
     if (!adapter) return
-    if (
-      props.mode === 'write' &&
-      !window.confirm(
-        `This overwrites the save on the ${GAME_LABEL[gameId]} cartridge with the PkCamp backup. It cannot be undone. Continue?`
-      )
-    ) {
-      return
-    }
     const controller = new AbortController()
     abortRef.current = controller
     setBusy(true)
-    setStatus('Connecting to the GB-Link…')
+    setStatus('Choose your GB-Link in the browser window.')
     const options = {
       gameId,
       signal: controller.signal,
@@ -65,20 +60,35 @@ export function GbaSavePanel(props: GbaSavePanelProps) {
       await gbLinkTradeDevice.connect()
       if (props.mode === 'read') {
         const bytes = await gbLinkTradeDevice.readSave(options)
-        adapter.load(bytes).dispose()
+        const loaded = adapter.load(bytes)
+        try {
+          assertSaveMatchesCabin(gameId, loaded)
+        } finally {
+          loaded.dispose()
+        }
+        setStatus(`Saving the ${GAME_LABEL[gameId]} backup…`)
+        await storage.putSave(gameId, bytes)
         props.onSave(bytes)
       } else {
-        await gbLinkTradeDevice.writeSave({ ...options, save: props.save })
+        const loaded = adapter.load(props.save)
+        try {
+          assertSaveMatchesCabin(gameId, loaded)
+        } finally {
+          loaded.dispose()
+        }
+        await gbLinkTradeDevice.writeSave({
+          ...options,
+          save: props.save,
+          // Stored as hardware.sav before the cartridge is touched.
+          backUpCartridgeSave: (cartridgeSave) =>
+            storage.putHardwareSave(gameId, cartridgeSave),
+        })
         setStatus('The cartridge save was overwritten.')
         props.onWritten()
       }
     } catch (cause) {
       setStatus(
-        controller.signal.aborted
-          ? 'Cancelled.'
-          : cause instanceof Error
-            ? cause.message
-            : String(cause)
+        controller.signal.aborted ? 'Cancelled.' : storageErrorMessage(cause)
       )
     } finally {
       abortRef.current = null
@@ -87,13 +97,25 @@ export function GbaSavePanel(props: GbaSavePanelProps) {
   }
 
   return (
-    <div className="camp-gba-read">
-      <p>
-        Connect the GB-Link to a GBA with {GAME_LABEL[gameId]} inserted. After
-        pressing Start, turn the GBA on while holding START + SELECT.
-        {props.mode === 'write' &&
-          ' This replaces the save on the cartridge with the PkCamp backup.'}
+    <div className="camp-gba-task">
+      <p className="camp-gba-task-title">
+        {props.mode === 'write'
+          ? `Restore ${GAME_LABEL[gameId]} Cabin to GBA`
+          : `Back up ${GAME_LABEL[gameId]} Cabin from GBA`}
       </p>
+      <ol className="camp-gba-steps">
+        <li>Connect the GB-Link to this computer and your GBA.</li>
+        <li>
+          Insert {GAME_LABEL[gameId]} and power on while holding START + SELECT.
+        </li>
+        <li>When ready, continue and choose your GB-Link.</li>
+      </ol>
+      {props.mode === 'write' && (
+        <p className="camp-gba-task-note">
+          The cartridge&apos;s current save will be backed up before{' '}
+          {GAME_LABEL[gameId]} Cabin is written to it.
+        </p>
+      )}
       <div className="camp-local-actions">
         <button
           type="button"
@@ -101,14 +123,14 @@ export function GbaSavePanel(props: GbaSavePanelProps) {
           disabled={busy || !adapter || !gbLinkTradeDevice.supported}
           onClick={() => void start()}
         >
-          Start
+          Continue
         </button>
         <button
           type="button"
-          className="camp-upload-btn"
+          className="camp-text-btn"
           onClick={() => (busy ? abortRef.current?.abort() : onClose())}
         >
-          {busy ? 'Cancel' : 'Close'}
+          Cancel
         </button>
       </div>
       {!gbLinkTradeDevice.supported && (

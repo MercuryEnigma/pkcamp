@@ -3,11 +3,13 @@ import {
   createTradeDeviceService,
   Esp32TradeDevice,
   TradeDeviceError,
+  type Esp32LinkSession,
   type Esp32TradeDeviceDependencies,
   type Esp32TradeSession,
   type Esp32Transport,
   type TradeDeviceEvent,
 } from './index.ts'
+import type { GbLinkRelayAdapter } from './gbLinkTradeDevice.ts'
 import { GbLinkTradeDevice as ImplementedGbLinkTradeDevice } from './gbLinkTradeDevice.ts'
 
 function pokemon(value: number): Uint8Array {
@@ -18,8 +20,15 @@ function makeDependencies(options?: { keysComplete?: boolean }): {
   dependencies: Esp32TradeDeviceDependencies
   transport: Esp32Transport
   sessions: Esp32TradeSession[]
+  links: (Esp32LinkSession & {
+    start: ReturnType<typeof vi.fn>
+    stop: ReturnType<typeof vi.fn>
+    kind: string
+    adapter: unknown
+  })[]
 } {
   const sessions: Esp32TradeSession[] = []
+  const links: ReturnType<typeof makeDependencies>['links'] = []
   const transport: Esp32Transport = {
     attached: false,
     info: { chip: 'esp32s3', version: '2.0.0' },
@@ -45,6 +54,16 @@ function makeDependencies(options?: { keysComplete?: boolean }): {
     isSupported: () => true,
     requestPort: async () => ({ id: 'test-port' }),
     createTransport: () => transport,
+    createLink: (kind, _device, adapter) => {
+      const link = Object.assign(new EventTarget(), {
+        start: vi.fn(async () => {}),
+        stop: vi.fn(async () => {}),
+        kind,
+        adapter,
+      })
+      links.push(link)
+      return link
+    },
     createSession: ({ emit }) => {
       const session: Esp32TradeSession = {
         offerSlot: vi.fn((slot: number) => {
@@ -63,7 +82,7 @@ function makeDependencies(options?: { keysComplete?: boolean }): {
     },
   }
 
-  return { dependencies, transport, sessions }
+  return { dependencies, transport, sessions, links }
 }
 
 describe('TradeDeviceService', () => {
@@ -161,5 +180,132 @@ describe('Esp32TradeDevice', () => {
 
     expect(transport.storeKeys).toHaveBeenCalledOnce()
     expect(transport.startBridge).toHaveBeenCalledOnce()
+  })
+
+  describe('runLink', () => {
+    const adapter = {} as GbLinkRelayAdapter
+
+    it('requires keys and a connection', async () => {
+      const { dependencies, links } = makeDependencies({ keysComplete: false })
+      const device = new Esp32TradeDevice(dependencies)
+      const signal = new AbortController().signal
+      await expect(
+        device.runLink('wireless', adapter, { signal })
+      ).rejects.toMatchObject({ code: 'not-connected' })
+      await device.connect()
+      await expect(
+        device.runLink('wireless', adapter, { signal })
+      ).rejects.toMatchObject({ code: 'missing-keys' })
+      expect(links).toHaveLength(0)
+      expect(device.state).toBe('connected')
+    })
+
+    it('stops the link and resolves when aborted', async () => {
+      const { dependencies, links } = makeDependencies()
+      const device = new Esp32TradeDevice(dependencies)
+      await device.connect()
+      const controller = new AbortController()
+      const events: TradeDeviceEvent[] = []
+
+      const running = device.runLink('wireless', adapter, {
+        signal: controller.signal,
+        onEvent: (event) => events.push(event),
+      })
+      await vi.waitFor(() => expect(links[0]?.start).toHaveBeenCalled())
+      expect(links[0].kind).toBe('wireless')
+      expect(links[0].adapter).toBe(adapter)
+      await vi.waitFor(() => expect(device.state).toBe('trading'))
+      await expect(
+        device.runLink('cable', adapter, { signal: controller.signal })
+      ).rejects.toMatchObject({ code: 'busy' })
+
+      controller.abort()
+      await running
+      expect(links[0].stop).toHaveBeenCalledOnce()
+      expect(device.state).toBe('connected')
+      expect(events).toContainEqual({
+        type: 'status',
+        message: 'Relaying between the GBA and the Switch.',
+      })
+    })
+
+    it('stops while the link is still starting', async () => {
+      const { dependencies, links } = makeDependencies()
+      let finishStart: (() => void) | undefined
+      const createLink = dependencies.createLink
+      dependencies.createLink = (...args) => {
+        const link = createLink(...args)
+        ;(link.start as ReturnType<typeof vi.fn>).mockImplementation(
+          () =>
+            new Promise<void>((resolve) => {
+              finishStart = resolve
+            })
+        )
+        return link
+      }
+      const device = new Esp32TradeDevice(dependencies)
+      await device.connect()
+      const controller = new AbortController()
+
+      const running = device.runLink('wireless', adapter, {
+        signal: controller.signal,
+      })
+      await vi.waitFor(() => expect(links[0]?.start).toHaveBeenCalled())
+      controller.abort()
+      await running
+
+      expect(links[0].stop).toHaveBeenCalledOnce()
+      expect(device.state).toBe('connected')
+      finishStart?.()
+    })
+
+    it('reports cable link progress', async () => {
+      const { dependencies, links } = makeDependencies()
+      const device = new Esp32TradeDevice(dependencies)
+      await device.connect()
+      const controller = new AbortController()
+      const messages: string[] = []
+
+      const running = device.runLink('cable', adapter, {
+        signal: controller.signal,
+        onEvent: (event) => {
+          if (event.type === 'status') messages.push(event.message)
+        },
+      })
+      await vi.waitFor(() => expect(links[0]?.start).toHaveBeenCalled())
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      const link = links[0] as unknown as Record<string, unknown>
+      Object.assign(link, { cableOpen: true })
+      links[0].dispatchEvent(new Event('change'))
+      Object.assign(link, { linked: true })
+      links[0].dispatchEvent(new Event('change'))
+      Object.assign(link, { tradeReady: true })
+      links[0].dispatchEvent(new Event('change'))
+      controller.abort()
+      await running
+      expect(messages).toEqual([
+        'GBA cable link open.',
+        "Linked to the Switch's room.",
+        'Ready to trade.',
+      ])
+    })
+
+    it('rejects and stops when the link fails', async () => {
+      const { dependencies, links } = makeDependencies()
+      const device = new Esp32TradeDevice(dependencies)
+      await device.connect()
+
+      const running = device.runLink('wireless', adapter, {
+        signal: new AbortController().signal,
+      })
+      await vi.waitFor(() => expect(links[0]?.start).toHaveBeenCalled())
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      links[0].dispatchEvent(
+        new CustomEvent('failed', { detail: new Error('port lost') })
+      )
+      await expect(running).rejects.toThrow('port lost')
+      expect(links[0].stop).toHaveBeenCalledOnce()
+      expect(device.state).toBe('connected')
+    })
   })
 })

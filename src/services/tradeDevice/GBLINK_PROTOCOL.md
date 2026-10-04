@@ -37,3 +37,25 @@ cartridge save with stock firmware, the same way GB-Link Cart Doctor does:
 (`0x30`, 36 µs, 4 bytes per transfer). It then multiboots Cart Doctor's dumper
 and runs its 32-bit SIO protocol (`CMD_INFO`, `CMD_DUMP_SAVE`). It finishes by
 sending `Cancel` so a later trade starts from idle.
+
+## GBA ↔ Switch
+
+GBA ↔ Switch trading is a live relay between a GB-Link and an ESP32 running the
+GB-Link-Switch-LDN bridge firmware, both on USB. Each player picks a Pokémon on
+their own console. PkCamp stores and writes nothing, and the National Dex
+bypass is never enabled.
+
+It needs GB-Link firmware 2.2.7 or newer. PkCamp reads the version with
+`GetFirmwareInfo` (`0x0F`) and refuses older or unknown firmware. To update,
+`RebootBootloader` (`0x43`) puts the GB-Link into its USB bootloader, and the
+user copies the `.uf2` from the GB-Link GitHub release to the `RPI-RP2` drive.
+PkCamp never ships or flashes firmware.
+
+- **FireRed/LeafGreen/Emerald (wireless):** the ESP32 drives the GB-Link into
+  wireless mode (`0x07`) itself. The page only relays GB frames between the
+  ESP32 adapter port (set to host) and the GB-Link (`Bridge`).
+- **Ruby/Sapphire (cable):** the GB-Link runs cable mode (`0x01`) and the page
+  translates the cable protocol to the Switch's room (`CableSession`).
+
+`GbLinkTradeDevice.linkAdapter()` hands the relay the GB-Link under its busy
+guard, and `Esp32TradeDevice.runLink()` runs the session until it is aborted.

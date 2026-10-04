@@ -1,35 +1,9 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import {
   createPkhexWasmBackend,
   initializePokemonSaveAdapter,
-  type PokemonSaveAdapter,
 } from '../../services/pkhex'
-
-/**
- * What `usePkHex()` hands consumers.
- *
- * The provider owns the one-time WASM bootstrap and exposes the typed adapter
- * boundary (`src/services/pkhex`) rather than the raw `pkhex-wasm` root, so
- * pages code against the normalized types instead of the WASM surface.
- */
-export interface PkHexContextValue {
-  /** Null while `loading`, or if initialization failed. */
-  adapter: PokemonSaveAdapter | null
-  loading: boolean
-  error: Error | null
-}
-
-const PkHexContext = createContext<PkHexContextValue>({
-  adapter: null,
-  loading: true,
-  error: null,
-})
+import { PkHexContext, type PkHexContextValue } from './PkHexContext'
 
 export function PkHexProvider({ children }: { children: ReactNode }) {
   const [value, setValue] = useState<PkHexContextValue>({
@@ -66,8 +40,4 @@ export function PkHexProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return <PkHexContext.Provider value={value}>{children}</PkHexContext.Provider>
-}
-
-export function usePkHex(): PkHexContextValue {
-  return useContext(PkHexContext)
 }

@@ -1,33 +1,27 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { StoredPokemonFile } from '../localPokemonLibrary'
+import type { Camp, CampPokemon } from '../storage'
 import type { PokemonSaveAdapter } from '../pkhex'
 
-const campSlots: (StoredPokemonFile | null)[] = []
-const saveLibraryMock = {
-  whenReady: vi.fn(async () => {}),
-  getSave: vi.fn((): Uint8Array | null => new Uint8Array([0])),
-  updateSave: vi.fn(),
+const camp: Camp = { sites: [] }
+const storageMock = {
+  getSave: vi.fn(async (): Promise<{ bytes: Uint8Array } | null> => ({
+    bytes: new Uint8Array([0]),
+  })),
+  putSave: vi.fn(async () => {}),
+  getCamp: vi.fn(async () => camp),
+  saveCamp: vi.fn(async () => {}),
 }
 
-vi.mock('../localPokemonLibrary', () => ({
-  localPokemonLibrary: {
-    getSlots: vi.fn(async () => campSlots.slice()),
-    saveSlots: vi.fn(async (_generation: number, slots: typeof campSlots) => {
-      campSlots.splice(0, campSlots.length, ...slots)
-    }),
-  },
-}))
-vi.mock('../saveLibrary', () => ({ saveLibrary: saveLibraryMock }))
+vi.mock('../storage', () => ({ storage: storageMock }))
 
 const { CampSiteTradeDevice, SaveBackupTradeDevice } =
   await import('./localTradeDevice.ts')
 
 const bytes = (value: number) => new Uint8Array([value])
 
-function file(id: string, value: number): StoredPokemonFile {
+function file(id: string, value: number): CampPokemon {
   return {
     id,
-    slot: 0,
     fileName: `${id}.pk3`,
     bytes: bytes(value),
     importedAt: '',
@@ -58,8 +52,9 @@ function fakeAdapter(boxSlots: (number | null)[]) {
 }
 
 beforeEach(() => {
-  campSlots.splice(0, campSlots.length, null, file('a', 1), file('b', 2))
-  saveLibraryMock.updateSave.mockClear()
+  camp.sites = [[null, file('a', 1), file('b', 2)], [file('c', 3)]]
+  storageMock.putSave.mockClear()
+  storageMock.saveCamp.mockClear()
 })
 
 describe('SaveBackupTradeDevice', () => {
@@ -72,7 +67,7 @@ describe('SaveBackupTradeDevice', () => {
       { box: 0, slot: 1 },
       { value: 9, nickname: 'Ribbondol', species: 1 }
     )
-    expect(saveLibraryMock.updateSave).toHaveBeenCalledWith('ruby', bytes(42))
+    expect(storageMock.putSave).toHaveBeenCalledWith('ruby', bytes(42))
   })
 
   it('rejects a slot that changed since it was selected', async () => {
@@ -93,31 +88,39 @@ describe('SaveBackupTradeDevice', () => {
 
 describe('CampSiteTradeDevice', () => {
   const { adapter } = fakeAdapter([])
+  const slot = { site: 0, index: 1 }
 
-  it('writes the received Pokémon over the expected file', async () => {
-    await new CampSiteTradeDevice().write(
-      adapter,
-      { id: 'a' },
-      bytes(1),
-      bytes(9)
-    )
-    expect(campSlots[1]).toMatchObject({
+  it('writes the received Pokémon over the expected position', async () => {
+    await new CampSiteTradeDevice().write(adapter, slot, bytes(1), bytes(9))
+    expect(camp.sites[0][1]).toMatchObject({
       id: 'a',
       bytes: bytes(9),
       fileName: 'ribbondol.pk3',
     })
+    expect(storageMock.saveCamp).toHaveBeenCalledWith(3, camp)
   })
 
-  it('rejects a file that changed since it was selected', async () => {
+  it('rejects a position that changed since it was selected', async () => {
     await expect(
-      new CampSiteTradeDevice().write(adapter, { id: 'a' }, bytes(3), bytes(9))
+      new CampSiteTradeDevice().write(adapter, slot, bytes(3), bytes(9))
     ).rejects.toThrow('changed')
-    expect(campSlots[1]?.bytes).toEqual(bytes(1))
+    expect(storageMock.saveCamp).not.toHaveBeenCalled()
   })
 
-  it('uses the first other occupied file as the companion', async () => {
+  it('rejects an empty position', async () => {
+    await expect(
+      new CampSiteTradeDevice().write(
+        adapter,
+        { site: 0, index: 0 },
+        bytes(1),
+        bytes(9)
+      )
+    ).rejects.toThrow('empty')
+  })
+
+  it('uses the first other occupied position as the companion', async () => {
     expect(
-      await new CampSiteTradeDevice().companion(adapter, { id: 'a' }, bytes(1))
+      await new CampSiteTradeDevice().companion(adapter, slot, bytes(1))
     ).toEqual(bytes(2))
   })
 })

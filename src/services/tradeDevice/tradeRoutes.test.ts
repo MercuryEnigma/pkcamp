@@ -19,7 +19,7 @@ const save = (gameId: 'ruby' | 'sapphire', pk3?: number): TradeSide => ({
 })
 const camp = (pk3?: number): TradeSide => ({
   device: 'camp-site',
-  slot: pk3 === undefined ? undefined : { id: 'camp-1', pk3: bytes(pk3) },
+  slot: pk3 === undefined ? undefined : { site: 0, index: 2, pk3: bytes(pk3) },
 })
 const gba: TradeSide = { device: 'gb-link' }
 const sw: TradeSide = { device: 'esp32' }
@@ -39,12 +39,16 @@ function makeDevices({
   const saveBackup = local()
   const campSite = local()
   const esp32 = {
+    runLink: vi.fn(async () => {}),
     trade: vi.fn(async () => ({
       trades: [{ slot: 0, sent: bytes(1), received: bytes(9) }],
       party: [],
     })),
   }
+  const lease = { adapter: {}, release: vi.fn(async () => {}) }
   const gbLink = {
+    firmwareVersion: vi.fn(async (): Promise<string | null> => '2.2.7'),
+    linkAdapter: vi.fn(async () => lease),
     trade: vi.fn(async () => ({
       trades:
         gbLinkReceived === undefined
@@ -58,6 +62,7 @@ function makeDevices({
     campSite,
     esp32,
     gbLink,
+    lease,
     devices: { saveBackup, campSite, esp32, gbLink } as unknown as TradeDevices,
   }
 }
@@ -78,9 +83,9 @@ describe('tradeAvailability', () => {
     expect(tradeAvailability(sw, sw)).toBe('blocked')
   })
 
-  it('marks GBA↔Switch as coming soon', () => {
-    expect(tradeAvailability(gba, sw)).toBe('coming-soon')
-    expect(tradeAvailability(sw, gba)).toBe('coming-soon')
+  it('allows GBA↔Switch', () => {
+    expect(tradeAvailability(gba, sw)).toBe('ok')
+    expect(tradeAvailability(sw, gba)).toBe('ok')
   })
 
   it('allows local↔local and local↔hardware', () => {
@@ -112,7 +117,7 @@ describe('runTrade', () => {
     )
     expect(campSite.write).toHaveBeenCalledWith(
       adapter,
-      { id: 'camp-1' },
+      { site: 0, index: 2 },
       bytes(2),
       bytes(1)
     )
@@ -150,7 +155,7 @@ describe('runTrade', () => {
     )
     expect(campSite.write).toHaveBeenCalledWith(
       adapter,
-      { id: 'camp-1' },
+      { site: 0, index: 2 },
       bytes(1),
       bytes(9)
     )
@@ -209,16 +214,84 @@ describe('runTrade', () => {
     expect(saveBackup.write).not.toHaveBeenCalled()
   })
 
-  it('rejects GBA↔Switch as coming soon', async () => {
-    const { devices } = makeDevices()
-    const error = await runTrade(
-      gba,
-      sw,
-      new AbortController().signal,
-      options(devices)
-    ).catch((cause: unknown) => cause)
-    expect(error).toBeInstanceOf(TradeDeviceError)
-    expect((error as TradeDeviceError).code).toBe('not-implemented')
+  describe('GBA ↔ Switch', () => {
+    const wirelessGba: TradeSide = { device: 'gb-link', gbaGame: 'wireless' }
+    const cableGba: TradeSide = { device: 'gb-link', gbaGame: 'cable' }
+
+    it('requires the GBA game to be chosen', async () => {
+      const { devices, gbLink } = makeDevices()
+      await expect(
+        runTrade(gba, sw, new AbortController().signal, options(devices))
+      ).rejects.toThrow('Choose the game on the GBA.')
+      expect(gbLink.linkAdapter).not.toHaveBeenCalled()
+    })
+
+    it.each(['2.2.6', '2.1.0', null])(
+      'rejects firmware %s without taking the adapter',
+      async (version) => {
+        const { devices, gbLink, esp32 } = makeDevices()
+        gbLink.firmwareVersion.mockResolvedValue(version)
+        const error = await runTrade(
+          wirelessGba,
+          sw,
+          new AbortController().signal,
+          options(devices)
+        ).catch((cause: unknown) => cause)
+        expect(error).toBeInstanceOf(TradeDeviceError)
+        expect((error as TradeDeviceError).code).toBe('unsupported')
+        expect(gbLink.linkAdapter).not.toHaveBeenCalled()
+        expect(esp32.runLink).not.toHaveBeenCalled()
+      }
+    )
+
+    it('relays with the chosen kind, writes nothing and releases', async () => {
+      const { devices, esp32, gbLink, lease, saveBackup, campSite } =
+        makeDevices()
+      const controller = new AbortController()
+      const opts = options(devices)
+      const writes = await runTrade(sw, cableGba, controller.signal, opts)
+      expect(writes).toEqual([])
+      expect(esp32.runLink).toHaveBeenCalledWith('cable', lease.adapter, {
+        signal: controller.signal,
+        onEvent: undefined,
+      })
+      expect(gbLink.linkAdapter).toHaveBeenCalledWith(controller.signal)
+      expect(lease.release).toHaveBeenCalledOnce()
+      expect(saveBackup.write).not.toHaveBeenCalled()
+      expect(campSite.write).not.toHaveBeenCalled()
+      expect(gbLink.trade).not.toHaveBeenCalled()
+      expect(esp32.trade).not.toHaveBeenCalled()
+      expect(opts.loadPlaceholder).not.toHaveBeenCalled()
+    })
+
+    it('releases the adapter when the link fails', async () => {
+      const { devices, esp32, lease } = makeDevices()
+      esp32.runLink.mockRejectedValueOnce(new Error('link failed'))
+      await expect(
+        runTrade(
+          wirelessGba,
+          sw,
+          new AbortController().signal,
+          options(devices)
+        )
+      ).rejects.toThrow('link failed')
+      expect(esp32.runLink).toHaveBeenCalledWith(
+        'wireless',
+        lease.adapter,
+        expect.anything()
+      )
+      expect(lease.release).toHaveBeenCalledOnce()
+    })
+
+    it('releases the adapter when the link ends on abort', async () => {
+      const { devices, esp32, lease } = makeDevices()
+      const controller = new AbortController()
+      esp32.runLink.mockImplementationOnce(async () => {
+        controller.abort()
+      })
+      await runTrade(wirelessGba, sw, controller.signal, options(devices))
+      expect(lease.release).toHaveBeenCalledOnce()
+    })
   })
 
   it('requires a selected Pokémon on local sides', async () => {
@@ -245,7 +318,7 @@ describe('revertTrade', () => {
 
     expect(campSite.write).toHaveBeenCalledWith(
       adapter,
-      { id: 'camp-1' },
+      { site: 0, index: 2 },
       bytes(1),
       bytes(2)
     )

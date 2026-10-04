@@ -6,7 +6,11 @@ import {
   POKEMONDB_SHINY_FEMALE_IDS,
   POKEMONDB_SPECIES_SLUGS,
 } from './generatedPokemonDb'
-import type { SpriteManifest, SpriteManifestEntry, SpriteSourceDefinition } from './manifest'
+import type {
+  SpriteManifest,
+  SpriteManifestEntry,
+  SpriteSourceDefinition,
+} from './manifest'
 import { auditSpriteManifest } from './coverage'
 import { POKEAPI_SOURCE, SPRITE_COVERAGE_TARGETS } from './sources'
 

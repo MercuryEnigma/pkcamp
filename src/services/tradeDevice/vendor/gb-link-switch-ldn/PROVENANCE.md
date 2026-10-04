@@ -1,10 +1,24 @@
 # GB-Link-Switch-LDN source
 
-These files are the browser transport and PC-to-Switch trade implementation
-from [GB-Link-Switch-LDN](https://github.com/GB-Link/GB-Link-Switch-LDN),
-revision `dcdbb1b30bfc930ff6cf35b469b7cd83b74b443c`.
+These files are the browser transport, PC-to-Switch trade implementation, and
+GBA-to-Switch relay (Bridge and CableSession) from
+[GB-Link-Switch-LDN](https://github.com/GB-Link/GB-Link-Switch-LDN),
+revision `c1a3a97f3ab5c60e87307089d6b7db10e3fd5993` (upstream `web/js/`).
 
-Only the dependency closure required by `EspDevice` and `TradeSession` is
-included. The source is licensed under AGPL-3.0; see `LICENSE` in this folder.
+Only the import closure of `EspDevice`, `TradeSession`, `Bridge` and
+`CableSession` is included: `esp.js`, `wire.js`, `keys.js`, `bridge.js`,
+`national.js`, `trade/{adapter,bytes,engine,link,pk3,pk3-data,pool,rfu,session}.js`,
+`cable/{session,cable,translator}.js`. The `.d.ts` files are hand-written
+local declarations.
 
-Local modification: the emulated trainer name in `trade/rfu.js` is `PkCamp`.
+Licensing: the source is AGPL-3.0; see `LICENSE` in this folder. Exception:
+`cable/translator.js` is MPL-2.0 (ported from mgba_LDN); see
+`cable/LICENSE.MPL-2.0`. Its header is kept intact.
+
+## Local modifications
+
+1. `trade/rfu.js`: the emulated trainer name is `PkCamp` instead of `EMU`
+   (three `gameName('PkCamp', ...)` calls).
+2. `cable/cable.js`: the `import { MODE_CABLE_LINK } from '../gblink.js'` line
+   is replaced by a local `const MODE_CABLE_LINK = 0x01;` (same value as
+   upstream) so upstream `gblink.js` is not vendored.

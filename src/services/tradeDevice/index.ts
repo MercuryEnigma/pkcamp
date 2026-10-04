@@ -1,6 +1,8 @@
 export {
   Esp32TradeDevice,
   type Esp32KeyStatus,
+  type Esp32LinkKind,
+  type Esp32LinkSession,
   type Esp32TradeDeviceDependencies,
   type Esp32TradeSession,
   type Esp32Transport,
@@ -16,8 +18,15 @@ export {
 } from './service.ts'
 export {
   GbLinkTradeDevice,
+  type GbLinkRelayAdapter,
+  type GbLinkRelayLease,
   type GbLinkTradeDeviceDependencies,
 } from './gbLinkTradeDevice.ts'
+export {
+  MIN_GBA_SWITCH_FIRMWARE,
+  compareFirmwareVersions,
+} from './gbLinkProtocol.ts'
+export { gbLinkFirmwareRelease } from './gbLinkFirmwareRelease.ts'
 export {
   CampSiteTradeDevice,
   SaveBackupTradeDevice,

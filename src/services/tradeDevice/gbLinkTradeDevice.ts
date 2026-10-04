@@ -8,7 +8,11 @@ import { toWire as pk3ToWire } from './vendor/gb-link-switch-ldn/trade/pk3.js'
 import {
   GB_LINK_COMMAND,
   GB_LINK_MODE,
+  GB_LINK_MAX_PAYLOAD,
+  GB_LINK_SERIAL_CHANNEL,
   GB_LINK_STATUS,
+  GbLinkSerialFrameDecoder,
+  encodeGbLinkSerialFrame,
 } from './gbLinkProtocol.ts'
 import {
   BrowserGbLinkTransport,
@@ -31,6 +35,30 @@ export interface GbLinkTradeDeviceDependencies {
   readyTimeoutMs?: number
   sessionTimeoutMs?: number
 }
+
+/** Relay surface used to bridge an ESP32 to the GB-Link (GBA-Switch trading). */
+export interface GbLinkRelayAdapter {
+  /** Every status and data frame the GB-Link sends, as a GB-framed byte stream. */
+  onBytes: ((bytes: Uint8Array) => void) | null
+  /** Every status and data frame the GB-Link sends, unframed. */
+  onFrame: ((channel: number, payload: Uint8Array) => void) | null
+  /** Takes a GB-framed byte stream and forwards each frame, in order. */
+  writeStream(bytes: Uint8Array): Promise<void>
+  setMode(mode: number): Promise<void>
+  /** `payload[0]` is the command byte. */
+  sendCommand(payload: ArrayLike<number>): Promise<void>
+  sendData(payload: Uint8Array): Promise<void>
+  /** Sends Cancel; never rejects. */
+  leaveMode(): Promise<void>
+}
+
+export interface GbLinkRelayLease {
+  adapter: GbLinkRelayAdapter
+  /** Sends Cancel, detaches listeners and frees the device. Safe to repeat. */
+  release(): Promise<void>
+}
+
+const FIRMWARE_REPLY_TIMEOUT_MS = 800
 
 const defaultDependencies: GbLinkTradeDeviceDependencies = {
   isSupported: () => BrowserGbLinkTransport.available(),
@@ -115,6 +143,7 @@ export class GbLinkTradeDevice implements TradeDevice {
   private transport: GbLinkTransport | null = null
   private currentState: TradeDeviceState = 'disconnected'
   private activeAbort: AbortController | null = null
+  private cachedFirmware: string | null = null
 
   constructor(
     dependencies: GbLinkTradeDeviceDependencies = defaultDependencies
@@ -156,7 +185,51 @@ export class GbLinkTradeDevice implements TradeDevice {
     }
   }
 
+  /** Firmware version read earlier on this connection, if any. */
+  get knownFirmwareVersion(): string | null {
+    return this.cachedFirmware
+  }
+
+  /** Asks the adapter for its firmware version; null if it does not answer. */
+  async firmwareVersion(): Promise<string | null> {
+    if (this.cachedFirmware) return this.cachedFirmware
+    const transport = this.requireTransport()
+    const version = await new Promise<string | null>((resolve) => {
+      const finish = (value: string | null): void => {
+        clearTimeout(timer)
+        removeListener()
+        resolve(value)
+      }
+      const removeListener = transport.onData((payload) => {
+        if (
+          payload[0] === GB_LINK_COMMAND.getFirmwareInfo &&
+          payload.length >= 4
+        ) {
+          finish(`${payload[1]}.${payload[2]}.${payload[3]}`)
+        }
+      })
+      const timer = setTimeout(() => finish(null), FIRMWARE_REPLY_TIMEOUT_MS)
+      transport
+        .sendCommand(GB_LINK_COMMAND.getFirmwareInfo)
+        .catch(() => finish(null))
+    })
+    if (version && this.transport === transport) this.cachedFirmware = version
+    return version
+  }
+
+  /** Resets the adapter into its USB bootloader; the device then disappears. */
+  async rebootToBootloader(): Promise<void> {
+    const transport = this.requireTransport()
+    await transport.sendCommand(GB_LINK_COMMAND.rebootBootloader)
+    this.cancelTrade()
+    this.transport = null
+    this.cachedFirmware = null
+    this.currentState = 'disconnected'
+    await transport.close()
+  }
+
   async disconnect(): Promise<void> {
+    this.cachedFirmware = null
     const transport = this.transport
     if (!transport) {
       this.currentState = 'disconnected'
@@ -283,6 +356,90 @@ export class GbLinkTradeDevice implements TradeDevice {
     signal: AbortSignal,
     operation: (transport: GbLinkTransport, signal: AbortSignal) => Promise<T>
   ): Promise<T> {
+    const lease = this.acquire(signal)
+    try {
+      return await operation(lease.transport, lease.signal)
+    } finally {
+      lease.free()
+    }
+  }
+
+  /**
+   * Claims the device for a GBA-Switch relay. Aborting `signal` or calling
+   * `release()` sends Cancel and frees the device for other operations.
+   */
+  linkAdapter(signal: AbortSignal): Promise<GbLinkRelayLease> {
+    return Promise.resolve().then(() => {
+      const lease = this.acquire(signal)
+      const { transport } = lease
+      const adapter: GbLinkRelayAdapter = {
+        onBytes: null,
+        onFrame: null,
+        writeStream: (bytes) => {
+          const sends = decoder
+            .push(bytes)
+            .map(
+              (frame) => () =>
+                frame.channel === GB_LINK_SERIAL_CHANNEL.command
+                  ? transport.sendCommand(
+                      frame.payload[0],
+                      frame.payload.slice(1)
+                    )
+                  : transport.sendData(frame.payload)
+            )
+          for (const send of sends) queue = queue.then(send)
+          const done = queue
+          queue = queue.catch(() => {})
+          return done
+        },
+        setMode: (mode) =>
+          transport.sendCommand(
+            GB_LINK_COMMAND.setMode,
+            new Uint8Array([mode])
+          ),
+        sendCommand: (payload) =>
+          transport.sendCommand(
+            payload[0],
+            Uint8Array.from(Array.from(payload).slice(1))
+          ),
+        sendData: (payload) => transport.sendData(payload),
+        leaveMode: () =>
+          transport.sendCommand(GB_LINK_COMMAND.cancel).catch(() => {}),
+      }
+      const decoder = new GbLinkSerialFrameDecoder()
+      let queue: Promise<void> = Promise.resolve()
+      const removeListener = transport.onFrame((channel, payload) => {
+        adapter.onFrame?.(channel, payload)
+        if (adapter.onBytes && payload.length <= GB_LINK_MAX_PAYLOAD) {
+          adapter.onBytes(encodeGbLinkSerialFrame(channel, payload))
+        }
+      })
+
+      let released: Promise<void> | null = null
+      const release = (): Promise<void> => {
+        released ??= (async () => {
+          lease.signal.removeEventListener('abort', onAbort)
+          removeListener()
+          adapter.onBytes = null
+          adapter.onFrame = null
+          if (transport.attached) await adapter.leaveMode()
+          lease.free()
+        })()
+        return released
+      }
+      const onAbort = (): void => void release()
+      if (lease.signal.aborted) onAbort()
+      else lease.signal.addEventListener('abort', onAbort, { once: true })
+      return { adapter, release }
+    })
+  }
+
+  /** Marks the device busy; the caller must call `free()` when done. */
+  private acquire(signal: AbortSignal): {
+    transport: GbLinkTransport
+    signal: AbortSignal
+    free(): void
+  } {
     const transport = this.requireTransport()
     if (this.activeAbort) {
       throw new TradeDeviceError(this.id, 'busy', 'The GB-Link is busy.')
@@ -293,12 +450,16 @@ export class GbLinkTradeDevice implements TradeDevice {
     const cancel = (): void => controller.abort(signal.reason)
     if (signal.aborted) cancel()
     else signal.addEventListener('abort', cancel, { once: true })
-    try {
-      return await operation(transport, controller.signal)
-    } finally {
-      signal.removeEventListener('abort', cancel)
-      this.activeAbort = null
-      this.currentState = transport.attached ? 'connected' : 'disconnected'
+    return {
+      transport,
+      signal: controller.signal,
+      free: () => {
+        signal.removeEventListener('abort', cancel)
+        if (this.activeAbort === controller) {
+          this.activeAbort = null
+          this.currentState = transport.attached ? 'connected' : 'disconnected'
+        }
+      },
     }
   }
 

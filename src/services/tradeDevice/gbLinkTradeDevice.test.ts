@@ -2,7 +2,10 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   GB_LINK_COMMAND,
   GB_LINK_MODE,
+  GB_LINK_SERIAL_CHANNEL,
   GB_LINK_STATUS,
+  GbLinkSerialFrameDecoder,
+  encodeGbLinkSerialFrame,
 } from './gbLinkProtocol.ts'
 import {
   GbLinkTradeDevice,
@@ -29,6 +32,9 @@ class FakeGbLinkTransport implements GbLinkTransport {
 
   async sendCommand(command: number, args = new Uint8Array()): Promise<void> {
     this.commands.push({ command, args: args.slice() })
+    if (command === GB_LINK_COMMAND.getFirmwareInfo && this.firmware) {
+      this.emitFrame(1, new Uint8Array([command, ...this.firmware]))
+    }
     if (command === GB_LINK_COMMAND.setMode) {
       this.emitStatus(GB_LINK_STATUS.deviceReady)
     }
@@ -47,8 +53,29 @@ class FakeGbLinkTransport implements GbLinkTransport {
     return () => this.statusListeners.delete(listener)
   }
 
-  onData(): () => void {
-    return () => {}
+  private readonly dataListeners = new Set<(payload: Uint8Array) => void>()
+  private readonly frameListeners = new Set<
+    (channel: number, payload: Uint8Array) => void
+  >()
+  firmware: number[] | null = null
+
+  onData(listener: (payload: Uint8Array) => void): () => void {
+    this.dataListeners.add(listener)
+    return () => this.dataListeners.delete(listener)
+  }
+
+  onFrame(
+    listener: (channel: number, payload: Uint8Array) => void
+  ): () => void {
+    this.frameListeners.add(listener)
+    return () => this.frameListeners.delete(listener)
+  }
+
+  emitFrame(channel: number, payload: Uint8Array): void {
+    for (const listener of this.frameListeners) listener(channel, payload)
+    if (channel === 1) {
+      for (const listener of this.dataListeners) listener(payload)
+    }
   }
 
   emitStatus(status: number): void {
@@ -82,14 +109,7 @@ function makeDevice(transport = new FakeGbLinkTransport()): {
 
 function request(onEvent?: (event: TradeDeviceEvent) => void) {
   return {
-    party: [
-      new Uint8Array([1]),
-      new Uint8Array([2]),
-      null,
-      null,
-      null,
-      null,
-    ],
+    party: [new Uint8Array([1]), new Uint8Array([2]), null, null, null, null],
     selectedSlot: 1,
     onEvent,
   }
@@ -165,5 +185,129 @@ describe('GbLinkTradeDevice', () => {
     expect(transport.data.every((chunk) => chunk[0] === 5)).toBe(true)
     expect(result.trades).toEqual([])
     expect(result.party[2]).toEqual(new Uint8Array([5]))
+  })
+
+  it('reads and caches the firmware version, and returns null on timeout', async () => {
+    const { device, transport } = makeDevice()
+    await device.connect()
+    expect(device.knownFirmwareVersion).toBeNull()
+
+    transport.firmware = [2, 2, 7, 0, 0]
+    expect(await device.firmwareVersion()).toBe('2.2.7')
+    expect(device.knownFirmwareVersion).toBe('2.2.7')
+    await device.firmwareVersion()
+    expect(
+      transport.commands.filter(
+        (c) => c.command === GB_LINK_COMMAND.getFirmwareInfo
+      )
+    ).toHaveLength(1)
+
+    await device.disconnect()
+    expect(device.knownFirmwareVersion).toBeNull()
+    await device.connect()
+    transport.firmware = null
+    expect(await device.firmwareVersion()).toBeNull()
+  })
+
+  it('reboots to the bootloader and disconnects', async () => {
+    const { device, transport } = makeDevice()
+    await device.connect()
+    await device.rebootToBootloader()
+    expect(transport.commands.map((c) => c.command)).toEqual([
+      GB_LINK_COMMAND.rebootBootloader,
+    ])
+    expect(device.state).toBe('disconnected')
+  })
+
+  describe('linkAdapter', () => {
+    it('splits a framed stream into command and data sends in order', async () => {
+      const { device, transport } = makeDevice()
+      await device.connect()
+      const { adapter, release } = await device.linkAdapter(
+        new AbortController().signal
+      )
+      const stream = new Uint8Array([
+        ...encodeGbLinkSerialFrame(
+          GB_LINK_SERIAL_CHANNEL.command,
+          new Uint8Array([0x00, 0x07])
+        ),
+        ...encodeGbLinkSerialFrame(
+          GB_LINK_SERIAL_CHANNEL.data,
+          new Uint8Array([9, 8, 7])
+        ),
+        ...encodeGbLinkSerialFrame(
+          GB_LINK_SERIAL_CHANNEL.command,
+          new Uint8Array([0x4c])
+        ),
+      ])
+      await adapter.writeStream(stream.slice(0, 4))
+      await adapter.writeStream(stream.slice(4))
+      expect(transport.commands).toEqual([
+        { command: 0, args: new Uint8Array([7]) },
+        { command: 0x4c, args: new Uint8Array() },
+      ])
+      expect(transport.data).toEqual([new Uint8Array([9, 8, 7])])
+      await release()
+    })
+
+    it('re-frames status and data frames for onBytes and onFrame', async () => {
+      const { device, transport } = makeDevice()
+      await device.connect()
+      const { adapter, release } = await device.linkAdapter(
+        new AbortController().signal
+      )
+      const bytes: Uint8Array[] = []
+      const frames: [number, number[]][] = []
+      adapter.onBytes = (chunk) => bytes.push(chunk)
+      adapter.onFrame = (channel, payload) =>
+        frames.push([channel, [...payload]])
+
+      transport.emitFrame(
+        GB_LINK_SERIAL_CHANNEL.status,
+        new Uint8Array([0x05, 0xff])
+      )
+      transport.emitFrame(
+        GB_LINK_SERIAL_CHANNEL.data,
+        new Uint8Array(25).fill(0x1d)
+      )
+
+      const decoded = new GbLinkSerialFrameDecoder().push(
+        new Uint8Array(bytes.flatMap((chunk) => [...chunk]))
+      )
+      expect(decoded.map((f) => [f.channel, f.payload.length])).toEqual([
+        [GB_LINK_SERIAL_CHANNEL.status, 2],
+        [GB_LINK_SERIAL_CHANNEL.data, 25],
+      ])
+      expect(frames[0]).toEqual([GB_LINK_SERIAL_CHANNEL.status, [0x05, 0xff]])
+      await release()
+    })
+
+    it('refuses while busy, and release sends Cancel and frees the device', async () => {
+      const { device, transport } = makeDevice()
+      await device.connect()
+      const lease = await device.linkAdapter(new AbortController().signal)
+      expect(device.state).toBe('trading')
+      await expect(
+        device.linkAdapter(new AbortController().signal)
+      ).rejects.toMatchObject({
+        code: 'busy',
+      })
+
+      await lease.release()
+      expect(transport.commands.at(-1)?.command).toBe(GB_LINK_COMMAND.cancel)
+      expect(device.state).toBe('connected')
+      const again = await device.linkAdapter(new AbortController().signal)
+      await again.release()
+    })
+
+    it('releases when the signal aborts', async () => {
+      const { device, transport } = makeDevice()
+      await device.connect()
+      const controller = new AbortController()
+      await device.linkAdapter(controller.signal)
+      controller.abort()
+      await vi.waitFor(() => expect(device.state).toBe('connected'))
+      expect(transport.commands.at(-1)?.command).toBe(GB_LINK_COMMAND.cancel)
+    })
   })
 })

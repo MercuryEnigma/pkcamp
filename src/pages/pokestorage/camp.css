@@ -547,7 +547,8 @@
 .camp-trade-columns {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: start;
+  /* Both sides match the taller one, e.g. a GBA side with its game selector. */
+  align-items: stretch;
   gap: 0.8rem;
   width: 100%;
 }
@@ -601,6 +602,19 @@
   color: var(--camp-muted);
   font-size: 0.78rem;
   line-height: 1.4;
+}
+
+/* Empty trade slot: instead of a dead-end note, offer the same "add a save"
+   actions as the Camp Office lodge card. */
+.camp-trade-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.camp-trade-empty .camp-trade-note {
+  margin: 0;
 }
 
 .camp-trade-hardware {
@@ -1415,90 +1429,195 @@
   font-size: 0.84rem;
 }
 
-.camp-backup-list {
-  display: flex;
-  flex-direction: column;
+/* A small all-caps section heading inside the Backup & Restore card ("GBA
+   Lodge") — a subheading, so it reads quieter than the section's <h2>. */
+.camp-lodge-label {
+  margin: 0 0 0.6rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--camp-muted);
 }
 
-.camp-backup-row {
+/* Each Cabin (and the Campsites view) is a record card below the picker: the
+   name and status lead, and the controls sit below as small, symmetric groups
+   so the saves dominate the card rather than a matrix of buttons. */
+.camp-cabin-card {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  margin-top: 0.85rem;
+  padding: 0.85rem;
+  border: 1px solid var(--camp-border-soft);
+  border-radius: 10px;
+  background: var(--camp-paper);
+}
+
+/* The Campsites card nests a settings field (the site-count input); give it
+   room to breathe under the status line. */
+.camp-cabin-card .camp-settings-field {
+  margin-top: 0.85rem;
+}
+
+.camp-cabin-head {
+  display: flex;
+  align-items: baseline;
   justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.camp-cabin-name {
+  font-size: 0.95rem;
+  color: var(--camp-leaf);
+}
+
+.camp-cabin-date {
+  font-size: 0.7rem;
+  color: var(--camp-muted);
+  white-space: nowrap;
+}
+
+.camp-cabin-status {
+  margin: 0.1rem 0 0;
+  font-size: 0.74rem;
+  color: var(--camp-muted);
+}
+
+/* Into camp / Out of camp — one column each on wide cards, stacked on narrow
+   ones. The labels make the direction of each transfer explicit. */
+.camp-transfer-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
   gap: 0.75rem;
-  padding: 0.7rem 0;
+  margin-top: 0.85rem;
+}
+
+.camp-transfer-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.camp-transfer-group-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--camp-muted);
+}
+
+/* Ordinary action: cream, outlined — the middle of the three control tiers
+   (tan outlined · forest-green primary · plain-text destructive). */
+.camp-transfer-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--camp-panel-border);
+  border-radius: 6px;
+  background: var(--camp-panel);
+  color: var(--camp-text);
+  padding: 0.4rem 0.7rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    border-color 0.12s ease,
+    background 0.12s ease;
+}
+
+.camp-transfer-btn:hover,
+.camp-transfer-btn:focus-within {
+  border-color: var(--camp-accent);
+  background: var(--camp-accent-soft);
+}
+
+.camp-transfer-btn:active {
+  animation: camp-bubble-pop 0.22s ease;
+}
+
+.camp-transfer-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.camp-cabin-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.85rem;
+  padding-top: 0.6rem;
   border-top: 1px solid var(--camp-border-soft);
 }
 
-.camp-backup-row:first-child {
-  border-top: 0;
-  padding-top: 0;
+/* Destructive / low-stakes text action — the quietest tier: no box, and red
+   only on hover so "Remove backup" never visually competes with a transfer. */
+.camp-text-btn {
+  border: 0;
+  background: none;
+  color: var(--camp-muted);
+  padding: 0.3rem 0.4rem;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.12s ease;
 }
 
-.camp-backup-row:last-child {
-  padding-bottom: 0;
+.camp-text-btn:hover:not(:disabled) {
+  color: var(--camp-text);
+  text-decoration: underline;
 }
 
-.camp-gba-read {
+.camp-text-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.camp-text-btn--danger:hover:not(:disabled) {
+  color: var(--camp-danger);
+}
+
+/* The GB-Link task panel: a focused step appearing beneath its Cabin, set off
+   from the record with a tinted background so the card doesn't just lurch open
+   into more of the same surface. */
+.camp-gba-task {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  max-width: 32rem;
-  padding: 0.75rem;
-  border: 1px solid var(--camp-border-soft);
+  margin-top: 0.85rem;
+  padding: 0.85rem;
+  border: 1px solid var(--camp-panel-border);
   border-radius: 8px;
+  background: var(--camp-accent-soft);
 }
 
-.camp-gba-read p {
+.camp-gba-task-title {
   margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--camp-leaf);
 }
 
-.camp-gba-read .camp-local-actions {
+.camp-gba-task-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--camp-text);
+}
+
+.camp-gba-steps {
+  margin: 0;
+  padding-left: 1.25rem;
+  line-height: 1.5;
+}
+
+.camp-gba-task .camp-local-actions {
   justify-content: flex-start;
-  margin-top: 0;
-}
-
-.camp-backup-meta {
-  display: flex;
-  min-width: 7rem;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.camp-backup-meta strong {
-  font-size: 0.84rem;
-}
-
-.camp-backup-meta small {
-  color: var(--camp-muted);
-  font-size: 0.7rem;
-}
-
-.camp-backup-row-actions {
-  display: grid;
-  /* Fixed columns so every row's buttons share the same size and position. */
-  grid-template-columns: 8.5rem 5.5rem;
-  justify-content: end;
-  gap: 0.35rem;
-}
-
-.camp-backup-row-actions .camp-upload-btn {
-  box-sizing: border-box;
-  width: 100%;
-  justify-content: center;
-  text-align: center;
-  padding: 0.35rem 0.55rem;
-  font-size: 0.74rem;
-}
-
-@media (max-width: 32rem) {
-  .camp-backup-row {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .camp-backup-row-actions {
-    justify-content: start;
-  }
+  align-items: center;
+  margin-top: 0.15rem;
 }
 
 .camp-settings-field {
@@ -1612,4 +1731,96 @@
 .camp-confirm-btn:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+/* Dropbox status badge: pinned to the grass corner of every Camp Zone
+   screen, outside the notice board so it never covers header actions. */
+.camp-zone {
+  position: relative;
+  /* The badge sits beside .camp-root, so it can't inherit its tokens. */
+  --camp-dropbox-blue: #0061fe;
+  --camp-dropbox-paper: #fff8e4;
+  --camp-dropbox-wood: #a66b3d;
+}
+
+.camp-dropbox-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
+  border-radius: 50%;
+  border: 1px solid var(--camp-dropbox-wood);
+  background: var(--camp-dropbox-paper);
+  color: var(--camp-dropbox-wood);
+  box-shadow: 0 2px 4px rgba(73, 53, 34, 0.18);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.camp-dropbox-badge svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.camp-dropbox-badge:focus-visible {
+  outline: 2px solid var(--camp-dropbox-blue);
+  outline-offset: 2px;
+}
+
+/* Status dot: grey signed out, green connected, red unreachable. */
+.camp-dropbox-badge-dot {
+  position: absolute;
+  right: -0.1rem;
+  bottom: -0.1rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  border: 2px solid var(--camp-dropbox-paper);
+  background: #9a8f80;
+}
+
+.camp-dropbox-badge--connected,
+.camp-dropbox-badge--connecting,
+.camp-dropbox-badge--offline {
+  color: var(--camp-dropbox-blue);
+}
+
+.camp-dropbox-badge--connected .camp-dropbox-badge-dot {
+  background: #3f9c44;
+}
+
+.camp-dropbox-badge--offline .camp-dropbox-badge-dot {
+  background: #b23a1f;
+}
+
+.camp-dropbox-badge--connecting .camp-dropbox-badge-dot {
+  background: var(--camp-dropbox-blue);
+  animation: camp-dropbox-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes camp-dropbox-pulse {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .camp-dropbox-badge--connecting .camp-dropbox-badge-dot {
+    animation: none;
+  }
+}
+
+/* Too narrow for the badge to sit beside the board: give it its own row. */
+@media (max-width: 48rem) {
+  .camp-zone > .camp-root {
+    padding-top: 3.75rem;
+  }
 }

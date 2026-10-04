@@ -10,11 +10,5 @@ export type {
   Gen7GameId,
   Gen8GameId,
   Gen9GameId,
-  GameSlotContents,
-  SaveLibrary,
-} from "./types";
-export { ROSTER, ALL_GAME_IDS, generationOf } from "./roster";
-export { InMemorySaveLibrary, saveLibrary } from "./library";
-export type { ByteKind, SaveLibraryBackend } from "./backend";
-export { InMemorySaveLibraryBackend } from "./backend";
-export { IndexedDbSaveLibraryBackend } from "./indexedDbBackend";
+} from './types'
+export { ROSTER, ALL_GAME_IDS, generationOf } from './roster'

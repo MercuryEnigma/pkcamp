@@ -2,8 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import ribbondolUrl from '../../assets/saves/ribbondol.pk3?url'
 import type { Gen3GameId } from '../../services/saveLibrary'
 import {
+  compareFirmwareVersions,
   esp32TradeDevice,
+  gbLinkFirmwareRelease,
   gbLinkTradeDevice,
+  MIN_GBA_SWITCH_FIRMWARE,
   revertTrade,
   runTrade,
   tradeAvailability,
@@ -12,8 +15,9 @@ import {
   type TradeSide,
   type TradeWrite,
 } from '../../services/tradeDevice'
-import { usePkHex } from '../context/PkHexProvider'
+import { usePkHex } from '../context/PkHexContext'
 import { GAME_LABEL } from './gameDisplay'
+import { useStorageOffline } from './useStorage'
 import { CampSelectionPanel, SaveSelectionPanel } from './TradeSelectionPanels'
 
 const MAX_KEYS_SIZE = 1024 * 1024
@@ -42,6 +46,24 @@ type LocalSlot = NonNullable<
 >
 
 type SideName = 'left' | 'right'
+
+type GbaGame = 'wireless' | 'cable'
+
+function gbaSwitchPair(
+  left: TradeSide | null,
+  right: TradeSide | null
+): boolean {
+  return (
+    (left?.device === 'gb-link' && right?.device === 'esp32') ||
+    (left?.device === 'esp32' && right?.device === 'gb-link')
+  )
+}
+
+function firmwareTooOld(version: string | null): boolean {
+  return (
+    !version || compareFirmwareVersions(version, MIN_GBA_SWITCH_FIRMWARE) < 0
+  )
+}
 
 function describeError(cause: unknown): string {
   if (cause instanceof DOMException && cause.name === 'AbortError') {
@@ -87,13 +109,28 @@ function clearSelection(side: TradeSide | null): TradeSide | null {
   return side
 }
 
-function isReady(side: TradeSide | null, switchKeysReady: boolean): boolean {
+function isStored(side: TradeSide | null): boolean {
+  return side?.device === 'save-backup' || side?.device === 'camp-site'
+}
+
+function isReady(
+  side: TradeSide | null,
+  switchKeysReady: boolean,
+  viaSwitch: boolean
+): boolean {
   if (!side) return false
   if (side.device === 'save-backup' || side.device === 'camp-site') {
     return !!side.slot
   }
   if (side.device === 'esp32') {
     return esp32TradeDevice.state === 'connected' && switchKeysReady
+  }
+  if (viaSwitch) {
+    return (
+      !!side.gbaGame &&
+      gbLinkTradeDevice.state === 'connected' &&
+      !firmwareTooOld(gbLinkTradeDevice.knownFirmwareVersion)
+    )
   }
   return gbLinkTradeDevice.state === 'connected'
 }
@@ -106,8 +143,11 @@ function DevicePanel({
   onKeysReady,
   onChange,
   onMessage,
+  viaSwitch,
 }: {
   kind: 'gb-link' | 'esp32'
+  /** The GBA is paired with the Switch, which needs newer GB-Link firmware. */
+  viaSwitch: boolean
   disabled: boolean
   /** Whether the ESP32 holds complete Switch keys; null until checked. */
   keysReady: boolean | null
@@ -120,6 +160,24 @@ function DevicePanel({
   const setKeysReady = onKeysReady
   const [working, setWorking] = useState(false)
   const connected = device.state !== 'disconnected'
+  // Whether the GB-Link firmware version has been read since connecting.
+  const [firmwareChecked, setFirmwareChecked] = useState(false)
+  const [release, setRelease] = useState<{
+    version: string
+    url: string
+  } | null>(null)
+  const outdated =
+    isGba &&
+    viaSwitch &&
+    connected &&
+    firmwareChecked &&
+    firmwareTooOld(gbLinkTradeDevice.knownFirmwareVersion)
+
+  useEffect(() => {
+    if (outdated && !release) {
+      void gbLinkFirmwareRelease().then(setRelease)
+    }
+  }, [outdated, release])
 
   const run = async (action: () => Promise<void>) => {
     setWorking(true)
@@ -136,7 +194,10 @@ function DevicePanel({
   const connect = () =>
     run(async () => {
       await device.connect()
-      if (!isGba) {
+      if (isGba) {
+        await gbLinkTradeDevice.firmwareVersion().catch(() => null)
+        setFirmwareChecked(true)
+      } else {
         setKeysReady(Boolean((await esp32TradeDevice.keyStatus())?.complete))
       }
     })
@@ -145,6 +206,13 @@ function DevicePanel({
     run(async () => {
       await device.disconnect()
       setKeysReady(null)
+      setFirmwareChecked(false)
+    })
+
+  const enterUpdateMode = () =>
+    run(async () => {
+      await gbLinkTradeDevice.rebootToBootloader()
+      setFirmwareChecked(false)
     })
 
   const uploadProdKeys = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,6 +267,35 @@ function DevicePanel({
           ? 'Connect the GB-Link to this computer and the link cable to the GBA.'
           : 'Connect the ESP32 by USB.'}
       </p>
+      {outdated && (
+        <div className="camp-trade-setup">
+          <strong>
+            GB-Link firmware{' '}
+            {gbLinkTradeDevice.knownFirmwareVersion ?? 'unknown'} — GBA ↔ Switch
+            needs {release?.version ?? MIN_GBA_SWITCH_FIRMWARE} or newer.
+          </strong>
+          <p>
+            {release && (
+              <>
+                <a href={release.url} target="_blank" rel="noreferrer">
+                  Download the firmware
+                </a>
+                .{' '}
+              </>
+            )}
+            Download the .uf2 file, press Enter update mode, then copy the file
+            to the RPI-RP2 drive that appears. Reconnect afterwards.
+          </p>
+          <button
+            type="button"
+            className="camp-upload-btn"
+            disabled={disabled || working}
+            onClick={() => void enterUpdateMode()}
+          >
+            Enter update mode
+          </button>
+        </div>
+      )}
       {!isGba && connected && keysReady === false && (
         <div className="camp-trade-setup">
           <strong>Switch keys required</strong>
@@ -233,6 +330,7 @@ function SidePanel({
   keysReady,
   onKeysReady,
   onSource,
+  onGbaGame,
   onSelection,
   onDeviceChange,
   onMessage,
@@ -247,6 +345,7 @@ function SidePanel({
   keysReady: boolean | null
   onKeysReady: (ready: boolean | null) => void
   onSource: (side: TradeSide | null) => void
+  onGbaGame: (game: GbaGame | undefined) => void
   onSelection: (slot: LocalSlot) => void
   onDeviceChange: () => void
   onMessage: (message: string) => void
@@ -276,9 +375,7 @@ function SidePanel({
                 value={tradeSideKey(side)}
                 disabled={availability !== 'ok'}
               >
-                {availability === 'coming-soon'
-                  ? `${label} (coming soon)`
-                  : label}
+                {label}
               </option>
             )
           })}
@@ -302,8 +399,26 @@ function SidePanel({
       {value?.device === 'camp-site' && (
         <CampSelectionPanel reload={reload} onSelect={onSelection} />
       )}
+      {value?.device === 'gb-link' && gbaSwitchPair(value, other) && (
+        <label className="camp-trade-source-label">
+          <span>Game on the GBA</span>
+          <select
+            className="camp-select"
+            value={value.gbaGame ?? ''}
+            disabled={disabled}
+            onChange={(event) =>
+              onGbaGame((event.target.value as GbaGame) || undefined)
+            }
+          >
+            <option value="">Choose the game…</option>
+            <option value="wireless">FireRed, LeafGreen or Emerald</option>
+            <option value="cable">Ruby or Sapphire</option>
+          </select>
+        </label>
+      )}
       {(value?.device === 'gb-link' || value?.device === 'esp32') && (
         <DevicePanel
+          viaSwitch={gbaSwitchPair(value, other)}
           key={value.device}
           kind={value.device}
           disabled={disabled}
@@ -344,6 +459,7 @@ export function TradeView({
   const [lastTrade, setLastTrade] = useState<TradeWrite[] | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const { adapter } = usePkHex()
+  const offline = useStorageOffline()
 
   useEffect(
     () => () => {
@@ -364,36 +480,59 @@ export function TradeView({
     setMessage(null)
   }
 
+  const viaSwitch = gbaSwitchPair(left, right)
+  const gbaSide = left?.device === 'gb-link' ? left : right
+  // A trade writes PkCamp storage, so it waits while Dropbox is unreachable.
+  const writesStorage = !viaSwitch && (isStored(left) || isStored(right))
   const ready =
+    !(offline && writesStorage) &&
     left !== null &&
     right !== null &&
-    adapter !== null &&
+    (adapter !== null || viaSwitch) &&
     tradeAvailability(left, right) === 'ok' &&
-    isReady(left, switchKeysReady === true) &&
-    isReady(right, switchKeysReady === true)
+    isReady(left, switchKeysReady === true, viaSwitch) &&
+    isReady(right, switchKeysReady === true, viaSwitch)
 
   const startTrade = async () => {
-    if (!left || !right || !adapter || !ready) return
+    if (!left || !right || !ready) return
+    // GBA ↔ Switch is a live relay and writes nothing, so it needs no save adapter.
+    const relay = viaSwitch
+    const pkAdapter = adapter ?? ({} as NonNullable<typeof adapter>)
     const controller = new AbortController()
     abortRef.current = controller
     setBusy(true)
-    setMessage('Starting trade…')
+    setMessage(relay ? 'Starting link…' : 'Starting trade…')
     setLastTrade(null)
     let usedPlaceholder = false
     try {
+      let placeholder: Uint8Array | null = null
+      const loadPlaceholder = async (): Promise<Uint8Array> => {
+        if (!placeholder) {
+          const response = await fetch(ribbondolUrl)
+          if (!response.ok) throw new Error('Could not load ribbondol.pk3.')
+          placeholder = new Uint8Array(await response.arrayBuffer())
+        }
+        return placeholder.slice()
+      }
+      if (!relay && (left.device === 'gb-link' || right.device === 'gb-link')) {
+        setMessage('Preparing trade…')
+        await loadPlaceholder()
+      }
       const writes = await runTrade(left, right, controller.signal, {
-        adapter,
+        adapter: pkAdapter,
         onEvent: (event) => {
           const status = statusForEvent(event)
           if (status) setMessage(status)
         },
         loadPlaceholder: async () => {
           usedPlaceholder = true
-          const response = await fetch(ribbondolUrl)
-          if (!response.ok) throw new Error('Could not load ribbondol.pk3.')
-          return new Uint8Array(await response.arrayBuffer())
+          return loadPlaceholder()
         },
       })
+      if (relay) {
+        setMessage('Link stopped.')
+        return
+      }
       setLastTrade(writes)
       setMessage(
         usedPlaceholder
@@ -435,7 +574,7 @@ export function TradeView({
     abortRef.current?.abort()
     esp32TradeDevice.cancelTrade()
     gbLinkTradeDevice.cancelTrade()
-    setMessage('Cancelling trade…')
+    setMessage(viaSwitch ? 'Stopping link…' : 'Cancelling trade…')
   }
 
   const boxRef = useRef(initialBox)
@@ -474,12 +613,17 @@ export function TradeView({
       keysReady={switchKeysReady}
       onKeysReady={setSwitchKeysReady}
       onSource={(side) => setSide(name, () => side)}
+      onGbaGame={(gbaGame) =>
+        setSide(name, (side) =>
+          side?.device === 'gb-link' ? { ...side, gbaGame } : side
+        )
+      }
       onSelection={(slot) => {
         if (!busy)
           setSide(name, (side) =>
             side?.device === 'save-backup' && 'box' in slot
               ? { ...side, slot }
-              : side?.device === 'camp-site' && 'id' in slot
+              : side?.device === 'camp-site' && 'site' in slot
                 ? { ...side, slot }
                 : side
           )
@@ -512,16 +656,44 @@ export function TradeView({
           {panel('right', 'Trainer Side B', right, left)}
         </div>
 
+        {viaSwitch && (
+          <div className="camp-trade-note">
+            <p>
+              On the Switch, lead a Trade Center group upstairs in a Pokémon
+              Center.
+            </p>
+            <p>
+              {gbaSide?.device === 'gb-link' && gbaSide.gbaGame === 'wireless'
+                ? 'On the GBA, join the group.'
+                : gbaSide?.device === 'gb-link' && gbaSide.gbaGame === 'cable'
+                  ? 'On the GBA, talk to the middle counter upstairs in a Pokémon Center.'
+                  : 'Choose the game on the GBA.'}
+            </p>
+            <p>
+              Both players choose their Pokémon on their own console. PkCamp
+              doesn't store anything from this trade.
+            </p>
+          </div>
+        )}
+
         <div className="camp-trade-actions">
           <button
             type="button"
             className="camp-confirm-btn"
-            disabled={!ready || busy}
-            onClick={() => void startTrade()}
+            disabled={viaSwitch && busy ? false : !ready || busy}
+            onClick={() =>
+              viaSwitch && busy ? cancelTrade() : void startTrade()
+            }
           >
-            {busy ? 'Trading…' : 'Start trade'}
+            {viaSwitch
+              ? busy
+                ? 'Stop link'
+                : 'Start link'
+              : busy
+                ? 'Trading…'
+                : 'Start trade'}
           </button>
-          {busy && (
+          {busy && !viaSwitch && (
             <button
               type="button"
               className="camp-upload-btn"
@@ -534,12 +706,20 @@ export function TradeView({
             <button
               type="button"
               className="camp-upload-btn"
+              disabled={offline}
               onClick={() => void undoTrade()}
             >
               Revert trade
             </button>
           )}
         </div>
+
+        {offline && writesStorage && (
+          <p className="camp-status">
+            Dropbox is unreachable. Trades that change PkCamp storage are paused
+            until it reconnects.
+          </p>
+        )}
 
         {message && (
           <p className="camp-status" aria-live="polite">

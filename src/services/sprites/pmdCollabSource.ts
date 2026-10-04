@@ -8,7 +8,11 @@ import {
   PMDCOLLAB_SHINY_FORMS,
   PMDCOLLAB_SHINY_MALE,
 } from './generatedPmdCollab'
-import type { SpriteManifest, SpriteManifestEntry, SpriteSourceDefinition } from './manifest'
+import type {
+  SpriteManifest,
+  SpriteManifestEntry,
+  SpriteSourceDefinition,
+} from './manifest'
 import { auditSpriteManifest } from './coverage'
 import { POKEAPI_SOURCE, SPRITE_COVERAGE_TARGETS } from './sources'
 

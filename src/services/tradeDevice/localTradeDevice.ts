@@ -1,6 +1,6 @@
-import { localPokemonLibrary } from '../localPokemonLibrary'
 import type { PokemonSaveAdapter, SaveGame } from '../pkhex'
-import { saveLibrary, type Gen3GameId } from '../saveLibrary'
+import type { Gen3GameId } from '../saveLibrary'
+import { storage } from '../storage'
 import {
   TradeDeviceError,
   type TradeDevice,
@@ -18,9 +18,10 @@ export interface SaveSlot {
   index: number
 }
 
-/** One Camp Sites file, identified by its stable id. */
+/** One Camp Sites position. */
 export interface CampSlot {
-  id: string
+  site: number
+  index: number
 }
 
 function bytesEqual(left: Uint8Array, right: Uint8Array): boolean {
@@ -90,8 +91,7 @@ export class SaveBackupTradeDevice extends LocalTradeDevice {
     expected: Uint8Array,
     access: (game: SaveGame) => T
   ): Promise<T> {
-    await saveLibrary.whenReady()
-    const bytes = saveLibrary.getSave(slot.gameId)
+    const bytes = (await storage.getSave(slot.gameId))?.bytes
     if (!bytes) throw new Error('The selected backup is no longer stored.')
     const game = adapter.load(bytes)
     try {
@@ -117,8 +117,8 @@ export class SaveBackupTradeDevice extends LocalTradeDevice {
         { box: slot.box, slot: slot.index },
         adapter.importPokemonFile(received)
       )
-      saveLibrary.updateSave(slot.gameId, game.toBytes())
-    })
+      return game.toBytes()
+    }).then((bytes) => storage.putSave(slot.gameId, bytes))
   }
 
   /** First other occupied box slot, then the first party Pokémon. */
@@ -146,16 +146,15 @@ export class CampSiteTradeDevice extends LocalTradeDevice {
   readonly label = 'Camp Sites'
 
   private async findSlot(slot: CampSlot, expected: Uint8Array) {
-    const slots = await localPokemonLibrary.getSlots(GENERATION)
-    const index = slots.findIndex((entry) => entry?.id === slot.id)
-    const current = slots[index]
+    const camp = await storage.getCamp(GENERATION)
+    const current = camp.sites[slot.site]?.[slot.index]
     if (!current) {
-      throw new Error('The selected Camp Site Pokémon is no longer stored.')
+      throw new Error('The selected Camp Site position is now empty.')
     }
     if (!bytesEqual(current.bytes, expected)) {
       throw new Error('The selected Camp Site slot changed before the trade.')
     }
-    return { slots, index, current }
+    return { camp, current }
   }
 
   async write(
@@ -165,14 +164,14 @@ export class CampSiteTradeDevice extends LocalTradeDevice {
     received: Uint8Array
   ): Promise<void> {
     const pokemon = adapter.importPokemonFile(received)
-    const { slots, index, current } = await this.findSlot(slot, expected)
-    slots[index] = {
+    const { camp, current } = await this.findSlot(slot, expected)
+    camp.sites[slot.site][slot.index] = {
       ...current,
       bytes: received.slice(),
       fileName: pokemonFileName(pokemon),
       importedAt: new Date().toISOString(),
     }
-    await localPokemonLibrary.saveSlots(GENERATION, slots)
+    await storage.saveCamp(GENERATION, camp)
   }
 
   /** First other occupied Camp Sites file. */
@@ -181,8 +180,12 @@ export class CampSiteTradeDevice extends LocalTradeDevice {
     slot: CampSlot,
     expected: Uint8Array
   ): Promise<Uint8Array | null> {
-    const { slots } = await this.findSlot(slot, expected)
-    const other = slots.find((entry) => entry && entry.id !== slot.id)
-    return other ? other.bytes.slice() : null
+    const { camp, current } = await this.findSlot(slot, expected)
+    for (const site of camp.sites) {
+      for (const entry of site) {
+        if (entry && entry.id !== current.id) return entry.bytes.slice()
+      }
+    }
+    return null
   }
 }

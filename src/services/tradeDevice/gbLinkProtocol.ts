@@ -6,19 +6,47 @@ export const GB_LINK_COMMAND = {
   /** `[us0, us1, us2, bytesPerTransfer]`, GB link mode only. */
   setTimingConfig: 0x30,
   setVoltage3V3: 0x40,
+  /** Resets the adapter into the RP2040 USB bootloader (`RPI-RP2` drive). */
+  rebootBootloader: 0x43,
+  /** Wireless stats; only firmware 2.2.7+ answers, on the data channel. */
+  wirelessStats: 0x4c,
 } as const
 
 export const GB_LINK_MODE = {
   tradeEmulation: 0x00,
+  /** GBA cable link relay (used for GBA-Switch trading). */
+  gbaLink: 0x01,
   /** Raw SPI exchanges; used to multiboot and talk to the save dumper. */
   gbLink: 0x02,
+  /** Wireless Adapter emulation; firmware 2.2.7+. */
+  rfuWireless: 0x07,
 } as const
 
 export const GB_LINK_STATUS = {
+  awaitMode: 0xff02,
+  handshakeReceived: 0xff03,
+  handshakeFinished: 0xff04,
+  linkConnected: 0xff05,
+  linkReconnecting: 0xff06,
+  linkClosed: 0xff07,
   deviceReady: 0xff08,
   tradeSessionFinished: 0xff09,
   emulationSessionStarted: 0xff0a,
 } as const
+
+/** Oldest firmware with Wireless Adapter emulation (GBA-Switch trading). */
+export const MIN_GBA_SWITCH_FIRMWARE = '2.2.7'
+
+/** Compares dotted numeric versions: negative if a < b, 0 if equal, positive if a > b. */
+export function compareFirmwareVersions(a: string, b: string): number {
+  const left = a.split('.').map((part) => Number.parseInt(part, 10) || 0)
+  const right = b.split('.').map((part) => Number.parseInt(part, 10) || 0)
+  for (let i = 0; i < Math.max(left.length, right.length); i++) {
+    const diff = (left[i] ?? 0) - (right[i] ?? 0)
+    if (diff !== 0) return diff
+  }
+  return 0
+}
 
 export const GB_LINK_SERIAL_CHANNEL = {
   command: 0,

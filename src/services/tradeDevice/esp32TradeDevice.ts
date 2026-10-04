@@ -1,6 +1,9 @@
+import { Bridge as UpstreamBridge } from './vendor/gb-link-switch-ldn/bridge.js'
+import { CableSession as UpstreamCableSession } from './vendor/gb-link-switch-ldn/cable/session.js'
 import { EspDevice as UpstreamEspDevice } from './vendor/gb-link-switch-ldn/esp.js'
 import { parseProdKeys } from './vendor/gb-link-switch-ldn/keys.js'
 import { TradeSession as UpstreamTradeSession } from './vendor/gb-link-switch-ldn/trade/session.js'
+import type { GbLinkRelayAdapter } from './gbLinkTradeDevice.ts'
 import {
   TradeDeviceError,
   type CompletedTrade,
@@ -52,6 +55,19 @@ export interface Esp32TradeSession {
   declineTrade(): void
 }
 
+/** GBA ↔ Switch link: `wireless` for FireRed/LeafGreen/Emerald, `cable` for Ruby/Sapphire. */
+export type Esp32LinkKind = 'wireless' | 'cable'
+
+/** The parts of the upstream `Bridge` and `CableSession` this device uses. */
+export interface Esp32LinkSession extends EventTarget {
+  start(): Promise<void>
+  stop(): Promise<void>
+  readonly cableOpen?: boolean
+  readonly linked?: boolean
+  readonly tradeReady?: boolean
+  readonly switchNotReady?: boolean
+}
+
 export interface Esp32TradeDeviceDependencies {
   isSupported(): boolean
   requestPort(): Promise<unknown>
@@ -62,6 +78,11 @@ export interface Esp32TradeDeviceDependencies {
     selected: number
     emit(event: UpstreamTradeEvent): void
   }): Esp32TradeSession
+  createLink(
+    kind: Esp32LinkKind,
+    device: Esp32Transport,
+    adapter: GbLinkRelayAdapter
+  ): Esp32LinkSession
 }
 
 const EspDeviceClass = UpstreamEspDevice as unknown as {
@@ -77,14 +98,25 @@ const TradeSessionClass = UpstreamTradeSession as unknown as new (options: {
   emit(event: UpstreamTradeEvent): void
 }) => Esp32TradeSession
 
+const LinkClasses = {
+  wireless: UpstreamBridge,
+  cable: UpstreamCableSession,
+} as unknown as Record<
+  Esp32LinkKind,
+  new (device: Esp32Transport, adapter: GbLinkRelayAdapter) => Esp32LinkSession
+>
+
 const defaultDependencies: Esp32TradeDeviceDependencies = {
   isSupported: () => EspDeviceClass.available(),
   requestPort: () => EspDeviceClass.requestPort(),
   createTransport: () => new EspDeviceClass(),
   createSession: (options) => new TradeSessionClass(options),
+  createLink: (kind, device, adapter) => new LinkClasses[kind](device, adapter),
 }
 
-function cloneParty(party: readonly (Uint8Array | null)[]): (Uint8Array | null)[] {
+function cloneParty(
+  party: readonly (Uint8Array | null)[]
+): (Uint8Array | null)[] {
   return party.map((pokemon) => pokemon?.slice() ?? null)
 }
 
@@ -123,7 +155,9 @@ export class Esp32TradeDevice implements TradeDevice {
   private activeAbort: AbortController | null = null
   private trading = false
 
-  constructor(dependencies: Esp32TradeDeviceDependencies = defaultDependencies) {
+  constructor(
+    dependencies: Esp32TradeDeviceDependencies = defaultDependencies
+  ) {
     this.dependencies = dependencies
   }
 
@@ -331,16 +365,107 @@ export class Esp32TradeDevice implements TradeDevice {
     }
   }
 
+  /**
+   * Relays a live GBA ↔ Switch trade until `signal` aborts. Both players pick
+   * their Pokémon on their own console; nothing is stored here.
+   */
+  async runLink(
+    kind: Esp32LinkKind,
+    adapter: GbLinkRelayAdapter,
+    options: { signal: AbortSignal; onEvent?(event: TradeDeviceEvent): void }
+  ): Promise<void> {
+    const transport = this.requireTransport()
+    if (this.trading) {
+      throw new TradeDeviceError(this.id, 'busy', 'A trade is already running.')
+    }
+
+    this.trading = true
+    this.currentState = 'trading'
+    const status = (message: string): void => {
+      try {
+        options.onEvent?.({ type: 'status', message })
+      } catch {
+        // A presentation callback must not interrupt the link.
+      }
+    }
+    let session: Esp32LinkSession | null = null
+
+    try {
+      const keys = await transport.keyStatus()
+      if (!keys?.complete) {
+        throw new TradeDeviceError(
+          this.id,
+          'missing-keys',
+          'The ESP32 needs the required Switch keys before trading.'
+        )
+      }
+      await transport.startBridge()
+      const link = this.dependencies.createLink(kind, transport, adapter)
+      session = link
+      const failed = new Promise<never>((_, reject) => {
+        link.addEventListener('failed', (event) => {
+          const error = (event as CustomEvent<unknown>).detail
+          reject(error instanceof Error ? error : new Error(String(error)))
+        })
+      })
+      failed.catch(() => {})
+      const aborted = new Promise<void>((resolve) => {
+        if (options.signal.aborted) resolve()
+        else
+          options.signal.addEventListener('abort', () => resolve(), {
+            once: true,
+          })
+      })
+      if (kind === 'cable') {
+        let last = ''
+        link.addEventListener('change', () => {
+          const message = link.switchNotReady
+            ? "The Switch's game can't trade with this GBA yet."
+            : link.tradeReady
+              ? 'Ready to trade.'
+              : link.linked
+                ? "Linked to the Switch's room."
+                : link.cableOpen
+                  ? 'GBA cable link open.'
+                  : ''
+          if (message && message !== last) status(message)
+          last = message
+        })
+      }
+      await Promise.race([link.start(), failed, aborted])
+      if (kind === 'wireless')
+        status('Relaying between the GBA and the Switch.')
+      await Promise.race([aborted, failed])
+    } finally {
+      try {
+        await session?.stop()
+      } finally {
+        this.trading = false
+        this.currentState = this.transport?.attached
+          ? 'connected'
+          : 'disconnected'
+      }
+    }
+  }
+
   offerSlot(slot: number): void {
     if (!this.activeSession) {
-      throw new TradeDeviceError(this.id, 'not-connected', 'No trade is active.')
+      throw new TradeDeviceError(
+        this.id,
+        'not-connected',
+        'No trade is active.'
+      )
     }
     this.activeSession.offerSlot(slot)
   }
 
   declineTrade(): void {
     if (!this.activeSession) {
-      throw new TradeDeviceError(this.id, 'not-connected', 'No trade is active.')
+      throw new TradeDeviceError(
+        this.id,
+        'not-connected',
+        'No trade is active.'
+      )
     }
     this.activeSession.declineTrade()
   }

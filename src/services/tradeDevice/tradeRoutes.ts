@@ -14,6 +14,10 @@ import {
   gbLinkTradeDevice,
   saveBackupTradeDevice,
 } from './service.ts'
+import {
+  compareFirmwareVersions,
+  MIN_GBA_SWITCH_FIRMWARE,
+} from './gbLinkProtocol.ts'
 import { TradeDeviceError, type TradeDeviceEvent } from './types.ts'
 
 /** One side of a trade. Local sides carry the selected box slot and its PK3. */
@@ -23,11 +27,18 @@ export type TradeSide =
       gameId: Gen3GameId
       slot?: { box: number; index: number; pk3: Uint8Array }
     }
-  | { device: 'camp-site'; slot?: { id: string; pk3: Uint8Array } }
-  | { device: 'gb-link' }
+  | {
+      device: 'camp-site'
+      slot?: { site: number; index: number; pk3: Uint8Array }
+    }
+  | {
+      device: 'gb-link'
+      /** Wireless for FireRed/LeafGreen/Emerald, cable for Ruby/Sapphire. GBA ↔ Switch only. */
+      gbaGame?: 'wireless' | 'cable'
+    }
   | { device: 'esp32' }
 
-export type TradeAvailability = 'ok' | 'blocked' | 'coming-soon'
+export type TradeAvailability = 'ok' | 'blocked'
 
 export interface TradeDevices {
   esp32: Esp32TradeDevice
@@ -73,7 +84,7 @@ export function tradeAvailability(
   if (tradeSideKey(left) === tradeSideKey(right)) return 'blocked'
   if (isLocal(left) || isLocal(right)) return 'ok'
   if (left.device === right.device) return 'blocked'
-  return 'coming-soon'
+  return 'ok'
 }
 
 export async function runTrade(
@@ -83,18 +94,14 @@ export async function runTrade(
   options: RunTradeOptions
 ): Promise<TradeWrite[]> {
   const availability = tradeAvailability(left, right)
-  if (availability === 'coming-soon') {
-    throw new TradeDeviceError(
-      'gb-link',
-      'not-implemented',
-      'GBA ↔ Switch trading is coming soon.'
-    )
-  }
   if (availability === 'blocked') {
     throw new Error('Those two sources cannot trade with each other.')
   }
   signal.throwIfAborted()
   const devices = options.devices ?? defaultDevices()
+  if (!isLocal(left) && !isLocal(right)) {
+    return runLink(left, right, signal, devices, options.onEvent)
+  }
   const [local, other] = isLocal(left)
     ? [left, right]
     : [right as LocalSide, left]
@@ -149,8 +156,39 @@ export async function runTrade(
     signal,
     onEvent: options.onEvent,
   })
-  signal.throwIfAborted()
   return write(result.trades[0]?.received ?? (await options.loadPlaceholder()))
+}
+
+/** GBA ↔ Switch: a live relay. Nothing is written in PkCamp. */
+async function runLink(
+  left: TradeSide,
+  right: TradeSide,
+  signal: AbortSignal,
+  devices: TradeDevices,
+  onEvent: RunTradeOptions['onEvent']
+): Promise<TradeWrite[]> {
+  const gba = left.device === 'gb-link' ? left : right
+  if (gba.device !== 'gb-link' || !gba.gbaGame) {
+    throw new Error('Choose the game on the GBA.')
+  }
+  const version = await devices.gbLink.firmwareVersion()
+  if (
+    !version ||
+    compareFirmwareVersions(version, MIN_GBA_SWITCH_FIRMWARE) < 0
+  ) {
+    throw new TradeDeviceError(
+      'gb-link',
+      'unsupported',
+      `GBA ↔ Switch needs GB-Link firmware ${MIN_GBA_SWITCH_FIRMWARE} or newer.`
+    )
+  }
+  const lease = await devices.gbLink.linkAdapter(signal)
+  try {
+    await devices.esp32.runLink(gba.gbaGame, lease.adapter, { signal, onEvent })
+  } finally {
+    await lease.release()
+  }
+  return []
 }
 
 /**
@@ -211,5 +249,5 @@ function saveSlot(
 }
 
 function campSlot(side: Extract<TradeSide, { device: 'camp-site' }>): CampSlot {
-  return { id: side.slot!.id }
+  return { site: side.slot!.site, index: side.slot!.index }
 }

@@ -1,30 +1,27 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { localPokemonLibrary } from '../../services/localPokemonLibrary'
-import type { StoredPokemonFile } from '../../services/localPokemonLibrary'
-import type { PokemonNode, SaveGame } from '../../services/pkhex'
-import { saveLibrary, type Gen3GameId } from '../../services/saveLibrary'
-import { initializeSpriteResolver } from '../../services/sprites'
-import { usePkHex } from '../context/PkHexProvider'
-import { CAMPING_POKEMON_BOX_SIZE } from './campingStoragePreference'
+import { useEffect, useRef, useState } from 'react'
+import type { SaveGame } from '../../services/pkhex'
+import type { Gen3GameId } from '../../services/saveLibrary'
+import { CAMP_SITE_SIZE, storage } from '../../services/storage'
+import { usePkHex } from '../context/PkHexContext'
+import {
+  isSamePosition,
+  loadCampEntries,
+  positionOf,
+  type CampEntry,
+  type CampPosition,
+} from './campPositions'
 import { GAME_LABEL } from './gameDisplay'
+import { GbaSavePanel } from './GbaSavePanel'
 import { PokemonSlotIcon } from './PokemonSlotIcon'
-import { getStoredSpriteSourceId } from './spritePreference'
-import { DEFAULT_SPRITE_SOURCE_ID, SPRITE_SOURCES } from './spriteSources'
+import { assertSaveMatchesCabin } from './saveVersion'
+import {
+  storageErrorMessage,
+  useSpriteResolver,
+  useStorageOffline,
+  useStorageProvider,
+} from './useStorage'
 
 const GENERATION = 3 as const
-
-function useSpriteResolver() {
-  return useMemo(() => {
-    const sourceId = getStoredSpriteSourceId() ?? DEFAULT_SPRITE_SOURCE_ID
-    const source =
-      SPRITE_SOURCES.find((item) => item.id === sourceId) ?? SPRITE_SOURCES[0]
-    return initializeSpriteResolver({
-      sourceId: source.id,
-      manifest: source.manifest,
-      formAliases: source.formAliases,
-    })
-  }, [])
-}
 
 function BoxNav({
   kicker,
@@ -81,8 +78,14 @@ export function SaveSelectionPanel({
 }) {
   const { adapter, loading: adapterLoading, error: adapterError } = usePkHex()
   const resolver = useSpriteResolver()
+  const { provider, ready } = useStorageProvider()
+  const offline = useStorageOffline()
   const [game, setGame] = useState<SaveGame | null>(null)
   const [boxIndex, setBoxIndex] = useState(initialBox)
+  // Bumped after the player adds a backup here, to reload the save in place.
+  const [refresh, setRefresh] = useState(0)
+  const [gbaReading, setGbaReading] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
   useEffect(() => {
     onBoxChange?.(boxIndex)
   }, [boxIndex, onBoxChange])
@@ -101,30 +104,61 @@ export function SaveSelectionPanel({
   useEffect(() => () => gameRef.current?.dispose(), [])
 
   useEffect(() => {
-    if (!adapter) return
+    if (!adapter || !ready) return
     let active = true
-    void saveLibrary.whenReady().then(() => {
-      if (!active) return
-      const bytes = saveLibrary.getSave(gameId)
-      try {
-        if (bytes) {
-          const previous = gameRef.current
-          gameRef.current = adapter.load(bytes)
-          setGame(gameRef.current)
-          previous?.dispose()
+    provider
+      .getSave(gameId)
+      .then((stored) => {
+        if (!active) return
+        const previous = gameRef.current
+        const loaded = stored ? adapter.load(stored.bytes) : null
+        try {
+          if (loaded) assertSaveMatchesCabin(gameId, loaded)
+        } catch (cause) {
+          loaded?.dispose()
+          throw cause
         }
-      } catch (cause) {
-        setMessage(
-          cause instanceof Error ? cause.message : 'Unable to open this backup.'
-        )
-      } finally {
-        setLoading(false)
-      }
-    })
+        gameRef.current = loaded
+        setGame(gameRef.current)
+        previous?.dispose()
+        setMessage(null)
+      })
+      .catch((cause: unknown) => {
+        if (active) setMessage(storageErrorMessage(cause))
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
     return () => {
       active = false
     }
-  }, [adapter, gameId, reload])
+  }, [adapter, gameId, provider, ready, reload, refresh])
+
+  const handleUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file || !adapter) return
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer())
+      const loaded = adapter.load(bytes)
+      try {
+        assertSaveMatchesCabin(gameId, loaded)
+      } finally {
+        loaded.dispose()
+      }
+      await storage.putSave(gameId, bytes)
+      setActionError(null)
+      setRefresh((n) => n + 1)
+    } catch (cause) {
+      setActionError(
+        cause instanceof Error
+          ? storageErrorMessage(cause)
+          : 'Unable to open that backup.'
+      )
+    }
+  }
 
   if (adapterLoading || loading)
     return <p className="camp-trade-note">Loading backup…</p>
@@ -138,9 +172,45 @@ export function SaveSelectionPanel({
   if (message) return <p className="camp-trade-note">{message}</p>
   if (!game || !adapter) {
     return (
-      <p className="camp-trade-note">
-        No {GAME_LABEL[gameId]} backup is stored. Add one in the Camp Office.
-      </p>
+      <div className="camp-trade-empty">
+        <p className="camp-trade-note">
+          No {GAME_LABEL[gameId]} backup is stored yet.
+        </p>
+        <div className="camp-transfer-group">
+          <span className="camp-transfer-group-label">Add a save</span>
+          <button
+            type="button"
+            className="camp-transfer-btn"
+            disabled={gbaReading || offline}
+            onClick={() => setGbaReading(true)}
+          >
+            From GBA
+          </button>
+          <label className="camp-transfer-btn">
+            From file
+            <input
+              className="camp-file-input--hidden"
+              type="file"
+              accept=".sav"
+              disabled={!adapter || offline}
+              onChange={(event) => void handleUpload(event)}
+            />
+          </label>
+        </div>
+        {gbaReading && (
+          <GbaSavePanel
+            mode="read"
+            gameId={gameId}
+            onSave={() => {
+              setGbaReading(false)
+              setActionError(null)
+              setRefresh((n) => n + 1)
+            }}
+            onClose={() => setGbaReading(false)}
+          />
+        )}
+        {actionError && <p className="camp-trade-note">{actionError}</p>}
+      </div>
     )
   }
 
@@ -186,51 +256,41 @@ export function SaveSelectionPanel({
   )
 }
 
-interface CampEntry {
-  file: StoredPokemonFile
-  pokemon: PokemonNode
-}
-
-/** Camp Sites grid. Selects exactly one Pokémon. */
+/** Camp Sites grid. Selects exactly one Pokémon by position. */
 export function CampSelectionPanel({
   reload,
   onSelect,
 }: {
   /** Changes after a completed trade: reload Camp Sites, keep the open site. */
   reload: number
-  onSelect: (slot: { id: string; pk3: Uint8Array }) => void
+  onSelect: (slot: { site: number; index: number; pk3: Uint8Array }) => void
 }) {
   const { adapter, loading: adapterLoading, error: adapterError } = usePkHex()
   const resolver = useSpriteResolver()
+  const { provider, ready } = useStorageProvider()
   const [entries, setEntries] = useState<(CampEntry | null)[]>([])
-  const [boxIndex, setBoxIndex] = useState(0)
+  const [siteIndex, setSiteIndex] = useState(0)
   // A selection only counts for the load it was made in.
-  const [selection, setSelection] = useState<{ id: string; reload: number }>()
-  const selectedId = selection?.reload === reload ? selection.id : undefined
+  const [selection, setSelection] = useState<{
+    position: CampPosition
+    reload: number
+  }>()
+  const selected = selection?.reload === reload ? selection.position : null
   const [loading, setLoading] = useState(true)
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!adapter) return
+    if (!adapter || !ready) return
     let active = true
-    void localPokemonLibrary
-      .getSlots(GENERATION)
-      .then((files) => {
+    provider
+      .getCamp(GENERATION)
+      .then((camp) => {
         if (!active) return
-        setEntries(
-          files.map((file) => {
-            if (!file) return null
-            try {
-              return { file, pokemon: adapter.importPokemonFile(file.bytes) }
-            } catch {
-              return null
-            }
-          })
-        )
+        setEntries(loadCampEntries(camp, adapter).entries)
+        setMessage(null)
       })
       .catch((cause: unknown) => {
-        if (active)
-          setMessage(cause instanceof Error ? cause.message : String(cause))
+        if (active) setMessage(storageErrorMessage(cause))
       })
       .finally(() => {
         if (active) setLoading(false)
@@ -238,7 +298,7 @@ export function CampSelectionPanel({
     return () => {
       active = false
     }
-  }, [adapter, reload])
+  }, [adapter, provider, ready, reload])
 
   if (adapterLoading || loading)
     return <p className="camp-trade-note">Loading Camp Sites…</p>
@@ -254,46 +314,42 @@ export function CampSelectionPanel({
     return <p className="camp-trade-note">No Camping Pokémon are stored.</p>
   }
 
-  const boxCount = Math.max(
-    1,
-    Math.ceil(entries.length / CAMPING_POKEMON_BOX_SIZE)
-  )
+  const siteCount = Math.max(1, Math.ceil(entries.length / CAMP_SITE_SIZE))
   const visible = entries.slice(
-    boxIndex * CAMPING_POKEMON_BOX_SIZE,
-    (boxIndex + 1) * CAMPING_POKEMON_BOX_SIZE
+    siteIndex * CAMP_SITE_SIZE,
+    (siteIndex + 1) * CAMP_SITE_SIZE
   )
-  while (visible.length < CAMPING_POKEMON_BOX_SIZE) visible.push(null)
 
   return (
     <div className="camp-trade-picker">
       <BoxNav
-        kicker={`Camp Site ${boxIndex + 1} of ${boxCount}`}
+        kicker={`Camp Site ${siteIndex + 1} of ${siteCount}`}
         name="Choose one camper"
         label="Camp Site"
         onCycle={(delta) =>
-          setBoxIndex((current) => (current + delta + boxCount) % boxCount)
+          setSiteIndex((current) => (current + delta + siteCount) % siteCount)
         }
       />
       <div className="camp-local-grid camp-trade-grid">
-        {visible.map((entry, visibleSlot) => (
-          <PokemonSlotIcon
-            key={
-              entry?.file.id ??
-              `empty-${boxIndex * CAMPING_POKEMON_BOX_SIZE + visibleSlot}`
-            }
-            slot={entry?.pokemon ?? null}
-            resolver={resolver}
-            selected={entry !== null && entry.file.id === selectedId}
-            onClick={() => {
-              if (!entry) return
-              setSelection({ id: entry.file.id, reload })
-              onSelect({ id: entry.file.id, pk3: entry.file.bytes.slice() })
-            }}
-          />
-        ))}
+        {visible.map((entry, index) => {
+          const position = positionOf(siteIndex * CAMP_SITE_SIZE + index)
+          return (
+            <PokemonSlotIcon
+              key={`${position.site}-${position.index}`}
+              slot={entry?.pokemon ?? null}
+              resolver={resolver}
+              selected={entry !== null && isSamePosition(position, selected)}
+              onClick={() => {
+                if (!entry) return
+                setSelection({ position, reload })
+                onSelect({ ...position, pk3: entry.file.bytes.slice() })
+              }}
+            />
+          )
+        })}
       </div>
       <p className="camp-trade-note">
-        {selectedId
+        {selected
           ? 'One Pokémon selected.'
           : 'Select one Pokémon from a Camp Site.'}
       </p>

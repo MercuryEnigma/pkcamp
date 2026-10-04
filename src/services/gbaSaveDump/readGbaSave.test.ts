@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { GB_LINK_COMMAND, GB_LINK_MODE } from '../tradeDevice/gbLinkProtocol.ts'
 import type { GbLinkTransport } from '../tradeDevice/gbLinkTransport.ts'
 import { GBA_CART as C } from './gbaCartClient.ts'
@@ -198,6 +198,9 @@ class FakeGbLink implements GbLinkTransport {
   onStatus() {
     return () => {}
   }
+  onFrame() {
+    return () => {}
+  }
   onData(listener: (payload: Uint8Array) => void) {
     this.listeners.add(listener)
     return () => this.listeners.delete(listener)
@@ -311,12 +314,17 @@ describe('writeGbaSave', () => {
   const backup = save.map((byte) => byte ^ 0xff)
   const cartFor = (): Cart => ({ ...ruby, save: save.slice() })
 
-  function write(link: FakeGbLink, data: Uint8Array, signal?: AbortSignal) {
+  function write(
+    link: FakeGbLink,
+    data: Uint8Array,
+    backUpCartridgeSave: (save: Uint8Array) => Promise<void> = async () => {}
+  ) {
     return writeGbaSave(link, {
       gameId: 'ruby',
       save: data,
-      signal: signal ?? new AbortController().signal,
+      signal: new AbortController().signal,
       loadDumper: async () => rom,
+      backUpCartridgeSave,
     })
   }
 
@@ -326,6 +334,32 @@ describe('writeGbaSave', () => {
     await write(link, backup)
     expect(cart.save).toEqual(backup)
     expect(link.commands.at(-1)).toEqual([GB_LINK_COMMAND.cancel])
+  })
+
+  it('stores the cartridge save before writing over it', async () => {
+    const cart = cartFor()
+    const stored: Uint8Array[] = []
+    let cartridgeWhenStored: Uint8Array | null = null
+    await write(new FakeGbLink(cart), backup, async (cartridgeSave) => {
+      stored.push(cartridgeSave)
+      cartridgeWhenStored = cart.save
+    })
+    expect(stored).toEqual([save])
+    // The cartridge still held its own save while the backup was stored.
+    expect(cartridgeWhenStored).toEqual(save)
+    expect(cart.save).toEqual(backup)
+  })
+
+  it('leaves the cartridge untouched when the backup cannot be stored', async () => {
+    const cart = cartFor()
+    const link = new FakeGbLink(cart)
+    await expect(
+      write(link, backup, async () => {
+        throw new Error('Dropbox could not be reached.')
+      })
+    ).rejects.toThrow('Dropbox could not be reached.')
+    expect(cart.save).toEqual(save)
+    expect(link.log).not.toContain('committed')
   })
 
   it('refuses a backup whose size differs from the cartridge save', async () => {
@@ -345,6 +379,7 @@ describe('writeGbaSave', () => {
       save: backup,
       signal: controller.signal,
       loadDumper: async () => rom,
+      backUpCartridgeSave: async () => {},
       onProgress: (done) => {
         if (done >= 0x1000) controller.abort()
       },
@@ -357,9 +392,11 @@ describe('writeGbaSave', () => {
 
   it('rejects a cartridge for a different game without writing', async () => {
     const cart = { ...cartFor(), code: 'BPRE', title: 'POKEMON FIRE' }
-    await expect(write(new FakeGbLink(cart), backup)).rejects.toThrow(
+    const backUp = vi.fn(async () => {})
+    await expect(write(new FakeGbLink(cart), backup, backUp)).rejects.toThrow(
       'POKEMON FIRE'
     )
+    expect(backUp).not.toHaveBeenCalled()
     expect(cart.save).toEqual(save)
   })
 })

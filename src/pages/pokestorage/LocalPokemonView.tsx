@@ -1,30 +1,33 @@
-import { useEffect, useMemo, useState } from 'react'
-import type { PokemonNode } from '../../services/pkhex'
-import {
-  localPokemonLibrary,
-  type StoredPokemonFile,
-} from '../../services/localPokemonLibrary'
-import { initializeSpriteResolver } from '../../services/sprites'
-import { usePkHex } from '../context/PkHexProvider'
+import { useEffect, useRef, useState } from 'react'
+import type { CampPokemon } from '../../services/storage'
+import { storage } from '../../services/storage'
+import { usePkHex } from '../context/PkHexContext'
 import { PokemonDetails } from './PokemonDetails'
 import { PokemonSlotIcon } from './PokemonSlotIcon'
 import {
-  CAMPING_POKEMON_BOX_SIZE,
-  getStoredCampingBoxCount,
-  resizeCampingSlots,
-} from './campingStoragePreference'
-import { getStoredSpriteSourceId } from './spritePreference'
-import { DEFAULT_SPRITE_SOURCE_ID, SPRITE_SOURCES } from './spriteSources'
+  CAMP_SITE_SIZE,
+  DEFAULT_CAMP_SITE_COUNT,
+  campFromEntries,
+  firstEmptyPosition,
+  flatIndexOf,
+  isSamePosition,
+  loadCampEntries,
+  positionOf,
+  sitesFromFlat,
+  type CampEntry,
+  type CampPosition,
+} from './campPositions'
+import {
+  storageErrorMessage,
+  useSpriteResolver,
+  useStorageOffline,
+  useStorageProvider,
+} from './useStorage'
 
 const GENERATION = 3 as const
 const FILE_EXTENSION = '.pk3'
 
-interface LocalPokemonEntry {
-  file: StoredPokemonFile
-  pokemon: PokemonNode
-}
-
-function downloadPokemon(entry: LocalPokemonEntry): void {
+function downloadPokemon(entry: CampEntry): void {
   const blob = new Blob([entry.file.bytes.slice()], {
     type: 'application/octet-stream',
   })
@@ -54,67 +57,48 @@ export function LocalPokemonView({
   onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
 }) {
   const { adapter, loading: adapterLoading, error: adapterError } = usePkHex()
-  const [entries, setEntries] = useState<(LocalPokemonEntry | null)[]>(() =>
-    new Array<null>(
-      getStoredCampingBoxCount(GENERATION) * CAMPING_POKEMON_BOX_SIZE
-    ).fill(null)
+  const { provider, ready } = useStorageProvider()
+  const offline = useStorageOffline()
+  const [entries, setEntries] = useState<(CampEntry | null)[]>(() =>
+    new Array<null>(DEFAULT_CAMP_SITE_COUNT * CAMP_SITE_SIZE).fill(null)
   )
+  const campLoadedRef = useRef(false)
+  const unreadableRef = useRef<ReadonlyMap<number, CampPokemon>>(new Map())
   const [dirty, setDirty] = useState(false)
   const [boxIndex, setBoxIndex] = useState(0)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [selected, setSelected] = useState<CampPosition | null>(null)
   const [loadingFiles, setLoadingFiles] = useState(true)
   const [message, setMessage] = useState<string | null>(null)
 
-  const resolver = useMemo(() => {
-    const sourceId = getStoredSpriteSourceId() ?? DEFAULT_SPRITE_SOURCE_ID
-    const source =
-      SPRITE_SOURCES.find((item) => item.id === sourceId) ?? SPRITE_SOURCES[0]
-    return initializeSpriteResolver({
-      sourceId: source.id,
-      manifest: source.manifest,
-      formAliases: source.formAliases,
-    })
-  }, [])
+  const resolver = useSpriteResolver()
 
   useEffect(() => {
-    if (!adapter) return
+    if (!adapter || !ready) return
 
     let cancelled = false
+    campLoadedRef.current = false
 
-    localPokemonLibrary
-      .getSlots(GENERATION)
-      .then((files) => {
+    provider
+      .getCamp(GENERATION)
+      .then((camp) => {
         if (cancelled) return
-        const readable = new Array<LocalPokemonEntry | null>(files.length).fill(
-          null
+        const loaded = loadCampEntries(camp, adapter)
+        unreadableRef.current = loaded.unreadable
+        campLoadedRef.current = true
+        setEntries(loaded.entries)
+        setDirty(false)
+        setSelected(null)
+        setBoxIndex((current) =>
+          Math.min(current, Math.max(0, camp.sites.length - 1))
         )
-        let unreadableCount = 0
-
-        for (const [slot, file] of files.entries()) {
-          if (file === null) continue
-          try {
-            readable[slot] = {
-              file,
-              pokemon: adapter.importPokemonFile(file.bytes),
-            }
-          } catch {
-            unreadableCount += 1
-          }
-        }
-
-        setEntries(
-          resizeCampingSlots(readable, getStoredCampingBoxCount(GENERATION))
+        setMessage(
+          loaded.unreadable.size > 0
+            ? `${loaded.unreadable.size} stored Pokémon file${loaded.unreadable.size === 1 ? '' : 's'} could not be read.`
+            : null
         )
-        if (unreadableCount > 0) {
-          setMessage(
-            `${unreadableCount} stored Pokémon file${unreadableCount === 1 ? '' : 's'} could not be read.`
-          )
-        }
       })
       .catch((cause: unknown) => {
-        if (!cancelled) {
-          setMessage(cause instanceof Error ? cause.message : String(cause))
-        }
+        if (!cancelled) setMessage(storageErrorMessage(cause))
       })
       .finally(() => {
         if (!cancelled) setLoadingFiles(false)
@@ -123,7 +107,7 @@ export function LocalPokemonView({
     return () => {
       cancelled = true
     }
-  }, [adapter, adapterLoading])
+  }, [adapter, adapterLoading, provider, ready])
 
   useEffect(() => {
     onUnsavedChangesChange?.(dirty)
@@ -143,12 +127,13 @@ export function LocalPokemonView({
     return () => window.removeEventListener('beforeunload', warnBeforeUnload)
   }, [dirty])
 
-  const selected =
-    entries.find((entry) => entry?.file.id === selectedId) ?? null
-  const boxCount = entries.length / CAMPING_POKEMON_BOX_SIZE
+  const selectedEntry = selected
+    ? (entries[flatIndexOf(selected)] ?? null)
+    : null
+  const boxCount = entries.length / CAMP_SITE_SIZE
   const visibleEntries = entries.slice(
-    boxIndex * CAMPING_POKEMON_BOX_SIZE,
-    (boxIndex + 1) * CAMPING_POKEMON_BOX_SIZE
+    boxIndex * CAMP_SITE_SIZE,
+    (boxIndex + 1) * CAMP_SITE_SIZE
   )
 
   const cycleBox = (delta: number) => {
@@ -168,25 +153,33 @@ export function LocalPokemonView({
     try {
       const bytes = new Uint8Array(await file.arrayBuffer())
       const pokemon = adapter.importPokemonFile(bytes)
-      const slot = entries.indexOf(null)
-      if (slot < 0) {
+      // The viewed Camp Site first, then the first empty position anywhere.
+      // Unreadable files still occupy their positions; never import over one.
+      const position = firstEmptyPosition(
+        sitesFromFlat<unknown>(
+          entries.map(
+            (entry, index) => entry ?? unreadableRef.current.get(index) ?? null
+          )
+        ),
+        boxIndex
+      )
+      if (!position) {
         throw new Error(
           'Camping Pokémon is full. Add another Camp Site in the Camp Office.'
         )
       }
-      const stored: StoredPokemonFile = {
+      const stored: CampPokemon = {
         id: newLocalId(),
-        slot,
         fileName: file.name,
         bytes,
         importedAt: new Date().toISOString(),
       }
       const next = entries.slice()
-      next[slot] = { file: stored, pokemon }
+      next[flatIndexOf(position)] = { file: stored, pokemon }
       setEntries(next)
       setDirty(true)
-      setBoxIndex(Math.floor(slot / CAMPING_POKEMON_BOX_SIZE))
-      setSelectedId(stored.id)
+      setBoxIndex(position.site)
+      setSelected(position)
       setMessage(`${file.name} added. Save Camping Pokémon to keep it.`)
     } catch (cause) {
       setMessage(
@@ -198,27 +191,32 @@ export function LocalPokemonView({
   }
 
   const handleDiscard = () => {
-    if (!selected) return
+    if (!selected || !selectedEntry) return
     const next = entries.slice()
-    next[selected.file.slot] = null
+    next[flatIndexOf(selected)] = null
     setEntries(next)
     setDirty(true)
-    setSelectedId(null)
+    setSelected(null)
     setMessage(
-      `${selected.file.fileName} removed. Save Camping Pokémon to make it permanent.`
+      `${selectedEntry.file.fileName} removed. Save Camping Pokémon to make it permanent.`
     )
   }
 
   const handleSave = async () => {
+    if (!campLoadedRef.current) {
+      setMessage('Camping Pokémon have not loaded, so they cannot be saved.')
+      return
+    }
     try {
-      await localPokemonLibrary.saveSlots(
+      await storage.saveCamp(
         GENERATION,
-        entries.map((entry) => entry?.file ?? null)
+        campFromEntries(entries, unreadableRef.current)
       )
       setDirty(false)
       setMessage('Camping Pokémon saved.')
     } catch (cause) {
-      setMessage(cause instanceof Error ? cause.message : String(cause))
+      // Unsaved changes stay on screen so the save can be retried.
+      setMessage(storageErrorMessage(cause))
     }
   }
 
@@ -268,11 +266,17 @@ export function LocalPokemonView({
                 <button
                   type="button"
                   className="camp-save-btn"
-                  onClick={handleSave}
+                  disabled={offline}
+                  onClick={() => void handleSave()}
                 >
                   Save Camping Pokémon
                 </button>
               </div>
+            )}
+            {offline && (
+              <p className="camp-status">
+                Dropbox is unreachable. Saving is paused until it reconnects.
+              </p>
             )}
             {message && <p className="camp-status">{message}</p>}
             <div className="camp-storage-layout">
@@ -291,8 +295,8 @@ export function LocalPokemonView({
                       Camp Site {boxIndex + 1} of {boxCount}
                     </span>
                     <span className="camp-location-name">
-                      {visibleEntries.filter(Boolean).length}/
-                      {CAMPING_POKEMON_BOX_SIZE} campers
+                      {visibleEntries.filter(Boolean).length}/{CAMP_SITE_SIZE}{' '}
+                      campers
                     </span>
                   </strong>
                   <button
@@ -307,15 +311,16 @@ export function LocalPokemonView({
                 <div className="camp-panel camp-storage-grid-panel">
                   <div className="camp-local-grid">
                     {visibleEntries.map((entry, visibleSlot) => {
-                      const slot =
-                        boxIndex * CAMPING_POKEMON_BOX_SIZE + visibleSlot
+                      const position = positionOf(
+                        boxIndex * CAMP_SITE_SIZE + visibleSlot
+                      )
                       return (
                         <PokemonSlotIcon
-                          key={entry?.file.id ?? `empty-${slot}`}
+                          key={`${position.site}-${position.index}`}
                           slot={entry?.pokemon ?? null}
                           resolver={resolver}
-                          selected={entry?.file.id === selectedId}
-                          onClick={() => setSelectedId(entry?.file.id ?? null)}
+                          selected={isSamePosition(position, selected)}
+                          onClick={() => setSelected(entry ? position : null)}
                         />
                       )
                     })}
@@ -324,11 +329,14 @@ export function LocalPokemonView({
               </section>
 
               <section className="camp-storage-right camp-storage-right--details">
-                {selected ? (
+                {selectedEntry ? (
                   <>
-                    <PokemonDetails pokemon={selected.pokemon} resolver={resolver} />
+                    <PokemonDetails
+                      pokemon={selectedEntry.pokemon}
+                      resolver={resolver}
+                    />
                     <p className="camp-local-filename">
-                      {selected.file.fileName}
+                      {selectedEntry.file.fileName}
                     </p>
                   </>
                 ) : (
@@ -341,7 +349,7 @@ export function LocalPokemonView({
 
             <div className="camp-backup-actions">
               <span className="camp-backup-actions-left">
-                {selected && (
+                {selectedEntry && (
                   <button
                     type="button"
                     className="camp-upload-btn camp-danger-btn"
@@ -361,11 +369,11 @@ export function LocalPokemonView({
                   />
                 </label>
               </span>
-              {selected && (
+              {selectedEntry && (
                 <button
                   type="button"
                   className="camp-upload-btn"
-                  onClick={() => downloadPokemon(selected)}
+                  onClick={() => downloadPokemon(selectedEntry)}
                 >
                   Download
                 </button>

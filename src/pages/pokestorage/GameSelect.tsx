@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react'
-import {
-  ROSTER,
-  saveLibrary,
-  type Gen3GameId,
-} from '../../services/saveLibrary'
+import { ROSTER, type Gen3GameId } from '../../services/saveLibrary'
 import { GAME_LABEL } from './gameDisplay'
+import { useStorageProvider } from './useStorage'
 import { ZoneCard } from './ZoneCard'
 
 /** ROSTER's value type is the broad GameId union; index 3 is always Gen3GameId by construction. */
@@ -33,28 +30,28 @@ export function GameSelect({
     Record<Gen3GameId, BackupStatus>
   > | null>(null)
 
+  const { provider, ready } = useStorageProvider()
+
   useEffect(() => {
+    if (!ready) return
     let cancelled = false
 
-    void saveLibrary.whenReady().then(() => {
-      if (cancelled) return
-      setBackupStatuses(
-        Object.fromEntries(
-          GEN_3_GAMES.map((gameId) => [
-            gameId,
-            {
-              hasSave: saveLibrary.getSave(gameId) !== null,
-              updatedAt: saveLibrary.getSaveUpdatedAt(gameId),
-            },
-          ])
-        ) as Record<Gen3GameId, BackupStatus>
-      )
+    Promise.all(
+      GEN_3_GAMES.map(async (gameId) => {
+        const save = await provider.getSave(gameId).catch(() => null)
+        return [
+          gameId,
+          { hasSave: save !== null, updatedAt: save?.updatedAt ?? null },
+        ] as const
+      })
+    ).then((entries) => {
+      if (!cancelled) setBackupStatuses(Object.fromEntries(entries))
     })
 
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [provider, ready])
 
   return (
     <div className="camp-root">
