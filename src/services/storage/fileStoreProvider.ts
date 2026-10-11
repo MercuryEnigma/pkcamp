@@ -7,6 +7,7 @@ import {
   type CampPokemon,
   type StorageProvider,
   type StorageSettings,
+  type StoredCollectionResult,
   type StoredRom,
   type StoredSave,
 } from './types'
@@ -22,12 +23,14 @@ import {
  *   saves/{gameId}/{gameId}.{gba|gb|gbc|nds…}
  *   camp/gen-{n}/camp.json         site positions and file details
  *   camp/gen-{n}/{id}.pk{n}
+ *   pokedex/{collectionId}.json    last scan result of one collection
  */
 
 const SETTINGS_PATH = 'settings.json'
 const CURRENT_SAVE = 'current.sav'
 const PREVIOUS_SAVE = 'previous.sav'
 const HARDWARE_SAVE = 'hardware.sav'
+const POKEDEX_FOLDER = 'pokedex'
 const CAMP_MANIFEST = 'camp.json'
 const CAMP_MANIFEST_VERSION = 1
 const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
@@ -75,6 +78,14 @@ function campFilePath(generation: Generation, id: string): string {
   return `${campFolder(generation)}/${id}.pk${generation}`
 }
 
+function collectionPath(collectionId: string): string {
+  // The id becomes a file name, so it must not be able to leave the folder.
+  if (!SAFE_NAME.test(collectionId)) {
+    throw new Error(`Invalid collection id ${collectionId}.`)
+  }
+  return `${POKEDEX_FOLDER}/${collectionId}.json`
+}
+
 function encodeJson(value: unknown): Uint8Array {
   return new TextEncoder().encode(JSON.stringify(value, null, 2))
 }
@@ -93,7 +104,7 @@ async function sha256(bytes: Uint8Array): Promise<string> {
 /**
  * What the Camp Zone reads first, picked from every stored path: each
  * game's newest day's current and previous save, every Camp manifest and
- * Pokémon file, and the settings. Older days and ROMs are left alone.
+ * Pokémon file, every collection result, and the settings. Older days and ROMs are left alone.
  */
 export function prefetchPaths(paths: readonly string[]): string[] {
   const newestDay = new Map<string, string>()
@@ -101,6 +112,8 @@ export function prefetchPaths(paths: readonly string[]): string[] {
   for (const path of paths) {
     const parts = path.split('/')
     if (path === SETTINGS_PATH) picked.push(path)
+    else if (parts[0] === POKEDEX_FOLDER && parts.length === 2)
+      picked.push(path)
     else if (parts[0] === 'camp' && parts.length === 3) picked.push(path)
     else if (
       parts[0] === 'saves' &&
@@ -424,6 +437,41 @@ export class FileStoreProvider implements StorageProvider {
         await this.store.delete(`${campFolder(generation)}/${entry.name}`)
       }
     }
+  }
+
+  async getCollectionResult(
+    collectionId: string
+  ): Promise<StoredCollectionResult | null> {
+    const file = await this.store.read(collectionPath(collectionId))
+    if (!file) return null
+    // A result is only a cache of a scan, so anything unreadable is treated
+    // as missing and the Lab rescans.
+    let stored: Partial<StoredCollectionResult> | null
+    try {
+      stored = decodeJson(file.bytes) as Partial<StoredCollectionResult> | null
+    } catch {
+      return null
+    }
+    if (
+      typeof stored !== 'object' ||
+      stored === null ||
+      stored.version !== 1 ||
+      stored.collectionId !== collectionId
+    ) {
+      return null
+    }
+    return stored as StoredCollectionResult
+  }
+
+  async putCollectionResult(result: StoredCollectionResult): Promise<void> {
+    await this.store.write(
+      collectionPath(result.collectionId),
+      encodeJson(result)
+    )
+  }
+
+  async discardCollectionResult(collectionId: string): Promise<void> {
+    await this.store.delete(collectionPath(collectionId))
   }
 
   async getSettings(): Promise<StorageSettings> {

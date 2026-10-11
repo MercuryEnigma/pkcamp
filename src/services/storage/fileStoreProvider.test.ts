@@ -11,6 +11,7 @@ import {
   DEFAULT_CAMP_SITE_COUNT,
   type Camp,
   type CampPokemon,
+  type StoredCollectionResult,
 } from './types'
 
 const bytes = (...values: number[]) => new Uint8Array(values)
@@ -511,6 +512,7 @@ describe('prefetchPaths', () => {
       'saves/emerald/2026-08-01/current.sav',
       'camp/gen-3/camp.json',
       'camp/gen-3/abc.pk3',
+      'pokedex/unown-dex.json',
       'accounts/dropbox.json',
       'migrations/legacy-browser-storage.json',
     ]
@@ -519,6 +521,7 @@ describe('prefetchPaths', () => {
       [
         'camp/gen-3/abc.pk3',
         'camp/gen-3/camp.json',
+        'pokedex/unown-dex.json',
         'saves/emerald/2026-08-01/current.sav',
         'saves/ruby/2026-10-02/current.sav',
         'saves/ruby/2026-10-02/previous.sav',
@@ -618,5 +621,87 @@ describe('hardware backups', () => {
         'saves/ruby/2026-10-05/hardware.sav',
       ])
     ).toEqual(['saves/ruby/2026-10-02/current.sav'])
+  })
+})
+
+describe('collection results', () => {
+  const result: StoredCollectionResult = {
+    version: 1,
+    collectionId: 'unown-dex',
+    collectionName: 'Unown Dex',
+    collectionVersion: '1.0.0',
+    scannedAt: '2026-01-05T12:00:00.000Z',
+    sources: [{ gameId: 'emerald', saveUpdatedAt: '2026-01-04T10:00:00.000Z' }],
+    owned: 1,
+    seen: 0,
+    total: 2,
+    entries: {
+      'unown-a': {
+        status: 'owned',
+        firstOwnedAt: '2026-01-05T12:00:00.000Z',
+        lastOwnedAt: '2026-01-05T12:00:00.000Z',
+        matches: [
+          {
+            gameId: 'emerald',
+            location: { box: 0, slot: 3 },
+            boxName: 'BOX 1',
+            species: 201,
+            form: 0,
+            nickname: 'UNOWN',
+            level: 5,
+            shiny: false,
+          },
+        ],
+      },
+      'unown-b': { status: 'unseen', matches: [] },
+    },
+  }
+
+  it('is null before the first scan', async () => {
+    expect(await provider.getCollectionResult('unown-dex')).toBeNull()
+  })
+
+  it('round trips a result', async () => {
+    await provider.putCollectionResult(result)
+    expect(await provider.getCollectionResult('unown-dex')).toEqual(result)
+    expect(await store.read('pokedex/unown-dex.json')).not.toBeNull()
+  })
+
+  it('replaces the previous result', async () => {
+    await provider.putCollectionResult(result)
+    await provider.putCollectionResult({ ...result, owned: 2 })
+    expect((await provider.getCollectionResult('unown-dex'))!.owned).toBe(2)
+  })
+
+  it('reads a corrupt or foreign file as missing', async () => {
+    const write = (text: string) =>
+      store.write('pokedex/unown-dex.json', new TextEncoder().encode(text))
+    await write('not json {')
+    expect(await provider.getCollectionResult('unown-dex')).toBeNull()
+    await write('null')
+    expect(await provider.getCollectionResult('unown-dex')).toBeNull()
+    await write(JSON.stringify({ ...result, version: 2 }))
+    expect(await provider.getCollectionResult('unown-dex')).toBeNull()
+    await write(JSON.stringify({ ...result, collectionId: 'other' }))
+    expect(await provider.getCollectionResult('unown-dex')).toBeNull()
+  })
+
+  it('rejects unsafe collection ids', async () => {
+    for (const id of ['../x', 'a b', 'a/b', '']) {
+      await expect(provider.getCollectionResult(id)).rejects.toThrow()
+      await expect(
+        provider.putCollectionResult({ ...result, collectionId: id })
+      ).rejects.toThrow()
+      await expect(provider.discardCollectionResult(id)).rejects.toThrow()
+    }
+  })
+
+  it('discards a result, and a missing one is fine', async () => {
+    await provider.putCollectionResult(result)
+    await provider.discardCollectionResult('unown-dex')
+    expect(await provider.getCollectionResult('unown-dex')).toBeNull()
+    await expect(
+      provider.discardCollectionResult('unown-dex')
+    ).resolves.toBeUndefined()
   })
 })

@@ -32,8 +32,11 @@ type Screen =
 
 export function PokeStorageMain({
   onUnsavedChangesChange,
+  onBack,
 }: {
   onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
+  /** Leaves the Camp Zone; shows a Back button on the activity list. */
+  onBack?: () => void
 }) {
   const [screen, setScreen] = useState<Screen>({ name: 'splash' })
   const { provider } = useStorageProvider()
@@ -61,16 +64,22 @@ export function PokeStorageMain({
     [onUnsavedChangesChange]
   )
 
-  const openStorageSettings = () => {
+  const confirmLeave = () => {
     if (
       unsavedRef.current &&
       !window.confirm('You have unsaved changes. Leave without saving them?')
     ) {
-      return
+      return false
     }
     handleUnsavedChange(false)
-    setScreen({ name: 'settings', tab: 'storage' })
+    return true
   }
+
+  const openStorageSettings = () => {
+    if (confirmLeave()) setScreen({ name: 'settings', tab: 'storage' })
+  }
+
+  const leaveCamp = onBack && (() => confirmLeave() && onBack())
 
   return (
     <div className="camp-zone">
@@ -86,6 +95,7 @@ export function PokeStorageMain({
       case 'activities':
         return (
           <CampActivities
+            onBack={leaveCamp}
             onSelectLodges={() => setScreen({ name: 'generationSelect' })}
             onSelectTrade={() => setScreen({ name: 'trade' })}
             onSelectSettings={() => setScreen({ name: 'settings' })}

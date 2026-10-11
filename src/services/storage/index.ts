@@ -2,7 +2,13 @@ import type { GameId, Generation } from '../saveLibrary'
 import { MemoryFileStore, type FileStore } from './fileStore'
 import { FileStoreProvider } from './fileStoreProvider'
 import { IndexedDbFileStore } from './indexedDbFileStore'
-import type { Camp, StorageProvider, StorageSettings, StoredRom } from './types'
+import type {
+  Camp,
+  StorageProvider,
+  StorageSettings,
+  StoredCollectionResult,
+  StoredRom,
+} from './types'
 
 export type {
   Camp,
@@ -11,6 +17,7 @@ export type {
   CampSite,
   StorageProvider,
   StorageSettings,
+  StoredCollectionResult,
   StoredRom,
   StoredSave,
 } from './types'
@@ -114,6 +121,15 @@ class ActiveStorage implements StorageProvider {
   }
   saveCamp(generation: Generation, camp: Camp) {
     return this.provider.saveCamp(generation, camp)
+  }
+  getCollectionResult(collectionId: string) {
+    return this.provider.getCollectionResult(collectionId)
+  }
+  putCollectionResult(result: StoredCollectionResult) {
+    return this.provider.putCollectionResult(result)
+  }
+  discardCollectionResult(collectionId: string) {
+    return this.provider.discardCollectionResult(collectionId)
   }
   getSettings() {
     return this.provider.getSettings()

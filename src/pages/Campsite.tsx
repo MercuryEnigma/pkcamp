@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Options } from './Options'
 import { PokeStorage } from './PokeStorage'
+import { LabMain } from './pokestorage/lab/LabMain'
 
 export function Campsite() {
   const [active, setActive] = useState<
@@ -34,7 +34,7 @@ export function Campsite() {
             </button>
             <p></p>
             <button onClick={() => setActive('options')}>
-              Lab Zone: Track your Records
+              Lab Zone: Pokédex Collections &amp; research
             </button>
           </p>
           <p>Coming Soon: Battle Zone</p>
@@ -45,14 +45,16 @@ export function Campsite() {
       )}
       {active == 'pokemon' && (
         <>
-          <PokeStorage onUnsavedChangesChange={setPokemonHasUnsavedChanges} />
+          <PokeStorage
+            onUnsavedChangesChange={setPokemonHasUnsavedChanges}
+            onBack={() => setActive('campsite')}
+          />
           <button onClick={leavePokemonStorage}>Back</button>
         </>
       )}
       {active == 'options' && (
         <>
-          <Options />
-          <button onClick={() => setActive('campsite')}>Back</button>
+          <LabMain onBack={() => setActive('campsite')} />
         </>
       )}
     </>

@@ -1,3 +1,4 @@
+import { useNavigationGuard } from './navigationGuard'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PokemonNode, SaveGame } from '../../services/pkhex'
 import type { Gen3GameId } from '../../services/saveLibrary'
@@ -78,6 +79,10 @@ export function SaveViewer({
   const unreadableCampRef = useRef<ReadonlyMap<number, CampPokemon>>(new Map())
   const boxRef = useRef<number | null>(initialBox ?? null)
   const hasUnsavedChanges = gameDirty || localDirty
+  useNavigationGuard(
+    hasUnsavedChanges,
+    'You have unsaved changes. Leave without saving them?'
+  )
 
   // Restore a previously stored save for this game as soon as the adapter
   // and the active storage are ready, and again if the storage changes.

@@ -49,6 +49,44 @@ export interface StorageSettings {
   spriteSourceId: string | null
 }
 
+/** One collection's last scan result, stored at pokedex/{collectionId}.json. */
+export interface StoredCollectionResult {
+  /** File-format version. */
+  version: 1
+  collectionId: string
+  collectionName: string
+  /** Definition `metadata.version` at scan time. */
+  collectionVersion: string
+  /** ISO timestamp. */
+  scannedAt: string
+  /** Cabins scanned, with the save timestamp each scan read. */
+  sources: { gameId: GameId; saveUpdatedAt: string }[]
+  owned: number
+  /** Seen but not currently owned. */
+  seen: number
+  total: number
+  entries: Record<
+    string,
+    {
+      status: 'owned' | 'seen' | 'unseen'
+      /** ISO; set the first scan that matched. */
+      firstOwnedAt?: string
+      /** ISO; the latest scan that matched. */
+      lastOwnedAt?: string
+      matches: {
+        gameId: GameId
+        location: 'party' | { box: number; slot: number }
+        boxName?: string
+        species: number
+        form: number
+        nickname: string
+        level: number
+        shiny: boolean
+      }[]
+    }
+  >
+}
+
 /**
  * One place a player's data can live: browser-local IndexedDB, Dropbox, or a
  * future cloud store. Every provider stores the same data with the same
@@ -93,6 +131,15 @@ export interface StorageProvider {
   getCamp(generation: Generation): Promise<Camp>
   /** Replaces a generation's whole Camp. */
   saveCamp(generation: Generation, camp: Camp): Promise<void>
+
+  /** A collection's last stored result, or null if it has never been scanned. */
+  getCollectionResult(
+    collectionId: string
+  ): Promise<StoredCollectionResult | null>
+  /** Replaces a collection's stored result. */
+  putCollectionResult(result: StoredCollectionResult): Promise<void>
+  /** Removes a collection's stored result. Missing is fine. */
+  discardCollectionResult(collectionId: string): Promise<void>
 
   getSettings(): Promise<StorageSettings>
   saveSettings(settings: StorageSettings): Promise<void>

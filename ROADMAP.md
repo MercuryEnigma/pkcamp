@@ -1,6 +1,6 @@
 # FR-LDN — Product Roadmap
 
-_Updated September 30, 2026._
+_Updated October 3, 2026._
 
 ## Product vision
 
@@ -62,10 +62,10 @@ activities → persist progress to the player's account.
       serialization, positional box writes, and movement are working.
 - [x] Built the Poké Storage proof of concept in Camp; Gen 3 has working save
       views.
-- [x] Added one browser-local save/ROM slot per game id and configurable
-      **Camping Pokémon** boxes for each generation. Each generation defaults
-      to one 30-slot box. These use IndexedDB as a proof-of-concept persistence
-      layer; Dropbox is not yet integrated.
+- [x] Added one save/ROM slot per game id and configurable **Camping Pokémon**
+      Camp Sites for each generation. Browser-local IndexedDB and Dropbox use
+      the same storage-provider contract; Dropbox supports PKCE sign-in,
+      copy-up, restore, and offline read-only handling.
 - [x] Added Gen 3 party, box, and details views plus explicit View, Move, and
       Group modes. Party Pokémon are view-only; box Pokémon can move between
       save boxes and Camping Pokémon.
@@ -74,6 +74,8 @@ activities → persist progress to the player's account.
       while unsaved.
 - [x] Added a site-wide sprite resolver boundary with a parameterized,
       user-selectable source for the proof of concept.
+- [x] Reject wrong-game Gen 3 save uploads and restores before they can enter a
+      Cabin or be written to its cartridge.
 - [ ] Replace the current section-oriented navigation with the splash screen
       and explorable six-area map described above.
 
@@ -147,7 +149,7 @@ recovery has been tested with more than one player-provided game.
 - [ ] Define a Dropbox folder and document schema for current settings, saves,
       Pokémon data, collection progress, rewards, inventory, decorations, and
       per-zone state.
-- [ ] Implement Dropbox OAuth 2.0 PKCE, logout, token recovery, and scoped
+- [x] Implement Dropbox OAuth 2.0 PKCE, logout, token recovery, and scoped
       access suitable for a static application.
 - [ ] Define ownership and mutation rules for raw saves, extracted Pokémon, and
       derived Pokédex/collection data. Validate every import and export through
@@ -169,7 +171,7 @@ a fresh browser session.
 - [x] Build the Gen 3 Camp proof of concept for importing, inspecting, and
       organizing save-box and Camping Pokémon.
 - [x] Add local save export to the Camp (download the current Gen 3 `.sav`).
-- [ ] Add Dropbox persistence to the Camp.
+- [x] Add Dropbox persistence to the Camp.
 - [ ] Expand the Camp's working save support beyond Gen 3.
 - [x] Add the Camp trade corner using the verified switch.gblink.io/device
       approach, including connection, permission, progress, cancellation, and

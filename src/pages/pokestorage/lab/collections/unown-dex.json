@@ -1,0 +1,189 @@
+{
+  "schemaVersion": "1",
+  "id": "unown-dex",
+  "name": "Unown Dex",
+  "metadata": {
+    "version": "1.0.0",
+    "author": "PkCamp",
+    "description": "All 28 Unown forms, A to Z, ! and ?. Eggs do not count.",
+    "updated": "2026-10-03"
+  },
+  "groups": [
+    {
+      "id": "unown",
+      "name": "Unown",
+      "pokemon": [
+        "unown-a",
+        "unown-b",
+        "unown-c",
+        "unown-d",
+        "unown-e",
+        "unown-f",
+        "unown-g",
+        "unown-h",
+        "unown-i",
+        "unown-j",
+        "unown-k",
+        "unown-l",
+        "unown-m",
+        "unown-n",
+        "unown-o",
+        "unown-p",
+        "unown-q",
+        "unown-r",
+        "unown-s",
+        "unown-t",
+        "unown-u",
+        "unown-v",
+        "unown-w",
+        "unown-x",
+        "unown-y",
+        "unown-z",
+        "unown-exclamation",
+        "unown-question"
+      ]
+    }
+  ],
+  "pokemon": {
+    "unown-a": {
+      "species": 201,
+      "form": 0,
+      "isEgg": false
+    },
+    "unown-b": {
+      "species": 201,
+      "form": 1,
+      "isEgg": false
+    },
+    "unown-c": {
+      "species": 201,
+      "form": 2,
+      "isEgg": false
+    },
+    "unown-d": {
+      "species": 201,
+      "form": 3,
+      "isEgg": false
+    },
+    "unown-e": {
+      "species": 201,
+      "form": 4,
+      "isEgg": false
+    },
+    "unown-f": {
+      "species": 201,
+      "form": 5,
+      "isEgg": false
+    },
+    "unown-g": {
+      "species": 201,
+      "form": 6,
+      "isEgg": false
+    },
+    "unown-h": {
+      "species": 201,
+      "form": 7,
+      "isEgg": false
+    },
+    "unown-i": {
+      "species": 201,
+      "form": 8,
+      "isEgg": false
+    },
+    "unown-j": {
+      "species": 201,
+      "form": 9,
+      "isEgg": false
+    },
+    "unown-k": {
+      "species": 201,
+      "form": 10,
+      "isEgg": false
+    },
+    "unown-l": {
+      "species": 201,
+      "form": 11,
+      "isEgg": false
+    },
+    "unown-m": {
+      "species": 201,
+      "form": 12,
+      "isEgg": false
+    },
+    "unown-n": {
+      "species": 201,
+      "form": 13,
+      "isEgg": false
+    },
+    "unown-o": {
+      "species": 201,
+      "form": 14,
+      "isEgg": false
+    },
+    "unown-p": {
+      "species": 201,
+      "form": 15,
+      "isEgg": false
+    },
+    "unown-q": {
+      "species": 201,
+      "form": 16,
+      "isEgg": false
+    },
+    "unown-r": {
+      "species": 201,
+      "form": 17,
+      "isEgg": false
+    },
+    "unown-s": {
+      "species": 201,
+      "form": 18,
+      "isEgg": false
+    },
+    "unown-t": {
+      "species": 201,
+      "form": 19,
+      "isEgg": false
+    },
+    "unown-u": {
+      "species": 201,
+      "form": 20,
+      "isEgg": false
+    },
+    "unown-v": {
+      "species": 201,
+      "form": 21,
+      "isEgg": false
+    },
+    "unown-w": {
+      "species": 201,
+      "form": 22,
+      "isEgg": false
+    },
+    "unown-x": {
+      "species": 201,
+      "form": 23,
+      "isEgg": false
+    },
+    "unown-y": {
+      "species": 201,
+      "form": 24,
+      "isEgg": false
+    },
+    "unown-z": {
+      "species": 201,
+      "form": 25,
+      "isEgg": false
+    },
+    "unown-exclamation": {
+      "species": 201,
+      "form": 26,
+      "isEgg": false
+    },
+    "unown-question": {
+      "species": 201,
+      "form": 27,
+      "isEgg": false
+    }
+  }
+}

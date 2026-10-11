@@ -1,0 +1,1963 @@
+{
+  "schemaVersion": "1",
+  "id": "gen3-living-dex",
+  "name": "Gen 3 Living Dex",
+  "metadata": {
+    "version": "1.0.0",
+    "author": "PkCamp",
+    "description": "One of every Pokémon from Bulbasaur to Deoxys. Eggs do not count.",
+    "updated": "2026-10-03"
+  },
+  "groups": [
+    {
+      "id": "kanto",
+      "name": "Kanto",
+      "pokemon": [
+        "0001",
+        "0002",
+        "0003",
+        "0004",
+        "0005",
+        "0006",
+        "0007",
+        "0008",
+        "0009",
+        "0010",
+        "0011",
+        "0012",
+        "0013",
+        "0014",
+        "0015",
+        "0016",
+        "0017",
+        "0018",
+        "0019",
+        "0020",
+        "0021",
+        "0022",
+        "0023",
+        "0024",
+        "0025",
+        "0026",
+        "0027",
+        "0028",
+        "0029",
+        "0030",
+        "0031",
+        "0032",
+        "0033",
+        "0034",
+        "0035",
+        "0036",
+        "0037",
+        "0038",
+        "0039",
+        "0040",
+        "0041",
+        "0042",
+        "0043",
+        "0044",
+        "0045",
+        "0046",
+        "0047",
+        "0048",
+        "0049",
+        "0050",
+        "0051",
+        "0052",
+        "0053",
+        "0054",
+        "0055",
+        "0056",
+        "0057",
+        "0058",
+        "0059",
+        "0060",
+        "0061",
+        "0062",
+        "0063",
+        "0064",
+        "0065",
+        "0066",
+        "0067",
+        "0068",
+        "0069",
+        "0070",
+        "0071",
+        "0072",
+        "0073",
+        "0074",
+        "0075",
+        "0076",
+        "0077",
+        "0078",
+        "0079",
+        "0080",
+        "0081",
+        "0082",
+        "0083",
+        "0084",
+        "0085",
+        "0086",
+        "0087",
+        "0088",
+        "0089",
+        "0090",
+        "0091",
+        "0092",
+        "0093",
+        "0094",
+        "0095",
+        "0096",
+        "0097",
+        "0098",
+        "0099",
+        "0100",
+        "0101",
+        "0102",
+        "0103",
+        "0104",
+        "0105",
+        "0106",
+        "0107",
+        "0108",
+        "0109",
+        "0110",
+        "0111",
+        "0112",
+        "0113",
+        "0114",
+        "0115",
+        "0116",
+        "0117",
+        "0118",
+        "0119",
+        "0120",
+        "0121",
+        "0122",
+        "0123",
+        "0124",
+        "0125",
+        "0126",
+        "0127",
+        "0128",
+        "0129",
+        "0130",
+        "0131",
+        "0132",
+        "0133",
+        "0134",
+        "0135",
+        "0136",
+        "0137",
+        "0138",
+        "0139",
+        "0140",
+        "0141",
+        "0142",
+        "0143",
+        "0144",
+        "0145",
+        "0146",
+        "0147",
+        "0148",
+        "0149",
+        "0150",
+        "0151"
+      ]
+    },
+    {
+      "id": "johto",
+      "name": "Johto",
+      "pokemon": [
+        "0152",
+        "0153",
+        "0154",
+        "0155",
+        "0156",
+        "0157",
+        "0158",
+        "0159",
+        "0160",
+        "0161",
+        "0162",
+        "0163",
+        "0164",
+        "0165",
+        "0166",
+        "0167",
+        "0168",
+        "0169",
+        "0170",
+        "0171",
+        "0172",
+        "0173",
+        "0174",
+        "0175",
+        "0176",
+        "0177",
+        "0178",
+        "0179",
+        "0180",
+        "0181",
+        "0182",
+        "0183",
+        "0184",
+        "0185",
+        "0186",
+        "0187",
+        "0188",
+        "0189",
+        "0190",
+        "0191",
+        "0192",
+        "0193",
+        "0194",
+        "0195",
+        "0196",
+        "0197",
+        "0198",
+        "0199",
+        "0200",
+        "0201",
+        "0202",
+        "0203",
+        "0204",
+        "0205",
+        "0206",
+        "0207",
+        "0208",
+        "0209",
+        "0210",
+        "0211",
+        "0212",
+        "0213",
+        "0214",
+        "0215",
+        "0216",
+        "0217",
+        "0218",
+        "0219",
+        "0220",
+        "0221",
+        "0222",
+        "0223",
+        "0224",
+        "0225",
+        "0226",
+        "0227",
+        "0228",
+        "0229",
+        "0230",
+        "0231",
+        "0232",
+        "0233",
+        "0234",
+        "0235",
+        "0236",
+        "0237",
+        "0238",
+        "0239",
+        "0240",
+        "0241",
+        "0242",
+        "0243",
+        "0244",
+        "0245",
+        "0246",
+        "0247",
+        "0248",
+        "0249",
+        "0250",
+        "0251"
+      ]
+    },
+    {
+      "id": "hoenn",
+      "name": "Hoenn",
+      "pokemon": [
+        "0252",
+        "0253",
+        "0254",
+        "0255",
+        "0256",
+        "0257",
+        "0258",
+        "0259",
+        "0260",
+        "0261",
+        "0262",
+        "0263",
+        "0264",
+        "0265",
+        "0266",
+        "0267",
+        "0268",
+        "0269",
+        "0270",
+        "0271",
+        "0272",
+        "0273",
+        "0274",
+        "0275",
+        "0276",
+        "0277",
+        "0278",
+        "0279",
+        "0280",
+        "0281",
+        "0282",
+        "0283",
+        "0284",
+        "0285",
+        "0286",
+        "0287",
+        "0288",
+        "0289",
+        "0290",
+        "0291",
+        "0292",
+        "0293",
+        "0294",
+        "0295",
+        "0296",
+        "0297",
+        "0298",
+        "0299",
+        "0300",
+        "0301",
+        "0302",
+        "0303",
+        "0304",
+        "0305",
+        "0306",
+        "0307",
+        "0308",
+        "0309",
+        "0310",
+        "0311",
+        "0312",
+        "0313",
+        "0314",
+        "0315",
+        "0316",
+        "0317",
+        "0318",
+        "0319",
+        "0320",
+        "0321",
+        "0322",
+        "0323",
+        "0324",
+        "0325",
+        "0326",
+        "0327",
+        "0328",
+        "0329",
+        "0330",
+        "0331",
+        "0332",
+        "0333",
+        "0334",
+        "0335",
+        "0336",
+        "0337",
+        "0338",
+        "0339",
+        "0340",
+        "0341",
+        "0342",
+        "0343",
+        "0344",
+        "0345",
+        "0346",
+        "0347",
+        "0348",
+        "0349",
+        "0350",
+        "0351",
+        "0352",
+        "0353",
+        "0354",
+        "0355",
+        "0356",
+        "0357",
+        "0358",
+        "0359",
+        "0360",
+        "0361",
+        "0362",
+        "0363",
+        "0364",
+        "0365",
+        "0366",
+        "0367",
+        "0368",
+        "0369",
+        "0370",
+        "0371",
+        "0372",
+        "0373",
+        "0374",
+        "0375",
+        "0376",
+        "0377",
+        "0378",
+        "0379",
+        "0380",
+        "0381",
+        "0382",
+        "0383",
+        "0384",
+        "0385",
+        "0386"
+      ]
+    }
+  ],
+  "pokemon": {
+    "0001": {
+      "species": 1,
+      "isEgg": false
+    },
+    "0002": {
+      "species": 2,
+      "isEgg": false
+    },
+    "0003": {
+      "species": 3,
+      "isEgg": false
+    },
+    "0004": {
+      "species": 4,
+      "isEgg": false
+    },
+    "0005": {
+      "species": 5,
+      "isEgg": false
+    },
+    "0006": {
+      "species": 6,
+      "isEgg": false
+    },
+    "0007": {
+      "species": 7,
+      "isEgg": false
+    },
+    "0008": {
+      "species": 8,
+      "isEgg": false
+    },
+    "0009": {
+      "species": 9,
+      "isEgg": false
+    },
+    "0010": {
+      "species": 10,
+      "isEgg": false
+    },
+    "0011": {
+      "species": 11,
+      "isEgg": false
+    },
+    "0012": {
+      "species": 12,
+      "isEgg": false
+    },
+    "0013": {
+      "species": 13,
+      "isEgg": false
+    },
+    "0014": {
+      "species": 14,
+      "isEgg": false
+    },
+    "0015": {
+      "species": 15,
+      "isEgg": false
+    },
+    "0016": {
+      "species": 16,
+      "isEgg": false
+    },
+    "0017": {
+      "species": 17,
+      "isEgg": false
+    },
+    "0018": {
+      "species": 18,
+      "isEgg": false
+    },
+    "0019": {
+      "species": 19,
+      "isEgg": false
+    },
+    "0020": {
+      "species": 20,
+      "isEgg": false
+    },
+    "0021": {
+      "species": 21,
+      "isEgg": false
+    },
+    "0022": {
+      "species": 22,
+      "isEgg": false
+    },
+    "0023": {
+      "species": 23,
+      "isEgg": false
+    },
+    "0024": {
+      "species": 24,
+      "isEgg": false
+    },
+    "0025": {
+      "species": 25,
+      "isEgg": false
+    },
+    "0026": {
+      "species": 26,
+      "isEgg": false
+    },
+    "0027": {
+      "species": 27,
+      "isEgg": false
+    },
+    "0028": {
+      "species": 28,
+      "isEgg": false
+    },
+    "0029": {
+      "species": 29,
+      "isEgg": false
+    },
+    "0030": {
+      "species": 30,
+      "isEgg": false
+    },
+    "0031": {
+      "species": 31,
+      "isEgg": false
+    },
+    "0032": {
+      "species": 32,
+      "isEgg": false
+    },
+    "0033": {
+      "species": 33,
+      "isEgg": false
+    },
+    "0034": {
+      "species": 34,
+      "isEgg": false
+    },
+    "0035": {
+      "species": 35,
+      "isEgg": false
+    },
+    "0036": {
+      "species": 36,
+      "isEgg": false
+    },
+    "0037": {
+      "species": 37,
+      "isEgg": false
+    },
+    "0038": {
+      "species": 38,
+      "isEgg": false
+    },
+    "0039": {
+      "species": 39,
+      "isEgg": false
+    },
+    "0040": {
+      "species": 40,
+      "isEgg": false
+    },
+    "0041": {
+      "species": 41,
+      "isEgg": false
+    },
+    "0042": {
+      "species": 42,
+      "isEgg": false
+    },
+    "0043": {
+      "species": 43,
+      "isEgg": false
+    },
+    "0044": {
+      "species": 44,
+      "isEgg": false
+    },
+    "0045": {
+      "species": 45,
+      "isEgg": false
+    },
+    "0046": {
+      "species": 46,
+      "isEgg": false
+    },
+    "0047": {
+      "species": 47,
+      "isEgg": false
+    },
+    "0048": {
+      "species": 48,
+      "isEgg": false
+    },
+    "0049": {
+      "species": 49,
+      "isEgg": false
+    },
+    "0050": {
+      "species": 50,
+      "isEgg": false
+    },
+    "0051": {
+      "species": 51,
+      "isEgg": false
+    },
+    "0052": {
+      "species": 52,
+      "isEgg": false
+    },
+    "0053": {
+      "species": 53,
+      "isEgg": false
+    },
+    "0054": {
+      "species": 54,
+      "isEgg": false
+    },
+    "0055": {
+      "species": 55,
+      "isEgg": false
+    },
+    "0056": {
+      "species": 56,
+      "isEgg": false
+    },
+    "0057": {
+      "species": 57,
+      "isEgg": false
+    },
+    "0058": {
+      "species": 58,
+      "isEgg": false
+    },
+    "0059": {
+      "species": 59,
+      "isEgg": false
+    },
+    "0060": {
+      "species": 60,
+      "isEgg": false
+    },
+    "0061": {
+      "species": 61,
+      "isEgg": false
+    },
+    "0062": {
+      "species": 62,
+      "isEgg": false
+    },
+    "0063": {
+      "species": 63,
+      "isEgg": false
+    },
+    "0064": {
+      "species": 64,
+      "isEgg": false
+    },
+    "0065": {
+      "species": 65,
+      "isEgg": false
+    },
+    "0066": {
+      "species": 66,
+      "isEgg": false
+    },
+    "0067": {
+      "species": 67,
+      "isEgg": false
+    },
+    "0068": {
+      "species": 68,
+      "isEgg": false
+    },
+    "0069": {
+      "species": 69,
+      "isEgg": false
+    },
+    "0070": {
+      "species": 70,
+      "isEgg": false
+    },
+    "0071": {
+      "species": 71,
+      "isEgg": false
+    },
+    "0072": {
+      "species": 72,
+      "isEgg": false
+    },
+    "0073": {
+      "species": 73,
+      "isEgg": false
+    },
+    "0074": {
+      "species": 74,
+      "isEgg": false
+    },
+    "0075": {
+      "species": 75,
+      "isEgg": false
+    },
+    "0076": {
+      "species": 76,
+      "isEgg": false
+    },
+    "0077": {
+      "species": 77,
+      "isEgg": false
+    },
+    "0078": {
+      "species": 78,
+      "isEgg": false
+    },
+    "0079": {
+      "species": 79,
+      "isEgg": false
+    },
+    "0080": {
+      "species": 80,
+      "isEgg": false
+    },
+    "0081": {
+      "species": 81,
+      "isEgg": false
+    },
+    "0082": {
+      "species": 82,
+      "isEgg": false
+    },
+    "0083": {
+      "species": 83,
+      "isEgg": false
+    },
+    "0084": {
+      "species": 84,
+      "isEgg": false
+    },
+    "0085": {
+      "species": 85,
+      "isEgg": false
+    },
+    "0086": {
+      "species": 86,
+      "isEgg": false
+    },
+    "0087": {
+      "species": 87,
+      "isEgg": false
+    },
+    "0088": {
+      "species": 88,
+      "isEgg": false
+    },
+    "0089": {
+      "species": 89,
+      "isEgg": false
+    },
+    "0090": {
+      "species": 90,
+      "isEgg": false
+    },
+    "0091": {
+      "species": 91,
+      "isEgg": false
+    },
+    "0092": {
+      "species": 92,
+      "isEgg": false
+    },
+    "0093": {
+      "species": 93,
+      "isEgg": false
+    },
+    "0094": {
+      "species": 94,
+      "isEgg": false
+    },
+    "0095": {
+      "species": 95,
+      "isEgg": false
+    },
+    "0096": {
+      "species": 96,
+      "isEgg": false
+    },
+    "0097": {
+      "species": 97,
+      "isEgg": false
+    },
+    "0098": {
+      "species": 98,
+      "isEgg": false
+    },
+    "0099": {
+      "species": 99,
+      "isEgg": false
+    },
+    "0100": {
+      "species": 100,
+      "isEgg": false
+    },
+    "0101": {
+      "species": 101,
+      "isEgg": false
+    },
+    "0102": {
+      "species": 102,
+      "isEgg": false
+    },
+    "0103": {
+      "species": 103,
+      "isEgg": false
+    },
+    "0104": {
+      "species": 104,
+      "isEgg": false
+    },
+    "0105": {
+      "species": 105,
+      "isEgg": false
+    },
+    "0106": {
+      "species": 106,
+      "isEgg": false
+    },
+    "0107": {
+      "species": 107,
+      "isEgg": false
+    },
+    "0108": {
+      "species": 108,
+      "isEgg": false
+    },
+    "0109": {
+      "species": 109,
+      "isEgg": false
+    },
+    "0110": {
+      "species": 110,
+      "isEgg": false
+    },
+    "0111": {
+      "species": 111,
+      "isEgg": false
+    },
+    "0112": {
+      "species": 112,
+      "isEgg": false
+    },
+    "0113": {
+      "species": 113,
+      "isEgg": false
+    },
+    "0114": {
+      "species": 114,
+      "isEgg": false
+    },
+    "0115": {
+      "species": 115,
+      "isEgg": false
+    },
+    "0116": {
+      "species": 116,
+      "isEgg": false
+    },
+    "0117": {
+      "species": 117,
+      "isEgg": false
+    },
+    "0118": {
+      "species": 118,
+      "isEgg": false
+    },
+    "0119": {
+      "species": 119,
+      "isEgg": false
+    },
+    "0120": {
+      "species": 120,
+      "isEgg": false
+    },
+    "0121": {
+      "species": 121,
+      "isEgg": false
+    },
+    "0122": {
+      "species": 122,
+      "isEgg": false
+    },
+    "0123": {
+      "species": 123,
+      "isEgg": false
+    },
+    "0124": {
+      "species": 124,
+      "isEgg": false
+    },
+    "0125": {
+      "species": 125,
+      "isEgg": false
+    },
+    "0126": {
+      "species": 126,
+      "isEgg": false
+    },
+    "0127": {
+      "species": 127,
+      "isEgg": false
+    },
+    "0128": {
+      "species": 128,
+      "isEgg": false
+    },
+    "0129": {
+      "species": 129,
+      "isEgg": false
+    },
+    "0130": {
+      "species": 130,
+      "isEgg": false
+    },
+    "0131": {
+      "species": 131,
+      "isEgg": false
+    },
+    "0132": {
+      "species": 132,
+      "isEgg": false
+    },
+    "0133": {
+      "species": 133,
+      "isEgg": false
+    },
+    "0134": {
+      "species": 134,
+      "isEgg": false
+    },
+    "0135": {
+      "species": 135,
+      "isEgg": false
+    },
+    "0136": {
+      "species": 136,
+      "isEgg": false
+    },
+    "0137": {
+      "species": 137,
+      "isEgg": false
+    },
+    "0138": {
+      "species": 138,
+      "isEgg": false
+    },
+    "0139": {
+      "species": 139,
+      "isEgg": false
+    },
+    "0140": {
+      "species": 140,
+      "isEgg": false
+    },
+    "0141": {
+      "species": 141,
+      "isEgg": false
+    },
+    "0142": {
+      "species": 142,
+      "isEgg": false
+    },
+    "0143": {
+      "species": 143,
+      "isEgg": false
+    },
+    "0144": {
+      "species": 144,
+      "isEgg": false
+    },
+    "0145": {
+      "species": 145,
+      "isEgg": false
+    },
+    "0146": {
+      "species": 146,
+      "isEgg": false
+    },
+    "0147": {
+      "species": 147,
+      "isEgg": false
+    },
+    "0148": {
+      "species": 148,
+      "isEgg": false
+    },
+    "0149": {
+      "species": 149,
+      "isEgg": false
+    },
+    "0150": {
+      "species": 150,
+      "isEgg": false
+    },
+    "0151": {
+      "species": 151,
+      "isEgg": false
+    },
+    "0152": {
+      "species": 152,
+      "isEgg": false
+    },
+    "0153": {
+      "species": 153,
+      "isEgg": false
+    },
+    "0154": {
+      "species": 154,
+      "isEgg": false
+    },
+    "0155": {
+      "species": 155,
+      "isEgg": false
+    },
+    "0156": {
+      "species": 156,
+      "isEgg": false
+    },
+    "0157": {
+      "species": 157,
+      "isEgg": false
+    },
+    "0158": {
+      "species": 158,
+      "isEgg": false
+    },
+    "0159": {
+      "species": 159,
+      "isEgg": false
+    },
+    "0160": {
+      "species": 160,
+      "isEgg": false
+    },
+    "0161": {
+      "species": 161,
+      "isEgg": false
+    },
+    "0162": {
+      "species": 162,
+      "isEgg": false
+    },
+    "0163": {
+      "species": 163,
+      "isEgg": false
+    },
+    "0164": {
+      "species": 164,
+      "isEgg": false
+    },
+    "0165": {
+      "species": 165,
+      "isEgg": false
+    },
+    "0166": {
+      "species": 166,
+      "isEgg": false
+    },
+    "0167": {
+      "species": 167,
+      "isEgg": false
+    },
+    "0168": {
+      "species": 168,
+      "isEgg": false
+    },
+    "0169": {
+      "species": 169,
+      "isEgg": false
+    },
+    "0170": {
+      "species": 170,
+      "isEgg": false
+    },
+    "0171": {
+      "species": 171,
+      "isEgg": false
+    },
+    "0172": {
+      "species": 172,
+      "isEgg": false
+    },
+    "0173": {
+      "species": 173,
+      "isEgg": false
+    },
+    "0174": {
+      "species": 174,
+      "isEgg": false
+    },
+    "0175": {
+      "species": 175,
+      "isEgg": false
+    },
+    "0176": {
+      "species": 176,
+      "isEgg": false
+    },
+    "0177": {
+      "species": 177,
+      "isEgg": false
+    },
+    "0178": {
+      "species": 178,
+      "isEgg": false
+    },
+    "0179": {
+      "species": 179,
+      "isEgg": false
+    },
+    "0180": {
+      "species": 180,
+      "isEgg": false
+    },
+    "0181": {
+      "species": 181,
+      "isEgg": false
+    },
+    "0182": {
+      "species": 182,
+      "isEgg": false
+    },
+    "0183": {
+      "species": 183,
+      "isEgg": false
+    },
+    "0184": {
+      "species": 184,
+      "isEgg": false
+    },
+    "0185": {
+      "species": 185,
+      "isEgg": false
+    },
+    "0186": {
+      "species": 186,
+      "isEgg": false
+    },
+    "0187": {
+      "species": 187,
+      "isEgg": false
+    },
+    "0188": {
+      "species": 188,
+      "isEgg": false
+    },
+    "0189": {
+      "species": 189,
+      "isEgg": false
+    },
+    "0190": {
+      "species": 190,
+      "isEgg": false
+    },
+    "0191": {
+      "species": 191,
+      "isEgg": false
+    },
+    "0192": {
+      "species": 192,
+      "isEgg": false
+    },
+    "0193": {
+      "species": 193,
+      "isEgg": false
+    },
+    "0194": {
+      "species": 194,
+      "isEgg": false
+    },
+    "0195": {
+      "species": 195,
+      "isEgg": false
+    },
+    "0196": {
+      "species": 196,
+      "isEgg": false
+    },
+    "0197": {
+      "species": 197,
+      "isEgg": false
+    },
+    "0198": {
+      "species": 198,
+      "isEgg": false
+    },
+    "0199": {
+      "species": 199,
+      "isEgg": false
+    },
+    "0200": {
+      "species": 200,
+      "isEgg": false
+    },
+    "0201": {
+      "species": 201,
+      "isEgg": false
+    },
+    "0202": {
+      "species": 202,
+      "isEgg": false
+    },
+    "0203": {
+      "species": 203,
+      "isEgg": false
+    },
+    "0204": {
+      "species": 204,
+      "isEgg": false
+    },
+    "0205": {
+      "species": 205,
+      "isEgg": false
+    },
+    "0206": {
+      "species": 206,
+      "isEgg": false
+    },
+    "0207": {
+      "species": 207,
+      "isEgg": false
+    },
+    "0208": {
+      "species": 208,
+      "isEgg": false
+    },
+    "0209": {
+      "species": 209,
+      "isEgg": false
+    },
+    "0210": {
+      "species": 210,
+      "isEgg": false
+    },
+    "0211": {
+      "species": 211,
+      "isEgg": false
+    },
+    "0212": {
+      "species": 212,
+      "isEgg": false
+    },
+    "0213": {
+      "species": 213,
+      "isEgg": false
+    },
+    "0214": {
+      "species": 214,
+      "isEgg": false
+    },
+    "0215": {
+      "species": 215,
+      "isEgg": false
+    },
+    "0216": {
+      "species": 216,
+      "isEgg": false
+    },
+    "0217": {
+      "species": 217,
+      "isEgg": false
+    },
+    "0218": {
+      "species": 218,
+      "isEgg": false
+    },
+    "0219": {
+      "species": 219,
+      "isEgg": false
+    },
+    "0220": {
+      "species": 220,
+      "isEgg": false
+    },
+    "0221": {
+      "species": 221,
+      "isEgg": false
+    },
+    "0222": {
+      "species": 222,
+      "isEgg": false
+    },
+    "0223": {
+      "species": 223,
+      "isEgg": false
+    },
+    "0224": {
+      "species": 224,
+      "isEgg": false
+    },
+    "0225": {
+      "species": 225,
+      "isEgg": false
+    },
+    "0226": {
+      "species": 226,
+      "isEgg": false
+    },
+    "0227": {
+      "species": 227,
+      "isEgg": false
+    },
+    "0228": {
+      "species": 228,
+      "isEgg": false
+    },
+    "0229": {
+      "species": 229,
+      "isEgg": false
+    },
+    "0230": {
+      "species": 230,
+      "isEgg": false
+    },
+    "0231": {
+      "species": 231,
+      "isEgg": false
+    },
+    "0232": {
+      "species": 232,
+      "isEgg": false
+    },
+    "0233": {
+      "species": 233,
+      "isEgg": false
+    },
+    "0234": {
+      "species": 234,
+      "isEgg": false
+    },
+    "0235": {
+      "species": 235,
+      "isEgg": false
+    },
+    "0236": {
+      "species": 236,
+      "isEgg": false
+    },
+    "0237": {
+      "species": 237,
+      "isEgg": false
+    },
+    "0238": {
+      "species": 238,
+      "isEgg": false
+    },
+    "0239": {
+      "species": 239,
+      "isEgg": false
+    },
+    "0240": {
+      "species": 240,
+      "isEgg": false
+    },
+    "0241": {
+      "species": 241,
+      "isEgg": false
+    },
+    "0242": {
+      "species": 242,
+      "isEgg": false
+    },
+    "0243": {
+      "species": 243,
+      "isEgg": false
+    },
+    "0244": {
+      "species": 244,
+      "isEgg": false
+    },
+    "0245": {
+      "species": 245,
+      "isEgg": false
+    },
+    "0246": {
+      "species": 246,
+      "isEgg": false
+    },
+    "0247": {
+      "species": 247,
+      "isEgg": false
+    },
+    "0248": {
+      "species": 248,
+      "isEgg": false
+    },
+    "0249": {
+      "species": 249,
+      "isEgg": false
+    },
+    "0250": {
+      "species": 250,
+      "isEgg": false
+    },
+    "0251": {
+      "species": 251,
+      "isEgg": false
+    },
+    "0252": {
+      "species": 252,
+      "isEgg": false
+    },
+    "0253": {
+      "species": 253,
+      "isEgg": false
+    },
+    "0254": {
+      "species": 254,
+      "isEgg": false
+    },
+    "0255": {
+      "species": 255,
+      "isEgg": false
+    },
+    "0256": {
+      "species": 256,
+      "isEgg": false
+    },
+    "0257": {
+      "species": 257,
+      "isEgg": false
+    },
+    "0258": {
+      "species": 258,
+      "isEgg": false
+    },
+    "0259": {
+      "species": 259,
+      "isEgg": false
+    },
+    "0260": {
+      "species": 260,
+      "isEgg": false
+    },
+    "0261": {
+      "species": 261,
+      "isEgg": false
+    },
+    "0262": {
+      "species": 262,
+      "isEgg": false
+    },
+    "0263": {
+      "species": 263,
+      "isEgg": false
+    },
+    "0264": {
+      "species": 264,
+      "isEgg": false
+    },
+    "0265": {
+      "species": 265,
+      "isEgg": false
+    },
+    "0266": {
+      "species": 266,
+      "isEgg": false
+    },
+    "0267": {
+      "species": 267,
+      "isEgg": false
+    },
+    "0268": {
+      "species": 268,
+      "isEgg": false
+    },
+    "0269": {
+      "species": 269,
+      "isEgg": false
+    },
+    "0270": {
+      "species": 270,
+      "isEgg": false
+    },
+    "0271": {
+      "species": 271,
+      "isEgg": false
+    },
+    "0272": {
+      "species": 272,
+      "isEgg": false
+    },
+    "0273": {
+      "species": 273,
+      "isEgg": false
+    },
+    "0274": {
+      "species": 274,
+      "isEgg": false
+    },
+    "0275": {
+      "species": 275,
+      "isEgg": false
+    },
+    "0276": {
+      "species": 276,
+      "isEgg": false
+    },
+    "0277": {
+      "species": 277,
+      "isEgg": false
+    },
+    "0278": {
+      "species": 278,
+      "isEgg": false
+    },
+    "0279": {
+      "species": 279,
+      "isEgg": false
+    },
+    "0280": {
+      "species": 280,
+      "isEgg": false
+    },
+    "0281": {
+      "species": 281,
+      "isEgg": false
+    },
+    "0282": {
+      "species": 282,
+      "isEgg": false
+    },
+    "0283": {
+      "species": 283,
+      "isEgg": false
+    },
+    "0284": {
+      "species": 284,
+      "isEgg": false
+    },
+    "0285": {
+      "species": 285,
+      "isEgg": false
+    },
+    "0286": {
+      "species": 286,
+      "isEgg": false
+    },
+    "0287": {
+      "species": 287,
+      "isEgg": false
+    },
+    "0288": {
+      "species": 288,
+      "isEgg": false
+    },
+    "0289": {
+      "species": 289,
+      "isEgg": false
+    },
+    "0290": {
+      "species": 290,
+      "isEgg": false
+    },
+    "0291": {
+      "species": 291,
+      "isEgg": false
+    },
+    "0292": {
+      "species": 292,
+      "isEgg": false
+    },
+    "0293": {
+      "species": 293,
+      "isEgg": false
+    },
+    "0294": {
+      "species": 294,
+      "isEgg": false
+    },
+    "0295": {
+      "species": 295,
+      "isEgg": false
+    },
+    "0296": {
+      "species": 296,
+      "isEgg": false
+    },
+    "0297": {
+      "species": 297,
+      "isEgg": false
+    },
+    "0298": {
+      "species": 298,
+      "isEgg": false
+    },
+    "0299": {
+      "species": 299,
+      "isEgg": false
+    },
+    "0300": {
+      "species": 300,
+      "isEgg": false
+    },
+    "0301": {
+      "species": 301,
+      "isEgg": false
+    },
+    "0302": {
+      "species": 302,
+      "isEgg": false
+    },
+    "0303": {
+      "species": 303,
+      "isEgg": false
+    },
+    "0304": {
+      "species": 304,
+      "isEgg": false
+    },
+    "0305": {
+      "species": 305,
+      "isEgg": false
+    },
+    "0306": {
+      "species": 306,
+      "isEgg": false
+    },
+    "0307": {
+      "species": 307,
+      "isEgg": false
+    },
+    "0308": {
+      "species": 308,
+      "isEgg": false
+    },
+    "0309": {
+      "species": 309,
+      "isEgg": false
+    },
+    "0310": {
+      "species": 310,
+      "isEgg": false
+    },
+    "0311": {
+      "species": 311,
+      "isEgg": false
+    },
+    "0312": {
+      "species": 312,
+      "isEgg": false
+    },
+    "0313": {
+      "species": 313,
+      "isEgg": false
+    },
+    "0314": {
+      "species": 314,
+      "isEgg": false
+    },
+    "0315": {
+      "species": 315,
+      "isEgg": false
+    },
+    "0316": {
+      "species": 316,
+      "isEgg": false
+    },
+    "0317": {
+      "species": 317,
+      "isEgg": false
+    },
+    "0318": {
+      "species": 318,
+      "isEgg": false
+    },
+    "0319": {
+      "species": 319,
+      "isEgg": false
+    },
+    "0320": {
+      "species": 320,
+      "isEgg": false
+    },
+    "0321": {
+      "species": 321,
+      "isEgg": false
+    },
+    "0322": {
+      "species": 322,
+      "isEgg": false
+    },
+    "0323": {
+      "species": 323,
+      "isEgg": false
+    },
+    "0324": {
+      "species": 324,
+      "isEgg": false
+    },
+    "0325": {
+      "species": 325,
+      "isEgg": false
+    },
+    "0326": {
+      "species": 326,
+      "isEgg": false
+    },
+    "0327": {
+      "species": 327,
+      "isEgg": false
+    },
+    "0328": {
+      "species": 328,
+      "isEgg": false
+    },
+    "0329": {
+      "species": 329,
+      "isEgg": false
+    },
+    "0330": {
+      "species": 330,
+      "isEgg": false
+    },
+    "0331": {
+      "species": 331,
+      "isEgg": false
+    },
+    "0332": {
+      "species": 332,
+      "isEgg": false
+    },
+    "0333": {
+      "species": 333,
+      "isEgg": false
+    },
+    "0334": {
+      "species": 334,
+      "isEgg": false
+    },
+    "0335": {
+      "species": 335,
+      "isEgg": false
+    },
+    "0336": {
+      "species": 336,
+      "isEgg": false
+    },
+    "0337": {
+      "species": 337,
+      "isEgg": false
+    },
+    "0338": {
+      "species": 338,
+      "isEgg": false
+    },
+    "0339": {
+      "species": 339,
+      "isEgg": false
+    },
+    "0340": {
+      "species": 340,
+      "isEgg": false
+    },
+    "0341": {
+      "species": 341,
+      "isEgg": false
+    },
+    "0342": {
+      "species": 342,
+      "isEgg": false
+    },
+    "0343": {
+      "species": 343,
+      "isEgg": false
+    },
+    "0344": {
+      "species": 344,
+      "isEgg": false
+    },
+    "0345": {
+      "species": 345,
+      "isEgg": false
+    },
+    "0346": {
+      "species": 346,
+      "isEgg": false
+    },
+    "0347": {
+      "species": 347,
+      "isEgg": false
+    },
+    "0348": {
+      "species": 348,
+      "isEgg": false
+    },
+    "0349": {
+      "species": 349,
+      "isEgg": false
+    },
+    "0350": {
+      "species": 350,
+      "isEgg": false
+    },
+    "0351": {
+      "species": 351,
+      "isEgg": false
+    },
+    "0352": {
+      "species": 352,
+      "isEgg": false
+    },
+    "0353": {
+      "species": 353,
+      "isEgg": false
+    },
+    "0354": {
+      "species": 354,
+      "isEgg": false
+    },
+    "0355": {
+      "species": 355,
+      "isEgg": false
+    },
+    "0356": {
+      "species": 356,
+      "isEgg": false
+    },
+    "0357": {
+      "species": 357,
+      "isEgg": false
+    },
+    "0358": {
+      "species": 358,
+      "isEgg": false
+    },
+    "0359": {
+      "species": 359,
+      "isEgg": false
+    },
+    "0360": {
+      "species": 360,
+      "isEgg": false
+    },
+    "0361": {
+      "species": 361,
+      "isEgg": false
+    },
+    "0362": {
+      "species": 362,
+      "isEgg": false
+    },
+    "0363": {
+      "species": 363,
+      "isEgg": false
+    },
+    "0364": {
+      "species": 364,
+      "isEgg": false
+    },
+    "0365": {
+      "species": 365,
+      "isEgg": false
+    },
+    "0366": {
+      "species": 366,
+      "isEgg": false
+    },
+    "0367": {
+      "species": 367,
+      "isEgg": false
+    },
+    "0368": {
+      "species": 368,
+      "isEgg": false
+    },
+    "0369": {
+      "species": 369,
+      "isEgg": false
+    },
+    "0370": {
+      "species": 370,
+      "isEgg": false
+    },
+    "0371": {
+      "species": 371,
+      "isEgg": false
+    },
+    "0372": {
+      "species": 372,
+      "isEgg": false
+    },
+    "0373": {
+      "species": 373,
+      "isEgg": false
+    },
+    "0374": {
+      "species": 374,
+      "isEgg": false
+    },
+    "0375": {
+      "species": 375,
+      "isEgg": false
+    },
+    "0376": {
+      "species": 376,
+      "isEgg": false
+    },
+    "0377": {
+      "species": 377,
+      "isEgg": false
+    },
+    "0378": {
+      "species": 378,
+      "isEgg": false
+    },
+    "0379": {
+      "species": 379,
+      "isEgg": false
+    },
+    "0380": {
+      "species": 380,
+      "isEgg": false
+    },
+    "0381": {
+      "species": 381,
+      "isEgg": false
+    },
+    "0382": {
+      "species": 382,
+      "isEgg": false
+    },
+    "0383": {
+      "species": 383,
+      "isEgg": false
+    },
+    "0384": {
+      "species": 384,
+      "isEgg": false
+    },
+    "0385": {
+      "species": 385,
+      "isEgg": false
+    },
+    "0386": {
+      "species": 386,
+      "isEgg": false
+    }
+  }
+}
