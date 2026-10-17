@@ -177,13 +177,13 @@ export function CollectionDashboard({
                 </button>
               </nav>
             )}
-            <button
+            {/* <button
               type="button"
               className="camp-upload-btn"
               onClick={() => input.current?.click()}
             >
               + New Collection
-            </button>
+            </button> */}
           </div>
           <input
             ref={input}
