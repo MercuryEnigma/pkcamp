@@ -11,15 +11,25 @@ export type LeaveGuard = () => boolean
 const NavigationGuardContext = createContext<
   ((guard: LeaveGuard) => () => void) | null
 >(null)
+const NavigationActionsContext = createContext<LeaveGuard>(() => true)
+const NavigationScopeContext = createContext(true)
 export const NavigationGuardProvider = NavigationGuardContext.Provider
+export const NavigationActionsProvider = NavigationActionsContext.Provider
+/** Hidden, preserved screens do not guard actions in the visible zone. */
+export const NavigationScopeProvider = NavigationScopeContext.Provider
 
-/** Registers the mounted screen's guard for navigation outside that screen. */
+export function useConfirmNavigation(): LeaveGuard {
+  return useContext(NavigationActionsContext)
+}
+
+/** One guard mechanism for edits, save replacement, trades and device tasks. */
 export function useNavigationGuard(blocked: boolean, message: string) {
   const register = useContext(NavigationGuardContext)
-  useEffect(
-    () => register?.(() => !blocked || window.confirm(message)),
-    [register, blocked, message]
-  )
+  const active = useContext(NavigationScopeContext)
+  useEffect(() => {
+    if (blocked && active) return register?.(() => window.confirm(message))
+  }, [register, blocked, active, message])
+  return useConfirmNavigation()
 }
 
 export function useNavigationGuards() {
@@ -34,7 +44,11 @@ export function useNavigationGuards() {
     () => confirmNavigation([...guards.current]),
     []
   )
-  return useMemo(() => ({ register, confirmLeave }), [register, confirmLeave])
+  const hasGuards = useCallback(() => guards.current.size > 0, [])
+  return useMemo(
+    () => ({ register, confirmLeave, hasGuards }),
+    [register, confirmLeave, hasGuards]
+  )
 }
 
 export function confirmNavigation(guards: readonly LeaveGuard[]): boolean {

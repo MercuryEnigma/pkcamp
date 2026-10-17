@@ -1,3 +1,4 @@
+import { useConfirmNavigation } from '../navigationGuard'
 import '../camp.css'
 import './labZone.css'
 import {
@@ -26,6 +27,7 @@ export function LabSettings({
   /** Tab to open first. */
   initialTab?: SettingsTab
 }) {
+  const confirmLeave = useConfirmNavigation()
   const form = useSettingsForm({
     initialTab,
     savedMessage: 'Settings saved.',
@@ -46,7 +48,13 @@ export function LabSettings({
     <div className="camp-root">
       <div className="camp-content">
         <header className="camp-page-header">
-          <button type="button" className="camp-back" onClick={onBack}>
+          <button
+            type="button"
+            className="camp-back"
+            onClick={() => {
+              if (confirmLeave()) onBack()
+            }}
+          >
             ← Back
           </button>
           <div className="camp-page-heading">

@@ -1,3 +1,4 @@
+import { useNavigationGuard } from './navigationGuard'
 import { useEffect, useRef, useState } from 'react'
 import type { Gen3GameId } from '../../services/saveLibrary'
 import { storage } from '../../services/storage'
@@ -10,6 +11,7 @@ import { storageErrorMessage } from './useStorage'
 type GbaSavePanelProps = {
   gameId: Gen3GameId
   onClose(): void
+  onBeforeStart?: () => boolean
 } & (
   | {
       /** Read the cartridge save into PkCamp's storage as the backup. */
@@ -30,6 +32,10 @@ export function GbaSavePanel(props: GbaSavePanelProps) {
   const { gameId, onClose } = props
   const { adapter } = usePkHex()
   const [busy, setBusy] = useState(false)
+  useNavigationGuard(
+    busy,
+    'A cartridge save transfer is active. Cancel it and leave?'
+  )
   const [status, setStatus] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
@@ -42,7 +48,7 @@ export function GbaSavePanel(props: GbaSavePanelProps) {
   )
 
   const start = async () => {
-    if (!adapter) return
+    if (!adapter || props.onBeforeStart?.() === false) return
     const controller = new AbortController()
     abortRef.current = controller
     setBusy(true)

@@ -75,11 +75,13 @@ export function SaveViewer({
     null
   )
   const loadedBytesRef = useRef<Uint8Array | null>(null)
+  const loadVersionRef = useRef(0)
+  const invalidateSaveLoad = useCallback(() => ++loadVersionRef.current, [])
   const campLoadedRef = useRef(false)
   const unreadableCampRef = useRef<ReadonlyMap<number, CampPokemon>>(new Map())
   const boxRef = useRef<number | null>(initialBox ?? null)
   const hasUnsavedChanges = gameDirty || localDirty
-  useNavigationGuard(
+  const confirmLeave = useNavigationGuard(
     hasUnsavedChanges,
     'You have unsaved changes. Leave without saving them?'
   )
@@ -89,11 +91,12 @@ export function SaveViewer({
   useEffect(() => {
     if (!adapter || !ready) return
     let cancelled = false
+    const loadVersion = invalidateSaveLoad()
 
     provider
       .getSave(gameId)
       .then((stored) => {
-        if (cancelled) return
+        if (cancelled || loadVersion !== loadVersionRef.current) return
         if (!stored) {
           setGame((previous) => {
             previous?.dispose()
@@ -129,13 +132,15 @@ export function SaveViewer({
         }
       })
       .catch((cause: unknown) => {
-        if (!cancelled) setUploadError(storageErrorMessage(cause))
+        if (!cancelled && loadVersion === loadVersionRef.current)
+          setUploadError(storageErrorMessage(cause))
       })
 
     return () => {
       cancelled = true
+      invalidateSaveLoad()
     }
-  }, [adapter, gameId, provider, ready])
+  }, [adapter, gameId, provider, ready, invalidateSaveLoad])
 
   // Fast Refresh can preserve a SaveGame created before the movement methods
   // were added. Rehydrate that stale object from the persisted source bytes so
@@ -201,16 +206,6 @@ export function SaveViewer({
     return () => onUnsavedChangesChange?.(false)
   }, [onUnsavedChangesChange])
 
-  useEffect(() => {
-    if (!hasUnsavedChanges) return
-    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault()
-      event.returnValue = ''
-    }
-    window.addEventListener('beforeunload', warnBeforeUnload)
-    return () => window.removeEventListener('beforeunload', warnBeforeUnload)
-  }, [hasUnsavedChanges])
-
   // Release WASM-side state when leaving this game, not just when replacing
   // it with a new upload.
   const gameRef = useRef<SaveGame | null>(null)
@@ -233,6 +228,7 @@ export function SaveViewer({
       save.dispose()
       throw cause
     }
+    invalidateSaveLoad()
     loadedBytesRef.current = bytes
     setGameDirty(true)
     setUploadError(null)
@@ -246,9 +242,12 @@ export function SaveViewer({
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file || !adapter) return
+    const loadVersion = invalidateSaveLoad()
 
     try {
-      loadBackup(new Uint8Array(await file.arrayBuffer()))
+      const bytes = new Uint8Array(await file.arrayBuffer())
+      if (loadVersion !== loadVersionRef.current || !confirmLeave()) return
+      loadBackup(bytes)
     } catch (cause) {
       setUploadError(
         cause instanceof Error
@@ -293,10 +292,7 @@ export function SaveViewer({
   }
 
   const handleBack = () => {
-    if (
-      hasUnsavedChanges &&
-      !window.confirm('You have unsaved changes. Leave without saving them?')
-    ) {
+    if (!confirmLeave()) {
       return
     }
     onUnsavedChangesChange?.(false)
@@ -308,10 +304,7 @@ export function SaveViewer({
   }, [])
 
   const handleTrade = () => {
-    if (
-      hasUnsavedChanges &&
-      !window.confirm('You have unsaved changes. Leave without saving them?')
-    ) {
+    if (!confirmLeave()) {
       return
     }
     onUnsavedChangesChange?.(false)
@@ -319,10 +312,7 @@ export function SaveViewer({
   }
 
   const handleManageBackup = () => {
-    if (
-      hasUnsavedChanges &&
-      !window.confirm('You have unsaved changes. Leave without saving them?')
-    ) {
+    if (!confirmLeave()) {
       return
     }
     onUnsavedChangesChange?.(false)
@@ -373,6 +363,7 @@ export function SaveViewer({
                   <GbaSavePanel
                     mode="read"
                     gameId={gameId}
+                    onBeforeStart={confirmLeave}
                     onSave={(bytes) => {
                       // Already stored by the panel, so it opens unchanged.
                       setReadingFromGba(false)

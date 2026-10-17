@@ -1,4 +1,5 @@
-import { useCallback, useRef, useState } from 'react'
+import { useState } from 'react'
+import { useConfirmNavigation } from './navigationGuard'
 import type { Gen3GameId } from '../../services/saveLibrary'
 import { CampActivities } from './CampActivities'
 import { DropboxBadge } from './DropboxBadge'
@@ -66,31 +67,9 @@ export function PokeStorageMain({
   )
   const { provider } = useStorageProvider()
 
-  // Screens guard their own navigation; the corner badge needs the same check.
-  const unsavedRef = useRef(false)
-  const handleUnsavedChange = useCallback(
-    (hasUnsavedChanges: boolean) => {
-      unsavedRef.current = hasUnsavedChanges
-      onUnsavedChangesChange?.(hasUnsavedChanges)
-    },
-    [onUnsavedChangesChange]
-  )
-
-  const confirmLeave = () => {
-    if (
-      unsavedRef.current &&
-      !window.confirm('You have unsaved changes. Leave without saving them?')
-    ) {
-      return false
-    }
-    handleUnsavedChange(false)
-    return true
-  }
-
-  const openStorageSettings = () => {
-    if (confirmLeave()) setScreen({ name: 'settings', tab: 'storage' })
-  }
-
+  const confirmLeave = useConfirmNavigation()
+  const openStorageSettings = () =>
+    setScreen({ name: 'settings', tab: 'storage' })
   const leaveCamp = onBack && (() => confirmLeave() && onBack())
 
   return (
@@ -154,7 +133,7 @@ export function PokeStorageMain({
               })
             }
             onManageBackup={() => setScreen({ name: 'settings' })}
-            onUnsavedChangesChange={handleUnsavedChange}
+            onUnsavedChangesChange={onUnsavedChangesChange}
           />
         )
       case 'localPokemon':
@@ -166,7 +145,7 @@ export function PokeStorageMain({
                 ? onReturn()
                 : setScreen({ name: 'gameSelect' })
             }
-            onUnsavedChangesChange={handleUnsavedChange}
+            onUnsavedChangesChange={onUnsavedChangesChange}
           />
         )
       case 'trade':

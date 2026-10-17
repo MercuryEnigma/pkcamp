@@ -1,3 +1,4 @@
+import { shareStorageLoads } from './sharedLoads'
 import type { GameId, Generation } from '../saveLibrary'
 import { MemoryFileStore, type FileStore } from './fileStore'
 import { FileStoreProvider } from './fileStoreProvider'
@@ -48,9 +49,8 @@ function createLocalStore(): FileStore {
 export const localFileStore: FileStore = createLocalStore()
 
 /** Browser-local storage, used whenever no cloud account is connected. */
-export const localStorageProvider: StorageProvider = new FileStoreProvider(
-  localFileStore,
-  { id: 'local', label: 'This browser' }
+export const localStorageProvider: StorageProvider = shareStorageLoads(
+  new FileStoreProvider(localFileStore, { id: 'local', label: 'This browser' })
 )
 
 type Listener = (provider: StorageProvider) => void
@@ -78,7 +78,7 @@ class ActiveStorage implements StorageProvider {
 
   /** Switches providers; null returns to local storage. */
   use(provider: StorageProvider | null): void {
-    const next = provider ?? localStorageProvider
+    const next = provider ? shareStorageLoads(provider) : localStorageProvider
     if (next === this.provider) return
     this.provider = next
     for (const listener of this.listeners) listener(next)

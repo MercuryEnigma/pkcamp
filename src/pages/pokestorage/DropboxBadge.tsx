@@ -1,3 +1,4 @@
+import { useConfirmNavigation } from './navigationGuard'
 import { dropboxAccount } from '../../services/storage/dropbox'
 import { useDropboxStatus, useStorageProvider } from './useStorage'
 
@@ -16,6 +17,7 @@ const BADGE_LABEL: Record<BadgeState, string> = {
  * build has no Dropbox app key.
  */
 export function DropboxBadge({ onOpen }: { onOpen: () => void }) {
+  const confirmLeave = useConfirmNavigation()
   const status = useDropboxStatus()
   const { provider } = useStorageProvider()
   if (!dropboxAccount.isConfigured()) return null
@@ -35,7 +37,9 @@ export function DropboxBadge({ onOpen }: { onOpen: () => void }) {
     <button
       type="button"
       className={`camp-dropbox-badge camp-dropbox-badge--${state}`}
-      onClick={onOpen}
+      onClick={() => {
+        if (confirmLeave()) onOpen()
+      }}
       title={title}
       aria-label={`${label} Open storage settings.`}
     >

@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
-import { initializeSpriteResolver } from '../../services/sprites'
+import { spriteResolver } from '../../services/sprites/resources'
+import {
+  settingsSnapshot,
+  subscribeSettings,
+} from '../../services/storage/sharedLoads'
 import {
   storage,
   StorageUnavailableError,
   type StorageProvider,
 } from '../../services/storage'
 import { dropboxAccount } from '../../services/storage/dropbox'
-import { DEFAULT_SPRITE_SOURCE_ID, SPRITE_SOURCES } from './spriteSources'
+import { DEFAULT_SPRITE_SOURCE_ID } from './spriteSources'
 
 let initialized: Promise<void> | null = null
 
@@ -73,37 +77,22 @@ export function storageErrorMessage(cause: unknown): string {
   return cause instanceof Error ? cause.message : String(cause)
 }
 
-/** The sprite resolver for the stored sprite source, default until loaded. */
-export function useSpriteResolver() {
+/** Shared preferences; writes update all mounted consumers immediately. */
+export function useStorageSettings() {
   const { provider, ready } = useStorageProvider()
-  const [sourceId, setSourceId] = useState(DEFAULT_SPRITE_SOURCE_ID)
-
+  const snapshot = useSyncExternalStore(
+    (listener) => subscribeSettings(provider, listener),
+    () => settingsSnapshot(provider)
+  )
   useEffect(() => {
-    if (!ready) return
-    let cancelled = false
-    provider
-      .getSettings()
-      .then((settings) => {
-        const stored = SPRITE_SOURCES.find(
-          (source) => source.id === settings.spriteSourceId
-        )
-        if (!cancelled) setSourceId(stored?.id ?? DEFAULT_SPRITE_SOURCE_ID)
-      })
-      .catch(() => {
-        // Keep the default sprites while storage is unreachable.
-      })
-    return () => {
-      cancelled = true
-    }
+    if (ready) void provider.getSettings().catch(() => {})
   }, [provider, ready])
+  return { ...snapshot, provider, ready: ready && snapshot.settings !== null }
+}
 
-  return useMemo(() => {
-    const source =
-      SPRITE_SOURCES.find((item) => item.id === sourceId) ?? SPRITE_SOURCES[0]
-    return initializeSpriteResolver({
-      sourceId: source.id,
-      manifest: source.manifest,
-      formAliases: source.formAliases,
-    })
-  }, [sourceId])
+/** The sprite resolver for the current, shared sprite preference. */
+export function useSpriteResolver() {
+  const { settings } = useStorageSettings()
+  const sourceId = settings?.spriteSourceId ?? DEFAULT_SPRITE_SOURCE_ID
+  return useMemo(() => spriteResolver(sourceId), [sourceId])
 }

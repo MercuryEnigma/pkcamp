@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
+    "lint": "oxlint --deny-warnings",
     "preview": "vite preview",
     "test": "vitest run",
     "sprites:generate": "node scripts/generate-sprite-catalog.mjs && node scripts/generate-pokemondb-catalog.mjs && node scripts/generate-pmdcollab-catalog.mjs",
-    "build:pkhex-wasm": "cd vendor/pkhex-wasm && npm --prefix tools/package ci && node tools/package/build-package.mjs --version 0.2.0 && rm -rf dist && cp -R artifacts/pkg-dist/package dist"
+    "build:pkhex-wasm": "cd vendor/pkhex-wasm && npm --prefix tools/package ci && node tools/package/build-package.mjs --version 0.2.0 && rm -rf dist && cp -R artifacts/pkg-dist/package dist",
+    "setup:pkhex-wasm": "node scripts/setup-pkhex-wasm.mjs"
   },
   "dependencies": {
     "fflate": "^0.8.3",

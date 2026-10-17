@@ -1,3 +1,4 @@
+import { useNavigationGuard } from './navigationGuard'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { zipSync } from 'fflate'
 import {
@@ -6,11 +7,7 @@ import {
   type Generation,
 } from '../../services/saveLibrary'
 import { initializeSpriteResolver } from '../../services/sprites'
-import {
-  storage,
-  type Camp,
-  type StorageProvider,
-} from '../../services/storage'
+import { type Camp, type StorageProvider } from '../../services/storage'
 import { dropboxAccount } from '../../services/storage/dropbox'
 import { minimumCampSiteCount, resizeCampSites } from './campPositions'
 import { DEFAULT_SPRITE_SOURCE_ID, SPRITE_SOURCES } from './spriteSources'
@@ -21,6 +18,7 @@ import {
   useDropboxStatus,
   useStorageOffline,
   useStorageProvider,
+  useStorageSettings,
 } from './useStorage'
 import { usePkHex } from '../context/PkHexContext'
 
@@ -79,6 +77,7 @@ export function useSettingsForm({
 }) {
   const { adapter } = usePkHex()
   const { provider, ready } = useStorageProvider()
+  const { settings: savedSettings } = useStorageSettings()
   const offline = useStorageOffline()
   const dropboxStatus = useDropboxStatus()
   const [tab, setTab] = useState<SettingsTab>(initialTab)
@@ -120,11 +119,11 @@ export function useSettingsForm({
 
   const refreshBackups = useCallback(async () => {
     try {
-      setBackups(await loadBackupStatuses(storage))
+      setBackups(await loadBackupStatuses(provider))
     } catch (cause) {
       setMessage(storageErrorMessage(cause))
     }
-  }, [])
+  }, [provider])
 
   useEffect(() => {
     if (!ready) return
@@ -202,7 +201,7 @@ export function useSettingsForm({
       } finally {
         loaded.dispose()
       }
-      await storage.putSave(gameId, bytes)
+      await provider.putSave(gameId, bytes)
       await refreshBackups()
       setMessage(`${GAME_LABEL[gameId]} Cabin backup saved.`)
     } catch (cause) {
@@ -223,7 +222,7 @@ export function useSettingsForm({
 
   const handleBackupWrite = async (gameId: Gen3GameId) => {
     try {
-      const save = await storage.getSave(gameId)
+      const save = await provider.getSave(gameId)
       if (save) setGbaAction({ gameId, mode: 'write', save: save.bytes })
     } catch (cause) {
       setMessage(storageErrorMessage(cause))
@@ -233,7 +232,7 @@ export function useSettingsForm({
   const handleBackupExport = async (gameId: Gen3GameId) => {
     let bytes: Uint8Array | undefined
     try {
-      bytes = (await storage.getSave(gameId))?.bytes
+      bytes = (await provider.getSave(gameId))?.bytes
     } catch (cause) {
       setMessage(storageErrorMessage(cause))
     }
@@ -252,7 +251,7 @@ export function useSettingsForm({
   /** Bundle every Camping Pokémon in the GBA Lodge into one `.zip`. */
   const handleDownloadCampsite = async () => {
     try {
-      const camp = await storage.getCamp(GBA_GENERATION)
+      const camp = await provider.getCamp(GBA_GENERATION)
       const files: Record<string, Uint8Array> = {}
       const used = new Map<string, number>()
       for (const site of camp.sites) {
@@ -294,7 +293,7 @@ export function useSettingsForm({
     )
       return
     try {
-      await storage.discardSave(gameId)
+      await provider.discardSave(gameId)
       await refreshBackups()
       setMessage(`${GAME_LABEL[gameId]} Cabin backup removed.`)
     } catch (cause) {
@@ -313,6 +312,22 @@ export function useSettingsForm({
     ) as SiteCounts
   }, [camps])
   const campsiteMinimum = minimumSiteCounts[GBA_GENERATION]
+  const hasChanges =
+    settingsLoaded &&
+    (spriteSourceId !==
+      (savedSettings?.spriteSourceId ?? DEFAULT_SPRITE_SOURCE_ID) ||
+      GENERATIONS.some(
+        (generation) =>
+          siteCounts &&
+          camps &&
+          siteCounts[generation] !== camps.get(generation)?.sites.length
+      ))
+  const confirmLeave = useNavigationGuard(
+    hasChanges || saving,
+    saving
+      ? 'Settings are being saved. Leave this screen?'
+      : 'You have unsaved settings. Leave without saving them?'
+  )
 
   const handleSave = async () => {
     if (!camps || !siteCounts) return
@@ -328,11 +343,11 @@ export function useSettingsForm({
         )
         if (count === camp.sites.length) continue
         const resized = { sites: resizeCampSites(camp.sites, count) }
-        await storage.saveCamp(generation, resized)
+        await provider.saveCamp(generation, resized)
         nextCamps.set(generation, resized)
       }
       setCamps(nextCamps)
-      if (settingsLoaded) await storage.saveSettings({ spriteSourceId })
+      if (settingsLoaded) await provider.saveSettings({ spriteSourceId })
       setMessage(savedMessage)
     } catch (cause) {
       setMessage(storageErrorMessage(cause))
@@ -342,6 +357,7 @@ export function useSettingsForm({
   }
 
   const handleDropbox = async (connect: boolean) => {
+    if (!confirmLeave()) return
     setMessage(null)
     try {
       if (connect) await dropboxAccount.signIn()

@@ -1,8 +1,5 @@
 import { useState } from 'react'
-import {
-  NavigationGuardProvider,
-  useNavigationGuards,
-} from '../navigationGuard'
+import { NavigationScopeProvider } from '../navigationGuard'
 import { NewsPage } from '../../NewsPage'
 import '../camp.css'
 import { DropboxBadge } from '../DropboxBadge'
@@ -45,20 +42,19 @@ export function LabMain({
 }) {
   const [screen, setScreen] = useState<Screen>({ name: 'menu' })
   const { provider } = useStorageProvider()
-  const { register, confirmLeave } = useNavigationGuards()
   const toMenu = () => setScreen({ name: 'menu' })
 
   return (
-    <NavigationGuardProvider value={register}>
+    <NavigationScopeProvider value={!hidden}>
       <div className="camp-zone lab-zone" hidden={hidden}>
         <DropboxBadge
           onOpen={() => {
-            if (confirmLeave()) setScreen({ name: 'settings', tab: 'storage' })
+            setScreen({ name: 'settings', tab: 'storage' })
           }}
         />
         {renderScreen()}
       </div>
-    </NavigationGuardProvider>
+    </NavigationScopeProvider>
   )
 
   function renderScreen() {

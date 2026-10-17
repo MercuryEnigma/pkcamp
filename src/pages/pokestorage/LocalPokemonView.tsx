@@ -1,3 +1,4 @@
+import { useNavigationGuard } from './navigationGuard'
 import { useEffect, useRef, useState } from 'react'
 import type { CampPokemon } from '../../services/storage'
 import { storage } from '../../services/storage'
@@ -68,6 +69,10 @@ export function LocalPokemonView({
   const campLoadedRef = useRef(false)
   const unreadableRef = useRef<ReadonlyMap<number, CampPokemon>>(new Map())
   const [dirty, setDirty] = useState(false)
+  const confirmLeave = useNavigationGuard(
+    dirty,
+    'You have unsaved changes. Leave without saving them?'
+  )
   const [boxIndex, setBoxIndex] = useState(initialSite)
   const [selected, setSelected] = useState<CampPosition | null>(null)
   const [loadingFiles, setLoadingFiles] = useState(true)
@@ -119,16 +124,6 @@ export function LocalPokemonView({
   useEffect(() => {
     return () => onUnsavedChangesChange?.(false)
   }, [onUnsavedChangesChange])
-
-  useEffect(() => {
-    if (!dirty) return
-    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault()
-      event.returnValue = ''
-    }
-    window.addEventListener('beforeunload', warnBeforeUnload)
-    return () => window.removeEventListener('beforeunload', warnBeforeUnload)
-  }, [dirty])
 
   const selectedEntry = selected
     ? (entries[flatIndexOf(selected)] ?? null)
@@ -224,10 +219,7 @@ export function LocalPokemonView({
   }
 
   const handleBack = () => {
-    if (
-      dirty &&
-      !window.confirm('You have unsaved changes. Leave without saving them?')
-    ) {
+    if (!confirmLeave()) {
       return
     }
     onUnsavedChangesChange?.(false)

@@ -1,30 +1,25 @@
-# PkCamp storage and trading
+# Build and verification architecture
 
-## Storage
+The [application overview](../ARCHITECTURE.md) describes runtime pages and
+services. The build prepares the ignored local `pkhex-wasm` package before root
+installation: `setup-pkhex-wasm.mjs` fetches pinned source revisions, refuses to
+reset a mismatched checkout, and invokes packaging. Vite serves/copies its WASM
+runtime beneath the `/pkcamp/` base path. The production trade placeholder is
+tracked in `src/assets/trade/`; personal save fixtures remain ignored.
 
-Persistence is layered: `FileStore` stores bytes at relative paths;
-`FileStoreProvider` implements saves, ROMs, Camps, and settings; `storage` is
-the active `StorageProvider`.
+The deployment workflow configures Node 24, .NET 10, and `wasm-tools`, then runs
+setup, install, strict maintained-code lint, tests, and build before Pages
+upload/deploy. Vendored code is excluded from lint; real-save tests skip without
+local fixtures. `verify-navigation.mjs` uses Chrome against a running dev server
+(default port 5174, overridable with `PKCAMP_TEST_URL`), checking a mock harness
+and actual Start/Lab/settings navigation without live accounts or hardware.
 
-- Read UI data with `useStorageProvider()`; write through `storage`.
-- `storage.current` is the active provider. `storage.use(provider | null)`
-  switches providers; `null` returns to browser-local storage.
-- A `StorageProvider` exposes save (`getSave`, `putSave`, history and hardware
-  backup methods), ROM, Camp, settings, and `prefetch` operations.
-- Dropbox status is `signed-out`, `connecting`, `connected`, or `error`.
-  `DropboxAccount` has no public redirect-URI getter.
-
-## GBA Lodge
-
-Each Gen-3 Cabin accepts only its matching save version: Ruby, Sapphire,
-Emerald, FireRed, or LeafGreen. `GbaSavePanel` checks the inserted cartridge
-before it reads or writes; a GBA write saves the cartridge's existing data as
-`hardware.sav` before overwriting it.
-
-## Trading Post
-
-`TradeView` routes local save backups, Camp Sites, GB-Link, and ESP32 sources
-through `runTrade`. GBA-to-Switch is a live relay and writes no PkCamp data.
-For a GB-Link trade involving PkCamp data, the fallback placeholder is loaded
-before the physical session starts. `revertTrade` restores only recorded local
-writes; it never changes a GBA or Switch.
+```mermaid
+flowchart TB
+  Setup["setup-pkhex-wasm.mjs<br/>run · revision"] --> Vendor["build:pkhex-wasm<br/>dotnet publish · package runtime/source kit"]
+  Vendor --> Install["npm ci"]
+  Install --> Checks["lint · vitest · tsc"]
+  Checks --> Build["vite build<br/>pkhexWasmAssets.configureServer/writeBundle"]
+  Build --> Pages["dist/ → GitHub Pages"]
+  Dev["vite dev server"] --> Browser["verify-navigation.mjs<br/>Chrome → tests/browser + actual app"]
+```

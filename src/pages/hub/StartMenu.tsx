@@ -44,7 +44,6 @@ export function StartMenu({
     setError(null)
     try {
       await startup.provider.saveSettings({ spriteSourceId: sourceId })
-      startup.setSourceId(sourceId)
       dialog.current?.close()
       onStart()
     } catch (cause) {

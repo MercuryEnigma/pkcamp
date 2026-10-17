@@ -1,6 +1,6 @@
 import { useNavigationGuard } from './navigationGuard'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import ribbondolUrl from '../../assets/saves/ribbondol.pk3?url'
+import ribbondolUrl from '../../assets/trade/ribbondol.pk3?url'
 import type { Gen3GameId } from '../../services/saveLibrary'
 import {
   esp32TradeDevice,
@@ -47,7 +47,10 @@ export function useTradeSession({
   )
   const [right, setRight] = useState<TradeSide | null>(null)
   const [busy, setBusy] = useState(false)
-  useNavigationGuard(busy, 'Cancel the active trade and go back?')
+  const confirmLeave = useNavigationGuard(
+    busy,
+    'Cancel the active trade and go back?'
+  )
   const [message, setMessage] = useState<string | null>(null)
   // Bumped after a completed trade so the selection panels reload their data
   // in place, keeping the box each side is viewing.
@@ -183,7 +186,7 @@ export function useTradeSession({
   }, [])
 
   const handleBack = () => {
-    if (busy && !window.confirm('Cancel the active trade and go back?')) return
+    if (!confirmLeave()) return
     onBack(boxRef.current)
   }
 

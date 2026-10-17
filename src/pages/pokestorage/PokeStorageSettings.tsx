@@ -1,3 +1,4 @@
+import { useConfirmNavigation } from './navigationGuard'
 import './camp.css'
 import {
   CabinBackupCard,
@@ -25,6 +26,7 @@ export function PokeStorageSettings({
   /** Tab to open first. */
   initialTab?: SettingsTab
 }) {
+  const confirmLeave = useConfirmNavigation()
   const form = useSettingsForm({
     initialTab,
     savedMessage: 'Camp Office settings saved.',
@@ -45,7 +47,13 @@ export function PokeStorageSettings({
     <div className="camp-root">
       <div className="camp-content">
         <header className="camp-page-header">
-          <button type="button" className="camp-back" onClick={onBack}>
+          <button
+            type="button"
+            className="camp-back"
+            onClick={() => {
+              if (confirmLeave()) onBack()
+            }}
+          >
             ← Back
           </button>
           <div className="camp-page-heading">
