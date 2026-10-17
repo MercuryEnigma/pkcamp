@@ -1,7 +1,11 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
-/** Fail closed if a workload update changes the runtime covered by our notices. */
+/**
+ * Checks the generated browser runtime against the release our notices were
+ * taken from. A different major.minor line fails the build; a servicing (patch)
+ * difference only warns, and the packager links that exact release's notices.
+ */
 export function verifyRuntimeNotices(framework, expectedVersion) {
   const files = readdirSync(framework).filter((name) =>
     /^dotnet\.runtime(?:\.[\w-]+)?\.js$/.test(name)
@@ -24,9 +28,15 @@ export function verifyRuntimeNotices(framework, expectedVersion) {
       'Cannot determine generated browser runtime product version; review its notices'
     )
   }
-  if (version !== expectedVersion) {
+  const line = (v) => v.split('.').slice(0, 2).join('.')
+  if (line(version) !== line(expectedVersion)) {
     throw new Error(
-      `Browser runtime ${version} does not match notice version ${expectedVersion}; update the runtime notices and pin together`
+      `Browser runtime ${version} is outside the ${line(expectedVersion)} line covered by notices ${expectedVersion}; update vendor/dotnet-runtime-notices`
+    )
+  }
+  if (version !== expectedVersion) {
+    console.warn(
+      `Browser runtime ${version} differs from notice version ${expectedVersion}; linking the exact release. Refresh vendor/dotnet-runtime-notices when convenient.`
     )
   }
   return version

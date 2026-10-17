@@ -20,14 +20,12 @@ const read = (path) => readFileSync(join(root, path), 'utf8')
  * The production build packages into `dist/`.
  */
 export function packageLicenses({ output, framework }) {
+  const noticeVersion = JSON.parse(
+    read('vendor/dotnet-runtime-notices/runtime.json')
+  ).productVersion
   const runtimeVersion = verifyRuntimeNotices(
     framework,
-    JSON.parse(
-      readFileSync(
-        join(root, 'vendor/dotnet-runtime-notices/runtime.json'),
-        'utf8'
-      )
-    ).productVersion
+    noticeVersion
   )
   const destination = join(output, 'licenses')
   mkdirSync(destination, { recursive: true })
@@ -171,7 +169,13 @@ export function packageLicenses({ output, framework }) {
       cwd: root,
       encoding: 'utf8',
     }).trim().length > 0
-  const build = { commit, dirty, license: 'GPL-3.0-or-later', runtimeVersion }
+  const build = {
+    commit,
+    dirty,
+    license: 'GPL-3.0-or-later',
+    runtimeVersion,
+    runtimeNoticeVersion: noticeVersion,
+  }
   writeFileSync(
     join(destination, 'build.json'),
     JSON.stringify(build, null, 2) + '\n'
@@ -205,6 +209,14 @@ export function packageLicenses({ output, framework }) {
     [
       'GB-Link-Switch-LDN gift source',
       'https://github.com/GB-Link/GB-Link-Switch-LDN/tree/8b47745dd2b8efcddb9ff93e4ad319eae4b95f25',
+    ],
+    [
+      `.NET runtime ${runtimeVersion} source`,
+      `https://github.com/dotnet/runtime/tree/v${runtimeVersion}`,
+    ],
+    [
+      `.NET runtime ${runtimeVersion} third-party notices`,
+      `https://github.com/dotnet/runtime/blob/v${runtimeVersion}/THIRD-PARTY-NOTICES.TXT`,
     ],
     [
       'Poké Transporter GB source',

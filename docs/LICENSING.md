@@ -44,9 +44,12 @@ License: https://github.com/MercuryEnigma/pkcamp/blob/main/LICENSE
 
 1. Run `npm run setup:pkhex-wasm` after any WASM source/overlay changes. Update
    .NET runtime notices when updating the runtime version. The SDK is pinned to
-   `10.0.401` in `global.json` and CI. The license packager checks that the actual
-   generated browser runtime is `10.0.12`; workload drift fails the build rather
-   than silently shipping notices for another version.
+   `10.0.401` in `global.json` and CI, but `wasm-tools` installs the newest
+   workload set, so the browser runtime can move to a newer 10.0 patch. The
+   license packager accepts any 10.0.x runtime: a patch difference from the
+   notices (`10.0.12`) only warns, and the licenses output links that exact
+   release's source and notices. A new major/minor line fails the build until
+   the notices are updated.
 2. Preserve upstream copyright statements and record local changes and dates in
    MODIFICATIONS.md or component logs. Verify licenses at the revisions used.
 3. Commit changes before production deployment. Run `npm ci`, `npm run lint`,
