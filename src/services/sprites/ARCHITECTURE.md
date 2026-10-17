@@ -3,8 +3,7 @@
 Normalized Pokémon requests resolve to a verified asset path or an explicit
 fallback. Generated manifests describe PokeAPI, Shuffle, PokémonDB, and PMD
 SpriteCollab coverage; resolution does not parse saves or perform I/O.
-`catalog.ts` owns selectable sources, and the old page `spriteSources.ts`
-re-exports it for compatibility.
+`catalog.ts` owns selectable sources and page consumers import it directly.
 
 `resources.ts` caches one resolver per source and preloads selected base images
 through a six-request queue. Paths/successes are deduplicated; changing source

@@ -4,7 +4,7 @@ import { CAMP_SITE_SIZE, storage } from '../../services/storage'
 import { dropboxAccount } from '../../services/storage/dropbox'
 import { DEFAULT_CAMP_SITE_COUNT, MAX_CAMP_SITE_COUNT } from './campPositions'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from './spriteDisplay'
-import { SPRITE_SOURCES } from './spriteSources'
+import { SPRITE_SOURCES } from '../../services/sprites/catalog'
 import { GAME_LABEL } from './gameDisplay'
 import { GbaSavePanel } from './GbaSavePanel'
 import {

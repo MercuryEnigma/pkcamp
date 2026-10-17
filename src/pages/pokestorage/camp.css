@@ -184,51 +184,6 @@
   font-size: 0.9rem;
 }
 
-/* The one full-screen tap target before the Camp Zone menu -- a <button>
-   so it's keyboard/screen-reader accessible for free, with the native
-   button chrome reset back to plain .camp-root styling. */
-.camp-splash {
-  appearance: none;
-  width: 100%;
-  font: inherit;
-  cursor: pointer;
-  justify-content: center;
-}
-
-.camp-splash-content {
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 0.3rem;
-  padding: 3rem 1.5rem;
-}
-
-.camp-splash-title {
-  margin: 0.1rem 0 0.6rem;
-  font-size: 3.2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--camp-leaf);
-}
-
-.camp-splash-tap {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--camp-muted);
-  animation: camp-splash-pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes camp-splash-pulse {
-  0%,
-  100% {
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
 .camp-back {
   display: inline-flex;
   align-items: center;
@@ -1290,28 +1245,6 @@
   border-radius: 6px;
   padding: 0.3rem 0.5rem;
   font-size: 0.85rem;
-}
-
-.camp-settings-btn {
-  display: block;
-  margin: 2rem auto 0;
-  background: var(--camp-leaf);
-  color: #fff;
-  border: 1px solid var(--camp-leaf);
-  border-radius: 6px;
-  padding: 0.45rem 1rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    transform 0.12s ease,
-    border-color 0.12s ease;
-}
-.camp-settings-btn:hover {
-  border-color: var(--camp-accent);
-}
-.camp-settings-btn:active {
-  animation: camp-bubble-pop 0.22s ease;
 }
 
 .camp-option-list {

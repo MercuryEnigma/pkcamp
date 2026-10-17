@@ -4,7 +4,7 @@ import { WorldMap } from './hub/WorldMap'
 import { useHubStartup } from './hub/useHubStartup'
 import './pokestorage/camp.css'
 import './hub/hub.css'
-import { PokeStorage } from './PokeStorage'
+import { PokeStorageMain } from './pokestorage/PokeStorageMain'
 import { LabMain } from './pokestorage/lab/LabMain'
 import type { CampDestination } from './pokestorage/PokeStorageMain'
 
@@ -13,7 +13,6 @@ export function Campsite() {
   const [active, setActive] = useState<
     'start' | 'campsite' | 'options' | 'pokemon'
   >('start')
-  const [, setPokemonHasUnsavedChanges] = useState(false)
   // A Lab entry opened its Cabin or Camp Site in the Camp Zone. The Lab stays
   // mounted (hidden) so Back returns to the same entry.
   const [fromLab, setFromLab] = useState<{
@@ -24,11 +23,9 @@ export function Campsite() {
 
   const openInCamp = (destination: CampDestination) => {
     setFromLab((current) => ({ id: (current?.id ?? 0) + 1, destination }))
-    setPokemonHasUnsavedChanges(false)
     setActive('pokemon')
   }
   const returnToLab = () => {
-    setPokemonHasUnsavedChanges(false)
     setActive('options')
     setLabReturns((count) => count + 1)
   }
@@ -46,18 +43,15 @@ export function Campsite() {
         />
       )}
       {active == 'pokemon' && (
-        <>
-          <PokeStorage
-            key={fromLab?.id ?? 'camp'}
-            onUnsavedChangesChange={setPokemonHasUnsavedChanges}
-            onBack={() => {
-              setFromLab(null)
-              setActive('campsite')
-            }}
-            destination={fromLab?.destination}
-            onReturn={fromLab ? returnToLab : undefined}
-          />
-        </>
+        <PokeStorageMain
+          key={fromLab?.id ?? 'camp'}
+          onBack={() => {
+            setFromLab(null)
+            setActive('campsite')
+          }}
+          destination={fromLab?.destination}
+          onReturn={fromLab ? returnToLab : undefined}
+        />
       )}
       {(active == 'options' || fromLab) && (
         <LabMain

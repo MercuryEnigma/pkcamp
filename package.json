@@ -19,8 +19,7 @@
     "pkhex-wasm": "file:./vendor/pkhex-wasm/dist",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-i18next": "^17.0.14",
-    "react-router-dom": "^7.18.4"
+    "react-i18next": "^17.0.14"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

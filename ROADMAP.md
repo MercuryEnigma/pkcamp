@@ -95,7 +95,9 @@
 - [ ] Move providers/startup/navigation into `app/` and separate hub/Camp/Lab/news pages.
 - [ ] Extract shared Pokémon storage, trading, settings, and collections into `features/`.
 - [ ] Consolidate repeated page layouts and move shared UI/hooks/styles into `shared/`.
-- [ ] Remove confirmed unused pages, wrappers, functions, assets, and experiments.
-- [ ] Keep i18n; relocate initialization/catalogs into `services/i18n/`, then adopt translation keys separately.
+- [x] Remove unused Options/Splash/wrappers, dirty-state callbacks, template assets/styles, and obsolete previews.
+- [x] Remove the unused router wrapper/dependency; preserve component-state navigation.
+- [x] Keep i18n and relocate initialization/catalogs into `services/i18n/` with a shared instance export.
+- [ ] Adopt translation keys in screens and add language selection separately.
 - [ ] Expand automated storage-mode, accessibility, transaction, and emulator-lifecycle coverage.
 - [ ] Keep each architecture document to one page: one or two current-state paragraphs and one structure/API diagram.

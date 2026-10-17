@@ -3,6 +3,7 @@
 ## Lodges and save inspection
 
 - [x] Model fixed game identifiers through Gen 9; open the Gen 3 GBA Lodge only.
+- [x] Open GBA directly from Camp Lodges and return to Camp activities; retain the lodge chooser.
 - [x] Restore the selected game's committed browser/Dropbox save.
 - [x] Show positional party/box grids, details, and sprite fallbacks.
 - [x] Stage manual save uploads until explicit Save Game.
@@ -65,6 +66,8 @@
 - [x] Prepare pinned-source WASM dependencies before installation in deployment configuration.
 - [ ] Verify the updated workflow from a clean GitHub Actions checkout.
 - [ ] Separate Camp/Lab pages and extract shared features, UI, hooks, and styles.
-- [ ] Consolidate settings/trade layouts and remove confirmed unused code.
-- [ ] Keep i18n and move it into a site-wide service before adopting translation keys separately.
+- [x] Remove unused Camp splash/wrapper, callback plumbing, and stale styles.
+- [ ] Consolidate settings/trade layouts.
+- [x] Preserve i18n in the site-wide `services/i18n/` service.
+- [ ] Adopt translation keys in screens separately.
 - [ ] Finish privacy, attribution, licensing, and browser/device compatibility reviews.

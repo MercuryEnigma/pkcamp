@@ -47,7 +47,6 @@ export function SaveViewer({
   onBack,
   onTrade,
   onManageBackup,
-  onUnsavedChangesChange,
   initialBox,
 }: {
   gameId: Gen3GameId
@@ -56,7 +55,6 @@ export function SaveViewer({
   onTrade: (box?: number) => void
   initialBox?: number
   onManageBackup: () => void
-  onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
 }) {
   const { adapter, loading, error } = usePkHex()
   const { provider, ready } = useStorageProvider()
@@ -198,14 +196,6 @@ export function SaveViewer({
     }
   }, [adapter, provider, ready])
 
-  useEffect(() => {
-    onUnsavedChangesChange?.(hasUnsavedChanges)
-  }, [hasUnsavedChanges, onUnsavedChangesChange])
-
-  useEffect(() => {
-    return () => onUnsavedChangesChange?.(false)
-  }, [onUnsavedChangesChange])
-
   // Release WASM-side state when leaving this game, not just when replacing
   // it with a new upload.
   const gameRef = useRef<SaveGame | null>(null)
@@ -295,7 +285,6 @@ export function SaveViewer({
     if (!confirmLeave()) {
       return
     }
-    onUnsavedChangesChange?.(false)
     onBack()
   }
 
@@ -307,7 +296,6 @@ export function SaveViewer({
     if (!confirmLeave()) {
       return
     }
-    onUnsavedChangesChange?.(false)
     onTrade(boxRef.current ?? undefined)
   }
 
@@ -315,7 +303,6 @@ export function SaveViewer({
     if (!confirmLeave()) {
       return
     }
-    onUnsavedChangesChange?.(false)
     onManageBackup()
   }
 

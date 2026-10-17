@@ -95,7 +95,7 @@ require the project owner's involvement.
 The approved organization direction separates `app/`, sibling zone pages,
 shared `features/`, UI/hooks/styles in `shared/`, and framework-free services.
 Remove confirmed unused code after preserving reachable behavior. Keep i18n
-and move its configuration/catalogs into a site-wide service; translating
+as a site-wide service with shared configuration/catalogs; translating
 inline screen text is a separate follow-up. Multi-device conflict policy,
 retention, identity/provenance, reward schemas, sprite licensing/hosting, and
 the browser/device support matrix remain design decisions.

@@ -96,8 +96,29 @@ try {
   await app.getByText('Settings saved.', { exact: true }).waitFor()
   await app.getByRole('button', { name: '← Back', exact: true }).click()
   await app.getByRole('heading', { name: "Celio's Lab", exact: true }).waitFor()
+  const translations = await app.evaluate(async () => {
+    const { i18n } = await import(
+      new URL('src/services/i18n/index.ts', document.baseURI).href
+    )
+    return {
+      language: i18n.language,
+      pokemon: i18n.t('areas.pokemon'),
+      fallback: i18n.t('areas.pokemon', { lng: 'unknown' }),
+      news: i18n.t('options_headers.news_page'),
+    }
+  })
+  assert.deepEqual(translations, {
+    language: 'en',
+    pokemon: 'Pokémon',
+    fallback: 'Pokémon',
+    news: 'News & Updates',
+  })
+  await app.getByRole('button', { name: 'Patch Notes', exact: true }).click()
+  await app
+    .getByRole('heading', { name: 'What is Mystery Gift?', exact: true })
+    .waitFor()
   console.log(
-    'Passed: Dropbox edit/trade guards, hidden Lab scope, shared sprites, uploaded-save guards, and real-app settings/navigation.'
+    'Passed: Dropbox edit/trade guards, hidden Lab scope, shared sprites, uploaded-save guards, real-app settings/navigation, shared i18n, and Patch Notes.'
   )
 } finally {
   await browser.close()

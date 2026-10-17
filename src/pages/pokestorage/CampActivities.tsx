@@ -8,7 +8,6 @@ export function CampActivities({
   onBack?: () => void
   onSelectLodges: () => void
   onSelectTrade: () => void
-  onSelectSettings: () => void
 }) {
   const heading = (
     <>
@@ -47,13 +46,6 @@ export function CampActivities({
           />
           <ZoneCard label="Transfer Station" comingSoon />
         </div>
-        {/* <button
-          type="button"
-          className="camp-settings-btn"
-          onClick={onSelectSettings}
-        >
-          Camp Office · Settings: backups &amp; appearance
-        </button> */}
       </div>
     </div>
   )

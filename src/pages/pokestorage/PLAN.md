@@ -83,6 +83,6 @@ product contract connects them.
 A dependable release requires safe import/inspect/organize/save/export,
 account restore, verified emulator handoff, documented hardware paths, and
 rebuildable research after commits. Shared UI/layout extraction and unused-code
-cleanup should preserve that behavior. Keep i18n and relocate it into a
+cleanup should preserve that behavior. Keep i18n as a
 site-wide service; the current implementation belongs in
 [ARCHITECTURE.md](ARCHITECTURE.md), not in this plan.

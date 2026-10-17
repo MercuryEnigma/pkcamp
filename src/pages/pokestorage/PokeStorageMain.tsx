@@ -13,10 +13,10 @@ import { TradeView } from './TradeView'
 import { useStorageProvider } from './useStorage'
 
 /**
- * The Camp Zone -> onwards flow: activity list -> lodge select -> the GBA
+ * The Camp Zone flow: activity list -> the GBA
  * Lodge's Cabin directory -> the actual save viewer. This component is
- * the entry point rendered by (read-only, outside this directory's scope)
- * PokeStorage.tsx, so navigation from Camp Zone downward lives entirely here.
+ * the Camp entry point rendered by Campsite; navigation below the zone
+ * lives here.
  */
 type Screen =
   | { name: 'activities' }
@@ -46,15 +46,13 @@ function destinationScreen(destination: CampDestination): Screen {
 }
 
 export function PokeStorageMain({
-  onUnsavedChangesChange,
   onBack,
   destination,
   onReturn,
 }: {
-  onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
   /** Leaves the Camp Zone; shows a Back button on the activity list. */
   onBack?: () => void
-  /** Opens straight onto this screen instead of the splash. */
+  /** Opens straight onto this screen instead of the activity menu. */
   destination?: CampDestination
   /**
    * Back from the `destination` screen goes here (e.g. back to the Lab)
@@ -85,9 +83,8 @@ export function PokeStorageMain({
         return (
           <CampActivities
             onBack={leaveCamp}
-            onSelectLodges={() => setScreen({ name: 'generationSelect' })}
+            onSelectLodges={() => setScreen({ name: 'gameSelect' })}
             onSelectTrade={() => setScreen({ name: 'trade' })}
-            onSelectSettings={() => setScreen({ name: 'settings' })}
           />
         )
       case 'settings':
@@ -108,7 +105,7 @@ export function PokeStorageMain({
       case 'gameSelect':
         return (
           <GameSelect
-            onBack={() => setScreen({ name: 'generationSelect' })}
+            onBack={() => setScreen({ name: 'activities' })}
             onSelectGame={(gameId) => setScreen({ name: 'saveViewer', gameId })}
             onSelectLocalPokemon={() => setScreen({ name: 'localPokemon' })}
           />
@@ -133,7 +130,6 @@ export function PokeStorageMain({
               })
             }
             onManageBackup={() => setScreen({ name: 'settings' })}
-            onUnsavedChangesChange={onUnsavedChangesChange}
           />
         )
       case 'localPokemon':
@@ -145,7 +141,6 @@ export function PokeStorageMain({
                 ? onReturn()
                 : setScreen({ name: 'gameSelect' })
             }
-            onUnsavedChangesChange={onUnsavedChangesChange}
           />
         )
       case 'trade':

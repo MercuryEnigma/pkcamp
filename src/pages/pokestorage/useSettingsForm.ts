@@ -10,7 +10,10 @@ import { initializeSpriteResolver } from '../../services/sprites'
 import { type Camp, type StorageProvider } from '../../services/storage'
 import { dropboxAccount } from '../../services/storage/dropbox'
 import { minimumCampSiteCount, resizeCampSites } from './campPositions'
-import { DEFAULT_SPRITE_SOURCE_ID, SPRITE_SOURCES } from './spriteSources'
+import {
+  DEFAULT_SPRITE_SOURCE_ID,
+  SPRITE_SOURCES,
+} from '../../services/sprites/catalog'
 import { GAME_LABEL } from './gameDisplay'
 import { assertSaveMatchesCabin } from './saveVersion'
 import {

@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { DropboxMenu } from './DropboxMenu'
 import { useDropboxStatus } from '../pokestorage/useStorage'
-import { SPRITE_SOURCES } from '../pokestorage/spriteSources'
+import { SPRITE_SOURCES } from '../../services/sprites/catalog'
 import { dropboxAccount } from '../../services/storage/dropbox'
 import { useHubStartup } from './useHubStartup'
 

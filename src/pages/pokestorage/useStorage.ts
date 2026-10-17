@@ -10,7 +10,7 @@ import {
   type StorageProvider,
 } from '../../services/storage'
 import { dropboxAccount } from '../../services/storage/dropbox'
-import { DEFAULT_SPRITE_SOURCE_ID } from './spriteSources'
+import { DEFAULT_SPRITE_SOURCE_ID } from '../../services/sprites/catalog'
 
 let initialized: Promise<void> | null = null
 

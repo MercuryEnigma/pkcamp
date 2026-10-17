@@ -41,7 +41,7 @@ function pkhexWasmAssets(): Plugin {
       sourceDir = resolve(config.root, 'node_modules/pkhex-wasm/wasm')
       if (!existsSync(sourceDir)) {
         config.logger.warn(
-          `[pkhex-wasm-assets] runtime not found at ${sourceDir} — run \`npm run build:pkhex-wasm\``,
+          `[pkhex-wasm-assets] runtime not found at ${sourceDir} — run \`npm run build:pkhex-wasm\``
         )
       }
     },
@@ -59,7 +59,10 @@ function pkhexWasmAssets(): Plugin {
         const file = join(sourceDir, rel)
         if (!file.startsWith(sourceDir) || !existsSync(file)) return next()
 
-        res.setHeader('Content-Type', MIME[extname(file)] ?? 'application/octet-stream')
+        res.setHeader(
+          'Content-Type',
+          MIME[extname(file)] ?? 'application/octet-stream'
+        )
         createReadStream(file).pipe(res)
       })
     },
@@ -68,7 +71,10 @@ function pkhexWasmAssets(): Plugin {
     // so nothing here is clobbered by Vite's own emptyOutDir.
     writeBundle() {
       if (!existsSync(sourceDir)) return
-      const outDir = resolve(this.environment.config.build.outDir, WASM_PUBLIC_DIR)
+      const outDir = resolve(
+        this.environment.config.build.outDir,
+        WASM_PUBLIC_DIR
+      )
       cpSync(sourceDir, outDir, { recursive: true, dereference: true })
     },
   }
@@ -90,7 +96,7 @@ export default defineConfig({
   },
   // Vite's dependency scanner otherwise globs every *.html in the project
   // (excluding node_modules) as a potential entry point. That picks up
-  // og_index.html and every nested wwwroot/index.html under vendor/
+  // every nested wwwroot/index.html under vendor/ and browser harnesses
   // (pkhex-wasm's own spike apps, e2e fixtures, and the vendored
   // PKHeX.Everywhere submodule), several of which reference build output
   // that doesn't exist in this repo and aborts the scan. Pin the real entry

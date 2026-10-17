@@ -52,13 +52,11 @@ function newLocalId(): string {
 
 export function LocalPokemonView({
   onBack,
-  onUnsavedChangesChange,
   initialSite = 0,
 }: {
   onBack: () => void
   /** Camp Site to show first (0-based), e.g. where a Lab entry was found. */
   initialSite?: number
-  onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
 }) {
   const { adapter, loading: adapterLoading, error: adapterError } = usePkHex()
   const { provider, ready } = useStorageProvider()
@@ -116,14 +114,6 @@ export function LocalPokemonView({
       cancelled = true
     }
   }, [adapter, adapterLoading, provider, ready])
-
-  useEffect(() => {
-    onUnsavedChangesChange?.(dirty)
-  }, [dirty, onUnsavedChangesChange])
-
-  useEffect(() => {
-    return () => onUnsavedChangesChange?.(false)
-  }, [onUnsavedChangesChange])
 
   const selectedEntry = selected
     ? (entries[flatIndexOf(selected)] ?? null)
@@ -222,7 +212,6 @@ export function LocalPokemonView({
     if (!confirmLeave()) {
       return
     }
-    onUnsavedChangesChange?.(false)
     onBack()
   }
 
