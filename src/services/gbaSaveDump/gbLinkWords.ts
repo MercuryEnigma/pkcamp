@@ -81,6 +81,18 @@ export class GbLinkWords {
     return (await this.exchange([word], options))[0]
   }
 
+  /** Raw 8-bit SPI exchanges for Cart Doctor's GBC-mode save receiver. */
+  async exchangeBytes(bytes: Uint8Array): Promise<Uint8Array> {
+    const result = new Uint8Array(bytes.length)
+    for (let offset = 0; offset < bytes.length; offset += 56) {
+      this.signal.throwIfAborted()
+      const chunk = bytes.slice(offset, offset + 56)
+      await this.transport.sendData(chunk)
+      result.set(await this.read(chunk.length, this.signal), offset)
+    }
+    return result
+  }
+
   private async read(length: number, signal: AbortSignal): Promise<Uint8Array> {
     const deadline = Date.now() + READ_TIMEOUT_MS
     while (this.buffer.length < length) {

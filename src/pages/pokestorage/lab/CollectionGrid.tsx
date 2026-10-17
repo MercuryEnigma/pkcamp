@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react'
+import { createPortal } from 'react-dom'
 import { GAME_LABEL } from '../gameDisplay'
 import type { CampDestination } from '../PokeStorageMain'
 import { GEN_3_GAMES } from './labStore'
@@ -35,6 +43,80 @@ function displayGroups(definition: CollectionDefinition): DisplayGroup[] {
     groups.push({ id: '(other)', name: 'Other', entryIds: other })
   }
   return groups
+}
+
+/** Keeps the tooltip this far inside the window edges. */
+const TIP_MARGIN = 8
+
+/**
+ * The first value, with the full list behind a hoverable "…". The tooltip is
+ * portaled to the page root and fixed-positioned, so the clipped, scrolling
+ * panels it sits in can't cut it off.
+ */
+function FieldValue({ value, values }: { value: string; values: string[] }) {
+  const trigger = useRef<HTMLSpanElement>(null)
+  const tip = useRef<HTMLSpanElement>(null)
+  /** The page root to portal into, set while the tooltip is open. */
+  const [root, setRoot] = useState<Element | null>(null)
+  const [position, setPosition] = useState<{ top: number; left: number }>()
+
+  useLayoutEffect(() => {
+    if (!root || !trigger.current || !tip.current) return
+    const anchor = trigger.current.getBoundingClientRect()
+    const { width, height } = tip.current.getBoundingClientRect()
+    const centered = anchor.left + anchor.width / 2 - width / 2
+    const left = Math.min(
+      Math.max(centered, TIP_MARGIN),
+      window.innerWidth - width - TIP_MARGIN
+    )
+    // Below the "…", or above it when there's no room below.
+    const below = anchor.bottom + 4
+    const top =
+      below + height > window.innerHeight - TIP_MARGIN
+        ? anchor.top - height - 4
+        : below
+    setPosition({ top, left })
+  }, [root])
+
+  if (values.length <= 1) return <>{value}</>
+  const show = () => setRoot(trigger.current?.closest('.camp-root') ?? null)
+  const hide = () => {
+    setRoot(null)
+    setPosition(undefined)
+  }
+  return (
+    <>
+      {values[0]}
+      <span
+        ref={trigger}
+        className="pokedex-more"
+        tabIndex={0}
+        aria-label={value}
+        onMouseEnter={show}
+        onMouseLeave={hide}
+        onFocus={show}
+        onBlur={hide}
+      >
+        …
+      </span>
+      {root &&
+        createPortal(
+          <span
+            ref={tip}
+            className="pokedex-more-tip"
+            role="tooltip"
+            style={
+              position
+                ? { top: position.top, left: position.left }
+                : { visibility: 'hidden' }
+            }
+          >
+            {value}
+          </span>,
+          root
+        )}
+    </>
+  )
 }
 
 function matchesQuery(
@@ -197,10 +279,12 @@ export function CollectionGrid({
               <dl className="pokedex-preview-fields">
                 {requirementFields(activeConstraints)
                   .slice(0, 2)
-                  .map(({ label, value }) => (
+                  .map(({ label, value, values }) => (
                     <div key={label}>
                       <dt>{label}</dt>
-                      <dd>{value}</dd>
+                      <dd>
+                        <FieldValue value={value} values={values} />
+                      </dd>
                     </div>
                   ))}
               </dl>
@@ -345,10 +429,12 @@ export function EntryDetails({
       <section className="lab-panel pokedex-record">
         <h2 className="lab-label">Collection requirement</h2>
         <dl className="pokedex-fields">
-          {requirementFields(constraints).map(({ label, value }) => (
+          {requirementFields(constraints).map(({ label, value, values }) => (
             <div key={label}>
               <dt>{label}</dt>
-              <dd>{value}</dd>
+              <dd>
+                <FieldValue value={value} values={values} />
+              </dd>
             </div>
           ))}
         </dl>

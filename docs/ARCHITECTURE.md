@@ -13,6 +13,8 @@ upload/deploy. Vendored code is excluded from lint; real-save tests skip without
 local fixtures. `verify-navigation.mjs` uses Chrome against a running dev server
 (default port 5174, overridable with `PKCAMP_TEST_URL`), checking a mock harness
 and actual Start/Lab/settings navigation without live accounts or hardware.
+`verify-hardware-lifecycle.mjs` adds a simulated device/session harness against
+the real tool pages (default port 5173, same URL override).
 
 ```mermaid
 flowchart TB
@@ -21,5 +23,5 @@ flowchart TB
   Install --> Checks["lint · vitest · tsc"]
   Checks --> Build["vite build<br/>pkhexWasmAssets.configureServer/writeBundle"]
   Build --> Pages["dist/ → GitHub Pages"]
-  Dev["vite dev server"] --> Browser["verify-navigation.mjs<br/>Chrome → tests/browser + actual app"]
+  Dev["vite dev server"] --> Browser["Navigation / hardware lifecycle scripts<br/>Chrome → real pages + simulated boundaries"]
 ```

@@ -27,11 +27,16 @@ export function WorldMap({
             sublabel="Pokédex collections & research"
             onClick={onLab}
           />
-          {['Battle Zone', 'Safari Zone', 'Pelago Zone', 'Arcade Zone'].map(
+          <ZoneCard
+            label="Arcade Zone"
+            sublabel="Play your adventure"
+            comingSoon
+          />
+          {/* {['Battle Zone', 'Safari Zone', 'Pelago Zone'].map(
             (label) => (
               <ZoneCard key={label} label={label} comingSoon />
             )
-          )}
+          )} */}
         </div>
         <button type="button" className="hub-back" onClick={onBack}>
           ← Start menu

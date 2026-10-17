@@ -193,13 +193,20 @@ const FIELDS: Record<
 /** Only the fields the entry actually constrains, in definition order. */
 export function requirementFields(
   constraints: EntryConstraints
-): { label: string; value: string }[] {
+): { label: string; value: string; values: string[] }[] {
   return (Object.keys(constraints) as ConstraintField[]).flatMap((field) => {
     const constraint = constraints[field]
     const describer = FIELDS[field]
-    return constraint === undefined || !describer
-      ? []
-      : [{ label: describer[0], value: describer[1](constraint, constraints) }]
+    if (constraint === undefined || !describer) return []
+    const [label, describe] = describer
+    return [
+      {
+        label,
+        value: describe(constraint, constraints),
+        // Each value on its own, so a long list can show just the first.
+        values: toList(constraint).map((v) => describe(v, constraints)),
+      },
+    ]
   })
 }
 

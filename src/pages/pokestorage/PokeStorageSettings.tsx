@@ -8,6 +8,7 @@ import {
   SpriteSourcePicker,
 } from './SettingsSections'
 import { useSettingsForm, type SettingsTab } from './useSettingsForm'
+import { GbLinkFirmwareSettings } from './GbLinkFirmwareSettings'
 
 export type { SettingsTab }
 
@@ -15,6 +16,7 @@ const SETTINGS_TABS: ReadonlyArray<{ id: SettingsTab; label: string }> = [
   { id: 'backups', label: 'Backup & Restore' },
   { id: 'appearance', label: 'Appearance' },
   { id: 'storage', label: 'Data' },
+  { id: 'hardware', label: 'Hardware' },
 ]
 
 /** The Camp Zone Office. Settings logic lives in `useSettingsForm`. */
@@ -79,7 +81,15 @@ export function PokeStorageSettings({
                 role="tab"
                 aria-selected={tab === item.id}
                 className={`camp-settings-tab${tab === item.id ? ' camp-settings-tab--active' : ''}`}
-                onClick={() => setTab(item.id)}
+                onClick={() => {
+                  if (item.id === tab) return
+                  if (
+                    (tab === 'hardware' || tab === 'backups') &&
+                    !confirmLeave()
+                  )
+                    return
+                  setTab(item.id)
+                }}
               >
                 {item.label}
               </button>
@@ -117,21 +127,25 @@ export function PokeStorageSettings({
             </section>
           )}
 
-          {offline && (
+          {tab === 'hardware' && <GbLinkFirmwareSettings />}
+
+          {offline && tab !== 'hardware' && (
             <p className="camp-status">
               Dropbox is unreachable. Your data is read-only until it
               reconnects.
             </p>
           )}
           {message && <p className="camp-status">{message}</p>}
-          <button
-            type="button"
-            className="camp-confirm-btn"
-            disabled={!camps || !siteCounts || saving || offline}
-            onClick={() => void handleSave()}
-          >
-            {saving ? 'Saving…' : 'Save Settings'}
-          </button>
+          {tab !== 'hardware' && (
+            <button
+              type="button"
+              className="camp-confirm-btn"
+              disabled={!camps || !siteCounts || saving || offline}
+              onClick={() => void handleSave()}
+            >
+              {saving ? 'Saving…' : 'Save Settings'}
+            </button>
+          )}
         </div>
       </div>
     </div>

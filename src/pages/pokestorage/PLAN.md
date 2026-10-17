@@ -71,6 +71,12 @@ path, including the production deployment; mocked protocol tests alone are
 insufficient. Cross-generation transfers and the Transfer Station require
 research before implementation.
 
+Hardware setup should feel consistent across Camp and Lab, with short steps,
+clear progress, Cancel/Stop controls, and warnings before leaving active work.
+Shared Settings should show the installed and latest GB-Link firmware and offer
+one action to check and update automatically. Cancellation must stop pending
+work safely, while an active firmware write completes without interruption.
+
 ## Other-zone handoff and release readiness
 
 Lab should derive research only from committed saves and Camp Sites, provide
@@ -80,9 +86,10 @@ explicit export/return path, and stage returned bytes for validation instead
 of silently overwriting a backup. Rewards remain separate until a shared
 product contract connects them.
 
+Lab's cartridge preservation, gifts, and transfer goals are in the
+[Research Tools plan](lab/PLAN.md).
+
 A dependable release requires safe import/inspect/organize/save/export,
 account restore, verified emulator handoff, documented hardware paths, and
 rebuildable research after commits. Shared UI/layout extraction and unused-code
-cleanup should preserve that behavior. Keep i18n as a
-site-wide service; the current implementation belongs in
-[ARCHITECTURE.md](ARCHITECTURE.md), not in this plan.
+cleanup should preserve that behavior.

@@ -9,6 +9,7 @@ describe('built-in collections', () => {
     expect(Object.keys(byId('gen3-living-dex').pokemon)).toHaveLength(386)
     expect(Object.keys(byId('kanto-dex').pokemon)).toHaveLength(151)
     expect(Object.keys(byId('unown-dex').pokemon)).toHaveLength(28)
+    expect(Object.keys(byId('gen3-in-game-trades').pokemon)).toHaveLength(18)
   })
 
   it('all validate and exclude eggs', () => {
@@ -39,5 +40,11 @@ describe('built-in collections', () => {
     ids.forEach((id, form) => {
       expect(unown.pokemon[id]).toEqual({ species: 201, form, isEgg: false })
     })
+  })
+
+  it('matches in-game trades by species, OT, and TID', () => {
+    const makuhita = byId('gen3-in-game-trades').pokemon['rs-makuhita']
+    expect(makuhita).toMatchObject({ species: 296, id: 49562 })
+    expect(makuhita.ot).toContain('ELYSSA')
   })
 })

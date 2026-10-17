@@ -3,7 +3,13 @@ import { GB_LINK_COMMAND, GB_LINK_MODE } from '../tradeDevice/gbLinkProtocol.ts'
 import type { GbLinkTransport } from '../tradeDevice/gbLinkTransport.ts'
 import { GBA_CART as C } from './gbaCartClient.ts'
 import { encryptWord } from './multiboot.ts'
-import { readGbaSave, writeGbaSave } from './readGbaSave.ts'
+import {
+  gameIdFromCode,
+  readGbaBios,
+  readGbaRom,
+  readGbaSave,
+  writeGbaSave,
+} from './readGbaSave.ts'
 
 // The payload model mirrors Cart Doctor's web/test/gba_protocol_sim.mjs, which
 // in turn mirrors the dumper's main.c state machine.
@@ -15,7 +21,10 @@ interface Cart {
   code: string
   title: string
   save: Uint8Array | null
+  rom?: Uint8Array
 }
+
+const bios = new Uint8Array(0x4000).map((_, index) => (index * 13 + 99) & 0xff)
 
 function wordsOf(bytes: Uint8Array): number[] {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
@@ -93,10 +102,17 @@ function* payload(
     const cmd = rx & 0xffff
     rx = yield ~(C.M_MAGIC | cmd) >>> 0
     if (rx !== C.M_GO) continue
+    if (cmd === C.CMD_DUMP_BIOS) {
+      yield { busy: 2 }
+      if (!(yield* doneGate())) continue
+      yield* streamToMaster(wordsOf(bios), log)
+      continue
+    }
     yield { busy: 2 }
     if (!(yield* doneGate())) continue
-    yield cart ? 0x800000 : BUSY
-    yield cart?.save?.length ?? 0
+    yield cart ? (cart.rom?.length ?? 0x800000) : BUSY
+    // A ROM dump reports only the game size.
+    if (cmd !== C.CMD_DUMP_ROM) yield cart?.save?.length ?? 0
     if (!cart) continue
     if (cmd === C.CMD_INFO) {
       const header = new Uint8Array(0xc0)
@@ -109,6 +125,8 @@ function* payload(
         }
       }
       for (const word of wordsOf(header)) yield word
+    } else if (cmd === C.CMD_DUMP_ROM && cart.rom) {
+      yield* streamToMaster(wordsOf(cart.rom), log)
     } else if (cmd === C.CMD_DUMP_SAVE && cart.save) {
       yield { busy: 2 }
       if (!(yield* doneGate())) continue
@@ -307,6 +325,64 @@ describe('readGbaSave', () => {
     await expect(reading).rejects.toThrow()
     expect(link.log).toContain('abort')
     expect(link.commands.at(-1)).toEqual([GB_LINK_COMMAND.cancel])
+  })
+})
+
+describe('game detection', () => {
+  it('maps cartridge codes to Gen 3 games', () => {
+    expect(gameIdFromCode('BPEE')).toBe('emerald')
+    expect(gameIdFromCode('AXPJ')).toBe('sapphire')
+    expect(gameIdFromCode('AGBJ')).toBeNull()
+  })
+
+  it('reads any cartridge when no game is expected and reports its header', async () => {
+    const emerald: Cart = { code: 'BPEE', title: 'POKEMON EMER', save }
+    const seen: string[] = []
+    const bytes = await readGbaSave(new FakeGbLink(emerald), {
+      signal: new AbortController().signal,
+      loadDumper: async () => rom,
+      onCartridge: (info) => seen.push(info.code),
+    })
+    expect(bytes).toEqual(save)
+    expect(seen).toEqual(['BPEE'])
+  })
+})
+
+describe('readGbaRom', () => {
+  const cartRom = new Uint8Array(0x1000).map(
+    (_, index) => (index * 17 + 1) & 0xff
+  )
+
+  it('reads the whole cartridge ROM', async () => {
+    const progress: number[] = []
+    const bytes = await readGbaRom(new FakeGbLink({ ...ruby, rom: cartRom }), {
+      signal: new AbortController().signal,
+      loadDumper: async () => rom,
+      onProgress: (done) => progress.push(done),
+    })
+    expect(bytes).toEqual(cartRom)
+    expect(progress.at(-1)).toBe(cartRom.length)
+  })
+
+  it('refuses a cartridge for a different expected game', async () => {
+    const link = new FakeGbLink({ ...ruby, rom: cartRom })
+    await expect(
+      readGbaRom(link, {
+        gameId: 'emerald',
+        signal: new AbortController().signal,
+        loadDumper: async () => rom,
+      })
+    ).rejects.toThrow('POKEMON RUBY')
+  })
+})
+
+describe('readGbaBios', () => {
+  it('reads the 16 KB BIOS without a cartridge', async () => {
+    const bytes = await readGbaBios(new FakeGbLink(null), {
+      signal: new AbortController().signal,
+      loadDumper: async () => rom,
+    })
+    expect(bytes).toEqual(bios)
   })
 })
 

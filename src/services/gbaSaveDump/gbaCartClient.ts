@@ -1,6 +1,6 @@
 import { delay, type GbLinkWords } from './gbLinkWords.ts'
 
-// Port of the save read/restore half of GB-Link Cart Doctor's web/gba_cart.js
+// Port of the save, ROM and BIOS commands of GB-Link Cart Doctor's web/gba_cart.js
 // (GPL-3.0); see vendor/gb-cart-doctor/PROVENANCE.md.
 
 export const GBA_CART = {
@@ -14,10 +14,13 @@ export const GBA_CART = {
   G_DONE: 0x444f4e45,
   G_OKOK: 0x4f4b4f4b,
   G_FAIL: 0x4641494c,
+  CMD_DUMP_ROM: 1,
   CMD_DUMP_SAVE: 2,
   CMD_RESTORE: 3,
+  CMD_DUMP_BIOS: 5,
   CMD_INFO: 6,
   SECTION_WORDS: 0x40,
+  BIOS_BYTES: 0x4000,
 } as const
 
 const NO_CART = 0xffffffff
@@ -84,6 +87,26 @@ export class GbaCartClient {
     if (saveSize === 0) throw new Error('This cartridge has no save memory.')
     await this.waitDone(120_000)
     return this.streamIn(saveSize, onProgress)
+  }
+
+  /** Reads the whole cartridge ROM; its size comes from the payload's probe. */
+  async dumpRom(
+    onProgress?: (done: number, total: number) => void
+  ): Promise<Uint8Array> {
+    await this.command(GBA_CART.CMD_DUMP_ROM)
+    await this.waitDone(30_000)
+    const [gameSize] = await this.readWords(1)
+    if (gameSize === NO_CART) throw new Error('No GBA cartridge was detected.')
+    return this.streamIn(gameSize, onProgress)
+  }
+
+  /** Reads the GBA's 16 KB BIOS. No cartridge is needed. */
+  async dumpBios(
+    onProgress?: (done: number, total: number) => void
+  ): Promise<Uint8Array> {
+    await this.command(GBA_CART.CMD_DUMP_BIOS)
+    await this.waitDone(30_000)
+    return this.streamIn(GBA_CART.BIOS_BYTES, onProgress)
   }
 
   /**
@@ -238,7 +261,7 @@ export class GbaCartClient {
       } else if (++retries > MAX_SECTION_RETRIES) {
         await this.abort()
         throw new Error(
-          'The save kept arriving corrupted. Check the link cable.'
+          'The data kept arriving corrupted. Check the link cable.'
         )
       } else {
         await this.link.exchangeOne(GBA_CART.M_FAIL)

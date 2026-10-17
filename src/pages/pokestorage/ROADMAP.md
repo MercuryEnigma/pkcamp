@@ -10,7 +10,7 @@
 - [x] Catch invalid files and reject mismatched Cabin versions.
 - [x] Export working saves and standalone Pokémon through the adapter.
 - [x] Discard stale restore/upload results after replacement or unmount.
-- [ ] Verify representative real-save edit/export/reopen workflows for every enabled format.
+- [x] Verify representative real-save import/edit/export/reopen workflows for enabled Gen 3 formats.
 - [ ] Expand generations and fields only after validating their capabilities.
 
 ## Working copies and Camp Sites
@@ -46,10 +46,21 @@
 - [x] Revert recorded PkCamp writes independently of physical-device state.
 - [x] Support GBA cartridge read/write with matching-game validation and pre-write backup.
 - [x] Protect active trades/transfers with the application navigation registry.
+- [x] Share cartridge task instructions, error/restore messages, and cartridge metadata capture across Camp and Lab.
 - [x] Track the production GB-Link placeholder outside personal fixtures.
 - [x] Verify GB-Link, ESP32, cartridge backup, and GBA ↔ Switch relay on real hardware from the dev server.
 - [ ] Repeat supported flows from the production/static deployment.
 - [ ] Define Transfer Station and cross-generation transfer behavior.
+
+## Shared hardware settings
+
+- [x] Show installed/latest GB-Link firmware and check/update to a newer compatible upstream build with one action.
+- [x] Validate UF2 before reboot/write, read back written bytes, and verify the running version.
+- [x] Preserve the pending image across the bootloader permission prompt within the mounted settings session.
+- [x] Guard hardware setup, settings-tab changes, and leaving during updates or pending selection/version verification.
+- [x] Reject late selections after cancellation and share overlapping disconnect cleanup.
+- [x] Cancel preparation on exit; finish verification/reboot once flashing starts.
+- [x] Test current firmware, catalog failure, invalid images, bootloader selection, read-back failure/retry, and cancellation before/during flashing.
 
 ## Emulator and Lab handoff
 
@@ -62,9 +73,8 @@
 
 ## Verification and organization
 
-- [x] Pass strict lint, production build, WASM packaging, browser checks, and 327 unit tests locally on October 16, 2026.
 - [x] Prepare pinned-source WASM dependencies before installation in deployment configuration.
-- [ ] Verify the updated workflow from a clean GitHub Actions checkout.
+- [x] Verify the updated workflow from a clean GitHub Actions checkout.
 - [ ] Separate Camp/Lab pages and extract shared features, UI, hooks, and styles.
 - [x] Remove unused Camp splash/wrapper, callback plumbing, and stale styles.
 - [ ] Consolidate settings/trade layouts.

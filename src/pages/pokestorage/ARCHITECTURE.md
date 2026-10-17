@@ -10,8 +10,10 @@ older requests on replacement/unmount. Cartridge backup and completed trade
 actions persist as explicit operations. The Camp Office is reachable through
 the configured Dropbox badge.
 
-Camp and Lab reuse settings/trade hooks and panels, with one root navigation
-guard protecting edits and active tasks. `useStorageProvider` supplies wrapped
+Camp and Lab reuse settings/trade hooks, task panels, and `gbLinkTask` helpers,
+with one root navigation guard protecting edits, active tasks, and hardware
+settings-tab changes. Shared Settings exposes installed/latest GB-Link firmware
+and the automatic updater. `useStorageProvider` supplies wrapped
 storage, `useStorageSettings` subscribes to preferences, and `useSpriteResolver`
 follows saved source changes. Shared hooks/UI and Lab still live here;
 `Campsite` renders the Camp entry directly without a wrapper. [PLAN.md](PLAN.md) holds product descriptions and
@@ -26,6 +28,7 @@ flowchart TB
   Main --> Trade["TradeView → useTradeSession<br/>startTrade · cancelTrade · undoTrade"]
   Main --> Settings["PokeStorageSettings → useSettingsForm<br/>handleSave · handleDropbox"]
   Save & Camp --> Grid["PokemonStorageView · PokemonDetails · PokemonSlotIcon"]
-  Save & Settings --> GBA["GbaSavePanel<br/>start · onBeforeStart"]
+  Save & Settings --> GBA["GbaSavePanel → shared task panel/helpers"]
+  Settings --> Firmware["GbLinkFirmwareSettings → firmware updater"]
   Save & Camp & Trade & Settings --> Shared["useStorage / navigationGuard<br/>useStorageSettings · useSpriteResolver · useNavigationGuard"]
 ```

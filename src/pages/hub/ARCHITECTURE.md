@@ -2,8 +2,8 @@
 
 `Campsite` renders either `StartMenu` or `WorldMap`. Start has one entry button,
 a configured Dropbox badge, project credits, and first-run source selection
-with optional sign-in. WorldMap enables Camp/Lab, disables four coming-soon
-zones, and places a subdued Start-menu link beneath its cards. Both pages use
+with optional sign-in. WorldMap enables Camp/Lab, shows Arcade as coming soon,
+hides Battle/Safari/Pelago, and places a subdued Start-menu link beneath its cards. Both pages use
 `DropboxMenu`; their navigation is component state rather than URL routes.
 
 `useHubStartup` stays mounted with the shell, waits for account/settings

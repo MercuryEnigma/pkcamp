@@ -62,7 +62,7 @@ export function formatBackupDate(date: Date): string {
   }).format(date)
 }
 
-export type SettingsTab = 'backups' | 'appearance' | 'storage'
+export type SettingsTab = 'backups' | 'appearance' | 'storage' | 'hardware'
 
 /** The GBA Lodge is a single generation; its cabins are the Gen 3 games. */
 export const GBA_GENERATION = 3 as const

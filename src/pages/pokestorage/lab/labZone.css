@@ -703,14 +703,6 @@ button.lab-station:hover .lab-station-action {
   .lab-menu-content .lab-stations {
     grid-template-columns: 1fr 1fr;
   }
-  .lab-menu-content .camp-page-heading {
-    grid-row: 1;
-    grid-column: 2;
-  }
-  .lab-menu-content .camp-page-header {
-    grid-template-columns: auto 1fr auto;
-    gap: 0.5rem;
-  }
   .lab-menu-content .camp-title {
     font-size: 1.25rem;
   }

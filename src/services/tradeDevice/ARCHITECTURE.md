@@ -1,26 +1,30 @@
 # Trade-device architecture
 
-`runTrade` pairs a Gen 3 save backup, Camp Site, GB-Link GBA, or ESP32 Switch
-source through one device interface. Stored writes preserve selected positions
-and validate expected source bytes. `revertTrade` restores recorded PkCamp
-writes, never physical-console state. GBA ↔ Switch is a live relay with no
-PkCamp persistence; GB-Link stored exchanges use the disclosed production
-placeholder when firmware cannot return the received Pokémon.
+`runTrade` pairs Gen 3 save backups, Camp Sites, GB-Link GBA, or ESP32 Switch
+sources through device adapters. Stored writes validate source bytes and
+preserve positions; `revertTrade` reverses recorded PkCamp writes only.
+GBA ↔ Switch is a live relay. GB-Link stored exchanges disclose the tracked
+production placeholder when firmware cannot return received Pokémon. Shared
+connections and exclusive operations also support saves, dumps, gifts, and
+multiboot; cancellation rejects late selections, and repeated disconnect calls
+wait for the same cleanup.
 
-Camp/Lab share `useTradeSession`, whose active guard protects Back/Dropbox and
-whose unmount cleanup cancels/disconnects. The placeholder is tracked at
-`src/assets/trade/ribbondol.pk3`; personal fixtures are not a production
-dependency. GB-Link firmware checks, permissions, transport errors, and events
-remain behind device adapters and vendored client code.
+Camp/Lab share guarded trading and hardware settings. `GbLinkFirmwareUpdater`
+checks the upstream manifest, validates a downloaded UF2, then writes and reads
+it back through the vendored PICOBOOT client before reboot/version verification.
+Leaving aborts preparation, while a started flash finishes verification/reboot.
+Its bootloader handle is separate from the normal GB-Link transport. Device
+adapters own permissions, firmware requirements, transport errors, and leases;
+page components own presentation and navigation.
 
 ```mermaid
 flowchart TB
-  UI["useTradeSession<br/>startTrade · cancelTrade · undoTrade"] --> Routes["tradeRoutes<br/>tradeAvailability · runTrade · revertTrade"]
-  Routes --> Registry["TradeDeviceService<br/>list · get"]
-  Registry --> Interface["TradeDevice<br/>connect · disconnect · trade · cancelTrade"]
-  Interface --> Stored["SaveBackupTradeDevice · CampSiteTradeDevice"]
-  Interface --> GBA["GbLinkTradeDevice<br/>trade / relay / readSave / writeSave"]
-  Interface --> Switch["Esp32TradeDevice<br/>keys / link session"]
-  Stored --> Storage["storage + pkhex"]
-  GBA --> Transport["BrowserGbLinkTransport · gbLinkProtocol"]
+  UI["Camp / Lab"] --> Routes["runTrade / revertTrade"]
+  Routes --> Stored["Save / Camp adapters → storage + PKHeX"]
+  Routes --> Devices["GB-Link / ESP32 adapters"]
+  Tasks["Saves / dumps / gifts / multiboot"] --> Devices
+  Devices --> Hardware["USB / Serial → consoles"]
+  UI --> Update["GbLinkFirmwareUpdater"]
+  Update --> Manifest["Manifest → validated UF2"]
+  Update --> Boot["PICOBOOT: write → read back → reboot"]
 ```

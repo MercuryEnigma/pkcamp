@@ -108,9 +108,10 @@
   box-shadow: 0 4px 16px rgba(36, 82, 58, 0.14);
 }
 
+/* Both zones share a navigation row above the centered page title. */
 .camp-page-header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 1rem;
   width: 100%;
@@ -118,12 +119,15 @@
 }
 
 .camp-page-header .camp-back {
+  grid-column: 1;
+  grid-row: 1;
   justify-self: start;
   margin: 0;
 }
 
 .camp-page-heading {
-  grid-column: 2;
+  grid-column: 1 / -1;
+  grid-row: 2;
   text-align: center;
 }
 
@@ -136,11 +140,13 @@
 
 .camp-page-action,
 .camp-page-header-spacer {
-  grid-column: 3;
+  grid-column: 2;
+  grid-row: 1;
   justify-self: end;
 }
 
 .camp-page-header .camp-back.camp-page-action {
+  grid-column: 2;
   justify-self: end;
 }
 
@@ -772,21 +778,6 @@
 }
 
 @media (max-width: 40rem) {
-  .camp-page-header {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .camp-page-heading {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-
-  .camp-page-action,
-  .camp-page-header-spacer {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
   .camp-storage-layout {
     flex-direction: column;
   }

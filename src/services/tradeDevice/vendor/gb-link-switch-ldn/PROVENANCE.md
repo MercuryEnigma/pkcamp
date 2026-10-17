@@ -22,3 +22,12 @@ Licensing: the source is AGPL-3.0; see `LICENSE` in this folder. Exception:
 2. `cable/cable.js`: the `import { MODE_CABLE_LINK } from '../gblink.js'` line
    is replaced by a local `const MODE_CABLE_LINK = 0x01;` (same value as
    upstream) so upstream `gblink.js` is not vendored.
+
+## Mystery Gift (newer revision)
+
+`cable/leader.js` and `gift/*.js` come from revision
+`8b47745dd2b8efcddb9ff93e4ad319eae4b95f25` (upstream `web/js/`), copied
+unmodified. They import `../wire.js`, `../trade/adapter.js` and `../esp.js`
+from this folder's older revision; those three files are unchanged in
+substance between the two revisions. `gift/wc3.js` and the page code in
+`app.js` are not included. The `.d.ts` files are hand-written.

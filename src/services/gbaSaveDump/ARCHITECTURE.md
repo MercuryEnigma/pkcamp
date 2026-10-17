@@ -1,23 +1,32 @@
 # Cartridge save-transfer architecture
 
-`readGbaSave` and `writeGbaSave` use the shared GB-Link transport to multiboot the
-vendored Cart Doctor dumper onto a GBA. The client identifies the cartridge and
-moves saves in checksummed sections. Game-code and adapter validation keep
-Cabin/cartridge versions aligned; the caller supplies the backup step that
-persists the original cartridge save before overwriting it.
+GBA save, ROM, and BIOS operations use a shared GB-Link transport to multiboot
+the vendored Cart Doctor dumper. `GbaCartClient` identifies cartridges and
+moves data in checksummed sections through `GbLinkWords`. Callers can require
+a matching game and must persist the original save before restore writes;
+the BIOS path skips cartridge identification. Restore supports Gen 3, while
+backups and ROM dumps read other GBA cartridges. The GB/GBC backup path boots
+the GBC-mode payload, validates SRAM sections with bounded retries, rejects
+ROM/restore headers, and restores adapter voltage during cleanup.
 
-`GbaSavePanel` exposes progress and registers active transfers with the shared
-navigation guard. Unmount aborts/disconnects; cancellation suppresses success
-reporting but does not guarantee rollback of a partially written cartridge.
-The service is Gen 3-only and uses WebUSB/Web Serial capability checks, a shared
-transport, vendored dumper bytes, and their provenance/license records.
+`sendMultiboot` shares the existing sender with the transporter service,
+which verifies its pinned program before upload. These operations run under
+exclusive device leases with abort/progress callbacks. Camp/Lab present them
+through shared task panels and helpers, retaining the connection between
+Research Tools tasks and releasing it on exit. Cancellation suppresses success
+reporting and cleans up adapter mode; it cannot guarantee rollback of a partial
+cartridge write.
 
 ```mermaid
 flowchart TB
-  Panel["GbaSavePanel<br/>start · onBeforeStart · onSave/onWritten"] --> Device["GbLinkTradeDevice<br/>readSave · writeSave"]
-  Device --> Entry["readGbaSave · writeGbaSave<br/>AbortSignal · progress · backUpCartridgeSave"]
-  Entry --> Boot["multiboot<br/>encryptWord"]
-  Entry --> Client["GbaCartClient<br/>readInfo · dumpSave · restoreSave"]
-  Boot & Client --> Words["GbLinkWords<br/>exchange · exchangeOne · dispose"]
-  Words --> Transport["GbLinkTransport → physical GBA"]
+  UI["Camp / Lab task panels"] --> Lease["Shared GB-Link exclusive lease"]
+  Lease --> GBA["GBA save / ROM / BIOS → GbaCartClient"]
+  Lease --> GBC["readGbSave → GBC SRAM receiver"]
+  Lease --> Launch["Verified transporter → sendMultiboot"]
+  GBA --> Boot["Multiboot sender"]
+  GBC --> Boot
+  Launch --> Boot
+  Boot --> Words["GbLinkWords → transport → hardware"]
+  GBA --> Words
+  GBC --> Words
 ```

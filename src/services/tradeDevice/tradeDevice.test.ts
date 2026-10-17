@@ -105,6 +105,79 @@ describe('TradeDeviceService', () => {
 })
 
 describe('Esp32TradeDevice', () => {
+  it('shares a pending disconnect and blocks a second connection during cleanup', async () => {
+    const { dependencies, transport } = makeDependencies()
+    const device = new Esp32TradeDevice(dependencies)
+    await device.connect()
+    let finish!: () => void
+    const closing = new Promise<void>((resolve) => {
+      finish = resolve
+    })
+    const close = vi
+      .spyOn(transport, 'close')
+      .mockImplementationOnce(async () => {
+        await closing
+        transport.attached = false
+      })
+    const first = device.disconnect()
+    const second = device.disconnect()
+    await expect(device.connect()).rejects.toMatchObject({ code: 'busy' })
+    expect(device.state).toBe('disconnecting')
+    finish()
+    await Promise.all([first, second])
+    expect(close).toHaveBeenCalledOnce()
+    expect(device.state).toBe('disconnected')
+  })
+
+  it.each(['cancel', 'disconnect'] as const)(
+    'does not open a late ESP32 selection after %s',
+    async (action) => {
+      const { dependencies, transport } = makeDependencies()
+      let choose!: (port: unknown) => void
+      const chosen = new Promise<unknown>((resolve) => {
+        choose = resolve
+      })
+      dependencies.requestPort = () => chosen
+      const open = vi.spyOn(transport, 'open')
+      const device = new Esp32TradeDevice(dependencies)
+      const controller = new AbortController()
+      const connecting = device.connect({ signal: controller.signal })
+      const rejected = expect(connecting).rejects.toMatchObject({
+        name: 'AbortError',
+      })
+      if (action === 'cancel') controller.abort()
+      else await device.disconnect()
+      await expect(device.connect()).rejects.toMatchObject({ code: 'busy' })
+      choose({ id: 'late-port' })
+      await rejected
+      expect(open).not.toHaveBeenCalled()
+      expect(device.state).toBe('disconnected')
+    }
+  )
+
+  it('releases a gift reservation cancelled while checking keys', async () => {
+    const { dependencies, transport } = makeDependencies()
+    transport.info!.version = '2.1.0'
+    let checked!: (keys: { complete: boolean }) => void
+    const keys = new Promise<{ complete: boolean }>((resolve) => {
+      checked = resolve
+    })
+    vi.spyOn(transport, 'keyStatus').mockReturnValueOnce(keys)
+    const device = new Esp32TradeDevice(dependencies)
+    await device.connect()
+    const controller = new AbortController()
+    const claim = device.claimForGift('2.1.0', controller.signal)
+    const rejected = expect(claim).rejects.toMatchObject({ name: 'AbortError' })
+    await expect(device.claimForGift('2.1.0')).rejects.toMatchObject({
+      code: 'busy',
+    })
+    controller.abort()
+    checked({ complete: true })
+    await rejected
+    expect(transport.startBridge).not.toHaveBeenCalled()
+    expect(device.state).toBe('connected')
+  })
+
   it('connects and runs a TradeSession with an automatic first offer', async () => {
     const { dependencies, transport, sessions } = makeDependencies()
     const device = new Esp32TradeDevice(dependencies)

@@ -43,8 +43,10 @@ return to the same entry. Unsaved editor changes do not count toward research.
 
 The Trade Table shares Camp's trade engine, and Settings manages the same
 account, backups, appearance, and data. Patch Notes remains reachable. Research
-Tools begins with Mystery Gifts only after supported delivery contents,
-games/devices, data sources, and failure/recovery behavior are specified.
+Tools helps players preserve cartridges, send event content, and move Pokémon
+forward from older generations. Cartridge restores require a pre-write backup;
+transporter backups are recommended and optional. See the
+[Research Tools plan](src/pages/pokestorage/lab/PLAN.md) for goals and scope.
 
 ## Battle Zone
 
@@ -111,5 +113,11 @@ to automated tests; mocks cannot establish hardware support.
 [ROADMAP.md](ROADMAP.md) contains only milestone/task checklists.
 [ARCHITECTURE.md](ARCHITECTURE.md) and directory architecture documents describe
 only current implementation, each limited to one page with one or two
-paragraphs and a diagram showing components and important methods. Product
+paragraphs and a simple diagram showing important components and flows. Product
 intent and unresolved design belong in plans; task status belongs in roadmaps.
+Detailed scope and interaction requirements belong in reference documents such
+as [LAB_TOOLS.md](src/pages/pokestorage/lab/LAB_TOOLS.md). Release URLs, hashes,
+compatibility details, and protocol references belong in technical references
+such as [POKE_TRANSPORTER_GB.md](src/pages/pokestorage/lab/POKE_TRANSPORTER_GB.md).
+These references link to roadmaps for status rather than maintaining duplicate
+verification checklists.

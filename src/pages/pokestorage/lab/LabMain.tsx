@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { gbLinkTradeDevice } from '../../../services/tradeDevice'
 import { NavigationScopeProvider } from '../navigationGuard'
 import { NewsPage } from '../../NewsPage'
 import '../camp.css'
@@ -10,18 +11,37 @@ import './lab.css'
 import { LabMenu } from './LabMenu'
 import { LabSettings, type SettingsTab } from './LabSettings'
 import { LabTradeTable } from './LabTradeTable'
+import { ResearchTools } from './ResearchTools'
+import { CartridgeSaves } from './CartridgeSaves'
+import { RomBiosDumps } from './RomBiosDumps'
+import { MysteryGifts } from './MysteryGifts'
+import { PokeTransporter } from './PokeTransporter'
 import './labZone.css'
 
 type Screen =
   | { name: 'menu' }
   | { name: 'collections' }
   | { name: 'trade' }
+  | { name: 'research' }
+  | { name: 'cartridge-saves' }
+  | { name: 'rom-bios-dumps' }
+  | { name: 'mystery-gifts' }
+  | { name: 'poke-transporter' }
   | { name: 'settings'; tab?: SettingsTab }
   | { name: 'news' }
 
+/** Research Tools screens share one GB-Link session between their tasks. */
+const RESEARCH_SCREENS: ReadonlySet<Screen['name']> = new Set([
+  'research',
+  'cartridge-saves',
+  'rom-bios-dumps',
+  'mystery-gifts',
+  'poke-transporter',
+])
+
 /**
- * The Lab Zone: Pokédex Collections, the Trade Table, and (later) Research
- * Tools. Storage is site-wide, so the Trade Table and Settings work on the
+ * The Lab Zone: Pokédex Collections, the Trade Table, and Research Tools.
+ * Storage is site-wide, so the Trade Table and Settings work on the
  * same saves and Camp Sites as the Camp Zone.
  */
 export function LabMain({
@@ -43,6 +63,15 @@ export function LabMain({
   const [screen, setScreen] = useState<Screen>({ name: 'menu' })
   const { provider } = useStorageProvider()
   const toMenu = () => setScreen({ name: 'menu' })
+  const inResearch = RESEARCH_SCREENS.has(screen.name)
+
+  // Tasks leave the GB-Link connected for the next one; release it on leaving.
+  useEffect(() => {
+    if (!inResearch) return
+    return () => {
+      void gbLinkTradeDevice.disconnect().catch(() => {})
+    }
+  }, [inResearch])
 
   return (
     <NavigationScopeProvider value={!hidden}>
@@ -69,6 +98,26 @@ export function LabMain({
         )
       case 'trade':
         return <LabTradeTable onBack={toMenu} />
+      case 'research':
+        return (
+          <ResearchTools
+            onBack={toMenu}
+            onOpenSaves={() => setScreen({ name: 'cartridge-saves' })}
+            onOpenDumps={() => setScreen({ name: 'rom-bios-dumps' })}
+            onOpenGifts={() => setScreen({ name: 'mystery-gifts' })}
+            onOpenTransporter={() => setScreen({ name: 'poke-transporter' })}
+          />
+        )
+      case 'cartridge-saves':
+        return <CartridgeSaves onBack={() => setScreen({ name: 'research' })} />
+      case 'rom-bios-dumps':
+        return <RomBiosDumps onBack={() => setScreen({ name: 'research' })} />
+      case 'mystery-gifts':
+        return <MysteryGifts onBack={() => setScreen({ name: 'research' })} />
+      case 'poke-transporter':
+        return (
+          <PokeTransporter onBack={() => setScreen({ name: 'research' })} />
+        )
       case 'settings':
         return (
           <LabSettings
@@ -101,6 +150,7 @@ export function LabMain({
             onBack={onBack}
             onSelectCollections={() => setScreen({ name: 'collections' })}
             onSelectTrade={() => setScreen({ name: 'trade' })}
+            onSelectResearch={() => setScreen({ name: 'research' })}
             onSelectSettings={() => setScreen({ name: 'settings' })}
             onSelectNews={() => setScreen({ name: 'news' })}
           />

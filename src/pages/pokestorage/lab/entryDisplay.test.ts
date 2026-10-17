@@ -62,13 +62,13 @@ describe('Pokédex requirement record', () => {
     expect(
       requirementFields({ species: 14, isEgg: false, moves: [33, 45] })
     ).toEqual([
-      { label: 'Species', value: 'Kakuna' },
-      { label: 'Egg', value: 'No' },
-      { label: 'Move', value: 'Any of 33, 45' },
+      { label: 'Species', value: 'Kakuna', values: ['Kakuna'] },
+      { label: 'Egg', value: 'No', values: ['No'] },
+      { label: 'Move', value: 'Any of 33, 45', values: ['33', '45'] },
     ])
     expect(requirementFields({ species: 201, form: 27 })).toEqual([
-      { label: 'Species', value: 'Unown' },
-      { label: 'Form', value: '?' },
+      { label: 'Species', value: 'Unown', values: ['Unown'] },
+      { label: 'Form', value: '?', values: ['?'] },
     ])
     expect(requirementFields({})).toEqual([])
   })

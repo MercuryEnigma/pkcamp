@@ -1,7 +1,7 @@
 import type { Gen3GameId } from '../saveLibrary'
 import { GB_LINK_COMMAND, GB_LINK_MODE } from '../tradeDevice/gbLinkProtocol.ts'
 import type { GbLinkTransport } from '../tradeDevice/gbLinkTransport.ts'
-import { GbaCartClient } from './gbaCartClient.ts'
+import { GbaCartClient, type GbaCartInfo } from './gbaCartClient.ts'
 import { delay, GbLinkWords } from './gbLinkWords.ts'
 import { multiboot } from './multiboot.ts'
 // Inlined (about 80 KB of base64) so starting a read needs no network
@@ -17,11 +17,18 @@ export const GAME_CODE_PREFIX: Record<Gen3GameId, string> = {
   leafgreen: 'BPG',
 }
 
+/** The Gen 3 game a cartridge code belongs to, or null for any other game. */
+export function gameIdFromCode(code: string): Gen3GameId | null {
+  const entry = Object.entries(GAME_CODE_PREFIX).find(([, prefix]) =>
+    code.startsWith(prefix)
+  )
+  return entry ? (entry[0] as Gen3GameId) : null
+}
+
 /** Microseconds between SPI words and bytes per word, as Cart Doctor uses. */
 const TIMING_CONFIG = new Uint8Array([36, 0, 0, 4])
 
-export interface GbaSaveOptions {
-  gameId: Gen3GameId
+export interface GbaDumperOptions {
   signal: AbortSignal
   onStatus?(message: string): void
   onProgress?(done: number, total: number): void
@@ -29,7 +36,16 @@ export interface GbaSaveOptions {
   loadDumper?(): Promise<Uint8Array>
 }
 
+export interface GbaSaveOptions extends GbaDumperOptions {
+  /** When set, a cartridge for any other game is refused before reading. */
+  gameId?: Gen3GameId
+  /** Called with the inserted cartridge's header once it has been read. */
+  onCartridge?(info: GbaCartInfo): void
+}
+
 export interface WriteGbaSaveOptions extends GbaSaveOptions {
+  /** The game `save` belongs to; the cartridge must match it. */
+  gameId: Gen3GameId
   /** The save to write over the cartridge's save. */
   save: Uint8Array
   /**
@@ -46,12 +62,12 @@ async function bundledDumper(): Promise<Uint8Array> {
 }
 
 /**
- * Multiboots the GB-Link Cart Doctor dumper, checks the inserted cartridge is
- * `gameId`, then runs `operation`. Works with stock GB-Link firmware.
+ * Multiboots the GB-Link Cart Doctor dumper onto the waiting GBA, then runs
+ * `operation`. Works with stock GB-Link firmware.
  */
-async function withCartridge<T>(
+async function withDumper<T>(
   transport: GbLinkTransport,
-  { gameId, signal, onStatus, loadDumper = bundledDumper }: GbaSaveOptions,
+  { signal, onStatus, loadDumper = bundledDumper }: GbaDumperOptions,
   operation: (cart: GbaCartClient) => Promise<T>
 ): Promise<T> {
   const dumper = await loadDumper()
@@ -68,27 +84,43 @@ async function withCartridge<T>(
     link.drain()
 
     // The GBA is already waiting: it was turned on holding START + SELECT.
-    onStatus?.('Sending the save tool to the GBA…')
+    onStatus?.('Sending the cartridge tool to the GBA…')
     await multiboot(link, dumper, signal)
 
-    onStatus?.('Checking the cartridge…')
     const cart = new GbaCartClient(link, signal)
     await delay(800, signal)
     if (!(await cart.ping())) {
-      throw new Error('The GBA save tool did not start. Try again.')
-    }
-    const info = await cart.readInfo()
-    if (!info) throw new Error('No GBA cartridge was detected.')
-    if (!info.code.startsWith(GAME_CODE_PREFIX[gameId])) {
-      throw new Error(
-        `This cartridge is ${info.title || info.code}, not the game for this Cabin.`
-      )
+      throw new Error('The GBA cartridge tool did not start. Try again.')
     }
     return await operation(cart)
   } finally {
     link.dispose()
     await transport.sendCommand(GB_LINK_COMMAND.cancel).catch(() => {})
   }
+}
+
+/**
+ * Like `withDumper`, but first reads the cartridge header, reports it, and
+ * refuses a cartridge for a game other than `gameId` when one is given.
+ */
+function withCartridge<T>(
+  transport: GbLinkTransport,
+  options: GbaSaveOptions,
+  operation: (cart: GbaCartClient) => Promise<T>
+): Promise<T> {
+  return withDumper(transport, options, async (cart) => {
+    options.onStatus?.('Checking the cartridge…')
+    const info = await cart.readInfo()
+    if (!info) throw new Error('No GBA cartridge was detected.')
+    options.onCartridge?.(info)
+    const { gameId } = options
+    if (gameId && !info.code.startsWith(GAME_CODE_PREFIX[gameId])) {
+      throw new Error(
+        `This cartridge is ${info.title || info.code}, which doesn't match the expected game.`
+      )
+    }
+    return operation(cart)
+  })
 }
 
 /** Reads the save from the cartridge in a GBA. */
@@ -124,5 +156,27 @@ export function writeGbaSave(
         )
       }
     })
+  })
+}
+
+/** Reads the whole ROM of the cartridge in a GBA. */
+export function readGbaRom(
+  transport: GbLinkTransport,
+  options: GbaSaveOptions
+): Promise<Uint8Array> {
+  return withCartridge(transport, options, (cart) => {
+    options.onStatus?.('Reading the ROM…')
+    return cart.dumpRom(options.onProgress)
+  })
+}
+
+/** Reads the 16 KB BIOS of a GBA. No cartridge is needed. */
+export function readGbaBios(
+  transport: GbLinkTransport,
+  options: GbaDumperOptions
+): Promise<Uint8Array> {
+  return withDumper(transport, options, (cart) => {
+    options.onStatus?.('Reading the BIOS…')
+    return cart.dumpBios(options.onProgress)
   })
 }

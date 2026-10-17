@@ -69,8 +69,8 @@ export function useTradeSession({
       abortRef.current?.abort()
       esp32TradeDevice.cancelTrade()
       gbLinkTradeDevice.cancelTrade()
-      void esp32TradeDevice.disconnect()
-      void gbLinkTradeDevice.disconnect()
+      void esp32TradeDevice.disconnect().catch(() => {})
+      void gbLinkTradeDevice.disconnect().catch(() => {})
     },
     []
   )

@@ -70,12 +70,14 @@ export function LabMenu({
   onBack,
   onSelectCollections,
   onSelectTrade,
+  onSelectResearch,
   onSelectSettings,
   onSelectNews,
 }: {
   onBack: () => void
   onSelectCollections: () => void
   onSelectTrade: () => void
+  onSelectResearch: () => void
   onSelectSettings: () => void
   onSelectNews: () => void
 }) {
@@ -112,13 +114,9 @@ export function LabMenu({
           />
           <LabStation
             title="Research Tools"
-            description="Mystery Gifts and research utilities are coming later."
-            planned={[
-              {
-                name: 'Mystery Gifts',
-                description: 'Receive event Pokémon and items.',
-              },
-            ]}
+            description="Work with cartridges and connected games."
+            action="Open research tools"
+            onClick={onSelectResearch}
           />
         </nav>
 

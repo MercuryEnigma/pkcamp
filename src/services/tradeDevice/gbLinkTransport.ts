@@ -10,7 +10,10 @@ export type GbLinkTransportKind = 'webusb' | 'webserial'
 export interface GbLinkTransport {
   readonly attached: boolean
   readonly kind: GbLinkTransportKind | null
-  open(): Promise<void>
+  open(options?: {
+    previouslyGrantedOnly?: boolean
+    signal?: AbortSignal
+  }): Promise<void>
   close(): Promise<void>
   sendCommand(command: number, args?: Uint8Array): Promise<void>
   sendData(payload: Uint8Array): Promise<void>
@@ -31,6 +34,8 @@ interface UsbTransferOutResultLike {
 }
 
 interface UsbDeviceLike {
+  vendorId?: number
+  productId?: number
   configuration?: { configurationValue: number } | null
   open(): Promise<void>
   selectConfiguration(value: number): Promise<void>
@@ -66,6 +71,7 @@ interface SerialPortLike {
 
 interface GbLinkNavigator {
   usb?: {
+    getDevices?(): Promise<UsbDeviceLike[]>
     requestDevice(options: {
       filters: { vendorId: number; productId: number }[]
     }): Promise<UsbDeviceLike>
@@ -130,28 +136,63 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     return this.currentKind
   }
 
-  async open(): Promise<void> {
+  async open(options?: {
+    previouslyGrantedOnly?: boolean
+    signal?: AbortSignal
+  }): Promise<void> {
+    const signal = options?.signal
+    signal?.throwIfAborted()
     if (this.connected) return
     const host = browserNavigator()
     if (!host) throw new Error('This browser has no USB device APIs.')
 
+    if (options?.previouslyGrantedOnly) {
+      const devices = (await host.usb?.getDevices?.()) ?? []
+      signal?.throwIfAborted()
+      const matches = devices.filter((device) =>
+        USB_FILTERS.some(
+          (filter) =>
+            device.vendorId === filter.vendorId &&
+            device.productId === filter.productId
+        )
+      )
+      if (matches.length !== 1)
+        throw new Error('Select your GB-Link to reconnect.')
+      try {
+        await this.openUsb(matches[0])
+        signal?.throwIfAborted()
+        return
+      } catch (cause) {
+        await this.close()
+        throw cause
+      }
+    }
+
     let webUsbError: unknown
     if (host.usb) {
       try {
-        await this.openUsb(
-          await host.usb.requestDevice({ filters: USB_FILTERS })
-        )
+        const device = await host.usb.requestDevice({ filters: USB_FILTERS })
+        signal?.throwIfAborted()
+        await this.openUsb(device)
+        signal?.throwIfAborted()
         return
       } catch (error) {
         webUsbError = error
         await this.close()
+        signal?.throwIfAborted()
+        if (
+          error instanceof DOMException &&
+          ['NotFoundError', 'AbortError'].includes(error.name)
+        )
+          throw error
       }
     }
 
     if (host.serial) {
-      await this.openSerial(
-        await host.serial.requestPort({ filters: SERIAL_FILTERS })
-      )
+      const port = await host.serial.requestPort({ filters: SERIAL_FILTERS })
+      signal?.throwIfAborted()
+      await this.openSerial(port)
+      signal?.throwIfAborted()
       return
     }
 

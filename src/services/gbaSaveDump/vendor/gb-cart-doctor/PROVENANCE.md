@@ -10,3 +10,10 @@ Dumper and is MIT-licensed.
 The host protocol in `../../multiboot.ts` and `../../gbaCartClient.ts` is a
 TypeScript port of `web/multiboot.js` and `web/gba_cart.js` from the same
 revision, which are licensed under GPL-3.0; see `LICENSE` in this folder.
+
+`gba-switch-to-gbc_mb.gba` is the unmodified GB/GBC backup dumper from the same
+revision (`web/gba-switch-to-gbc_mb.gba`), SHA-256
+`ed1d58599273b10480a719a25eb05644ed199de03d132b91e05ada007946ded2`.
+`../../readGbSave.ts` ports the SRAM receive portion of
+`web/dump_receiver_fast.js` and the mode/timing setup in `web/app.js` under
+GPL-3.0. It accepts only save transfers and validates section XOR checksums.

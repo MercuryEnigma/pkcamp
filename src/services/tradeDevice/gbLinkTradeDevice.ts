@@ -1,6 +1,9 @@
 import {
+  readGbaBios,
+  readGbaRom,
   readGbaSave,
   writeGbaSave,
+  type GbaDumperOptions,
   type GbaSaveOptions,
   type WriteGbaSaveOptions,
 } from '../gbaSaveDump/readGbaSave.ts'
@@ -144,6 +147,8 @@ export class GbLinkTradeDevice implements TradeDevice {
   private currentState: TradeDeviceState = 'disconnected'
   private activeAbort: AbortController | null = null
   private cachedFirmware: string | null = null
+  private connecting: AbortController | null = null
+  private disconnecting: Promise<void> | null = null
 
   constructor(
     dependencies: GbLinkTradeDeviceDependencies = defaultDependencies
@@ -159,7 +164,11 @@ export class GbLinkTradeDevice implements TradeDevice {
     return this.currentState
   }
 
-  async connect(): Promise<void> {
+  async connect(options?: {
+    previouslyGrantedOnly?: boolean
+    signal?: AbortSignal
+  }): Promise<void> {
+    options?.signal?.throwIfAborted()
     if (this.transport?.attached) return
     if (!this.supported) {
       throw new TradeDeviceError(
@@ -168,20 +177,31 @@ export class GbLinkTradeDevice implements TradeDevice {
         'This browser supports neither WebUSB nor Web Serial.'
       )
     }
-    if (this.currentState !== 'disconnected') {
+    if (this.connecting || this.currentState !== 'disconnected') {
       throw new TradeDeviceError(this.id, 'busy', 'The GB-Link is busy.')
     }
 
     this.currentState = 'connecting'
+    const controller = new AbortController()
+    this.connecting = controller
+    const cancel = () => controller.abort(options?.signal?.reason)
+    options?.signal?.addEventListener('abort', cancel, { once: true })
     const transport = this.dependencies.createTransport()
     try {
-      await transport.open()
+      await transport.open({ ...options, signal: controller.signal })
+      controller.signal.throwIfAborted()
       this.transport = transport
       this.currentState = 'connected'
     } catch (error) {
-      await transport.close()
-      this.currentState = 'disconnected'
+      try {
+        await transport.close()
+      } finally {
+        this.currentState = 'disconnected'
+      }
       throw error
+    } finally {
+      options?.signal?.removeEventListener('abort', cancel)
+      this.connecting = null
     }
   }
 
@@ -229,6 +249,8 @@ export class GbLinkTradeDevice implements TradeDevice {
   }
 
   async disconnect(): Promise<void> {
+    if (this.disconnecting) return this.disconnecting
+    this.connecting?.abort()
     this.cachedFirmware = null
     const transport = this.transport
     if (!transport) {
@@ -239,14 +261,18 @@ export class GbLinkTradeDevice implements TradeDevice {
     this.currentState = 'disconnecting'
     this.cancelTrade()
     this.transport = null
-    try {
-      if (transport.attached) {
-        await transport.sendCommand(GB_LINK_COMMAND.cancel).catch(() => {})
+    this.disconnecting = Promise.resolve().then(async () => {
+      try {
+        if (transport.attached) {
+          await transport.sendCommand(GB_LINK_COMMAND.cancel).catch(() => {})
+        }
+        await transport.close()
+      } finally {
+        this.currentState = 'disconnected'
+        this.disconnecting = null
       }
-      await transport.close()
-    } finally {
-      this.currentState = 'disconnected'
-    }
+    })
+    return this.disconnecting
   }
 
   async trade(request: TradeRequest): Promise<TradeResult> {
@@ -330,7 +356,12 @@ export class GbLinkTradeDevice implements TradeDevice {
       removeSessionListener()
       request.signal?.removeEventListener('abort', cancel)
       this.activeAbort = null
-      this.currentState = transport.attached ? 'connected' : 'disconnected'
+      if (!this.disconnecting) {
+        this.currentState =
+          this.transport === transport && transport.attached
+            ? 'connected'
+            : 'disconnected'
+      }
     }
   }
 
@@ -341,6 +372,20 @@ export class GbLinkTradeDevice implements TradeDevice {
   readSave(options: GbaSaveOptions): Promise<Uint8Array> {
     return this.runExclusive(options.signal, (transport, signal) =>
       readGbaSave(transport, { ...options, signal })
+    )
+  }
+
+  /** Reads the cartridge ROM in the connected GBA. */
+  readRom(options: GbaSaveOptions): Promise<Uint8Array> {
+    return this.runExclusive(options.signal, (transport, signal) =>
+      readGbaRom(transport, { ...options, signal })
+    )
+  }
+
+  /** Reads the BIOS of the connected GBA. */
+  readBios(options: GbaDumperOptions): Promise<Uint8Array> {
+    return this.runExclusive(options.signal, (transport, signal) =>
+      readGbaBios(transport, { ...options, signal })
     )
   }
 
@@ -362,6 +407,19 @@ export class GbLinkTradeDevice implements TradeDevice {
     } finally {
       lease.free()
     }
+  }
+
+  /**
+   * Claims the device for a caller that drives the transport itself, such as
+   * a Mystery Gift distribution. `free()` releases it; the caller leaves any
+   * mode it set.
+   */
+  claim(signal: AbortSignal): {
+    transport: GbLinkTransport
+    signal: AbortSignal
+    free(): void
+  } {
+    return this.acquire(signal)
   }
 
   /**
@@ -457,7 +515,12 @@ export class GbLinkTradeDevice implements TradeDevice {
         signal.removeEventListener('abort', cancel)
         if (this.activeAbort === controller) {
           this.activeAbort = null
-          this.currentState = transport.attached ? 'connected' : 'disconnected'
+          if (!this.disconnecting) {
+            this.currentState =
+              this.transport === transport && transport.attached
+                ? 'connected'
+                : 'disconnected'
+          }
         }
       },
     }

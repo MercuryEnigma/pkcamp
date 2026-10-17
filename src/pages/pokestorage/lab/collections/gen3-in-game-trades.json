@@ -1,0 +1,284 @@
+{
+  "schemaVersion": "1",
+  "id": "gen3-in-game-trades",
+  "name": "Gen 3 In-Game Trades",
+  "metadata": {
+    "version": "1.0.0",
+    "author": "PkCamp",
+    "description": "Every in-game trade Pokémon from Ruby, Sapphire, Emerald, FireRed, and LeafGreen, still unevolved. Matched by species, OT, and TID; any language's OT counts.",
+    "source": "PKHeX.Core Encounters3RSE / Encounters3FRLG trade tables",
+    "updated": "2026-10-17"
+  },
+  "groups": [
+    {
+      "id": "ruby-sapphire",
+      "name": "Ruby & Sapphire",
+      "pokemon": [
+        "rs-makuhita",
+        "rs-skitty",
+        "rs-corsola"
+      ]
+    },
+    {
+      "id": "emerald",
+      "name": "Emerald",
+      "pokemon": [
+        "e-seedot",
+        "e-plusle",
+        "e-horsea",
+        "e-meowth"
+      ]
+    },
+    {
+      "id": "firered-leafgreen",
+      "name": "FireRed & LeafGreen",
+      "details": "Lickitung is offered in both games, for Golduck in FireRed and Slowbro in LeafGreen.",
+      "pokemon": [
+        "frlg-mr-mime",
+        "frlg-jynx",
+        "frlg-farfetchd",
+        "frlg-electrode",
+        "frlg-tangela",
+        "frlg-seel",
+        "frlg-lickitung"
+      ]
+    },
+    {
+      "id": "firered",
+      "name": "FireRed",
+      "pokemon": [
+        "fr-nidoran-f",
+        "fr-nidorina"
+      ]
+    },
+    {
+      "id": "leafgreen",
+      "name": "LeafGreen",
+      "pokemon": [
+        "lg-nidoran-m",
+        "lg-nidorino"
+      ]
+    }
+  ],
+  "pokemon": {
+    "rs-makuhita": {
+      "species": 296,
+      "ot": [
+        "ELYSSA",
+        "モーリン",
+        "NELSON",
+        "LEANDRO",
+        "MAIK",
+        "EVELIO"
+      ],
+      "id": 49562,
+      "isEgg": false
+    },
+    "rs-skitty": {
+      "species": 300,
+      "ot": [
+        "DARRELL",
+        "ユキポン",
+        "ELYSA",
+        "LOLA",
+        "MADINA",
+        "DALILA"
+      ],
+      "id": 2259,
+      "isEgg": false
+    },
+    "rs-corsola": {
+      "species": 222,
+      "ot": [
+        "LANE",
+        "サトチン",
+        "LANA",
+        "BETTA",
+        "LIANA",
+        "LAILA"
+      ],
+      "id": 50183,
+      "isEgg": false
+    },
+    "e-seedot": {
+      "species": 273,
+      "ot": [
+        "KOBE",
+        "マッチャン",
+        "KIKO",
+        "FABIAN",
+        "QUICO"
+      ],
+      "id": 38726,
+      "isEgg": false
+    },
+    "e-plusle": {
+      "species": 311,
+      "ot": [
+        "ROMAN",
+        "アッキー",
+        "ALBAN",
+        "RÜDIGER",
+        "RENATO"
+      ],
+      "id": 8460,
+      "isEgg": false
+    },
+    "e-horsea": {
+      "species": 116,
+      "ot": [
+        "SKYLAR",
+        "ソガチン",
+        "LUDOVIC",
+        "SERGINO",
+        "TORSTEN",
+        "SERGIO"
+      ],
+      "id": 46285,
+      "isEgg": false
+    },
+    "e-meowth": {
+      "species": 52,
+      "ot": [
+        "ISIS",
+        "マリッペ",
+        "TABITHA",
+        "ISA"
+      ],
+      "id": 25945,
+      "isEgg": false
+    },
+    "frlg-mr-mime": {
+      "species": 122,
+      "ot": [
+        "REYLEY",
+        "ひとまろ",
+        "NASSIM",
+        "RICHARD",
+        "RÚTEO"
+      ],
+      "id": 1985,
+      "isEgg": false
+    },
+    "frlg-jynx": {
+      "species": 124,
+      "ot": [
+        "DONTAE",
+        "もりべー",
+        "JOHAN",
+        "RINO",
+        "DANTE",
+        "CELESTO"
+      ],
+      "id": 36728,
+      "isEgg": false
+    },
+    "frlg-farfetchd": {
+      "species": 83,
+      "ot": [
+        "ELYSSA",
+        "みどりん",
+        "ADELINE",
+        "ELISA",
+        "CARMELA"
+      ],
+      "id": 8810,
+      "isEgg": false
+    },
+    "frlg-electrode": {
+      "species": 101,
+      "ot": [
+        "CLIFTON",
+        "タナーカ",
+        "ALBAN",
+        "FRANZ",
+        "CANEL"
+      ],
+      "id": 50298,
+      "isEgg": false
+    },
+    "frlg-tangela": {
+      "species": 114,
+      "ot": [
+        "NORMA",
+        "なっつん",
+        "PERRINE",
+        "DULCE"
+      ],
+      "id": 60042,
+      "isEgg": false
+    },
+    "frlg-seel": {
+      "species": 86,
+      "ot": [
+        "GARETT",
+        "よしもつ",
+        "FELIX",
+        "GUSTAV",
+        "GOYO"
+      ],
+      "id": 9853,
+      "isEgg": false
+    },
+    "frlg-lickitung": {
+      "species": 108,
+      "ot": [
+        "HADEN",
+        "みちはる",
+        "ISMAEL",
+        "HELMUTH",
+        "DIOCHO"
+      ],
+      "id": 1239,
+      "isEgg": false
+    },
+    "fr-nidoran-f": {
+      "species": 29,
+      "ot": [
+        "SAIGE",
+        "めぐっぺ",
+        "FLORA",
+        "WALTRAU",
+        "QUICA"
+      ],
+      "id": 63184,
+      "isEgg": false
+    },
+    "fr-nidorina": {
+      "species": 30,
+      "ot": [
+        "TURNER",
+        "とーたん",
+        "ELIOTT",
+        "THOMAS",
+        "ONZANO"
+      ],
+      "id": 13637,
+      "isEgg": false
+    },
+    "lg-nidoran-m": {
+      "species": 32,
+      "ot": [
+        "SAIGE",
+        "めぐっぺ",
+        "FLORA",
+        "WALTRAU",
+        "QUICA"
+      ],
+      "id": 63184,
+      "isEgg": false
+    },
+    "lg-nidorino": {
+      "species": 33,
+      "ot": [
+        "TURNER",
+        "とーたん",
+        "ELIOTT",
+        "THOMAS",
+        "ONZANO"
+      ],
+      "id": 13637,
+      "isEgg": false
+    }
+  }
+}

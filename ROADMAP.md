@@ -2,11 +2,11 @@
 
 ## Hub
 
-- [x] Add Start and six-zone world-map menus under `pages/hub/`.
+- [x] Add Start and the zone-card menu under `pages/hub/`.
 - [x] Restore Dropbox and settings before enabling Start.
 - [x] Ask first-time players to select a sprite source; offer optional Dropbox sign-in.
 - [x] Show Dropbox controls on both menus when configured and project credits on Start.
-- [x] Open Camp and Lab; mark Battle, Safari, Pelago, and Arcade as coming soon.
+- [x] Open Camp and Lab, show Arcade as coming soon, and hide the deferred Battle/Safari/Pelago cards.
 - [x] Place a subdued Start-menu link below the map's zone cards.
 - [x] Start shared storage prefetch and bounded sprite preloading in the background.
 - [ ] Replace the zone-card menu with the explorable map.
@@ -22,8 +22,7 @@
 - [x] Persist saves, Camp Sites, and settings in browser storage or Dropbox.
 - [x] Add Trading Post and cartridge backup/restore workflows.
 - [x] Verify ESP32, GB-Link trades/backups, and GBA ↔ Switch relay from the dev server.
-- [ ] Repeat supported device flows from the production/static build.
-- [ ] Verify import/edit/export/reopen with representative real saves before expanding support.
+- [x] Verify representative real-save import/edit/export/reopen workflows for enabled Gen 3 formats.
 - [ ] Expand game generations, field editing, and transfer rules only after validation.
 - [ ] Implement emulator save handoff with Arcade, Safari, and Pelago.
 - [ ] Add source/device provenance and define standalone Pokémon identity.
@@ -38,8 +37,12 @@
 - [x] Migrate legacy browser-only Lab settings and uploads into active storage.
 - [x] Open source Cabin boxes/Camp Sites and return to the same Lab entry.
 - [x] Share the trading/settings logic and navigation guards with Camp.
-- [ ] Specify Mystery Gift sources, contents, compatible games/devices, and recovery behavior.
-- [ ] Build Research Tools, starting with verified Mystery Gift workflows.
+- [x] Specify Mystery Gift sources, contents, compatible games/devices, and recovery behavior.
+- [x] Add the Research Tools hub and GBA save download and restore workflows.
+- [x] Validate Research Tools hardware workflows; detailed coverage is in the [Lab checklist](src/pages/pokestorage/lab/ROADMAP.md).
+- [x] Add automatic GB-Link firmware updates with installed/latest versions in shared Settings.
+- [x] Harden cancellation, late device selection, repeated shutdown, and guarded hardware settings navigation.
+- [ ] Complete remaining production, accessibility, and automated checks in the [Research Tools checklist](src/pages/pokestorage/lab/ROADMAP.md).
 - [ ] Finish account, compatibility, accessibility, and data-management options.
 
 ## Battle Zone
@@ -86,8 +89,8 @@
 - [x] Cache sprite resolvers and preload at most six images concurrently.
 - [x] Track production trade assets separately from ignored personal fixtures.
 - [x] Add pinned-source WASM setup before dependency installation in deployment configuration.
-- [x] Pass strict maintained-code lint, build, WASM packaging, browser checks, and 327 unit tests locally on October 16, 2026.
-- [ ] Verify the updated GitHub Actions workflow from a clean checkout and the deployed site's assets/routes.
+- [ ] Run lint, the full test suite, and the production build for the release commit.
+- [x] Verify the updated GitHub Actions workflow from a clean checkout and the deployed site's assets/routes.
 - [ ] Record fresh-profile Dropbox restore, revoked-access, and multi-device recovery checks.
 - [ ] Define synchronization/conflict, retention, storage-limit, reward, and decoration schemas.
 - [ ] Complete privacy, attribution, licensing, and support-matrix reviews.
@@ -100,4 +103,3 @@
 - [x] Keep i18n and relocate initialization/catalogs into `services/i18n/` with a shared instance export.
 - [ ] Adopt translation keys in screens and add language selection separately.
 - [ ] Expand automated storage-mode, accessibility, transaction, and emulator-lifecycle coverage.
-- [ ] Keep each architecture document to one page: one or two current-state paragraphs and one structure/API diagram.

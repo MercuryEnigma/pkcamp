@@ -144,7 +144,8 @@ describe('evaluateCollection', () => {
     const hatched = scanned({ species: 201, form: 0, isEgg: false })
     for (const def of BUILT_IN_COLLECTIONS) {
       const entryId = def.id === 'unown-dex' ? 'unown-a' : '0201'
-      if (def.id === 'kanto-dex') continue
+      // No Unown entry in these.
+      if (def.id === 'kanto-dex' || def.id === 'gen3-in-game-trades') continue
       expect(evaluateCollection(def, [egg])[entryId].matched).toBe(false)
       expect(evaluateCollection(def, [hatched])[entryId].matched).toBe(true)
     }

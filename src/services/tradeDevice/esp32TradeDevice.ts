@@ -114,6 +114,17 @@ const defaultDependencies: Esp32TradeDeviceDependencies = {
   createLink: (kind, device, adapter) => new LinkClasses[kind](device, adapter),
 }
 
+/** Negative when dotted version `a` is older than `b`. */
+function compareVersions(a: string, b: string): number {
+  const left = a.split('.').map(Number)
+  const right = b.split('.').map(Number)
+  for (let index = 0; index < Math.max(left.length, right.length); index++) {
+    const difference = (left[index] ?? 0) - (right[index] ?? 0)
+    if (difference !== 0) return difference
+  }
+  return 0
+}
+
 function cloneParty(
   party: readonly (Uint8Array | null)[]
 ): (Uint8Array | null)[] {
@@ -154,6 +165,8 @@ export class Esp32TradeDevice implements TradeDevice {
   private activeSession: Esp32TradeSession | null = null
   private activeAbort: AbortController | null = null
   private trading = false
+  private connecting: AbortController | null = null
+  private disconnecting: Promise<void> | null = null
 
   constructor(
     dependencies: Esp32TradeDeviceDependencies = defaultDependencies
@@ -169,7 +182,8 @@ export class Esp32TradeDevice implements TradeDevice {
     return this.currentState
   }
 
-  async connect(): Promise<void> {
+  async connect(options?: { signal?: AbortSignal }): Promise<void> {
+    options?.signal?.throwIfAborted()
     if (this.transport?.attached) return
     if (!this.supported) {
       throw new TradeDeviceError(
@@ -178,25 +192,39 @@ export class Esp32TradeDevice implements TradeDevice {
         'This browser does not support Web Serial.'
       )
     }
-    if (this.currentState !== 'disconnected') {
+    if (this.connecting || this.currentState !== 'disconnected') {
       throw new TradeDeviceError(this.id, 'busy', 'The ESP32 is busy.')
     }
 
     this.currentState = 'connecting'
+    const controller = new AbortController()
+    this.connecting = controller
+    const cancel = () => controller.abort(options?.signal?.reason)
+    options?.signal?.addEventListener('abort', cancel, { once: true })
     const transport = this.dependencies.createTransport()
     try {
       const port = await this.dependencies.requestPort()
+      controller.signal.throwIfAborted()
       await transport.open(port)
+      controller.signal.throwIfAborted()
       this.transport = transport
       this.currentState = 'connected'
     } catch (error) {
-      await transport.close()
-      this.currentState = 'disconnected'
+      try {
+        await transport.close()
+      } finally {
+        this.currentState = 'disconnected'
+      }
       throw error
+    } finally {
+      options?.signal?.removeEventListener('abort', cancel)
+      this.connecting = null
     }
   }
 
   async disconnect(): Promise<void> {
+    if (this.disconnecting) return this.disconnecting
+    this.connecting?.abort()
     const transport = this.transport
     if (!transport) {
       this.currentState = 'disconnected'
@@ -206,11 +234,15 @@ export class Esp32TradeDevice implements TradeDevice {
     this.currentState = 'disconnecting'
     this.cancelTrade()
     this.transport = null
-    try {
-      await transport.close()
-    } finally {
-      this.currentState = 'disconnected'
-    }
+    this.disconnecting = Promise.resolve().then(async () => {
+      try {
+        await transport.close()
+      } finally {
+        this.currentState = 'disconnected'
+        this.disconnecting = null
+      }
+    })
+    return this.disconnecting
   }
 
   async keyStatus(): Promise<Esp32KeyStatus | null> {
@@ -359,9 +391,11 @@ export class Esp32TradeDevice implements TradeDevice {
       this.activeSession = null
       this.activeAbort = null
       this.trading = false
-      this.currentState = this.transport?.attached
-        ? 'connected'
-        : 'disconnected'
+      if (!this.disconnecting) {
+        this.currentState = this.transport?.attached
+          ? 'connected'
+          : 'disconnected'
+      }
     }
   }
 
@@ -441,10 +475,74 @@ export class Esp32TradeDevice implements TradeDevice {
         await session?.stop()
       } finally {
         this.trading = false
-        this.currentState = this.transport?.attached
-          ? 'connected'
-          : 'disconnected'
+        if (!this.disconnecting) {
+          this.currentState = this.transport?.attached
+            ? 'connected'
+            : 'disconnected'
+        }
       }
+    }
+  }
+
+  /**
+   * Claims the board for a Mystery Gift group. The board needs its Switch
+   * keys and firmware `minFirmware` or newer. `release()` frees it again.
+   */
+  async claimForGift(
+    minFirmware: string,
+    signal?: AbortSignal
+  ): Promise<{
+    transport: Esp32Transport
+    signal: AbortSignal
+    release(): void
+  }> {
+    signal?.throwIfAborted()
+    const transport = this.requireTransport()
+    if (this.trading) {
+      throw new TradeDeviceError(this.id, 'busy', 'The ESP32 is busy.')
+    }
+    const version = transport.info?.version
+    if (!version || compareVersions(version, minFirmware) < 0) {
+      throw new TradeDeviceError(
+        this.id,
+        'unsupported',
+        `Mystery Gift needs ESP32 firmware ${minFirmware} or newer${version ? `; this board has ${version}` : ''}.`
+      )
+    }
+    const controller = new AbortController()
+    const cancel = () => controller.abort(signal?.reason)
+    signal?.addEventListener('abort', cancel, { once: true })
+    this.activeAbort = controller
+    this.trading = true
+    this.currentState = 'trading'
+    const release = () => {
+      signal?.removeEventListener('abort', cancel)
+      if (this.activeAbort === controller) {
+        this.activeAbort = null
+        this.trading = false
+        if (!this.disconnecting) {
+          this.currentState = this.transport?.attached
+            ? 'connected'
+            : 'disconnected'
+        }
+      }
+    }
+    try {
+      const keys = await transport.keyStatus()
+      controller.signal.throwIfAborted()
+      if (!keys?.complete) {
+        throw new TradeDeviceError(
+          this.id,
+          'missing-keys',
+          'The ESP32 needs your Switch keys. Add prod.keys on the Trade Table first.'
+        )
+      }
+      await transport.startBridge()
+      controller.signal.throwIfAborted()
+      return { transport, signal: controller.signal, release }
+    } catch (cause) {
+      release()
+      throw cause
     }
   }
 

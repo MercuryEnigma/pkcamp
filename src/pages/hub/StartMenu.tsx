@@ -87,6 +87,10 @@ export function StartMenu({
             GB-Link Cart Doctor
           </a>{' '}
           ·{' '}
+          <a href="https://github.com/GB-Link/gblink-wondercards">
+            gblink-wondercards
+          </a>{' '}
+          ·{' '}
           <a href="https://github.com/FIX94/gba-link-cable-dumper">
             GBA Link Cable Dumper
           </a>

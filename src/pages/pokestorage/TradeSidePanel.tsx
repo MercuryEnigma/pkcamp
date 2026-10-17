@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigationGuard } from './navigationGuard'
 import type { Gen3GameId } from '../../services/saveLibrary'
 import {
   esp32TradeDevice,
@@ -73,6 +74,13 @@ function DevicePanel({
   const device = isGba ? gbLinkTradeDevice : esp32TradeDevice
   const setKeysReady = onKeysReady
   const [working, setWorking] = useState(false)
+  const lifetime = useRef<AbortController | null>(null)
+  useNavigationGuard(working, 'Hardware setup is active. Cancel it and leave?')
+  useEffect(() => {
+    const controller = new AbortController()
+    lifetime.current = controller
+    return () => controller.abort()
+  }, [device])
   const connected = device.state !== 'disconnected'
   // Whether the GB-Link firmware version has been read since connecting.
   const [firmwareChecked, setFirmwareChecked] = useState(false)
@@ -94,25 +102,33 @@ function DevicePanel({
   }, [outdated, release])
 
   const run = async (action: () => Promise<void>) => {
+    const signal = lifetime.current!.signal
     setWorking(true)
     try {
       await action()
     } catch (cause) {
-      onMessage(describeError(cause))
+      if (!signal.aborted) onMessage(describeError(cause))
     } finally {
-      setWorking(false)
-      onChange()
+      if (!signal.aborted) {
+        setWorking(false)
+        onChange()
+      }
     }
   }
 
   const connect = () =>
     run(async () => {
-      await device.connect()
+      const signal = lifetime.current!.signal
+      await device.connect({ signal })
+      signal.throwIfAborted()
       if (isGba) {
         await gbLinkTradeDevice.firmwareVersion().catch(() => null)
+        signal.throwIfAborted()
         setFirmwareChecked(true)
       } else {
-        setKeysReady(Boolean((await esp32TradeDevice.keyStatus())?.complete))
+        const keys = await esp32TradeDevice.keyStatus()
+        signal.throwIfAborted()
+        setKeysReady(Boolean(keys?.complete))
       }
     })
 

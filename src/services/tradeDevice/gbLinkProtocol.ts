@@ -6,6 +6,7 @@ export const GB_LINK_COMMAND = {
   /** `[us0, us1, us2, bytesPerTransfer]`, GB link mode only. */
   setTimingConfig: 0x30,
   setVoltage3V3: 0x40,
+  setVoltage5V: 0x41,
   /** Resets the adapter into the RP2040 USB bootloader (`RPI-RP2` drive). */
   rebootBootloader: 0x43,
   /** Wireless stats; only firmware 2.2.7+ answers, on the data channel. */

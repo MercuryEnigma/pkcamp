@@ -295,13 +295,10 @@
 }
 .pokedex-root .camp-page-header {
   flex: none;
-  grid-template-columns: minmax(64px, 1fr) minmax(0, 4fr) minmax(64px, 1fr);
   gap: 8px;
   margin-bottom: 0;
 }
 .pokedex-root .camp-page-heading {
-  grid-column: 2;
-  grid-row: 1;
   text-align: center;
 }
 .pokedex-root .camp-title {
@@ -568,6 +565,39 @@
   font-weight: 600;
   overflow-wrap: anywhere;
 }
+/* A multi-value field shows its first value; "…" reveals the rest. */
+.pokedex-more {
+  margin-left: 0.3em;
+  padding: 0 0.25em;
+  border-radius: 3px;
+  color: var(--camp-muted);
+  cursor: help;
+}
+.pokedex-more:hover,
+.pokedex-more:focus-visible {
+  color: var(--camp-text);
+  background: var(--camp-panel);
+}
+/* Portaled to .camp-root and placed by FieldValue, clear of clipped panels. */
+.pokedex-more-tip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  width: max-content;
+  max-width: 16rem;
+  padding: 5px 8px;
+  border: 1px solid var(--camp-border-soft);
+  border-radius: 6px;
+  background: var(--camp-surface);
+  box-shadow: 0 2px 6px rgb(53 67 76 / 14%);
+  color: var(--camp-text);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+  pointer-events: none;
+}
 .pokedex-found {
   display: flex;
   flex-direction: column;
@@ -641,11 +671,9 @@
     gap: 0.65rem;
   }
   .pokedex-root .camp-page-header {
-    grid-template-columns: 56px minmax(0, 1fr) 56px;
     gap: 4px;
   }
   .pokedex-root .camp-page-heading {
-    grid-column: 2;
     text-align: center;
   }
   .pokedex-root .camp-page-heading .camp-page-subtitle {
@@ -735,9 +763,6 @@
     height: 94svh;
   }
 }
-.pokedex-root .camp-page-header-spacer {
-  grid-column: 3;
-}
 @media (max-width: 600px) and (max-height: 700px) {
   .pokedex-collection-card > .pokedex-card-description {
     display: none;
@@ -786,6 +811,7 @@
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.35fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: 0.8rem;
   container-type: size;
 }
@@ -868,7 +894,12 @@
 /* The whole collection scrolls here; the preview beside it stays put. */
 .pokedex-list-viewport {
   min-height: 0;
-  overflow: visible;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* Inset, so the scrolling viewport doesn't clip the focus ring. */
+.pokedex-root .pokedex-index-row:focus-visible {
+  outline-offset: -3px;
 }
 .pokedex-index-list {
   list-style: none;

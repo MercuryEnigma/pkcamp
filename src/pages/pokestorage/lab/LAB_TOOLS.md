@@ -1,99 +1,66 @@
-# Plan: Define the Lab's Research Tools (GBA scope)
+# Research Tools scope
 
-## Context
+Research Tools is a Lab workspace for cartridge saves, ROM and BIOS dumps,
+Mystery Gifts, and Poké Transporter GB. The current design is in [PLAN.md](PLAN.md)
+and implementation status is tracked in [ROADMAP.md](ROADMAP.md).
 
-Research Tools is only a placeholder today: one sentence in `PLAN.md:45-47`, two roadmap items
-(`ROADMAP.md:41-42`), and a "coming later" card in `src/pages/pokestorage/lab/LabMenu.tsx:113-122`.
-The user has now chosen the GBA-focused scope. This change writes that scope down so later
-implementation sessions have a spec. It is a docs-only change plus the Lab card's planned list. Other
-generations are deferred.
+## Cartridge Saves
 
-Facts this builds on:
+- **Backup:** download a `.sav` from any GBA cartridge using GB-Link's Cart
+  Doctor backup tool. The game is detected from the cartridge header and names
+  the file, such as `Pokemon Emerald (BPEE).sav`. Switch save download via a Mystery Gift script and
+  ESP32 is in research; its feasibility has not been established.
+- **Restore:** choose a Gen 3 `.sav` from the computer. PKHeX detects its game,
+  and the cartridge must match it and the save size. The current cartridge save
+  is stored as that game's Cabin `hardware.sav` before writing.
+- **Repair:** coming soon for the Ruby/Sapphire berry glitch and RTC changes.
+  Specify compatibility, backup, and recovery before enabling a repair.
 
-- `src/services/gbaSaveDump` already multiboots the vendored Cart Doctor dumper over GB-Link and
-  reads/writes Gen 3 saves (`readGbaSave` / `writeGbaSave`, `GbaCartClient`, `multiboot`).
-- Cart Doctor 1.4.0 also dumps GB/GBC/GBA ROMs and GB/GBC SRAM, dumps the BIOS, and erases saves.
-  Its restore refuses a size mismatch.
-- `Esp32TradeDevice` is the existing Switch boundary.
-- Poke Transporter GB ships `Poke_Transporter_GB_mb.gba` (multiboot, MIT code). It needs a GBC link
-  cable and supports R/B/Y/G/S/C → R/S/FR/LG/E, using PCCS "LEGAL" conversion.
+GBA save operations reuse `src/services/gbaSaveDump` and the shared GB-Link
+device. Tasks share one GB-Link connection while the player stays in Research
+Tools, and the Lab releases it on leaving. GB/GBC save operations and erase are outside the current workspace scope.
+Implementation and hardware-verification status are tracked in [ROADMAP.md](ROADMAP.md).
 
-## Decided scope (user-confirmed)
+## ROM & BIOS Dumps
 
-1. **Cartridge ROM dump** for GB/GBC/GBA through the Cart Doctor dumper over GB-Link.
-   - Verify against known-good hashes where available.
-   - Optional BIOS dump.
-   - **Local only:** download, or keep in browser storage for the emulator. Never synced to
-     Dropbox or uploaded.
-2. **Cartridge save backup/restore** for GB/GBC/GBA.
-   - Generalizes the existing Gen 3 `readGbaSave`/`writeGbaSave` into a standalone tool.
-   - Saves go to Cabins like today. Restoring always backs up first.
-   - Erase save is guarded behind that backup.
-3. **Mystery Gift delivery** of a curated, verified gift catalog.
-   - Targets: GBA carts (GB-Link) and Switch GBA FR/LG (ESP32).
-   - Covers Wonder Card + script contents: items/tickets, Pokémon, eggs.
-   - Shows the unlock phrase help.
-4. **Switch GBA save download** via a Mystery Gift script that sends save data back over the ESP32
-   link into a Cabin. A research spike comes first to prove it's feasible.
-5. **Poke Transporter GB launcher.**
-   - Multiboot the PTGB ROM over GB-Link, then guide the cable swap to a GBC link cable.
-   - Fallback: a download of the official release files with flash cart instructions.
-   - Pin the release version and keep its provenance and license, as we do for the Cart Doctor vendor.
-   - Prompt a save backup of both carts first.
-6. **Ruby/Sapphire berry glitch fix + clock (RTC) reset/diagnosis** over GB-Link, with a save backup
-   first.
+The ROM & BIOS Dumps page downloads a GBA cartridge ROM, named from its header,
+or the 16 KB GBA BIOS as `gba_bios.bin`. Both use the bundled Cart Doctor dumper;
+the BIOS needs no cartridge. Dumps only go to the computer and never enter
+storage or Dropbox. GB/GBC ROM dumps and known-good hash checks are still to
+come.
 
-Explicitly deferred: R/S Mystery Event and GameCube-era events, cart authenticity check, Save
-Inspector, emulator handoff/conversion, and non-GBA generations. List them as "later" ideas.
+## Mystery Gifts
 
-## Changes
+One page picks the hardware, GBA (GB-Link) or Switch (ESP32), then one of six
+Wonder Cards: Altering Cave, Fast Forward ×4, Pokémon Follow, PC Anywhere,
+Reusable TMs, and Trade Evolution Without Trading. A link opens GB-Link's own
+page for every other card on that hardware. **Start** opens a Mystery Gift group
+that sends the chosen card to each console that joins, until **Stop**. Start the
+sender and wait for Ready before choosing Mystery Gift in the game. Startup
+offers Cancel; leaving active work requires the shared navigation warning.
 
-### 1. `PLAN.md`, Lab Zone section (replace lines 44-47 wording about Research Tools)
+- **GBA:** Emerald, FireRed and LeafGreen in every language, through the GB-Link
+  in Wireless Adapter mode (firmware 2.2.7+), with the vendored
+  gblink-wondercards distributor.
+- **Switch:** FireRed and LeafGreen on Nintendo Switch Online, through the ESP32
+  board (firmware 2.1.0+, Switch keys required), with the vendored
+  GB-Link-Switch-LDN gift distribution.
 
-Rewrite the Research Tools sentence into a short paragraph that matches the file's terse prose style:
+The games' own checks decide what is sent: a console that already holds the card
+is asked before it is replaced, and an unsupported game gets nothing. Nothing is
+stored. Firmware maintenance is available in shared Settings, which shows the
+installed/latest GB-Link version and checks/updates automatically.
 
-- Name the six tools above in one or two sentences.
-- State that each must specify the following before it is built, keeping the existing gate:
-  - supported games/devices
-  - data sources/contents
-  - backup-before-write
-  - failure/recovery
-- Note that ROM/BIOS dumps stay local, and that the Switch save download is unproven until a spike.
+## Poké Transporter GB
 
-### 2. `ROADMAP.md`, Lab Zone checklist (replace lines 41-42)
+The [Poké Transporter GB page reference](POKE_TRANSPORTER_GB.md)
+pins the official v1.2.1 release and puts optional GB/GBC and GBA save backups
+above the primary action. Both backups run in PkCamp. Start sends the bundled
+official `.gba` through GB-Link using GBA multiboot, then guides the switch to a
+Game Boy Color link cable. GB-Link's web tools are protocol references.
+GB/GBC source backups use the bundled GBC-mode Cart Doctor dumper and validate
+per-section XOR checksums. GBA destination backups reuse the GBA save reader.
+Completed backups remain in memory for download again until leaving the page.
 
-Replace the two Mystery Gift items with unchecked items, in build order:
-
-- [ ] Add a Research Tools hub in the Lab with GB-Link capability checks.
-- [ ] Back up and restore GB/GBC/GBA cartridge saves from Research Tools.
-- [ ] Dump GB/GBC/GBA ROMs (and the GBA BIOS) to local-only storage with hash verification.
-- [ ] Launch Poke Transporter GB over GB-Link multiboot, with a download fallback.
-- [ ] Fix the Ruby/Sapphire berry glitch and reset or diagnose cartridge clocks.
-- [ ] Specify the Mystery Gift catalog, contents, compatible games/devices, and recovery behavior.
-- [ ] Deliver verified Mystery Gifts to GBA carts and Switch GBA FR/LG.
-- [ ] Prove, then build, Switch GBA save download via Mystery Gift.
-
-### 3. `src/pages/pokestorage/PLAN.md` (optional, one line)
-
-Add a single cross-reference in the Lab section. It should say that cartridge save backup/restore in
-Research Tools reuses the Camp GB-Link save transfer (`gbaSaveDump`) rather than a second path.
-
-### 4. `src/pages/pokestorage/lab/LabMenu.tsx`
-
-Update the Research Tools station:
-
-- `description`: "Cartridge dumps, Mystery Gifts, and repair tools are coming later."
-- `planned` entries, each with a one-line description:
-  - Cartridge Dumps (ROM and save)
-  - Mystery Gifts (GBA and Switch)
-  - Switch Save Download
-  - Poke Transporter GB
-  - Berry Fix & Clock
-    Keep the existing `{ name, description }` shape.
-
-## Verification
-
-- `npm run lint` and `npm test`. The LabMenu copy change should not break tests. Grep the tests for
-  "Mystery Gifts and research utilities" first and update any assertion that matches.
-- `node scripts/verify-navigation.mjs` (or the project's browser navigation test) still passes.
-- Open the Lab and check that the Research Tools card lists the five planned entries at phone width.
+R/S Mystery Event, GameCube-era events, cartridge authenticity checks, Save
+Inspector, and emulator handoff/conversion remain deferred.

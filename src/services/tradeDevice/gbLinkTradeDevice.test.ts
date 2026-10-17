@@ -116,6 +116,58 @@ function request(onEvent?: (event: TradeDeviceEvent) => void) {
 }
 
 describe('GbLinkTradeDevice', () => {
+  it('waits for one disconnect and blocks reconnects until USB cleanup finishes', async () => {
+    const { device, transport } = makeDevice()
+    await device.connect()
+    let finish!: () => void
+    const closing = new Promise<void>((resolve) => {
+      finish = resolve
+    })
+    const close = vi
+      .spyOn(transport, 'close')
+      .mockImplementationOnce(async () => {
+        await closing
+        transport.attached = false
+      })
+    const first = device.disconnect()
+    const second = device.disconnect()
+    await expect(device.connect()).rejects.toMatchObject({ code: 'busy' })
+    expect(device.state).toBe('disconnecting')
+    finish()
+    await Promise.all([first, second])
+    expect(close).toHaveBeenCalledOnce()
+    expect(device.state).toBe('disconnected')
+  })
+
+  it.each(['cancel', 'disconnect'] as const)(
+    'does not revive a connection after %s while the chooser is pending',
+    async (action) => {
+      const { device, transport } = makeDevice()
+      let choose!: () => void
+      const chosen = new Promise<void>((resolve) => {
+        choose = resolve
+      })
+      vi.spyOn(transport, 'open').mockImplementationOnce(async () => {
+        await chosen
+        transport.attached = true
+      })
+      const controller = new AbortController()
+      const connecting = device.connect({ signal: controller.signal })
+      const rejected = expect(connecting).rejects.toMatchObject({
+        name: 'AbortError',
+      })
+      if (action === 'cancel') controller.abort()
+      else await device.disconnect()
+      await expect(device.connect()).rejects.toMatchObject({ code: 'busy' })
+      choose()
+      await rejected
+      expect(transport.attached).toBe(false)
+      expect(device.state).toBe('disconnected')
+      await device.connect()
+      expect(device.state).toBe('connected')
+    }
+  )
+
   it('connects, initializes trade-emulation mode, and uploads six copies of the selected Pokémon', async () => {
     const { device, transport, encodePokemon } = makeDevice()
     const events: TradeDeviceEvent[] = []
