@@ -3,11 +3,17 @@ name: Github Pages
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
+
+# One deploy at a time; let an in-flight deploy finish instead of cancelling it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -17,15 +23,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('vendor/pkhex-wasm/**/*.csproj', 'scripts/setup-pkhex-wasm.mjs') }}
+          restore-keys: nuget-${{ runner.os }}-
       - run: dotnet workload install wasm-tools
       - run: npm run setup:pkhex-wasm
       - run: npm ci
       - run: npm run lint
       - run: npm test
       - run: npm run build
+        env:
+          # Dropbox app key (public in the PKCE flow). Set under
+          # Settings → Secrets and variables → Actions → Variables.
+          VITE_DROPBOX_APP_KEY: ${{ vars.VITE_DROPBOX_APP_KEY }}
+      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

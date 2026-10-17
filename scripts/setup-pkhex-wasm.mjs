@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync, mkdirSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { join } from 'node:path'
 
@@ -47,4 +47,21 @@ if (!existsSync(join(core, '.git'))) {
   )
 }
 if (revision(core) !== corePin) throw new Error(`PKHeX must be at ${corePin}`)
+
+// Local additions to upstream sources (see vendor/pkhex-wasm/overlays/README.md).
+// Idempotent: safe to re-run on an already-patched checkout.
+const overlays = join(project, 'vendor/pkhex-wasm/overlays/PKHeX.Everywhere')
+cpSync(overlays, everywhere, { recursive: true })
+const pokemonCs = join(everywhere, 'src/PKHeX.Facade/Pokemons/Pokemon.cs')
+const anchor = /^( *)public Egg Egg => new\(pokemon\);(\r?\n)/m
+const source = readFileSync(pokemonCs, 'utf8')
+if (!source.includes('public Ribbons Ribbons => new(pokemon);')) {
+  if (!anchor.test(source))
+    throw new Error(`Cannot find the Egg property in ${pokemonCs} to add Ribbons after it`)
+  writeFileSync(
+    pokemonCs,
+    source.replace(anchor, (line, indent, eol) => `${line}${indent}public Ribbons Ribbons => new(pokemon);${eol}`),
+  )
+}
+
 run('npm', ['run', 'build:pkhex-wasm'])
