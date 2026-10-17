@@ -17,6 +17,10 @@ Licensing: the source is AGPL-3.0; see `LICENSE` in this folder. Exception:
 
 ## Local modifications
 
+Documentation updated 2026-10-17: both modified files carry dated header notices
+linking here. This is the notice date, not a claim about the original edit dates.
+Upstream comments are preserved.
+
 1. `trade/rfu.js`: the emulated trainer name is `PkCamp` instead of `EMU`
    (three `gameName('PkCamp', ...)` calls).
 2. `cable/cable.js`: the `import { MODE_CABLE_LINK } from '../gblink.js'` line

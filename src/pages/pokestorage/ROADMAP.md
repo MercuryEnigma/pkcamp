@@ -80,4 +80,5 @@
 - [ ] Consolidate settings/trade layouts.
 - [x] Preserve i18n in the site-wide `services/i18n/` service.
 - [ ] Adopt translation keys in screens separately.
-- [ ] Finish privacy, attribution, licensing, and browser/device compatibility reviews.
+- [x] Credit sprite/portrait sources and artists beside displayed artwork.
+- [ ] Finish privacy and browser/device compatibility reviews.

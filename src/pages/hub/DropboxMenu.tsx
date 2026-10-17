@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { dropboxAccount } from '../../services/storage/dropbox'
 import { DropboxBadge } from '../pokestorage/DropboxBadge'
+import { SourceLink } from './SourceLink'
 import { useDropboxStatus } from '../pokestorage/useStorage'
 
 /** Shared corner indicator and account controls for the hub menus. */
@@ -24,6 +25,7 @@ export function DropboxMenu() {
 
   return (
     <>
+      <SourceLink />
       <DropboxBadge onOpen={() => dialog.current?.showModal()} />
       <dialog
         ref={dialog}

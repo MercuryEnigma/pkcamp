@@ -1668,6 +1668,7 @@
 }
 
 .camp-dropbox-badge {
+  box-sizing: border-box;
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
@@ -1689,6 +1690,25 @@
   width: 100%;
   height: 100%;
   fill: currentColor;
+}
+
+.camp-source-link {
+  right: 4.75rem;
+}
+
+.camp-license-link {
+  position: fixed;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  color: #6c4728;
+  font-size: 0.85rem;
+  text-decoration: underline;
+}
+
+.camp-license-link:focus-visible {
+  outline: 2px solid var(--camp-dropbox-blue, #0061fe);
+  outline-offset: 2px;
 }
 
 .camp-dropbox-badge:focus-visible {
@@ -1747,4 +1767,29 @@
   .camp-zone > .camp-root {
     padding-top: 3.75rem;
   }
+}
+
+/* Keep attribution directly below the featured artwork, including long artist lists. */
+.camp-details-artwork {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 100px;
+  gap: 4px;
+  min-width: 0;
+}
+.camp-sprite-credit {
+  display: block;
+  max-width: 100%;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  text-align: center;
+  overflow-wrap: anywhere;
+  color: #765531;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.camp-sprite-credit:hover,
+.camp-sprite-credit:focus-visible {
+  color: #245d35;
 }

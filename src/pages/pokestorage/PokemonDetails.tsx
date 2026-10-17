@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { PokemonNode, StatSpread } from '../../services/pkhex'
 import type { SpriteResolver } from '../../services/sprites'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from './spriteDisplay'
+import { SpriteCredit } from './SpriteCredit'
 import { DEX_NAME } from './dexNames'
 
 const GENDER_SYMBOL: Record<PokemonNode['gender'], string> = {
@@ -98,11 +99,8 @@ function SpeciesRow({ pokemon }: { pokemon: PokemonNode }) {
   )
 }
 
-function spriteImageSrc(
-  pokemon: PokemonNode,
-  resolver: SpriteResolver
-): string {
-  const display = resolveSpriteDisplay(resolver, {
+function spriteDisplay(pokemon: PokemonNode, resolver: SpriteResolver) {
+  return resolveSpriteDisplay(resolver, {
     nationalDex: pokemon.species,
     displayName: pokemon.nickname || speciesName(pokemon.species),
     formId: pokemon.form === 0 ? undefined : pokemon.form,
@@ -110,7 +108,6 @@ function spriteImageSrc(
     shiny: pokemon.shiny,
     egg: pokemon.isEgg,
   })
-  return spriteDisplayImageSrc(display)
 }
 
 /**
@@ -129,19 +126,24 @@ function TopRow({
   resolver: SpriteResolver
   faint?: boolean
 }) {
+  const display = spriteDisplay(pokemon, resolver)
   return (
     <div className="camp-details-top">
       <div className="camp-details-top-text">
         <SpeciesRow pokemon={pokemon} />
       </div>
-      <img
-        className={`camp-details-sprite${faint ? ' camp-details-sprite--faint' : ''}`}
-        src={spriteImageSrc(pokemon, resolver)}
-        alt={pokemon.nickname || speciesName(pokemon.species)}
-        onError={(e) => {
-          e.currentTarget.style.display = 'none'
-        }}
-      />
+      <div className="camp-details-artwork">
+        <img
+          key={spriteDisplayImageSrc(display)}
+          className={`camp-details-sprite${faint ? ' camp-details-sprite--faint' : ''}`}
+          src={spriteDisplayImageSrc(display)}
+          alt={pokemon.nickname || speciesName(pokemon.species)}
+          onError={(e) => {
+            e.currentTarget.style.display = 'none'
+          }}
+        />
+        <SpriteCredit display={display} />
+      </div>
     </div>
   )
 }

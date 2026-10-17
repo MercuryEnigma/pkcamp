@@ -3,6 +3,7 @@ import { useConfirmNavigation } from './navigationGuard'
 import type { Gen3GameId } from '../../services/saveLibrary'
 import { CampActivities } from './CampActivities'
 import { DropboxBadge } from './DropboxBadge'
+import { SourceLink } from '../hub/SourceLink'
 import './camp.css'
 import { GameSelect } from './GameSelect'
 import { GenerationSelect } from './GenerationSelect'
@@ -72,6 +73,7 @@ export function PokeStorageMain({
 
   return (
     <div className="camp-zone">
+      <SourceLink />
       <DropboxBadge onOpen={openStorageSettings} />
       {renderScreen()}
     </div>

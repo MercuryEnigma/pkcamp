@@ -5,7 +5,11 @@
 revision `12aa211923add22a567e5c4310ebb45605cd49bf` (`web/gba-cart-dumper_mb.gba`,
 SHA-256 `07df90a6de9a5af420493b1ce42ce030e51a41ac1dd1286839f1cb84adc45e61`).
 Its source (`source/gba_cart_dumper/`) is a port of FIX94's GBA Link Cable
-Dumper and is MIT-licensed.
+Dumper and is MIT-licensed; see `LICENSE.MIT` (Copyright (c) 2016 FIX94).
+
+Source and build scripts for both bundled dumper ROMs are available at the
+[exact upstream revision](https://github.com/GB-Link/gb-cart-doctor-web/tree/12aa211923add22a567e5c4310ebb45605cd49bf).
+The site's `licenses/SOURCES.md` links there; no source archive is bundled.
 
 The host protocol in `../../multiboot.ts` and `../../gbaCartClient.ts` is a
 TypeScript port of `web/multiboot.js` and `web/gba_cart.js` from the same

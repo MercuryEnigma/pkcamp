@@ -3,6 +3,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { generatePortraitCredits } from './generate-portrait-credits.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const OUTPUT = resolve(ROOT, 'src/services/sprites/generatedPmdCollab.ts')
@@ -99,13 +100,12 @@ function formCandidates(species, label) {
   return candidates
 }
 
-const [trackerText, pokemonCsv, speciesCsv, formIconsText] =
-  await Promise.all([
-    fetchText(URLS.tracker),
-    fetchText(URLS.pokemon),
-    fetchText(URLS.species),
-    fetchText(URLS.formIcons),
-  ])
+const [trackerText, pokemonCsv, speciesCsv, formIconsText] = await Promise.all([
+  fetchText(URLS.tracker),
+  fetchText(URLS.pokemon),
+  fetchText(URLS.species),
+  fetchText(URLS.formIcons),
+])
 
 const tracker = JSON.parse(trackerText)
 const formIcons = JSON.parse(formIconsText)
@@ -328,4 +328,11 @@ console.log(
     `forms matched ${namedFormsMatched} (of ${namedFormsFound} canon named forms found in the tree), ` +
     `female ${female.length}, shinyFemale ${shinyFemale.length}, ` +
     `male ${male.length}, shinyMale ${shinyMale.length}`
+)
+
+await generatePortraitCredits(
+  tracker,
+  await fetchText(
+    'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/credit_names.txt'
+  )
 )

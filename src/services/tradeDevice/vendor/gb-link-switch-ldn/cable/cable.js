@@ -1,3 +1,5 @@
+// pkCamp modifications documented 2026-10-17: replace the gblink.js mode import with the same local constant.
+// See ../PROVENANCE.md. Upstream license notices remain applicable.
 // The adapter's cable relay (mode 0x01) as the link master. The adapter clocks the GBA's cable
 // and runs the handshake; this side supplies player 0's commands and reads the game's.
 //

@@ -13,6 +13,7 @@ import { GEN_3_GAMES } from './labStore'
 import type { SpriteResolver } from '../../../services/sprites'
 import type { StoredCollectionResult } from '../../../services/storage'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from '../spriteDisplay'
+import { SpriteCredit } from '../SpriteCredit'
 import { type CollectionDefinition, type EntryStatus } from './collectionTypes'
 import {
   entryDexNumber,
@@ -272,6 +273,7 @@ export function CollectionGrid({
                   alt=""
                 />
               </div>
+              <SpriteCredit display={activeDisplay} />
               <h2>{collectionEntryLabel(definition, activeId)}</h2>
               <span className="pokedex-preview-status">
                 {statusLabel(activeStatus)}
@@ -401,6 +403,7 @@ export function EntryDetails({
         className={`pokedex-identity${registered ? '' : ' pokedex-identity--missing'}`}
       >
         <img
+          key={spriteDisplayImageSrc(display)}
           className="pokedex-identity-sprite"
           src={spriteDisplayImageSrc(display)}
           alt=""
@@ -408,6 +411,7 @@ export function EntryDetails({
             e.currentTarget.style.visibility = 'hidden'
           }}
         />
+        <SpriteCredit display={display} />
         <h1 className="pokedex-identity-name">
           {dex !== null && (
             <span className="pokedex-identity-dex">

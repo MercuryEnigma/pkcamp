@@ -1,3 +1,4 @@
+import { spriteAttribution, type SpriteAttribution } from './attribution'
 import {
   SUPPORTED_DEX_RANGE,
   type SpriteGender,
@@ -31,6 +32,7 @@ export type SpriteFallbackReason =
   | 'egg-unavailable'
 
 export interface SpriteAvailableResult {
+  attribution?: SpriteAttribution
   status: 'available'
   assetPath: string
   label: string
@@ -152,7 +154,13 @@ export function resolveSpriteFromManifest(
     return { status: 'fallback', reason: 'missing-form', label }
   }
 
-  return { status: 'available', assetPath: exact.assetPath, label }
+  const attribution = exact.attribution ?? spriteAttribution(exact.assetPath)
+  return {
+    status: 'available',
+    assetPath: exact.assetPath,
+    label,
+    ...(attribution ? { attribution } : {}),
+  }
 }
 
 /** Configuration used to initialize a sprite resolver instance. */

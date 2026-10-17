@@ -38,7 +38,16 @@ function entry(
   assetPath: string,
   options: Pick<SpriteManifestEntry, 'form' | 'gender' | 'shiny'>
 ): SpriteManifestEntry {
-  return { nationalDex, egg: false, assetPath, ...options }
+  return {
+    nationalDex,
+    egg: false,
+    assetPath,
+    ...options,
+    attribution: {
+      name: 'Pokémon Database',
+      sourceUrl: `https://pokemondb.net/sprites/${speciesSlugs[nationalDex]}`,
+    },
+  }
 }
 
 const baseEntries: SpriteManifestEntry[] = Object.entries(speciesSlugs).map(

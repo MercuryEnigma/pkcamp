@@ -93,7 +93,8 @@
 - [x] Verify the updated GitHub Actions workflow from a clean checkout and the deployed site's assets/routes.
 - [ ] Record fresh-profile Dropbox restore, revoked-access, and multi-device recovery checks.
 - [ ] Define synchronization/conflict, retention, storage-limit, reward, and decoration schemas.
-- [ ] Complete privacy, attribution, licensing, and support-matrix reviews.
+- [x] Publish license notices, source links, modification records, and image credits.
+- [ ] Complete privacy and support-matrix reviews.
 - [ ] Address Vite/WASM source-map, runtime-URL, and bundle-size diagnostics.
 - [ ] Move providers/startup/navigation into `app/` and separate hub/Camp/Lab/news pages.
 - [ ] Extract shared Pokémon storage, trading, settings, and collections into `features/`.

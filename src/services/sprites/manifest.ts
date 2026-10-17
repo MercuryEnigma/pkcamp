@@ -8,6 +8,7 @@
  * artwork; `assetPath` values are placeholder strings only, shaped like the
  * `import.meta.env.BASE_URL`-relative convention real assets would use later.
  */
+import type { SpriteAttribution } from './attribution'
 
 /** Gender variants a manifest entry can be scoped to. */
 export type SpriteGender = 'male' | 'female' | 'genderless'
@@ -26,6 +27,7 @@ export interface SpriteManifestEntry {
   gender?: SpriteGender
   shiny: boolean
   egg: boolean
+  attribution?: SpriteAttribution
   assetPath: string
 }
 

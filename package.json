@@ -2,10 +2,11 @@
   "name": "pkcamp",
   "private": true,
   "version": "0.0.0",
+  "license": "GPL-3.0-or-later",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/package-licenses.mjs",
     "lint": "oxlint --deny-warnings",
     "preview": "vite preview",
     "test": "vitest run",

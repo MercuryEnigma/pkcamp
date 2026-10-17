@@ -4,6 +4,7 @@ import { NavigationScopeProvider } from '../navigationGuard'
 import { NewsPage } from '../../NewsPage'
 import '../camp.css'
 import { DropboxBadge } from '../DropboxBadge'
+import { SourceLink } from '../../hub/SourceLink'
 import type { CampDestination } from '../PokeStorageMain'
 import { useStorageProvider } from '../useStorage'
 import { CollectionView } from './CollectionView'
@@ -76,6 +77,7 @@ export function LabMain({
   return (
     <NavigationScopeProvider value={!hidden}>
       <div className="camp-zone lab-zone" hidden={hidden}>
+        <SourceLink />
         <DropboxBadge
           onOpen={() => {
             setScreen({ name: 'settings', tab: 'storage' })

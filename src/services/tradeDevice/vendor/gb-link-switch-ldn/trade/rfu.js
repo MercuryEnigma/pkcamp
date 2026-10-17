@@ -1,3 +1,5 @@
+// pkCamp modifications documented 2026-10-17: use PkCamp as the trainer name instead of EMU.
+// See ../PROVENANCE.md. Upstream license notices remain applicable.
 // GBA wireless adapter link layer as used by the games, plus its Pia framing.
 // Port of host/core/Rfu.cs. A command is seven 16-bit words; the op is the high byte of word 0.
 
