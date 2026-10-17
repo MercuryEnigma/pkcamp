@@ -1,5 +1,6 @@
 import type { Gen3GameId } from '../../../services/saveLibrary'
 import type { PokemonNode } from '../../../services/pkhex'
+import type { CampPosition } from '../../../services/storage'
 
 export type Scalar = string | number | boolean
 /** A scalar is an exact match; an array means "one of". */
@@ -56,13 +57,19 @@ export interface CollectionDefinition {
 
 export type PokemonLocation = 'party' | { box: number; slot: number }
 
+/** Scanned Lab sources: a Gen 3 Cabin's save, or the Gen 3 Camp Sites. */
+export const CAMP_SOURCE = 'camp'
+export type LabSourceId = Gen3GameId | typeof CAMP_SOURCE
+
 export interface ScannedPokemon {
   node: PokemonNode
-  source: {
-    gameId: Gen3GameId
-    location: PokemonLocation
-    boxName?: string
-  }
+  source:
+    | {
+        gameId: Gen3GameId
+        location: PokemonLocation
+        boxName?: string
+      }
+    | { camp: true; location: CampPosition }
 }
 
 export interface EntryMatch {
@@ -78,6 +85,11 @@ export const STATUS_LABEL: Record<EntryStatus, string> = {
   seen: 'Seen',
   unseen: 'Unseen',
 }
+
+/** The Gen 3 Camp Sites' scan, with a digest of where each Pokémon sits. */
+export type CampScanStatus =
+  | { state: 'ok'; count: number; unreadable: number; fingerprint: string }
+  | { state: 'error'; message: string }
 
 export type CabinScanStatus =
   | { gameId: Gen3GameId; state: 'ok'; updatedAt: Date; count: number }

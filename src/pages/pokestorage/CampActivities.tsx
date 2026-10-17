@@ -4,7 +4,6 @@ export function CampActivities({
   onBack,
   onSelectLodges,
   onSelectTrade,
-  onSelectSettings,
 }: {
   onBack?: () => void
   onSelectLodges: () => void
@@ -48,13 +47,13 @@ export function CampActivities({
           />
           <ZoneCard label="Transfer Station" comingSoon />
         </div>
-        <button
+        {/* <button
           type="button"
           className="camp-settings-btn"
           onClick={onSelectSettings}
         >
           Camp Office · Settings: backups &amp; appearance
-        </button>
+        </button> */}
       </div>
     </div>
   )

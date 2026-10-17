@@ -705,3 +705,66 @@ describe('collection results', () => {
     ).resolves.toBeUndefined()
   })
 })
+
+describe('Lab data', () => {
+  it('defaults to no source choice and round trips one', async () => {
+    expect(await provider.getLabSettings()).toEqual({ sources: null })
+    await provider.saveLabSettings({ sources: ['emerald', 'camp'] })
+    expect(await provider.getLabSettings()).toEqual({
+      sources: ['emerald', 'camp'],
+    })
+    expect(await store.read('lab/settings.json')).not.toBeNull()
+  })
+
+  it('reads corrupt or malformed Lab settings as no choice', async () => {
+    const write = (text: string) =>
+      store.write('lab/settings.json', new TextEncoder().encode(text))
+    await write('not json {')
+    expect(await provider.getLabSettings()).toEqual({ sources: null })
+    await write(JSON.stringify({ sources: ['emerald', 3] }))
+    expect(await provider.getLabSettings()).toEqual({ sources: null })
+  })
+
+  it('stores, lists, replaces, and discards uploaded collections', async () => {
+    expect(await provider.listLabCollections()).toEqual([])
+    await provider.putLabCollection('my-dex', { id: 'my-dex', v: 1 })
+    await provider.putLabCollection('other-dex', { id: 'other-dex' })
+    await provider.putLabCollection('my-dex', { id: 'my-dex', v: 2 })
+    expect(await store.read('lab/collections/my-dex.json')).not.toBeNull()
+    const listed = (await provider.listLabCollections()) as { id: string }[]
+    expect(listed.map((d) => d.id).sort()).toEqual(['my-dex', 'other-dex'])
+    expect(listed.find((d) => d.id === 'my-dex')).toEqual({
+      id: 'my-dex',
+      v: 2,
+    })
+    await provider.discardLabCollection('my-dex')
+    await provider.discardLabCollection('missing')
+    expect(await provider.listLabCollections()).toEqual([{ id: 'other-dex' }])
+  })
+
+  it('skips collection files that are not JSON', async () => {
+    await provider.putLabCollection('good', { id: 'good' })
+    await store.write(
+      'lab/collections/bad.json',
+      new TextEncoder().encode('{ nope')
+    )
+    expect(await provider.listLabCollections()).toEqual([{ id: 'good' }])
+  })
+
+  it('rejects unsafe collection ids', async () => {
+    for (const id of ['../x', 'a/b', 'a b', '']) {
+      await expect(provider.putLabCollection(id, {})).rejects.toThrow()
+      await expect(provider.discardLabCollection(id)).rejects.toThrow()
+    }
+  })
+
+  it('prefetches Lab settings and uploaded collections', () => {
+    expect(
+      prefetchPaths([
+        'lab/settings.json',
+        'lab/collections/my-dex.json',
+        'lab/other/thing.json',
+      ]).sort()
+    ).toEqual(['lab/collections/my-dex.json', 'lab/settings.json'])
+  })
+})

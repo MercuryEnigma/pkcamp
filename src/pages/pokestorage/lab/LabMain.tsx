@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { Gen3GameId } from '../../../services/saveLibrary'
 import {
   NavigationGuardProvider,
   useNavigationGuards,
@@ -7,8 +6,8 @@ import {
 import { NewsPage } from '../../NewsPage'
 import '../camp.css'
 import { DropboxBadge } from '../DropboxBadge'
+import type { CampDestination } from '../PokeStorageMain'
 import { useStorageProvider } from '../useStorage'
-import { CabinDestination } from './CabinDestination'
 import { CollectionView } from './CollectionView'
 import './lab.css'
 import { LabMenu } from './LabMenu'
@@ -28,33 +27,30 @@ type Screen =
  * Tools. Storage is site-wide, so the Trade Table and Settings work on the
  * same saves and Camp Sites as the Camp Zone.
  */
-export function LabMain({ onBack }: { onBack: () => void }) {
+export function LabMain({
+  onBack,
+  onOpenInCamp,
+  campReturns,
+  hidden = false,
+}: {
+  onBack: () => void
+  /**
+   * Leaves for a Camp Zone screen (a Pokédex entry's Cabin or Camp Site).
+   * The Lab is kept mounted and hidden meanwhile, so Back returns here.
+   */
+  onOpenInCamp: (destination: CampDestination) => void
+  /** Bumped each time the player comes back from the Camp Zone. */
+  campReturns: number
+  hidden?: boolean
+}) {
   const [screen, setScreen] = useState<Screen>({ name: 'menu' })
   const { provider } = useStorageProvider()
   const { register, confirmLeave } = useNavigationGuards()
   const toMenu = () => setScreen({ name: 'menu' })
-  // "Go To Cabin" leaves the Lab for the Camp Zone's Cabin. The Lab stays
-  // mounted (hidden) so Back returns to the same Pokédex entry.
-  const [cabin, setCabin] = useState<{
-    gameId: Gen3GameId
-    box?: number
-  } | null>(null)
-  const [cabinReturns, setCabinReturns] = useState(0)
 
   return (
     <NavigationGuardProvider value={register}>
-      {cabin && (
-        <div className="camp-zone">
-          <CabinDestination
-            {...cabin}
-            onBack={() => {
-              setCabin(null)
-              setCabinReturns((count) => count + 1)
-            }}
-          />
-        </div>
-      )}
-      <div className="camp-zone lab-zone" hidden={cabin !== null}>
+      <div className="camp-zone lab-zone" hidden={hidden}>
         <DropboxBadge
           onOpen={() => {
             if (confirmLeave()) setScreen({ name: 'settings', tab: 'storage' })
@@ -71,8 +67,8 @@ export function LabMain({ onBack }: { onBack: () => void }) {
         return (
           <CollectionView
             onBack={toMenu}
-            onOpenCabin={(gameId, box) => setCabin({ gameId, box })}
-            cabinReturns={cabinReturns}
+            onOpenInCamp={onOpenInCamp}
+            campReturns={campReturns}
           />
         )
       case 'trade':

@@ -28,7 +28,7 @@ export function LabSettings({
 }) {
   const form = useSettingsForm({
     initialTab,
-    savedMessage: 'Lab settings saved.',
+    savedMessage: 'Settings saved.',
   })
   const {
     tab,
@@ -51,7 +51,7 @@ export function LabSettings({
           </button>
           <div className="camp-page-heading">
             <p className="camp-eyebrow">Lab Zone · Settings</p>
-            <h1 className="camp-title">Lab Settings</h1>
+            <h1 className="camp-title">Settings</h1>
             <p className="camp-page-subtitle">
               Manage save backups, Camp Sites, and appearance.
             </p>
@@ -63,7 +63,7 @@ export function LabSettings({
           <div
             className="camp-settings-tabs"
             role="tablist"
-            aria-label="Lab settings section"
+            aria-label="settings section"
           >
             {SETTINGS_TABS.map((item) => (
               <button

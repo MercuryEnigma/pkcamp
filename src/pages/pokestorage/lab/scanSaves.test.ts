@@ -118,7 +118,11 @@ describe('scanSaves', () => {
     })
     expect(cabins[1].state).toBe('ok')
     // The failed Cabin contributes nothing, not a partial list.
-    expect(pokemon.every((p) => p.source.gameId === 'emerald')).toBe(true)
+    expect(
+      pokemon.every(
+        (p) => 'gameId' in p.source && p.source.gameId === 'emerald'
+      )
+    ).toBe(true)
     expect(games).toHaveLength(2)
     for (const game of games) expect(game.dispose).toHaveBeenCalledTimes(1)
   })

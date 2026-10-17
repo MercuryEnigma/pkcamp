@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
-import type { Gen3GameId } from '../../../services/saveLibrary'
 import { GAME_LABEL } from '../gameDisplay'
+import type { CampDestination } from '../PokeStorageMain'
 import { GEN_3_GAMES } from './labStore'
 import type { SpriteResolver } from '../../../services/sprites'
 import type { StoredCollectionResult } from '../../../services/storage'
@@ -278,14 +278,15 @@ export function EntryDetails({
   resolver,
   entryId,
   onClose,
-  onOpenCabin,
+  onOpenInCamp,
 }: {
   definition: CollectionDefinition
   result: StoredCollectionResult
   resolver: SpriteResolver
   entryId: string
   onClose: () => void
-  onOpenCabin: (gameId: Gen3GameId, box?: number) => void
+  /** Opens where a match was found: its Cabin or the Camp Sites. */
+  onOpenInCamp: (destination: CampDestination) => void
 }) {
   const constraints = definition.pokemon[entryId]
   if (!constraints) return null
@@ -358,19 +359,36 @@ export function EntryDetails({
         {matches.length > 0 ? (
           <ul className="pokedex-matches">
             {matches.map((match, index) => {
-              const gameId = GEN_3_GAMES.find((id) => id === match.gameId)
               const species = speciesName(match.species)
+              const camp = 'camp' in match
+              const gameId = camp
+                ? undefined
+                : GEN_3_GAMES.find((id) => id === match.gameId)
+              const where = camp
+                ? 'Camp Sites'
+                : `${gameId ? GAME_LABEL[gameId] : match.gameId} Cabin`
+              const position = camp
+                ? `Site ${match.location.site + 1} · Space ${match.location.index + 1}`
+                : match.location === 'party'
+                  ? 'Party'
+                  : `Room ${match.location.box + 1}${match.boxName ? ` · ${match.boxName}` : ''} · Slot ${match.location.slot + 1}`
+              const destination: CampDestination | null = camp
+                ? { name: 'campSites', site: match.location.site }
+                : gameId
+                  ? {
+                      name: 'cabin',
+                      gameId,
+                      box:
+                        match.location === 'party'
+                          ? undefined
+                          : match.location.box,
+                    }
+                  : null
               return (
                 <li className="pokedex-match" key={index}>
                   <div className="pokedex-match-where">
-                    <span className="lab-label">
-                      {gameId ? GAME_LABEL[gameId] : match.gameId} Cabin
-                    </span>
-                    <span className="lab-note">
-                      {match.location === 'party'
-                        ? 'Party'
-                        : `Room ${match.location.box + 1}${match.boxName ? ` · ${match.boxName}` : ''} · Slot ${match.location.slot + 1}`}
-                    </span>
+                    <span className="lab-label">{where}</span>
+                    <span className="lab-note">{position}</span>
                   </div>
                   <div className="pokedex-match-what">
                     <span className="pokedex-match-pokemon">
@@ -382,20 +400,13 @@ export function EntryDetails({
                       {` · Lv. ${match.level}`}
                       {match.shiny ? ' · Shiny' : ''}
                     </span>
-                    {gameId && (
+                    {destination && (
                       <button
                         type="button"
                         className="camp-upload-btn"
-                        onClick={() =>
-                          onOpenCabin(
-                            gameId,
-                            match.location === 'party'
-                              ? undefined
-                              : match.location.box
-                          )
-                        }
+                        onClick={() => onOpenInCamp(destination)}
                       >
-                        Go to cabin →
+                        {camp ? 'Go to Camp Sites →' : 'Go to cabin →'}
                       </button>
                     )}
                   </div>
@@ -405,12 +416,12 @@ export function EntryDetails({
           </ul>
         ) : (
           <p className="pokedex-empty">
-            No matching Pokémon in the selected saved Cabins.
+            No matching Pokémon in the selected Cabins or Camp Sites.
           </p>
         )}
         <p className="pokedex-scan-note">
-          From the last scan of selected saved Cabins. Camp Sites and unsaved
-          changes are not included.
+          From the last scan of the selected saved Cabins and Camp Sites.
+          Unsaved changes are not included.
         </p>
       </section>
     </article>

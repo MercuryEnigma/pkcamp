@@ -1,6 +1,11 @@
 # FR-LDN — Product Roadmap
 
-_Updated October 3, 2026._
+_Updated October 16, 2026._
+
+Checklist key: `[x]` done · `[~]` partly done · `[ ]` not started.
+Implemented features are tracked in the milestones; whether they are verified
+on real hardware or in the deployed site is tracked separately under
+[Verification gates](#verification-gates).
 
 ## Product vision
 
@@ -43,19 +48,19 @@ activities → persist progress to the player's account.
 
 ## World map
 
-| Area        | Theme and host                     | Primary activity                                                                         |
-| ----------- | ---------------------------------- | ---------------------------------------------------------------------------------------- |
-| Camp Zone   | Campsite and ranch run by Hayley   | Manage Pokémon and save backups; use the trade corner to interact with physical devices. |
-| Lab Zone    | Pokémon laboratory run by Brigette | View the Pokédex, collection sheets, and options.                                        |
-| Battle Zone | Shopping district                  | Buy and inspect items and decorations for use elsewhere.                                 |
-| Safari Zone | Gated safari                       | Play a custom GBA Safari game; decorations influence which Pokémon can appear.           |
-| Pelego Zone | Thick jungle                       | Play a custom GBA idle expedition game; decorations influence expeditions.               |
-| Arcade Zone | Large arcade tower                 | Play player-provided ROMs in the browser and back up their saves.                        |
+| Area        | Theme and host                   | Primary activity                                                                                                      |
+| ----------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Camp Zone   | Campsite and ranch run by Hayley | Manage Pokémon and save backups; use the trade corner to interact with physical devices.                              |
+| Lab Zone    | Pokémon laboratory run by Celio  | Track Pokédex collections, trade at the Trade Table, and manage settings; Research Tools (Mystery Gifts) are planned. |
+| Battle Zone | Shopping district                | Buy and inspect items and decorations for use elsewhere.                                                              |
+| Safari Zone | Gated safari                     | Play a custom GBA Safari game; decorations influence which Pokémon can appear.                                        |
+| Pelego Zone | Thick jungle                     | Play a custom GBA idle expedition game; decorations influence expeditions.                                            |
+| Arcade Zone | Large arcade tower               | Play player-provided ROMs in the browser and back up their saves.                                                     |
 
 ## Current foundation
 
 - [x] React + Vite application scaffolded for GitHub Pages.
-- [x] Existing pkcamp content moved into a patch-notes view under Options.
+- [x] Existing pkcamp content moved into a patch-notes view, now in the Lab Zone.
 - [x] Initial `react-i18next` catalog structure added.
 - [x] Forked `pkhex-wasm` into `vendor/pkhex-wasm` and exposed a typed browser
       adapter backed by `PKHeX.Facade`; Gen 3 save and `.pk3` parsing,
@@ -76,8 +81,10 @@ activities → persist progress to the player's account.
       user-selectable source for the proof of concept.
 - [x] Reject wrong-game Gen 3 save uploads and restores before they can enter a
       Cabin or be written to its cartridge.
-- [ ] Replace the current section-oriented navigation with the splash screen
-      and explorable six-area map described above.
+- [~] Replace the current section-oriented navigation with the splash screen
+      and explorable six-area map described above. A Start menu and a zone
+      menu now replace the old section list; the explorable map is still to
+      do.
 
 ## Immediate priority: prove the two new integration paths
 
@@ -109,25 +116,28 @@ static app, export its save, reload the page, restore that save, and continue.
 ### B. Switch and GBA hardware through switch.gblink.io
 
 - [x] Reproduce the current switch.gblink.io flow with supported physical GBA
-  and Switch hardware and record the required adapters, firmware, browsers,
-  permissions, and user steps.
-  -- Switch support added
-  -- GBA support added (stock GB-Link firmware)
+      and Switch hardware and record the required adapters, firmware,
+      browsers, permissions, and user steps. Switch (ESP32) trades, GBA
+      (stock GB-Link firmware) trades and cartridge save backups, and the
+      GBA ↔ Switch live relay all completed on real hardware from the dev
+      server; the production-build check is a
+      [verification gate](#verification-gates).
 - [x] Determine the supported integration boundary: redirect or companion
       workflow, reusable client package, documented protocol, or a direct
       browser integration. Do not assume the older ESP32-specific architecture.
 - [x] Confirm which data can move between the browser and each device, including
       Pokémon formats, saves, metadata, and trade/session status.
 - [~] Review licenses, security expectations, origin restrictions, and any
-  dependency on services outside the GitHub Pages app.
+      dependency on services outside the GitHub Pages app.
 - [x] Define a device adapter around capabilities and events so the Camp trade
       experience does not depend on one transport implementation.
 - [x] Prove a Pokémon round trip between the website's data model and real
-      hardware, with `pkhex-wasm` validation at the data boundary.
+      hardware, with `pkhex-wasm` validation at the data boundary (dev
+      server).
 
-**Exit gate:** the supported hardware path and integration method are documented
-from evidence, and one end-to-end real-device transfer succeeds without a
-project-owned backend.
+**Exit gate (met from the dev server):** the supported hardware path and
+integration method are documented from evidence, and one end-to-end
+real-device transfer succeeds without a project-owned backend.
 
 ## Delivery milestones
 
@@ -146,16 +156,19 @@ recovery has been tested with more than one player-provided game.
 
 ### 2. Shared player-state foundation
 
-- [ ] Define a Dropbox folder and document schema for current settings, saves,
+- [~] Define a Dropbox folder and document schema for current settings, saves,
       Pokémon data, collection progress, rewards, inventory, decorations, and
       per-zone state.
 - [x] Implement Dropbox OAuth 2.0 PKCE, logout, token recovery, and scoped
       access suitable for a static application.
-- [ ] Define ownership and mutation rules for raw saves, extracted Pokémon, and
+- [~] Define ownership and mutation rules for raw saves, extracted Pokémon, and
       derived Pokédex/collection data. Validate every import and export through
       `pkhex-wasm` where its verified capabilities apply.
-- [ ] Make synchronization explicit and show the last successful synchronization
+- [~] Make synchronization explicit and show the last successful synchronization
       state.
+- [x] Keep the Lab's own data (scanned sources and uploaded collections) in
+      the active storage, so it restores with saves and is copied to Dropbox
+      on connect. Browser-only Lab data from earlier builds migrates once.
 - [ ] Define shared contracts for rewards and decorations without deciding
       unverified gameplay rules prematurely.
 
@@ -164,10 +177,17 @@ a fresh browser session.
 
 ### 3. Splash screen, map, Camp, and Lab
 
-- [ ] Build the splash screen and Start flow.
-- [ ] Build the explorable map with all six selectable areas, keyboard and
-      pointer navigation, accessible labels, and stable deep links.
-- [ ] Establish the shared visual language and reusable area/activity shell.
+- [x] Build the splash screen and Start flow: a site-wide Start menu that
+      restores Dropbox and settings before Start, asks first-time players to
+      choose a sprite source, offers Dropbox sign-in from its corner badge,
+      and credits the projects pkCamp builds on. The Camp Zone now opens
+      directly on its activity list.
+- [~] Build the explorable map with all six selectable areas, keyboard and
+      pointer navigation, accessible labels, and stable deep links. A zone
+      menu lists all six areas as accessible buttons (Camp and Lab open; the
+      other four are marked coming soon) and returns to the Start menu.
+      Still to do: the explorable map itself and stable deep links.
+- [x] Establish the shared visual language and reusable area/activity shell.
 - [x] Build the Gen 3 Camp proof of concept for importing, inspecting, and
       organizing save-box and Camping Pokémon.
 - [x] Add local save export to the Camp (download the current Gen 3 `.sav`).
@@ -176,9 +196,17 @@ a fresh browser session.
 - [x] Add the Camp trade corner using the verified switch.gblink.io/device
       approach, including connection, permission, progress, cancellation, and
       recovery states.
-- [ ] Build the Lab's Pokédex and collection sheets from derived save and
-      Pokémon data.
-- [ ] Move account, data-management, compatibility, and accessibility options
+- [x] Build the Lab's Pokédex and collection sheets from derived save and
+      Pokémon data: built-in and uploaded collections, a scrolling Pokédex
+      index, and per-entry requirement and location records.
+- [x] Count Gen 3 Camp Sites alongside saved Cabins in collection progress.
+- [x] Link each Lab entry's location to that Cabin box or Camp Site in the
+      Camp Zone, returning to the same entry afterwards.
+- [x] Add the Lab's Trade Table on the same trade engine as the Camp's
+      Trading Post.
+- [ ] Build the Lab's Research Tools, starting with Mystery Gifts; the
+      station is shown as "In development" until then.
+- [~] Move account, data-management, compatibility, and accessibility options
       into the Lab while keeping patch notes available there.
 
 **Done when:** a player can enter through the splash screen, navigate the full
@@ -222,15 +250,17 @@ saves.
 
 - [ ] Publish a tested support matrix for browsers, devices, adapters, ROM/save
       formats, and accessibility/input modes.
-- [ ] Add automated tests for state schemas, transactions, emulator lifecycle,
+- [~] Add automated tests for state schemas, transactions, emulator lifecycle,
       and data adapters; retain real-device checks for hardware paths.
-- [ ] Verify privacy behavior, OAuth scopes, permission prompts, local data
+- [~] Verify privacy behavior, OAuth scopes, permission prompts, local data
       cleanup, and recovery from revoked access.
-- [ ] Complete license and attribution review for code, firmware integrations,
-      sprites, music, fonts, and custom-ROM assets.
-- [ ] Add actionable diagnostics for emulator, Dropbox, save-parser, and device
+- [~] Complete license and attribution review for code, firmware integrations,
+      sprites, music, fonts, and custom-ROM assets. The Start menu credits
+      PKHeX, pkhex-wasm, the GB-Link projects, the GBA link cable dumper, and
+      each sprite source; the full license review is still to do.
+- [~] Add actionable diagnostics for emulator, Dropbox, save-parser, and device
       failures without exposing player data.
-- [ ] Verify production builds and GitHub Pages routing on every release.
+- [~] Verify production builds and GitHub Pages routing on every release.
 
 ## Open decisions
 
@@ -242,21 +272,33 @@ after a documented decision or working spike:
 - Whether any ROM persistence beyond the local browser is appropriate.
 - The long-term representation and provenance model for Pokémon outside a save.
   The current Gen 3 proof of concept stores standalone `.pk3` bytes in
-  configurable 30-slot browser-local boxes; Dropbox, other `.pk*` formats, and
-  account-level identity remain unresolved.
+  positional 30-slot Camp Sites in the active storage (browser or Dropbox);
+  other `.pk*` formats and account-level identity remain unresolved.
 - Reward sources, prices, progression balance, and decoration effects.
 - Safari and Pelego mechanics and their website/ROM data exchange protocol.
 - Dropbox conflict policy, storage limits, retention, and multi-device behavior.
+- What Mystery Gifts (Lab Research Tools) can deliver, to which games and
+  devices, and from which data sources.
 - The minimum supported browser/device matrix for emulator and hardware features.
 
 ## Verification gates
 
-- `npm run build` succeeds and the deployed GitHub Pages site loads its routes,
-  workers, WASM, and static assets from the correct base path.
-- mGBA: a real player-provided ROM and save complete the Arcade exit gate.
-- `pkhex-wasm`: representative supported saves survive parse, edit, export, and
-  reopen checks before it is trusted for player data.
-- Dropbox: login, save, and restore pass in a clean browser profile.
-- Hardware: the documented flow passes on real supported GBA/Switch hardware;
-  mocks alone cannot close the milestone.
-- Content: no deployed artifact contains a commercial ROM or unlicensed asset.
+These close only on evidence from the named environment; an implemented
+feature is not verified until its gate passes.
+
+- [~] Production build: `npm run build` succeeds with the `/pkcamp/` base path
+      and ships the pkhex-wasm runtime. Still to do: confirm the deployed
+      GitHub Pages site loads its routes, workers, WASM, and static assets.
+- [ ] mGBA: a real player-provided ROM and save complete the Arcade exit gate.
+- [~] `pkhex-wasm`: Gen 3 parse → serialize → reopen round trips pass in
+      automated tests; representative real saves still need edit/export/reopen
+      checks before it is trusted beyond Gen 3 viewing and movement.
+- [~] Dropbox: login, save, and restore pass in a clean browser profile.
+      Restore in another browser session works (Poké Storage milestone 3);
+      a recorded run from a clean profile is still to do.
+- [~] Hardware: GB-Link trades, cartridge save backup, ESP32 Switch trades,
+      and the GBA ↔ Switch relay pass on real hardware from the dev server.
+      Still to do: repeat them from a production/static build. Mocks alone
+      cannot close this gate.
+- [ ] Content: no deployed artifact contains a commercial ROM or unlicensed
+      asset (sprites are still hotlinked from third-party hosts).

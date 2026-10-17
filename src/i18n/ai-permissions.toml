@@ -1,2 +1,2 @@
 [permissions]
-ai_chmod = r
+ai_chmod = rwx

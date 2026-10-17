@@ -1,0 +1,122 @@
+.hub-root {
+  --camp-bg: #a6ad91;
+  --camp-board: #e6e3cc;
+  --camp-panel: #d5d8bc;
+  --camp-panel-hover: #c8cdae;
+  --camp-panel-border: #858c70;
+  --camp-wood: #6c735b;
+  --camp-text: #343f30;
+  --camp-muted: #606b53;
+  --camp-leaf: #45583c;
+}
+.hub-start {
+  position: relative;
+  padding-top: 4rem;
+}
+.hub-start-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+.hub-start-button,
+.hub-dialog button {
+  background: #d5d8bc;
+  color: #343f30;
+  border: 1px solid #6c735b;
+  border-radius: 8px;
+  padding: 0.8rem 2.5rem;
+  font: inherit;
+  cursor: pointer;
+  box-shadow: 0 2px 4px #343f3020;
+}
+.hub-start-button {
+  min-width: 12rem;
+  font-size: 1.4rem;
+}
+.hub-start-button:hover,
+.hub-dialog button:hover {
+  background: #c8cdae;
+}
+.hub-root button:focus-visible,
+.hub-dialog :focus-visible {
+  outline: 3px solid #45583c;
+  outline-offset: 4px;
+}
+.hub-root button:disabled,
+.hub-dialog button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.hub-credits {
+  background: transparent;
+  border: 0;
+  color: #343f30;
+  line-height: 1.8;
+  max-width: 52rem;
+  padding: 1.5rem 0 0;
+}
+.hub-credits a {
+  color: #344c2d;
+}
+.hub-dialog {
+  box-sizing: border-box;
+  max-width: min(34rem, calc(100vw - 2rem));
+  max-height: calc(100svh - 2rem);
+  overflow: auto;
+  border: 1px solid #858c70;
+  border-radius: 12px;
+  padding: 2rem;
+  background: #e6e3cc;
+  color: #343f30;
+}
+.hub-dialog::backdrop {
+  background: #26302399;
+}
+.hub-dialog h2 {
+  color: inherit;
+}
+.hub-dialog p {
+  margin: 1rem 0;
+}
+.hub-source-label {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+.hub-source-label select {
+  width: 100%;
+  padding: 0.75rem;
+  font: inherit;
+  background: #f5f3e5;
+  color: #343f30;
+  border: 1px solid #858c70;
+  border-radius: 6px;
+}
+.hub-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.hub-back {
+  margin-top: 1.5rem;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  color: var(--camp-muted);
+  border: 0;
+  border-radius: 4px;
+  box-shadow: none;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.hub-back:hover {
+  color: var(--camp-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

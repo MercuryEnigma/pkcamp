@@ -4,6 +4,8 @@ const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 const GEN_PATTERN = /^gen-\d+$/
 const CAMP_MANIFEST = 'camp.json'
 const SETTINGS_PATH = 'settings.json'
+const LAB_SETTINGS_PATH = 'lab/settings.json'
+const LAB_COLLECTIONS = 'lab/collections'
 const SAVE_FILES = ['current.sav', 'previous.sav', 'hardware.sav']
 
 /** Dropbox keeps whole seconds, so compare at that precision. */
@@ -101,10 +103,25 @@ async function copyCamps(local: FileStore, remote: FileStore): Promise<void> {
   }
 }
 
+/** Lab settings when Dropbox has none; uploaded collections by file name. */
+async function copyLab(local: FileStore, remote: FileStore): Promise<void> {
+  if (!(await remote.read(LAB_SETTINGS_PATH))) {
+    await copyFile(local, remote, LAB_SETTINGS_PATH)
+  }
+  const remoteNames = new Set(
+    (await remote.list(LAB_COLLECTIONS)).map((entry) => entry.name)
+  )
+  for (const entry of await local.list(LAB_COLLECTIONS)) {
+    if (entry.kind === 'file' && !remoteNames.has(entry.name)) {
+      await copyFile(local, remote, `${LAB_COLLECTIONS}/${entry.name}`)
+    }
+  }
+}
+
 /**
  * Uploads local data that Dropbox lacks, never changing local data.
  * Saves and ROMs by day and game, Camps and settings only when Dropbox has
- * none. Account and migration bookkeeping files are never copied.
+ * none, and Lab collections Dropbox doesn't have yet. Account and migration bookkeeping files are never copied.
  */
 export async function copyLocalToDropbox(
   local: FileStore,
@@ -115,4 +132,5 @@ export async function copyLocalToDropbox(
   if (!(await remote.read(SETTINGS_PATH))) {
     await copyFile(local, remote, SETTINGS_PATH)
   }
+  await copyLab(local, remote)
 }

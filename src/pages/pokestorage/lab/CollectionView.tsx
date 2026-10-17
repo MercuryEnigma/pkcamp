@@ -1,49 +1,47 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Gen3GameId } from '../../../services/saveLibrary'
+import type { CampDestination } from '../PokeStorageMain'
 import { usePkHex } from '../../context/PkHexContext'
-import { GAME_LABEL } from '../gameDisplay'
 import { useSpriteResolver } from '../useStorage'
 import { BUILT_IN_COLLECTIONS, isBuiltInId } from './builtInCollections'
 import { CollectionGrid, EntryDetails } from './CollectionGrid'
-import type { CollectionDefinition } from './collectionTypes'
+import type { CollectionDefinition, LabSourceId } from './collectionTypes'
 import {
   formatRelative,
   STATUS_FILTERS,
   type StatusFilter,
 } from './entryDisplay'
-import {
-  GEN_3_GAMES,
-  loadSelectedSources,
-  saveSelectedSources,
-} from './labStore'
+import { CAMP_SOURCE } from './collectionTypes'
+import { GEN_3_GAMES, LAB_SOURCES, sourceLabel } from './labStore'
 import { useCollectionScans } from './useCollectionScan'
 import { CollectionDashboard } from './CollectionDashboard'
 import { SourcesPanel } from './SourcesPanel'
-import { useUploadedCollections } from './useUploadedCollections'
+import { useLabData } from './useLabData'
 
 export function CollectionView({
   onBack,
-  onOpenCabin,
-  cabinReturns,
+  onOpenInCamp,
+  campReturns,
 }: {
   onBack: () => void
-  /** Opens a Cabin in the Camp Zone; this view stays mounted underneath. */
-  onOpenCabin: (gameId: Gen3GameId, box?: number) => void
-  /** Bumped each time the player comes back from a Cabin. */
-  cabinReturns: number
+  /** Opens a Camp Zone screen; this view stays mounted underneath. */
+  onOpenInCamp: (destination: CampDestination) => void
+  /** Bumped each time the player comes back from the Camp Zone. */
+  campReturns: number
 }) {
   const {
+    ready: labReady,
+    sources,
+    setSources,
     uploads,
     errors: uploadErrors,
     clearErrors,
     upload,
     remove,
-  } = useUploadedCollections()
+  } = useLabData()
   const [collectionId, setCollectionId] = useState(BUILT_IN_COLLECTIONS[0].id)
   const [page, setPage] = useState<'collections' | 'grid' | 'entry'>(
     'collections'
   )
-  const [sources, setSources] = useState(loadSelectedSources)
   const [filter, setFilter] = useState<StatusFilter>('all')
   const [query, setQuery] = useState('')
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null)
@@ -55,28 +53,31 @@ export function CollectionView({
   )
   const definition: CollectionDefinition =
     definitions.find((c) => c.id === collectionId) ?? BUILT_IN_COLLECTIONS[0]
-  const { scans, refresh } = useCollectionScans(definitions, sources)
+  const { scans, refresh } = useCollectionScans(definitions, sources, labReady)
   const scan = scans[definition.id]
   const resolver = useSpriteResolver()
-  const seenReturns = useRef(cabinReturns)
+  const seenReturns = useRef(campReturns)
   useEffect(() => {
-    if (cabinReturns === seenReturns.current) return
-    seenReturns.current = cabinReturns
+    if (campReturns === seenReturns.current) return
+    seenReturns.current = campReturns
     refresh()
-  }, [cabinReturns, refresh])
+  }, [campReturns, refresh])
   const { loading: pkhexLoading, error: pkhexError } = usePkHex()
 
-  const effectiveSources: readonly Gen3GameId[] =
-    sources ?? GEN_3_GAMES.filter((id) => scan.saves?.[id])
+  // With no stored choice, every source holding data is scanned.
+  const effectiveSources: readonly LabSourceId[] =
+    sources ??
+    LAB_SOURCES.filter((id) =>
+      id === CAMP_SOURCE ? (scan.campCount ?? 0) > 0 : scan.saves?.[id]
+    )
 
-  const toggleSource = (gameId: Gen3GameId) => {
-    const next = effectiveSources.includes(gameId)
-      ? effectiveSources.filter((id) => id !== gameId)
-      : GEN_3_GAMES.filter(
-          (id) => id === gameId || effectiveSources.includes(id)
+  const toggleSource = (source: LabSourceId) => {
+    const next = effectiveSources.includes(source)
+      ? effectiveSources.filter((id) => id !== source)
+      : LAB_SOURCES.filter(
+          (id) => id === source || effectiveSources.includes(id)
         )
-    setSources(next)
-    saveSelectedSources(next)
+    void setSources(next)
   }
 
   const selectCollection = (id: string) => {
@@ -115,7 +116,14 @@ export function CollectionView({
 
   const result = scan.result
   const noSaves =
-    scan.saves !== null && GEN_3_GAMES.every((id) => !scan.saves?.[id])
+    scan.saves !== null &&
+    scan.campCount === 0 &&
+    GEN_3_GAMES.every((id) => !scan.saves?.[id])
+  const nothingSelected = scan.targets.length === 0 && !scan.campTarget
+  const failedSources = [
+    ...scan.failedCabins.map(sourceLabel),
+    ...(scan.camp?.state === 'error' ? [sourceLabel(CAMP_SOURCE)] : []),
+  ]
   const busy = scan.phase !== 'idle'
   const pct =
     result && result.total > 0 ? (result.owned / result.total) * 100 : 0
@@ -142,7 +150,7 @@ export function CollectionView({
             resolver={resolver}
             entryId={selectedEntry}
             onClose={() => setPage('grid')}
-            onOpenCabin={onOpenCabin}
+            onOpenInCamp={onOpenInCamp}
           />
         </div>
       </div>
@@ -245,8 +253,10 @@ export function CollectionView({
               <summary>Research sources</summary>
               <SourcesPanel
                 saves={scan.saves}
+                campCount={scan.campCount}
                 selected={effectiveSources}
                 cabins={scan.cabins}
+                camp={scan.camp}
                 onToggle={toggleSource}
               />
             </details>
@@ -254,13 +264,13 @@ export function CollectionView({
 
           {noSaves && (
             <p className="lab-banner">
-              No Gen 3 saves are stored yet. Add a save to a Cabin in the Camp
-              Zone Lodges, then come back.
+              No Gen 3 saves or Camping Pokémon are stored yet. Add a save to a
+              Cabin or Pokémon to a Camp Site in the Camp Zone, then come back.
             </p>
           )}
-          {!noSaves && scan.saves && scan.targets.length === 0 && (
+          {!noSaves && scan.saves && nothingSelected && (
             <p className="lab-banner">
-              No Cabins are selected. Pick at least one Cabin above to scan.
+              No sources are selected. Pick at least one in Research sources.
             </p>
           )}
           {pkhexError && scan.waitingForPkHex && (
@@ -282,11 +292,10 @@ export function CollectionView({
               {scan.storageError}
             </p>
           )}
-          {scan.failedCabins.length > 0 && (
+          {failedSources.length > 0 && (
             <p className="lab-warning" role="alert">
-              Could not read{' '}
-              {scan.failedCabins.map((id) => GAME_LABEL[id]).join(', ')}. These
-              results are partial and were not saved.
+              Could not read {failedSources.join(', ')}. These results are
+              partial and were not saved.
             </p>
           )}
 
@@ -324,7 +333,7 @@ export function CollectionView({
                   <button
                     type="button"
                     className="camp-text-btn"
-                    disabled={busy || scan.offline || scan.targets.length === 0}
+                    disabled={busy || scan.offline || nothingSelected}
                     onClick={scan.rebuild}
                   >
                     Rebuild
@@ -332,7 +341,7 @@ export function CollectionView({
                   <button
                     type="button"
                     className="camp-text-btn camp-text-btn--danger"
-                    disabled={busy || scan.offline || scan.targets.length === 0}
+                    disabled={busy || scan.offline || nothingSelected}
                     onClick={handleReset}
                   >
                     Reset history

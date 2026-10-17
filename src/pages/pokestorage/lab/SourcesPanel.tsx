@@ -1,10 +1,15 @@
 import type { Gen3GameId } from '../../../services/saveLibrary'
 import { GAME_LABEL } from '../gameDisplay'
-import type { CabinScanStatus } from './collectionTypes'
+import {
+  CAMP_SOURCE,
+  type CabinScanStatus,
+  type CampScanStatus,
+  type LabSourceId,
+} from './collectionTypes'
 import { GEN_3_GAMES } from './labStore'
 
 const SCAN_NOTE =
-  'Scans saved Cabin files only. Unsaved Camp changes and Camp Sites are not included.'
+  'Scans saved Cabin files and Gen 3 Camp Sites. Unsaved changes are not included.'
 
 function statusText(
   hasSave: boolean,
@@ -17,18 +22,40 @@ function statusText(
   return loaded ? 'No save' : 'Checking…'
 }
 
-/** The Cabin checklist; Cabins without a stored save are disabled. */
+function campStatusText(
+  count: number | null,
+  camp: CampScanStatus | null
+): string {
+  if (camp?.state === 'error') return `Error: ${camp.message}`
+  if (count === null) return 'Checking…'
+  if (count === 0) return 'No Pokémon'
+  const unreadable =
+    camp?.state === 'ok' && camp.unreadable > 0
+      ? ` · ${camp.unreadable} unreadable`
+      : ''
+  return `${count} Pokémon${unreadable}`
+}
+
+/**
+ * The source checklist: each Cabin, then the Camp Sites. A source with
+ * nothing stored is disabled.
+ */
 export function SourcesPanel({
   saves,
+  campCount,
   selected,
   cabins,
+  camp,
   onToggle,
 }: {
   saves: Partial<Record<Gen3GameId, Date | null>> | null
-  selected: readonly Gen3GameId[]
+  campCount: number | null
+  selected: readonly LabSourceId[]
   cabins: readonly CabinScanStatus[]
-  onToggle: (gameId: Gen3GameId) => void
+  camp: CampScanStatus | null
+  onToggle: (source: LabSourceId) => void
 }) {
+  const hasCamp = (campCount ?? 0) > 0
   return (
     <section className="lab-panel">
       <h2 className="lab-heading">Sources</h2>
@@ -53,6 +80,20 @@ export function SourcesPanel({
             </li>
           )
         })}
+        <li>
+          <label className={hasCamp ? '' : 'lab-disabled'}>
+            <input
+              type="checkbox"
+              checked={hasCamp && selected.includes(CAMP_SOURCE)}
+              disabled={!hasCamp}
+              onChange={() => onToggle(CAMP_SOURCE)}
+            />{' '}
+            Camp Sites
+          </label>
+          <span className="lab-source-status">
+            {campStatusText(campCount, camp)}
+          </span>
+        </li>
       </ul>
       <p className="lab-note">{SCAN_NOTE}</p>
     </section>

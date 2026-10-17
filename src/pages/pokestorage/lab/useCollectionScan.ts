@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Gen3GameId } from '../../../services/saveLibrary'
 import type {
+  Camp,
   StorageProvider,
   StoredCollectionResult,
 } from '../../../services/storage'
@@ -11,8 +12,15 @@ import {
   useStorageProvider,
 } from '../useStorage'
 import { isStale } from './collectionResults'
-import type { CabinScanStatus, CollectionDefinition } from './collectionTypes'
+import {
+  CAMP_SOURCE,
+  type CabinScanStatus,
+  type CampScanStatus,
+  type CollectionDefinition,
+  type LabSourceId,
+} from './collectionTypes'
 import { GEN_3_GAMES } from './labStore'
+import { campFingerprint, campPokemonCount } from './scanCamp'
 import {
   evaluateResearchSnapshot,
   scanResearchSnapshot,
@@ -26,6 +34,12 @@ export interface CollectionScanState {
   targets: Gen3GameId[]
   cabins: CabinScanStatus[]
   failedCabins: Gen3GameId[]
+  /** Camp Pokémon stored in Gen 3 Camp Sites; null until loaded. */
+  campCount: number | null
+  /** Whether this scan includes Camp Sites. */
+  campTarget: boolean
+  /** The Camp Sites' last scan, when they were scanned. */
+  camp: CampScanStatus | null
   unsaved: boolean
   storageError: string | null
   offline: boolean
@@ -41,6 +55,9 @@ interface ResearchState {
   saves: CollectionScanState['saves']
   targets: Gen3GameId[]
   cabins: CabinScanStatus[]
+  campCount: number | null
+  campTarget: boolean
+  camp: CampScanStatus | null
   unsaved: boolean
   waitingForPkHex: boolean
 }
@@ -52,6 +69,9 @@ const initial: ResearchState = {
   saves: null,
   targets: [],
   cabins: [],
+  campCount: null,
+  campTarget: false,
+  camp: null,
   unsaved: false,
   waitingForPkHex: false,
 }
@@ -59,7 +79,10 @@ const initial: ResearchState = {
 /** One source snapshot for the dashboard and every collection workspace. */
 export function useCollectionScans(
   definitions: readonly CollectionDefinition[],
-  selected: readonly Gen3GameId[] | null
+  /** Selected sources, or null for every source that holds data. */
+  selected: readonly LabSourceId[] | null,
+  /** False until the stored selection has loaded; nothing scans before. */
+  selectionReady = true
 ) {
   const { provider, ready } = useStorageProvider()
   const offline = useStorageOffline()
@@ -79,7 +102,7 @@ export function useCollectionScans(
   const selectedKey = selected === null ? '*' : selected.join(',')
 
   useEffect(() => {
-    if (!ready) return
+    if (!ready || !selectionReady) return
     let cancelled = false
     const requested = request.id !== handled.current
     handled.current = request.id
@@ -100,21 +123,38 @@ export function useCollectionScans(
         unsaved: false,
       })
       try {
-        const files = Object.fromEntries(
-          await Promise.all(
+        const [files, camp] = await Promise.all([
+          Promise.all(
             GEN_3_GAMES.map(
               async (id) => [id, await provider.getSave(id)] as const
             )
-          )
-        )
+          ).then((entries) => Object.fromEntries(entries)),
+          // A Camp that can't be read must not stop the Cabins from scanning.
+          provider.getCamp(3).then(
+            (value): Camp | { error: string } => value,
+            (cause: unknown) => ({ error: storageErrorMessage(cause) })
+          ),
+        ])
         if (cancelled) return
+        const campError = 'error' in camp ? camp.error : null
+        const campData = 'error' in camp ? null : camp
+        const campCount = campData ? campPokemonCount(campData) : null
+        // By default Camp Sites count once they hold a Pokémon, like Cabins
+        // once they hold a save; an explicit selection decides otherwise.
+        const campWanted =
+          selected === null
+            ? (campCount ?? 0) > 0
+            : selected.includes(CAMP_SOURCE)
+        const campTarget = campWanted && campData !== null
+        const fingerprint =
+          campData && campTarget ? campFingerprint(campData) : null
         const saves = Object.fromEntries(
           GEN_3_GAMES.map((id) => [id, files[id]?.updatedAt ?? null])
         )
         const targets = GEN_3_GAMES.filter(
           (id) => (selected === null || selected.includes(id)) && files[id]
         )
-        update({ saves, targets })
+        update({ saves, targets, campCount, campTarget })
         if (requested && request.resetId)
           await provider.discardCollectionResult(request.resetId)
         const history = Object.fromEntries(
@@ -142,14 +182,19 @@ export function useCollectionScans(
           (definition) =>
             (requested && request.force) ||
             !history[definition.id] ||
-            isStale(history[definition.id]!, definition, targets, saves) !==
-              null
+            isStale(
+              history[definition.id]!,
+              definition,
+              targets,
+              saves,
+              fingerprint
+            ) !== null
         )
         if (stale.length === 0) {
           update({ phase: 'idle' })
           return
         }
-        if (targets.length > 0 && !adapter) {
+        if ((targets.length > 0 || campTarget) && !adapter) {
           update({
             waitingForPkHex: true,
             phase: pkhexLoading ? 'loading' : 'idle',
@@ -157,9 +202,10 @@ export function useCollectionScans(
           return
         }
         update({ phase: 'scanning' })
-        const key = targets
-          .map((id) => `${id}@${saves[id]?.getTime()}`)
-          .join('|')
+        const key = [
+          ...targets.map((id) => `${id}@${saves[id]?.getTime()}`),
+          fingerprint ?? '',
+        ].join('|')
         let snapshot =
           memory.current?.provider === provider &&
           memory.current.key === key &&
@@ -168,9 +214,15 @@ export function useCollectionScans(
             : null
         if (!snapshot) {
           snapshot =
-            targets.length === 0
-              ? { pokemon: [], cabins: [] }
-              : await scanResearchSnapshot(provider, adapter!, targets, files)
+            targets.length === 0 && !campTarget
+              ? { pokemon: [], cabins: [], camp: null }
+              : await scanResearchSnapshot(
+                  provider,
+                  adapter!,
+                  targets,
+                  files,
+                  campTarget ? campData : null
+                )
           if (cancelled) return
           memory.current = snapshot.cabins.some(
             (cabin) => cabin.state === 'error'
@@ -187,9 +239,20 @@ export function useCollectionScans(
             new Date().toISOString()
           ),
         }
-        const partial = snapshot.cabins.some((cabin) => cabin.state === 'error')
-        let unsaved = partial || targets.length === 0
-        update({ results, cabins: snapshot.cabins, unsaved })
+        const campStatus: CampScanStatus | null =
+          campWanted && campError
+            ? { state: 'error', message: campError }
+            : (snapshot.camp ?? null)
+        const partial =
+          snapshot.cabins.some((cabin) => cabin.state === 'error') ||
+          campStatus?.state === 'error'
+        let unsaved = partial || (targets.length === 0 && !campTarget)
+        update({
+          results,
+          cabins: snapshot.cabins,
+          camp: campStatus,
+          unsaved,
+        })
         if (!unsaved) {
           for (const definition of stale) {
             if (cancelled) return
@@ -228,6 +291,7 @@ export function useCollectionScans(
   }, [
     definitions,
     selectedKey,
+    selectionReady,
     provider,
     ready,
     adapter,
@@ -276,6 +340,9 @@ export function useCollectionScans(
         failedCabins: current.cabins.flatMap((cabin) =>
           cabin.state === 'error' ? [cabin.gameId] : []
         ),
+        campCount: current.campCount,
+        campTarget: current.campTarget,
+        camp: current.camp,
         unsaved: current.unsaved,
         storageError: current.errors[definition.id] ?? null,
         offline,

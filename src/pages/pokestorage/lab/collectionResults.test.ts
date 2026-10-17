@@ -156,3 +156,49 @@ describe('isStale', () => {
     )
   })
 })
+
+describe('Camp Sites in results', () => {
+  const def = definition(['25'])
+  const campMatch = () =>
+    evaluateCollection(def, [
+      scanned({ species: 25 }, { camp: true, location: { site: 1, index: 4 } }),
+    ])
+
+  it('stores Camp matches with their Camp Site position', () => {
+    const merged = mergeStatuses(def, campMatch(), null, T1)
+    expect(merged.entries['25'].matches[0]).toMatchObject({
+      camp: true,
+      location: { site: 1, index: 4 },
+      species: 25,
+    })
+    expect('gameId' in merged.entries['25'].matches[0]).toBe(false)
+  })
+
+  it('records the Camp fingerprint only when Camp Sites were scanned', () => {
+    const merged = mergeStatuses(def, campMatch(), null, T1)
+    const withCamp = toStoredResult(def, merged, [], T1, {
+      state: 'ok',
+      count: 1,
+      unreadable: 0,
+      fingerprint: '1:abc',
+    })
+    expect(withCamp.campFingerprint).toBe('1:abc')
+    expect(toStoredResult(def, merged, [], T1).campFingerprint).toBeUndefined()
+  })
+
+  it('is stale when the Camp changed, was added, or was dropped', () => {
+    const merged = mergeStatuses(def, campMatch(), null, T1)
+    const stored = toStoredResult(def, merged, [], T1, {
+      state: 'ok',
+      count: 1,
+      unreadable: 0,
+      fingerprint: '1:abc',
+    })
+    expect(isStale(stored, def, [], {}, '1:abc')).toBeNull()
+    expect(isStale(stored, def, [], {}, '2:def')).toBe('camp')
+    expect(isStale(stored, def, [], {}, null)).toBe('camp')
+    const cabinOnly = toStoredResult(def, merged, [], T1)
+    expect(isStale(cabinOnly, def, [], {}, '1:abc')).toBe('camp')
+    expect(isStale(cabinOnly, def, [], {})).toBeNull()
+  })
+})

@@ -6,6 +6,7 @@ import {
   type Camp,
   type CampPokemon,
   type StorageProvider,
+  type LabSettings,
   type StorageSettings,
   type StoredCollectionResult,
   type StoredRom,
@@ -24,6 +25,8 @@ import {
  *   camp/gen-{n}/camp.json         site positions and file details
  *   camp/gen-{n}/{id}.pk{n}
  *   pokedex/{collectionId}.json    last scan result of one collection
+ *   lab/settings.json              Lab preferences (scanned sources)
+ *   lab/collections/{id}.json      an uploaded collection definition
  */
 
 const SETTINGS_PATH = 'settings.json'
@@ -31,6 +34,9 @@ const CURRENT_SAVE = 'current.sav'
 const PREVIOUS_SAVE = 'previous.sav'
 const HARDWARE_SAVE = 'hardware.sav'
 const POKEDEX_FOLDER = 'pokedex'
+const LAB_FOLDER = 'lab'
+const LAB_SETTINGS_PATH = 'lab/settings.json'
+const LAB_COLLECTIONS_FOLDER = 'lab/collections'
 const CAMP_MANIFEST = 'camp.json'
 const CAMP_MANIFEST_VERSION = 1
 const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
@@ -86,6 +92,14 @@ function collectionPath(collectionId: string): string {
   return `${POKEDEX_FOLDER}/${collectionId}.json`
 }
 
+function labCollectionPath(collectionId: string): string {
+  // The id becomes a file name, so it must not be able to leave the folder.
+  if (!SAFE_NAME.test(collectionId)) {
+    throw new Error(`Invalid collection id ${collectionId}.`)
+  }
+  return `${LAB_COLLECTIONS_FOLDER}/${collectionId}.json`
+}
+
 function encodeJson(value: unknown): Uint8Array {
   return new TextEncoder().encode(JSON.stringify(value, null, 2))
 }
@@ -104,7 +118,8 @@ async function sha256(bytes: Uint8Array): Promise<string> {
 /**
  * What the Camp Zone reads first, picked from every stored path: each
  * game's newest day's current and previous save, every Camp manifest and
- * Pokémon file, every collection result, and the settings. Older days and ROMs are left alone.
+ * Pokémon file, every collection result, the settings, and the Lab's
+ * settings and uploaded collections. Older days and ROMs are left alone.
  */
 export function prefetchPaths(paths: readonly string[]): string[] {
   const newestDay = new Map<string, string>()
@@ -113,6 +128,13 @@ export function prefetchPaths(paths: readonly string[]): string[] {
     const parts = path.split('/')
     if (path === SETTINGS_PATH) picked.push(path)
     else if (parts[0] === POKEDEX_FOLDER && parts.length === 2)
+      picked.push(path)
+    else if (path === LAB_SETTINGS_PATH) picked.push(path)
+    else if (
+      parts[0] === LAB_FOLDER &&
+      parts[1] === 'collections' &&
+      parts.length === 3
+    )
       picked.push(path)
     else if (parts[0] === 'camp' && parts.length === 3) picked.push(path)
     else if (
@@ -490,5 +512,63 @@ export class FileStoreProvider implements StorageProvider {
       SETTINGS_PATH,
       encodeJson({ spriteSourceId: settings.spriteSourceId ?? null })
     )
+  }
+
+  async getLabSettings(): Promise<LabSettings> {
+    const file = await this.store.read(LAB_SETTINGS_PATH)
+    if (!file) return { sources: null }
+    let stored: unknown
+    try {
+      stored = decodeJson(file.bytes)
+    } catch {
+      return { sources: null }
+    }
+    const sources = (stored as Partial<LabSettings> | null)?.sources
+    return {
+      sources:
+        Array.isArray(sources) &&
+        sources.every((source) => typeof source === 'string')
+          ? sources
+          : null,
+    }
+  }
+
+  async saveLabSettings(settings: LabSettings): Promise<void> {
+    await this.store.write(
+      LAB_SETTINGS_PATH,
+      encodeJson({ sources: settings.sources })
+    )
+  }
+
+  async listLabCollections(): Promise<unknown[]> {
+    const entries = await this.store.list(LAB_COLLECTIONS_FOLDER)
+    const definitions: unknown[] = []
+    for (const entry of entries) {
+      if (entry.kind !== 'file' || !entry.name.endsWith('.json')) continue
+      const file = await this.store.read(
+        `${LAB_COLLECTIONS_FOLDER}/${entry.name}`
+      )
+      if (!file) continue
+      try {
+        definitions.push(decodeJson(file.bytes))
+      } catch {
+        // Not JSON: the Lab can't use it, and other files still load.
+      }
+    }
+    return definitions
+  }
+
+  async putLabCollection(
+    collectionId: string,
+    definition: unknown
+  ): Promise<void> {
+    await this.store.write(
+      labCollectionPath(collectionId),
+      encodeJson(definition)
+    )
+  }
+
+  async discardLabCollection(collectionId: string): Promise<void> {
+    await this.store.delete(labCollectionPath(collectionId))
   }
 }

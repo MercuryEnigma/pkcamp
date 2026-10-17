@@ -128,7 +128,7 @@ export function LabMenu({
             className="lab-settings-btn"
             onClick={onSelectSettings}
           >
-            Lab Settings
+            Settings
             <span className="lab-settings-sub">
               Backups, appearance &amp; data
             </span>

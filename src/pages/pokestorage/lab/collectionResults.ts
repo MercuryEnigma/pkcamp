@@ -5,6 +5,7 @@ import type {
 } from '../../../services/storage'
 import type {
   CabinScanStatus,
+  CampScanStatus,
   CollectionDefinition,
   EntryMatch,
   ScannedPokemon,
@@ -23,10 +24,16 @@ export interface MergedStatuses {
 /** Only the summary of a match is stored, never the whole Pokémon. */
 export function toStoredMatch(scanned: ScannedPokemon): StoredMatch {
   const { node, source } = scanned
+  const where =
+    'camp' in source
+      ? { camp: true as const, location: source.location }
+      : {
+          gameId: source.gameId,
+          location: source.location,
+          ...(source.boxName !== undefined ? { boxName: source.boxName } : {}),
+        }
   return {
-    gameId: source.gameId,
-    location: source.location,
-    ...(source.boxName !== undefined ? { boxName: source.boxName } : {}),
+    ...where,
     species: node.species,
     form: node.form,
     nickname: node.nickname,
@@ -90,7 +97,9 @@ export function toStoredResult(
   definition: CollectionDefinition,
   merged: MergedStatuses,
   cabins: readonly CabinScanStatus[],
-  scannedAt: string
+  scannedAt: string,
+  /** The Camp Sites' scan, when they were a source. */
+  camp: CampScanStatus | null = null
 ): StoredCollectionResult {
   return {
     version: 1,
@@ -108,6 +117,7 @@ export function toStoredResult(
           ]
         : []
     ),
+    ...(camp?.state === 'ok' ? { campFingerprint: camp.fingerprint } : {}),
     owned: merged.owned,
     seen: merged.seen,
     total: merged.total,
@@ -116,25 +126,29 @@ export function toStoredResult(
 }
 
 export type StaleReason =
-  'version' | 'sources' | 'unscanned-cabin' | 'newer-save'
+  'version' | 'sources' | 'unscanned-cabin' | 'newer-save' | 'camp'
 
 export const STALE_REASON_LABEL: Record<StaleReason, string> = {
   version: 'The collection changed since the last scan.',
   sources: 'The selected Cabins changed since the last scan.',
   'unscanned-cabin': 'A selected Cabin has a save that was not scanned yet.',
   'newer-save': 'A Cabin save changed since the last scan.',
+  camp: 'Camp Sites changed since the last scan.',
 }
 
 /**
  * Why a stored result needs a rescan, or null when it is fresh.
  * `currentSaves` holds each Cabin's current save timestamp, or null/missing
  * when it has no save; only selected Cabins with a save count as sources.
+ * `campFingerprint` is the current Camp's digest when Camp Sites are a
+ * source, or null when they are not.
  */
 export function isStale(
   stored: StoredCollectionResult,
   definition: CollectionDefinition,
   selectedGameIds: readonly Gen3GameId[],
-  currentSaves: Partial<Record<Gen3GameId, Date | null>>
+  currentSaves: Partial<Record<Gen3GameId, Date | null>>,
+  campFingerprint: string | null = null
 ): StaleReason | null {
   if (stored.collectionVersion !== definition.metadata.version) {
     return 'version'
@@ -149,6 +163,7 @@ export function isStale(
     return 'sources'
   }
   if (current.some((id) => !scanned.has(id))) return 'unscanned-cabin'
+  if ((stored.campFingerprint ?? null) !== campFingerprint) return 'camp'
   for (const source of stored.sources) {
     const updatedAt = currentSaves[source.gameId as Gen3GameId]
     if (updatedAt && updatedAt.getTime() > Date.parse(source.saveUpdatedAt)) {

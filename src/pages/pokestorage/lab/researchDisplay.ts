@@ -10,6 +10,7 @@ export function researchAvailability(
   if (
     scan.storageError ||
     scan.failedCabins.length ||
+    scan.camp?.state === 'error' ||
     scan.waitingForPkHex ||
     scan.offline
   )

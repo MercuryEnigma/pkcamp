@@ -52,8 +52,11 @@ function newLocalId(): string {
 export function LocalPokemonView({
   onBack,
   onUnsavedChangesChange,
+  initialSite = 0,
 }: {
   onBack: () => void
+  /** Camp Site to show first (0-based), e.g. where a Lab entry was found. */
+  initialSite?: number
   onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
 }) {
   const { adapter, loading: adapterLoading, error: adapterError } = usePkHex()
@@ -65,7 +68,7 @@ export function LocalPokemonView({
   const campLoadedRef = useRef(false)
   const unreadableRef = useRef<ReadonlyMap<number, CampPokemon>>(new Map())
   const [dirty, setDirty] = useState(false)
-  const [boxIndex, setBoxIndex] = useState(0)
+  const [boxIndex, setBoxIndex] = useState(initialSite)
   const [selected, setSelected] = useState<CampPosition | null>(null)
   const [loadingFiles, setLoadingFiles] = useState(true)
   const [message, setMessage] = useState<string | null>(null)

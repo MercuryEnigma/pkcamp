@@ -131,3 +131,28 @@ describe('copyLocalToDropbox', () => {
     expect(await text(local, 'saves/g/2026-10-01/current.sav')).toEqual([1])
   })
 })
+
+describe('copyLocalToDropbox Lab data', () => {
+  it('copies Lab settings only when Dropbox has none', async () => {
+    const local = new MemoryFileStore()
+    const remote = new MemoryFileStore()
+    await local.write('lab/settings.json', bytes(1))
+    await copyLocalToDropbox(local, remote)
+    expect(await text(remote, 'lab/settings.json')).toEqual([1])
+
+    await local.write('lab/settings.json', bytes(2))
+    await copyLocalToDropbox(local, remote)
+    expect(await text(remote, 'lab/settings.json')).toEqual([1])
+  })
+
+  it('adds uploaded collections Dropbox lacks, keeping its own', async () => {
+    const local = new MemoryFileStore()
+    const remote = new MemoryFileStore()
+    await local.write('lab/collections/a.json', bytes(1))
+    await local.write('lab/collections/b.json', bytes(2))
+    await remote.write('lab/collections/b.json', bytes(9))
+    await copyLocalToDropbox(local, remote)
+    expect(await text(remote, 'lab/collections/a.json')).toEqual([1])
+    expect(await text(remote, 'lab/collections/b.json')).toEqual([9])
+  })
+})

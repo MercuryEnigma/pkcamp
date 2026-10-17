@@ -1,22 +1,89 @@
 import { ROSTER, type Gen3GameId } from '../../../services/saveLibrary'
-import type { CollectionDefinition } from './collectionTypes'
+import type { StorageProvider } from '../../../services/storage'
+import { GAME_LABEL } from '../gameDisplay'
+import {
+  CAMP_SOURCE,
+  type CollectionDefinition,
+  type LabSourceId,
+} from './collectionTypes'
 import { validateCollection } from './validateCollection'
 
 /*
- * Interim per-browser store. The selected Cabins and uploaded definitions
- * live in localStorage, so they do not follow the player to another device
- * or storage provider. Moving them into the StorageProvider is a pending
- * owner decision. Until then a stored result for an uploaded collection can
- * exist on a device that does not have its definition: ignore it there, and
- * never delete it.
+ * The Lab's own data, kept in the player's active storage (this browser or
+ * Dropbox) next to their saves: which sources the Pokédex scans, in
+ * lab/settings.json, and each uploaded collection, in lab/collections/.
  */
-
-const SOURCES_KEY = 'pkcamp.lab.sources'
-const UPLOADS_KEY = 'pkcamp.lab.uploadedCollections'
 
 export const GEN_3_GAMES = ROSTER[3] as readonly Gen3GameId[]
 
-function readJson(key: string): unknown {
+/** Every source the Pokédex can scan, in display order. */
+export const LAB_SOURCES: readonly LabSourceId[] = [...GEN_3_GAMES, CAMP_SOURCE]
+
+export function sourceLabel(source: LabSourceId): string {
+  return source === CAMP_SOURCE ? 'Camp Sites' : `${GAME_LABEL[source]} Cabin`
+}
+
+/** Stored source ids, or null when missing or not all recognized. */
+function parseSources(stored: string[] | null): LabSourceId[] | null {
+  if (
+    !stored ||
+    !stored.every((id) => LAB_SOURCES.includes(id as LabSourceId))
+  ) {
+    return null
+  }
+  return LAB_SOURCES.filter((id) => stored.includes(id))
+}
+
+/** The stored source selection, or null for "every source with data". */
+export async function loadSelectedSources(
+  provider: StorageProvider
+): Promise<LabSourceId[] | null> {
+  return parseSources((await provider.getLabSettings()).sources)
+}
+
+export function saveSelectedSources(
+  provider: StorageProvider,
+  sources: readonly LabSourceId[]
+): Promise<void> {
+  return provider.saveLabSettings({ sources: [...sources] })
+}
+
+/** Uploaded definitions, re-validated on every load. */
+export async function loadUploadedCollections(
+  provider: StorageProvider
+): Promise<CollectionDefinition[]> {
+  const definitions: CollectionDefinition[] = []
+  for (const json of await provider.listLabCollections()) {
+    const result = validateCollection(json)
+    if (result.ok) definitions.push(result.definition)
+    else console.warn('Skipped an invalid uploaded collection', result.errors)
+  }
+  return definitions.sort((a, b) => a.name.localeCompare(b.name))
+}
+
+export function saveUploadedCollection(
+  provider: StorageProvider,
+  definition: CollectionDefinition
+): Promise<void> {
+  return provider.putLabCollection(definition.id, definition)
+}
+
+export function discardUploadedCollection(
+  provider: StorageProvider,
+  collectionId: string
+): Promise<void> {
+  return provider.discardLabCollection(collectionId)
+}
+
+/*
+ * Earlier builds kept this data in this browser's localStorage. The first
+ * time the Lab opens with a writable storage, it moves that data across and
+ * clears the old keys. Anything already in storage wins.
+ */
+const LEGACY_SOURCES_KEY = 'pkcamp.lab.sources'
+const LEGACY_UPLOADS_KEY = 'pkcamp.lab.uploadedCollections'
+
+function readLegacy(key: string): unknown {
   try {
     const raw = localStorage.getItem(key)
     return raw === null ? undefined : JSON.parse(raw)
@@ -25,45 +92,36 @@ function readJson(key: string): unknown {
   }
 }
 
-function writeJson(key: string, value: unknown): void {
+export async function migrateBrowserLabData(
+  provider: StorageProvider
+): Promise<void> {
+  const sources = readLegacy(LEGACY_SOURCES_KEY)
+  const uploads = readLegacy(LEGACY_UPLOADS_KEY)
+  if (sources === undefined && uploads === undefined) return
+
+  if (Array.isArray(sources)) {
+    const current = await provider.getLabSettings()
+    const legacy = parseSources(sources as string[])
+    if (current.sources === null && legacy) {
+      // Camp Sites are a newer source; an old selection still includes them.
+      await saveSelectedSources(provider, [...legacy, CAMP_SOURCE])
+    }
+  }
+  if (Array.isArray(uploads)) {
+    const existing = new Set(
+      (await loadUploadedCollections(provider)).map((d) => d.id)
+    )
+    for (const json of uploads) {
+      const result = validateCollection(json)
+      if (result.ok && !existing.has(result.definition.id)) {
+        await saveUploadedCollection(provider, result.definition)
+      }
+    }
+  }
   try {
-    localStorage.setItem(key, JSON.stringify(value))
-  } catch (cause) {
-    console.warn(`Could not save ${key}`, cause)
+    localStorage.removeItem(LEGACY_SOURCES_KEY)
+    localStorage.removeItem(LEGACY_UPLOADS_KEY)
+  } catch {
+    // Storage blocked: the copy above is done; leaving the keys is harmless.
   }
-}
-
-/** The stored Cabin selection, or null when missing or invalid. */
-export function loadSelectedSources(): Gen3GameId[] | null {
-  const stored = readJson(SOURCES_KEY)
-  if (
-    !Array.isArray(stored) ||
-    !stored.every((id) => GEN_3_GAMES.includes(id as Gen3GameId))
-  ) {
-    return null
-  }
-  return GEN_3_GAMES.filter((id) => stored.includes(id))
-}
-
-export function saveSelectedSources(gameIds: readonly Gen3GameId[]): void {
-  writeJson(SOURCES_KEY, gameIds)
-}
-
-/** Uploaded definitions, re-validated on every load. */
-export function loadUploadedCollections(): CollectionDefinition[] {
-  const stored = readJson(UPLOADS_KEY)
-  if (!Array.isArray(stored)) return []
-  const definitions: CollectionDefinition[] = []
-  for (const json of stored) {
-    const result = validateCollection(json)
-    if (result.ok) definitions.push(result.definition)
-    else console.warn('Dropped an invalid uploaded collection', result.errors)
-  }
-  return definitions
-}
-
-export function saveUploadedCollections(
-  definitions: readonly CollectionDefinition[]
-): void {
-  writeJson(UPLOADS_KEY, definitions)
 }

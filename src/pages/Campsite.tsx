@@ -1,61 +1,74 @@
 import { useState } from 'react'
+import { StartMenu } from './hub/StartMenu'
+import { WorldMap } from './hub/WorldMap'
+import { useHubStartup } from './hub/useHubStartup'
+import './pokestorage/camp.css'
+import './hub/hub.css'
 import { PokeStorage } from './PokeStorage'
 import { LabMain } from './pokestorage/lab/LabMain'
+import type { CampDestination } from './pokestorage/PokeStorageMain'
 
 export function Campsite() {
+  const startup = useHubStartup()
   const [active, setActive] = useState<
     'start' | 'campsite' | 'options' | 'pokemon'
   >('start')
-  const [pokemonHasUnsavedChanges, setPokemonHasUnsavedChanges] =
-    useState(false)
+  const [, setPokemonHasUnsavedChanges] = useState(false)
+  // A Lab entry opened its Cabin or Camp Site in the Camp Zone. The Lab stays
+  // mounted (hidden) so Back returns to the same entry.
+  const [fromLab, setFromLab] = useState<{
+    id: number
+    destination: CampDestination
+  } | null>(null)
+  const [labReturns, setLabReturns] = useState(0)
 
-  const leavePokemonStorage = () => {
-    if (
-      pokemonHasUnsavedChanges &&
-      !window.confirm('You have unsaved changes. Leave without saving them?')
-    ) {
-      return
-    }
+  const openInCamp = (destination: CampDestination) => {
+    setFromLab((current) => ({ id: (current?.id ?? 0) + 1, destination }))
     setPokemonHasUnsavedChanges(false)
-    setActive('campsite')
+    setActive('pokemon')
   }
+  const returnToLab = () => {
+    setPokemonHasUnsavedChanges(false)
+    setActive('options')
+    setLabReturns((count) => count + 1)
+  }
+
   return (
     <>
       {active === 'start' && (
-        <div>
-          <button onClick={() => setActive('campsite')}>Start</button>
-        </div>
+        <StartMenu startup={startup} onStart={() => setActive('campsite')} />
       )}
-      {active == 'campsite' && (
-        <div>
-          <p>
-            <button onClick={() => setActive('pokemon')}>
-              Camp Zone: Manage your Pokemon
-            </button>
-            <p></p>
-            <button onClick={() => setActive('options')}>
-              Lab Zone: Pokédex Collections &amp; research
-            </button>
-          </p>
-          <p>Coming Soon: Battle Zone</p>
-          <p>Coming Soon: Safari Zone</p>
-          <p>Coming Soon: Pelago Zone</p>
-          <p>Coming Soon: Arcade Zone</p>
-        </div>
+      {active === 'campsite' && (
+        <WorldMap
+          onCamp={() => setActive('pokemon')}
+          onLab={() => setActive('options')}
+          onBack={() => setActive('start')}
+        />
       )}
       {active == 'pokemon' && (
         <>
           <PokeStorage
+            key={fromLab?.id ?? 'camp'}
             onUnsavedChangesChange={setPokemonHasUnsavedChanges}
-            onBack={() => setActive('campsite')}
+            onBack={() => {
+              setFromLab(null)
+              setActive('campsite')
+            }}
+            destination={fromLab?.destination}
+            onReturn={fromLab ? returnToLab : undefined}
           />
-          <button onClick={leavePokemonStorage}>Back</button>
         </>
       )}
-      {active == 'options' && (
-        <>
-          <LabMain onBack={() => setActive('campsite')} />
-        </>
+      {(active == 'options' || fromLab) && (
+        <LabMain
+          hidden={active !== 'options'}
+          onBack={() => {
+            setFromLab(null)
+            setActive('campsite')
+          }}
+          onOpenInCamp={openInCamp}
+          campReturns={labReturns}
+        />
       )}
     </>
   )

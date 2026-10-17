@@ -49,6 +49,36 @@ export interface StorageSettings {
   spriteSourceId: string | null
 }
 
+/**
+ * Lab Zone preferences that follow the player's selected storage. Source ids
+ * are the Lab's (Cabin game ids and Camp Sites); storage keeps them opaque.
+ */
+export interface LabSettings {
+  /** Scanned sources, or null for every source that holds data. */
+  sources: string[] | null
+}
+
+/** Where a collection entry was found, and a summary of that Pokémon. */
+export type StoredCollectionMatch = (
+  | {
+      /** A Cabin's save. */
+      gameId: GameId
+      location: 'party' | { box: number; slot: number }
+      boxName?: string
+    }
+  | {
+      /** A Gen 3 Camp Site; `location` is its `CampPosition`. */
+      camp: true
+      location: CampPosition
+    }
+) & {
+  species: number
+  form: number
+  nickname: string
+  level: number
+  shiny: boolean
+}
+
 /** One collection's last scan result, stored at pokedex/{collectionId}.json. */
 export interface StoredCollectionResult {
   /** File-format version. */
@@ -61,6 +91,11 @@ export interface StoredCollectionResult {
   scannedAt: string
   /** Cabins scanned, with the save timestamp each scan read. */
   sources: { gameId: GameId; saveUpdatedAt: string }[]
+  /**
+   * Set when Camp Sites were scanned: a digest of which Camp Pokémon sat
+   * where, so a Camp change marks the result stale. Camps have no timestamp.
+   */
+  campFingerprint?: string
   owned: number
   /** Seen but not currently owned. */
   seen: number
@@ -73,16 +108,7 @@ export interface StoredCollectionResult {
       firstOwnedAt?: string
       /** ISO; the latest scan that matched. */
       lastOwnedAt?: string
-      matches: {
-        gameId: GameId
-        location: 'party' | { box: number; slot: number }
-        boxName?: string
-        species: number
-        form: number
-        nickname: string
-        level: number
-        shiny: boolean
-      }[]
+      matches: StoredCollectionMatch[]
     }
   >
 }
@@ -143,6 +169,17 @@ export interface StorageProvider {
 
   getSettings(): Promise<StorageSettings>
   saveSettings(settings: StorageSettings): Promise<void>
+
+  getLabSettings(): Promise<LabSettings>
+  saveLabSettings(settings: LabSettings): Promise<void>
+  /**
+   * Uploaded collection definitions as parsed JSON, one file each; files
+   * that are not JSON are skipped. The Lab validates them on load.
+   */
+  listLabCollections(): Promise<unknown[]>
+  putLabCollection(collectionId: string, definition: unknown): Promise<void>
+  /** Missing is fine. */
+  discardLabCollection(collectionId: string): Promise<void>
 
   /**
    * Loads what the Camp Zone shows first (newest saves, Camps, settings)

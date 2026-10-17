@@ -5,12 +5,15 @@ import { IndexedDbFileStore } from './indexedDbFileStore'
 import type {
   Camp,
   StorageProvider,
+  LabSettings,
   StorageSettings,
   StoredCollectionResult,
   StoredRom,
 } from './types'
 
 export type {
+  LabSettings,
+  StoredCollectionMatch,
   Camp,
   CampPokemon,
   CampPosition,
@@ -136,6 +139,21 @@ class ActiveStorage implements StorageProvider {
   }
   saveSettings(settings: StorageSettings) {
     return this.provider.saveSettings(settings)
+  }
+  getLabSettings() {
+    return this.provider.getLabSettings()
+  }
+  saveLabSettings(settings: LabSettings) {
+    return this.provider.saveLabSettings(settings)
+  }
+  listLabCollections() {
+    return this.provider.listLabCollections()
+  }
+  putLabCollection(collectionId: string, definition: unknown) {
+    return this.provider.putLabCollection(collectionId, definition)
+  }
+  discardLabCollection(collectionId: string) {
+    return this.provider.discardLabCollection(collectionId)
   }
   prefetch() {
     return this.provider.prefetch()

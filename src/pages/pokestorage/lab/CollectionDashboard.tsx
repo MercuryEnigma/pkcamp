@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import type { CollectionDefinition } from './collectionTypes'
 import type { CollectionScanState } from './useCollectionScan'
 import { researchAvailability, researchSummary } from './researchDisplay'
@@ -92,6 +92,11 @@ export function CollectionDashboard({
   errors: string[]
 }) {
   const input = useRef<HTMLInputElement>(null)
+  const [pageIndex, setPageIndex] = useState(0)
+  const capacity = 6
+  const pages = Math.max(1, Math.ceil(definitions.length / capacity))
+  const page = Math.min(pageIndex, pages - 1)
+  const shown = definitions.slice(page * capacity, (page + 1) * capacity)
   const total = definitions.reduce(
     (sum, definition) => sum + Object.keys(definition.pokemon).length,
     0
@@ -139,7 +144,7 @@ export function CollectionDashboard({
         <section className="pokedex-collections">
           <h2 className="lab-label">Collections</h2>
           <div className="pokedex-collection-grid">
-            {definitions.map((definition) => (
+            {shown.map((definition) => (
               <CollectionCard
                 key={definition.id}
                 definition={definition}
@@ -149,6 +154,29 @@ export function CollectionDashboard({
             ))}
           </div>
           <div className="pokedex-collection-actions">
+            {pages > 1 && (
+              <nav className="pokedex-pagination" aria-label="Collection pages">
+                <button
+                  type="button"
+                  className="lab-chip"
+                  disabled={page === 0}
+                  onClick={() => setPageIndex(page - 1)}
+                >
+                  ← Previous
+                </button>
+                <span aria-live="polite">
+                  Page {page + 1} / {pages}
+                </span>
+                <button
+                  type="button"
+                  className="lab-chip"
+                  disabled={page + 1 >= pages}
+                  onClick={() => setPageIndex(page + 1)}
+                >
+                  Next →
+                </button>
+              </nav>
+            )}
             <button
               type="button"
               className="camp-upload-btn"

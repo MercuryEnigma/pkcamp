@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import type { Gen3GameId } from '../../services/saveLibrary'
-import { storage } from '../../services/storage'
-import { dropboxAccount } from '../../services/storage/dropbox'
 import { CampActivities } from './CampActivities'
 import { DropboxBadge } from './DropboxBadge'
 import './camp.css'
@@ -10,7 +8,6 @@ import { GenerationSelect } from './GenerationSelect'
 import { LocalPokemonView } from './LocalPokemonView'
 import { PokeStorageSettings, type SettingsTab } from './PokeStorageSettings'
 import { SaveViewer } from './SaveViewer'
-import { Splash } from './Splash'
 import { TradeView } from './TradeView'
 import { useStorageProvider } from './useStorage'
 
@@ -21,38 +18,53 @@ import { useStorageProvider } from './useStorage'
  * PokeStorage.tsx, so navigation from Camp Zone downward lives entirely here.
  */
 type Screen =
-  | { name: 'splash' }
   | { name: 'activities' }
   | { name: 'generationSelect' }
   | { name: 'gameSelect' }
   | { name: 'saveViewer'; gameId: Gen3GameId; initialBox?: number }
-  | { name: 'localPokemon' }
+  | { name: 'localPokemon'; initialSite?: number }
   | { name: 'trade'; initialGameId?: Gen3GameId; initialBox?: number }
   | { name: 'settings'; tab?: SettingsTab }
+
+/**
+ * A Camp screen another zone can open directly, e.g. the Lab showing where a
+ * Pokédex entry was found.
+ */
+export type CampDestination =
+  | { name: 'cabin'; gameId: Gen3GameId; box?: number }
+  | { name: 'campSites'; site?: number }
+
+function destinationScreen(destination: CampDestination): Screen {
+  return destination.name === 'cabin'
+    ? {
+        name: 'saveViewer',
+        gameId: destination.gameId,
+        initialBox: destination.box,
+      }
+    : { name: 'localPokemon', initialSite: destination.site }
+}
 
 export function PokeStorageMain({
   onUnsavedChangesChange,
   onBack,
+  destination,
+  onReturn,
 }: {
   onUnsavedChangesChange?: (hasUnsavedChanges: boolean) => void
   /** Leaves the Camp Zone; shows a Back button on the activity list. */
   onBack?: () => void
+  /** Opens straight onto this screen instead of the splash. */
+  destination?: CampDestination
+  /**
+   * Back from the `destination` screen goes here (e.g. back to the Lab)
+   * instead of up to the Cabin directory.
+   */
+  onReturn?: () => void
 }) {
-  const [screen, setScreen] = useState<Screen>({ name: 'splash' })
+  const [screen, setScreen] = useState<Screen>(() =>
+    destination ? destinationScreen(destination) : { name: 'activities' }
+  )
   const { provider } = useStorageProvider()
-
-  // Idempotent: completes a Dropbox sign-in redirect or restores the session,
-  // then warms the active storage's saves, Camps, and settings so screens
-  // open without waiting on one download each. Repeats on provider changes.
-  useEffect(() => {
-    const prefetch = () =>
-      storage.prefetch().catch((error: unknown) => {
-        // Screens report storage errors themselves when they load.
-        console.warn('Storage prefetch failed', error)
-      })
-    void dropboxAccount.initialize().then(prefetch)
-    return storage.subscribe(() => void prefetch())
-  }, [])
 
   // Screens guard their own navigation; the corner badge needs the same check.
   const unsavedRef = useRef(false)
@@ -90,8 +102,6 @@ export function PokeStorageMain({
 
   function renderScreen() {
     switch (screen.name) {
-      case 'splash':
-        return <Splash onStart={() => setScreen({ name: 'activities' })} />
       case 'activities':
         return (
           <CampActivities
@@ -129,7 +139,13 @@ export function PokeStorageMain({
           <SaveViewer
             gameId={screen.gameId}
             initialBox={screen.initialBox}
-            onBack={() => setScreen({ name: 'gameSelect' })}
+            onBack={() =>
+              onReturn &&
+              destination?.name === 'cabin' &&
+              destination.gameId === screen.gameId
+                ? onReturn()
+                : setScreen({ name: 'gameSelect' })
+            }
             onTrade={(box) =>
               setScreen({
                 name: 'trade',
@@ -144,7 +160,12 @@ export function PokeStorageMain({
       case 'localPokemon':
         return (
           <LocalPokemonView
-            onBack={() => setScreen({ name: 'gameSelect' })}
+            initialSite={screen.initialSite}
+            onBack={() =>
+              onReturn && destination?.name === 'campSites'
+                ? onReturn()
+                : setScreen({ name: 'gameSelect' })
+            }
             onUnsavedChangesChange={handleUnsavedChange}
           />
         )
