@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { SaveGame } from '../../services/pkhex'
-import { assertSaveMatchesCabin } from './saveVersion'
+import { assertSaveMatchesCabin, gameIdsFromSave } from './saveVersion'
 
 function save(exact: SaveGame['version']['exact']): Pick<SaveGame, 'version'> {
   return {
@@ -14,7 +14,21 @@ function save(exact: SaveGame['version']['exact']): Pick<SaveGame, 'version'> {
 
 describe('assertSaveMatchesCabin', () => {
   it('accepts the selected Cabin game', () => {
-    expect(() => assertSaveMatchesCabin('emerald', save('Emerald'))).not.toThrow()
+    expect(() =>
+      assertSaveMatchesCabin('emerald', save('Emerald'))
+    ).not.toThrow()
+  })
+
+  it('accepts a Ruby/Sapphire save in either of those Cabins only', () => {
+    expect(() =>
+      assertSaveMatchesCabin('ruby', save('RubySapphire'))
+    ).not.toThrow()
+    expect(() =>
+      assertSaveMatchesCabin('sapphire', save('RubySapphire'))
+    ).not.toThrow()
+    expect(() =>
+      assertSaveMatchesCabin('emerald', save('RubySapphire'))
+    ).toThrow('not a Emerald save')
   })
 
   it('rejects a different or unknown game', () => {
@@ -24,5 +38,13 @@ describe('assertSaveMatchesCabin', () => {
     expect(() => assertSaveMatchesCabin('ruby', save('Unknown'))).toThrow(
       'not a Ruby save'
     )
+  })
+})
+
+describe('gameIdsFromSave', () => {
+  it('names one game, both Ruby and Sapphire, or none', () => {
+    expect(gameIdsFromSave(save('Emerald'))).toEqual(['emerald'])
+    expect(gameIdsFromSave(save('RubySapphire'))).toEqual(['ruby', 'sapphire'])
+    expect(gameIdsFromSave(save('Unknown'))).toEqual([])
   })
 })

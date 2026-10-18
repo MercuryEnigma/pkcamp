@@ -13,7 +13,7 @@ import {
   taskErrorMessage,
 } from '../gbLinkTask'
 import { useConfirmNavigation } from '../navigationGuard'
-import { gameIdFromSave } from '../saveVersion'
+import { gameIdsFromSave } from '../saveVersion'
 import { useStorageProvider } from '../useStorage'
 import { cartridgeFileName, downloadFile } from './downloadFile'
 import './cartridgeSaves.css'
@@ -24,7 +24,10 @@ type Task = 'read' | 'write' | 'repair'
 interface RestoreFile {
   name: string
   bytes: Uint8Array
-  gameId: Gen3GameId
+  /** Ruby/Sapphire saves fit either cartridge; the cartridge decides. */
+  gameIds: readonly Gen3GameId[]
+  /** The games, as text: "Emerald", "Ruby or Sapphire". */
+  label: string
 }
 
 const TASKS = [
@@ -56,14 +59,19 @@ export function CartridgeSaves({ onBack }: { onBack(): void }) {
     try {
       const loaded = adapter.load(bytes)
       try {
-        const gameId = gameIdFromSave(loaded)
-        if (!gameId) {
+        const gameIds = gameIdsFromSave(loaded)
+        if (gameIds.length === 0) {
           setFileError(
             `${file.name} is a ${loaded.version.aggregated} save. Restore supports Ruby, Sapphire, Emerald, FireRed and LeafGreen.`
           )
           return
         }
-        setRestore({ name: file.name, bytes, gameId })
+        setRestore({
+          name: file.name,
+          bytes,
+          gameIds,
+          label: gameIds.map((id) => GAME_LABEL[id]).join(' or '),
+        })
       } finally {
         loaded.dispose()
       }
@@ -78,7 +86,6 @@ export function CartridgeSaves({ onBack }: { onBack(): void }) {
       title="Back up a cartridge save"
       steps={[CONNECT_STEP, BOOT_STEP]}
       progressLabel="Reading the save"
-      keepConnected
       onBusyChange={setBusy}
       describeError={describeReadError}
       run={async (task) => {
@@ -100,35 +107,39 @@ export function CartridgeSaves({ onBack }: { onBack(): void }) {
       title={`Restore ${restore.name}`}
       steps={[
         CONNECT_STEP,
-        `Insert ${GAME_LABEL[restore.gameId]} and power on while holding START + SELECT.`,
+        `Insert ${restore.label} and power on while holding START + SELECT.`,
       ]}
-      note={`The cartridge's current save is stored first as the ${GAME_LABEL[restore.gameId]} Cabin's hardware backup.`}
+      note="The cartridge's current save is stored first as its game's Cabin hardware backup."
+
       progressLabel="Sending the save"
-      keepConnected
       disabled={!ready}
       onBusyChange={setBusy}
       onBeforeStart={() =>
         window.confirm(
-          `Overwrite the save on the ${GAME_LABEL[restore.gameId]} cartridge with ${restore.name}?`
+          `Overwrite the save on the ${restore.label} cartridge with ${restore.name}?`
         )
       }
       describeError={(cause, cancelled) =>
         restoreErrorMessage(
           cause,
           cancelled,
-          `If the first step finished, its previous save is the ${GAME_LABEL[restore.gameId]} Cabin's hardware backup.`
+          `If the first step finished, its previous save is that game's Cabin hardware backup.`
         )
       }
       run={async (task) => {
+        let cartridgeGame: Gen3GameId = restore.gameIds[0]
         await gbLinkTradeDevice.writeSave({
           ...task,
-          gameId: restore.gameId,
+          gameId: restore.gameIds,
           save: restore.bytes,
-          // Stored as the Cabin's hardware.sav before the cartridge is touched.
-          backUpCartridgeSave: (cartridgeSave) =>
-            storage.putHardwareSave(restore.gameId, cartridgeSave),
+          // Stored as the cartridge game's hardware.sav before it is touched.
+          backUpCartridgeSave: (cartridgeSave, gameId) => {
+            cartridgeGame = gameId
+            return storage.putHardwareSave(gameId, cartridgeSave)
+          },
         })
-        return `Restored ${restore.name} to the ${GAME_LABEL[restore.gameId]} cartridge. Its previous save is the ${GAME_LABEL[restore.gameId]} Cabin's hardware backup.`
+        const label = GAME_LABEL[cartridgeGame]
+        return `Restored ${restore.name} to the ${label} cartridge. Its previous save is the ${label} Cabin's hardware backup.`
       }}
     />
   )
@@ -197,7 +208,7 @@ export function CartridgeSaves({ onBack }: { onBack(): void }) {
                 <p>
                   Choose a Ruby, Sapphire, Emerald, FireRed or LeafGreen .sav
                   file. The game is detected from the file, and the cartridge
-                  must match it.
+                  must match it. A Ruby or Sapphire save fits either cartridge.
                 </p>
               </div>
               <label className="lab-save-game">
@@ -219,7 +230,7 @@ export function CartridgeSaves({ onBack }: { onBack(): void }) {
               )}
               {restore && (
                 <p className="camp-status" role="status">
-                  {restore.name} is a Pokémon {GAME_LABEL[restore.gameId]} save.
+                  {restore.name} is a Pokémon {restore.label} save.
                 </p>
               )}
               {restorePanel}

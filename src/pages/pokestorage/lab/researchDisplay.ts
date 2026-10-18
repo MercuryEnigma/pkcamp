@@ -1,3 +1,4 @@
+import { registeredCount } from './collectionTypes'
 import type { CollectionScanState } from './useCollectionScan'
 
 export type ResearchAvailability =
@@ -19,6 +20,7 @@ export function researchAvailability(
 }
 export function researchSummary(scans: readonly CollectionScanState[]): {
   availability: ResearchAvailability
+  /** Registered entries: owned or seen. */
   owned: number
   available: number
 } {
@@ -32,7 +34,10 @@ export function researchSummary(scans: readonly CollectionScanState[]): {
         : statuses.every((status) => status === 'ready')
           ? 'ready'
           : 'partial',
-    owned: scans.reduce((sum, scan) => sum + (scan.result?.owned ?? 0), 0),
+    owned: scans.reduce(
+      (sum, scan) => sum + (scan.result ? registeredCount(scan.result) : 0),
+      0
+    ),
     available,
   }
 }

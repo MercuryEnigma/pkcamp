@@ -23,6 +23,8 @@ export type GameVersion =
   | 'Crystal'
   | 'Ruby'
   | 'Sapphire'
+  /** Ruby and Sapphire share a save format, so a save names only the pair. */
+  | 'RubySapphire'
   | 'Emerald'
   | 'FireRed'
   | 'LeafGreen'

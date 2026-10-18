@@ -9,13 +9,16 @@ hides Battle/Safari/Pelago, and places a subdued Start-menu link beneath its car
 `useHubStartup` stays mounted with the shell, waits for account/settings
 readiness, then begins storage prefetch and shared sprite preloading without
 waiting for downloads to finish. It returns provider/readiness/source/error/
-retry state. Saving through the provider publishes source changes; the hub has
+retry state. Pressing Start calls its `updateCollections`, which brings every
+Lab collection up to date in the background (`updateAllCollections`) and
+again whenever save or Camp data changes. Saving through the provider publishes source changes; the hub has
 no separate settings cache. Shared cards, hooks, and badge still come from Camp.
 
 ```mermaid
 flowchart TB
   Shell["Campsite"] --> Startup["useHubStartup<br/>useStorageSettings · retry"]
   Startup --> Load["provider.prefetch<br/>preloadSpriteSource"]
+  Startup --> Collections["updateAllCollections<br/>on Start · subscribeDataChanges"]
   Shell --> Start["StartMenu<br/>start · save · connect"]
   Shell --> Map["WorldMap<br/>onCamp · onLab · onBack"]
   Start & Map --> Account["DropboxMenu<br/>connect → dropboxAccount.signIn"]

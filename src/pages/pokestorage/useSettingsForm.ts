@@ -304,6 +304,28 @@ export function useSettingsForm({
     }
   }
 
+  /** Empties the GBA Lodge Camp Sites; the Camp Site count stays. */
+  const handleCampsiteRemove = async () => {
+    const camp = camps?.get(GBA_GENERATION)
+    if (!camps || !camp) return
+    if (
+      !window.confirm(
+        'Delete every Camping Pokémon at the GBA Lodge Camp Sites? Download the campsite first to keep a copy. This cannot be undone.'
+      )
+    )
+      return
+    try {
+      const emptied: Camp = {
+        sites: camp.sites.map((site) => site.map(() => null)),
+      }
+      await provider.saveCamp(GBA_GENERATION, emptied)
+      setCamps(new Map(camps).set(GBA_GENERATION, emptied))
+      setMessage('GBA Lodge campsite deleted.')
+    } catch (cause) {
+      setMessage(storageErrorMessage(cause))
+    }
+  }
+
   // Positions are stable: a Camp can only shrink down to its last occupied
   // Camp Site, and nothing is moved to make room.
   const minimumSiteCounts = useMemo(() => {
@@ -404,6 +426,7 @@ export function useSettingsForm({
     handleBackupExport,
     handleDownloadCampsite,
     handleBackupRemove,
+    handleCampsiteRemove,
     campsiteMinimum,
     handleSave,
     handleDropbox,

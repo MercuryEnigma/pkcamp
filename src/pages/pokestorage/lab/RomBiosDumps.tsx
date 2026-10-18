@@ -86,7 +86,6 @@ export function RomBiosDumps({ onBack }: { onBack(): void }) {
               title="Dump a cartridge ROM"
               steps={[CONNECT_STEP, BOOT_STEP]}
               progressLabel="Reading the ROM"
-              keepConnected
               onBusyChange={setBusy}
               describeError={dumpError}
               run={async (dump) => {
@@ -110,7 +109,6 @@ export function RomBiosDumps({ onBack }: { onBack(): void }) {
                 'Power on the GBA while holding START + SELECT. A cartridge isn’t needed.',
               ]}
               progressLabel="Reading the BIOS"
-              keepConnected
               onBusyChange={setBusy}
               describeError={dumpError}
               run={async (dump) => {

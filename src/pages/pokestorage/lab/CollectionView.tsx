@@ -4,7 +4,11 @@ import { usePkHex } from '../../context/PkHexContext'
 import { useSpriteResolver } from '../useStorage'
 import { BUILT_IN_COLLECTIONS, isBuiltInId } from './builtInCollections'
 import { CollectionGrid, EntryDetails } from './CollectionGrid'
-import type { CollectionDefinition, LabSourceId } from './collectionTypes'
+import {
+  registeredCount,
+  type CollectionDefinition,
+  type LabSourceId,
+} from './collectionTypes'
 import {
   formatRelative,
   STATUS_FILTERS,
@@ -107,7 +111,7 @@ export function CollectionView({
   const handleReset = () => {
     if (
       window.confirm(
-        'Reset history? Seen entries will go back to Unseen unless a Cabin owns them now.'
+        'Reset history? Entries no longer in a Cabin or Camp Site will go back to Missing.'
       )
     ) {
       scan.resetHistory()
@@ -125,8 +129,8 @@ export function CollectionView({
     ...(scan.camp?.state === 'error' ? [sourceLabel(CAMP_SOURCE)] : []),
   ]
   const busy = scan.phase !== 'idle'
-  const pct =
-    result && result.total > 0 ? (result.owned / result.total) * 100 : 0
+  const registered = result ? registeredCount(result) : 0
+  const pct = result && result.total > 0 ? (registered / result.total) * 100 : 0
   const isUpload = !isBuiltInId(definition.id)
 
   if (page === 'collections')
@@ -171,7 +175,7 @@ export function CollectionView({
             <h1 className="camp-title">{definition.name}</h1>
             <p className="camp-page-subtitle">
               {result
-                ? `${result.owned} / ${result.total} registered`
+                ? `${registered} / ${result.total} registered`
                 : 'Preparing research…'}
             </p>
           </div>
@@ -304,11 +308,11 @@ export function CollectionView({
               <section className="lab-panel">
                 <div className="lab-progress-head">
                   <span className="lab-progress-main">
-                    Registered {result.owned} / {result.total}
+                    Registered {registered} / {result.total}
                   </span>
                   {result.seen > 0 && (
                     <span className="lab-progress-seen">
-                      {result.seen} seen
+                      {result.owned} held now
                     </span>
                   )}
                 </div>
@@ -317,7 +321,7 @@ export function CollectionView({
                   role="progressbar"
                   aria-valuemin={0}
                   aria-valuemax={result.total}
-                  aria-valuenow={result.owned}
+                  aria-valuenow={registered}
                   aria-label="Registered entries"
                 >
                   <div className="lab-bar-fill" style={{ width: `${pct}%` }} />

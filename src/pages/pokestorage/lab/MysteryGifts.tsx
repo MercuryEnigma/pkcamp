@@ -201,12 +201,23 @@ export function MysteryGifts({ onBack }: { onBack(): void }) {
             if (!current()) return
             setDecision(null)
             const view = resultMessage(result, target)
+            // A GBA exchange is over once it reports: close the group and
+            // release the GB-Link. The Switch board stays open, since it
+            // restarts each time it closes.
+            const release = target === 'gba'
             setMessage({
               headline: view.headline,
-              hint: [view.hint, 'Choose another gift above to send again.']
+              hint: [
+                view.hint,
+                release
+                  ? 'Press Start to send another gift.'
+                  : 'Choose another gift above to send again.',
+              ]
                 .filter(Boolean)
                 .join(' '),
             })
+            // After the session finishes reporting, not inside its callback.
+            if (release) queueMicrotask(() => void finish(controller))
           },
           onFailed: (error) => {
             if (!current()) return
@@ -247,6 +258,22 @@ export function MysteryGifts({ onBack }: { onBack(): void }) {
           ? 'Cancelled.'
           : describeError(cause),
       })
+    }
+  }
+
+  /** Ends a finished GBA group quietly, keeping the result on screen. */
+  const finish = async (controller: AbortController) => {
+    if (attempt.current !== controller) return
+    attempt.current = null
+    const link = linkRef.current
+    linkRef.current = null
+    setPhase('stopping')
+    try {
+      await link?.stop()
+    } catch {
+      // The result is already shown; the link is closed either way.
+    } finally {
+      setPhase('idle')
     }
   }
 

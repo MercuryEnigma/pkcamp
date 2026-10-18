@@ -80,6 +80,19 @@ export interface EntryMatch {
 
 export type EntryStatus = 'owned' | 'seen' | 'unseen'
 
+/**
+ * Owned and seen entries are both registered: owned means a source holds a
+ * match now; seen means one did before, so the entry stays registered.
+ */
+export function isRegistered(status: EntryStatus | undefined): boolean {
+  return status === 'owned' || status === 'seen'
+}
+
+/** Registered entries in a stored result. */
+export function registeredCount(result: { owned: number; seen: number }) {
+  return result.owned + result.seen
+}
+
 export const STATUS_LABEL: Record<EntryStatus, string> = {
   owned: 'Owned',
   seen: 'Seen',

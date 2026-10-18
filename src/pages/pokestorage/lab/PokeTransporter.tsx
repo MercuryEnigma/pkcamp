@@ -109,7 +109,6 @@ export function PokeTransporter({ onBack }: { onBack(): void }) {
             <GbLinkTaskPanel
               key={active}
               title={`Back up ${active === 'gb' ? 'GB/GBC source' : 'GBA destination'}`}
-              keepConnected
               onBusyChange={setBusy}
               onClose={() => setActive(null)}
               progressLabel="Reading the save"
@@ -180,7 +179,6 @@ export function PokeTransporter({ onBack }: { onBack(): void }) {
             disabled={active !== null}
             startLabel="Start Poké Transporter GB"
             progressLabel="Sending Poké Transporter"
-            keepConnected
             onBusyChange={setBusy}
             describeError={taskError}
             steps={[

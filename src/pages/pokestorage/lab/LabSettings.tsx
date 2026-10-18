@@ -10,6 +10,7 @@ import {
 } from '../SettingsSections'
 import { useSettingsForm, type SettingsTab } from '../useSettingsForm'
 import { GbLinkFirmwareSettings } from '../GbLinkFirmwareSettings'
+import { LabCollectionData } from './LabCollectionData'
 
 export type { SettingsTab }
 
@@ -123,8 +124,12 @@ export function LabSettings({
           {tab === 'storage' && (
             <section className="camp-settings-section">
               <h2>Data</h2>
-              <p>Where your backups, Camping Pokémon, and settings are kept.</p>
+              <p>
+                Where your backups, Camping Pokémon, collections, and settings
+                are kept.
+              </p>
               <DataStorageControls form={form} />
+              <LabCollectionData offline={offline} />
             </section>
           )}
 

@@ -1,6 +1,6 @@
 import type { Gen3GameId } from '../../services/saveLibrary'
 import type { SpriteRequest } from '../../services/sprites'
-import { CAMP_SITE_SIZE, storage } from '../../services/storage'
+import { CAMP_SITE_SIZE } from '../../services/storage'
 import { dropboxAccount } from '../../services/storage/dropbox'
 import { DEFAULT_CAMP_SITE_COUNT, MAX_CAMP_SITE_COUNT } from './campPositions'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from './spriteDisplay'
@@ -236,9 +236,15 @@ export function CampsitesCard({ form }: { form: SettingsForm }) {
     siteCounts,
     setSiteCounts,
     saving,
+    offline,
+    camps,
     campsiteMinimum,
     handleDownloadCampsite,
+    handleCampsiteRemove,
   } = form
+  const hasCampers = (camps?.get(GBA_GENERATION)?.sites ?? []).some((site) =>
+    site.some((pokemon) => pokemon !== null)
+  )
   const siteCount = Math.max(
     siteCounts?.[GBA_GENERATION] ?? DEFAULT_CAMP_SITE_COUNT,
     campsiteMinimum
@@ -297,6 +303,19 @@ export function CampsitesCard({ form }: { form: SettingsForm }) {
           </button>
         </div>
       </div>
+
+      {hasCampers && (
+        <div className="camp-cabin-footer">
+          <button
+            type="button"
+            className="camp-text-btn camp-text-btn--danger"
+            disabled={offline || saving}
+            onClick={() => void handleCampsiteRemove()}
+          >
+            Delete campsite
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -355,12 +374,24 @@ export function SpriteSourcePicker({ form }: { form: SettingsForm }) {
 
 /** Active storage and the Dropbox connection. */
 export function DataStorageControls({ form }: { form: SettingsForm }) {
-  const { provider, dropboxStatus, handleDropbox } = form
+  const { provider, offline, dropboxStatus, handleDropbox } = form
+  const inDropbox = provider.id === 'dropbox'
   return (
     <>
-      <p>
-        <strong>Active storage:</strong> {storage.label}
-      </p>
+      <div className="camp-cabin-card camp-storage-location">
+        <div className="camp-cabin-head">
+          <strong className="camp-cabin-name">
+            {inDropbox ? 'Stored on Dropbox' : 'Stored locally in this browser'}
+          </strong>
+        </div>
+        <p className="camp-cabin-status">
+          {inDropbox
+            ? offline
+              ? "Your data is in your Dropbox account, which can't be reached right now. It's read-only until Dropbox reconnects."
+              : 'Your data is saved to your Dropbox account and follows you to any browser where you connect it.'
+            : "Your data is saved only in this browser on this device. It isn't backed up or synced, and clearing this site's data deletes it."}
+        </p>
+      </div>
       {dropboxAccount.isConfigured() ? (
         <>
           <p className="camp-status">

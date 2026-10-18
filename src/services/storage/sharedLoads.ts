@@ -1,3 +1,4 @@
+import type { GameId, Generation } from '../saveLibrary'
 import type { StorageProvider, StorageSettings } from './types'
 
 export interface SettingsSnapshot {
@@ -28,10 +29,15 @@ export class SharedLoads {
   }
 }
 
+/** A save or Camp that was written or removed. */
+export type DataChange =
+  { kind: 'save'; gameId: GameId } | { kind: 'camp'; generation: Generation }
+
 interface SharedProvider {
   provider: StorageProvider
   snapshot: SettingsSnapshot
   subscribe: (listener: () => void) => () => void
+  subscribeData: (listener: (change: DataChange) => void) => () => void
 }
 const shared = new WeakMap<StorageProvider, SharedProvider>()
 
@@ -41,6 +47,7 @@ export function shareStorageLoads(provider: StorageProvider): StorageProvider {
   if (existing) return existing.provider
   const loads = new SharedLoads()
   const listeners = new Set<() => void>()
+  const dataListeners = new Set<(change: DataChange) => void>()
   const state: SharedProvider = {
     provider,
     snapshot: { settings: null, error: null },
@@ -50,6 +57,16 @@ export function shareStorageLoads(provider: StorageProvider): StorageProvider {
         listeners.delete(listener)
       }
     },
+    subscribeData: (listener) => {
+      dataListeners.add(listener)
+      return () => {
+        dataListeners.delete(listener)
+      }
+    },
+  }
+  // Only after a write succeeds: a failed write left the data as it was.
+  const changed = (change: DataChange) => {
+    for (const listener of dataListeners) listener(change)
   }
   let settingsVersion = 0
   const publish = (settings: StorageSettings | null, error: Error | null) => {
@@ -99,6 +116,7 @@ export function shareStorageLoads(provider: StorageProvider): StorageProvider {
       } finally {
         loads.invalidate(`save:${id}`)
       }
+      changed({ kind: 'save', gameId: id })
     },
     discardSave: async (id) => {
       loads.invalidate(`save:${id}`)
@@ -107,6 +125,7 @@ export function shareStorageLoads(provider: StorageProvider): StorageProvider {
       } finally {
         loads.invalidate(`save:${id}`)
       }
+      changed({ kind: 'save', gameId: id })
     },
     saveCamp: async (generation, camp) => {
       loads.invalidate(`camp:${generation}`)
@@ -115,6 +134,7 @@ export function shareStorageLoads(provider: StorageProvider): StorageProvider {
       } finally {
         loads.invalidate(`camp:${generation}`)
       }
+      changed({ kind: 'camp', generation })
     },
   }
   // Bind untouched methods to the original provider, including private fields.
@@ -147,4 +167,12 @@ export function subscribeSettings(
   listener: () => void
 ) {
   return settingsState(provider).subscribe(listener)
+}
+
+/** Calls `listener` after each save or Camp write through this provider. */
+export function subscribeDataChanges(
+  provider: StorageProvider,
+  listener: (change: DataChange) => void
+) {
+  return settingsState(provider).subscribeData(listener)
 }

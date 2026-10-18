@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import type { CollectionDefinition } from './collectionTypes'
+import { registeredCount, type CollectionDefinition } from './collectionTypes'
 import type { CollectionScanState } from './useCollectionScan'
 import { researchAvailability, researchSummary } from './researchDisplay'
 
@@ -39,7 +39,7 @@ function CollectionCard({
   onSelect: (id: string) => void
 }) {
   const availability = researchAvailability(scan)
-  const owned = scan.result?.owned ?? null
+  const owned = scan.result ? registeredCount(scan.result) : null
   const total = Object.keys(definition.pokemon).length
   return (
     <button

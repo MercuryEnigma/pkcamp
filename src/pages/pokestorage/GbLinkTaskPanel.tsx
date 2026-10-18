@@ -21,11 +21,6 @@ type GbLinkTaskPanelProps = {
   progressLabel: string
   startLabel?: string
   disabled?: boolean
-  /**
-   * Leave the GB-Link connected when the panel closes, so the next task can
-   * reuse it. The owner of the session disconnects it later.
-   */
-  keepConnected?: boolean
   onBeforeStart?: () => boolean
   onBusyChange?: (busy: boolean) => void
   onClose?: () => void
@@ -35,13 +30,16 @@ type GbLinkTaskPanelProps = {
   describeError(cause: unknown, cancelled: boolean): string
 }
 
-/** Steps, progress and cancellation for one GB-Link cartridge task. */
+/**
+ * Steps, progress and cancellation for one GB-Link cartridge task. The
+ * GB-Link is released when the task ends, however it ends; the next task
+ * reconnects to it, without the chooser where the browser allows.
+ */
 export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const mounted = useRef(false)
-  const { keepConnected } = props
   useNavigationGuard(
     busy,
     'A cartridge transfer is active. Cancel it and leave?'
@@ -51,10 +49,10 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
     mounted.current = true
     return () => {
       mounted.current = false
+      // A running task disconnects as it settles.
       abortRef.current?.abort()
-      if (!keepConnected) void gbLinkTradeDevice.disconnect().catch(() => {})
     }
-  }, [keepConnected])
+  }, [])
 
   const setRunning = (running: boolean) => {
     setBusy(running)
@@ -73,7 +71,7 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
     setStatus(
       gbLinkTradeDevice.state === 'connected'
         ? 'Starting…'
-        : 'Choose your GB-Link in the browser window.'
+        : 'Connecting… Choose your GB-Link if the browser asks.'
     )
     try {
       await gbLinkTradeDevice.connect({ signal: controller.signal })
@@ -94,12 +92,14 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
       if (mounted.current)
         setStatus(props.describeError(cause, controller.signal.aborted))
     } finally {
+      // Another tool may still hold the GB-Link (a refused "busy" start).
+      if (gbLinkTradeDevice.state !== 'trading')
+        await gbLinkTradeDevice.disconnect().catch(() => {})
       abortRef.current = null
       if (mounted.current) setRunning(false)
     }
   }
 
-  const connected = gbLinkTradeDevice.state === 'connected'
   const startLabel = props.startLabel ?? 'Start'
 
   return (
@@ -112,7 +112,7 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
         <li>
           Press {startLabel === 'Start' ? 'Start' : 'the start button'} below.
         </li>
-        {!connected && <li>Choose your GB-Link in the browser.</li>}
+        <li>If the browser asks, choose your GB-Link.</li>
         {props.afterStartSteps?.map((step, index) => (
           <li key={`after-${index}`}>{step}</li>
         ))}

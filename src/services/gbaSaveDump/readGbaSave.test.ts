@@ -475,4 +475,18 @@ describe('writeGbaSave', () => {
     expect(backUp).not.toHaveBeenCalled()
     expect(cart.save).toEqual(save)
   })
+
+  it('accepts any listed game and backs up under the cartridge header game', async () => {
+    const cart = { ...cartFor(), code: 'AXPE', title: 'POKEMON SAPP' }
+    const backUp = vi.fn(async () => {})
+    await writeGbaSave(new FakeGbLink(cart), {
+      gameId: ['ruby', 'sapphire'],
+      save: backup,
+      signal: new AbortController().signal,
+      loadDumper: async () => rom,
+      backUpCartridgeSave: backUp,
+    })
+    expect(backUp).toHaveBeenCalledWith(save, 'sapphire')
+    expect(cart.save).toEqual(backup)
+  })
 })

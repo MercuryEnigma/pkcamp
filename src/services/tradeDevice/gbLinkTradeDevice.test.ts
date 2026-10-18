@@ -81,6 +81,19 @@ class FakeGbLinkTransport implements GbLinkTransport {
   emitStatus(status: number): void {
     for (const listener of this.statusListeners) listener(status)
   }
+
+  private readonly detachListeners = new Set<() => void>()
+
+  onDetach(listener: () => void): () => void {
+    this.detachListeners.add(listener)
+    return () => this.detachListeners.delete(listener)
+  }
+
+  /** The cable was pulled: the link drops without `close()`. */
+  unplug(): void {
+    this.attached = false
+    for (const listener of this.detachListeners) listener()
+  }
 }
 
 function makeDevice(transport = new FakeGbLinkTransport()): {
@@ -116,6 +129,28 @@ function request(onEvent?: (event: TradeDeviceEvent) => void) {
 }
 
 describe('GbLinkTradeDevice', () => {
+  it('releases a link that dropped on its own so the next task can connect', async () => {
+    const { device, transport } = makeDevice()
+    await device.connect()
+    const close = vi.spyOn(transport, 'close')
+    transport.unplug()
+    await vi.waitFor(() => expect(device.state).toBe('disconnected'))
+    expect(close).toHaveBeenCalledOnce()
+    await device.connect()
+    expect(device.state).toBe('connected')
+  })
+
+  it('reconnects when a link went away without reporting it', async () => {
+    const { device, transport } = makeDevice()
+    await device.connect()
+    transport.attached = false
+    const close = vi.spyOn(transport, 'close')
+    await device.connect()
+    expect(close).toHaveBeenCalledOnce()
+    expect(transport.attached).toBe(true)
+    expect(device.state).toBe('connected')
+  })
+
   it('waits for one disconnect and blocks reconnects until USB cleanup finishes', async () => {
     const { device, transport } = makeDevice()
     await device.connect()

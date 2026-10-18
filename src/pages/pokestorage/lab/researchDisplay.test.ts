@@ -24,7 +24,9 @@ function scan(
     ...overrides,
   }
 }
-const result = { owned: 3 } as NonNullable<CollectionScanState['result']>
+const result = { owned: 2, seen: 1 } as NonNullable<
+  CollectionScanState['result']
+>
 describe('research dashboard availability', () => {
   it('does not keep loading after an offline or failed scan with no stored results', () => {
     for (const unavailable of [
@@ -35,6 +37,9 @@ describe('research dashboard availability', () => {
       expect(researchAvailability(unavailable)).toBe('unavailable')
       expect(researchSummary([unavailable]).availability).toBe('unavailable')
     }
+  })
+  it('counts seen entries as registered alongside owned ones', () => {
+    expect(researchSummary([scan({ result }), scan({ result })]).owned).toBe(6)
   })
   it('distinguishes initial loading, complete results, and partial results', () => {
     expect(researchSummary([scan({ phase: 'loading' })]).availability).toBe(

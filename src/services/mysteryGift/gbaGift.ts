@@ -121,6 +121,8 @@ export async function openGbaGift(
         await transport.sendCommand(GB_LINK_COMMAND.cancel).catch(() => {})
       } finally {
         lease.free()
+        // Closing the group hands the GB-Link back for the next tool.
+        await gbLinkTradeDevice.disconnect().catch(() => {})
       }
     })
     return stopping

@@ -11,8 +11,10 @@ and implementation status is tracked in [ROADMAP.md](ROADMAP.md).
   the file, such as `Pokemon Emerald (BPEE).sav`. Switch save download via a Mystery Gift script and
   ESP32 is in research; its feasibility has not been established.
 - **Restore:** choose a Gen 3 `.sav` from the computer. PKHeX detects its game,
-  and the cartridge must match it and the save size. The current cartridge save
-  is stored as that game's Cabin `hardware.sav` before writing.
+  and the cartridge must match it and the save size. Ruby and Sapphire saves
+  share a format with no version byte (PKHeX reports `RS`), so either of those
+  cartridges is accepted. The current cartridge save is stored as the
+  cartridge header's game's Cabin `hardware.sav` before writing.
 - **Repair:** coming soon for the Ruby/Sapphire berry glitch and RTC changes.
   Specify compatibility, backup, and recovery before enabling a repair.
 

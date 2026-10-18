@@ -11,11 +11,15 @@ const device = vi.hoisted(() => ({
   sent: [] as Uint8Array[],
   statusListeners: new Set<(status: number) => void>(),
   freed: 0,
+  disconnects: 0,
 }))
 
 vi.mock('../tradeDevice', () => ({
   gbLinkTradeDevice: {
     connect: async () => {},
+    disconnect: async () => {
+      device.disconnects++
+    },
     firmwareVersion: async () => device.firmware,
     claim: () => ({
       signal: new AbortController().signal,
@@ -63,6 +67,7 @@ beforeEach(() => {
   device.sent = []
   device.statusListeners.clear()
   device.freed = 0
+  device.disconnects = 0
   vi.clearAllMocks()
 })
 
@@ -123,8 +128,10 @@ describe('openGbaGift', () => {
     await link.stop()
     expect(device.commands.at(-1)).toEqual([GB_LINK_COMMAND.cancel])
     expect(device.freed).toBe(1)
+    expect(device.disconnects).toBe(1)
     await link.stop()
     expect(device.freed).toBe(1)
+    expect(device.disconnects).toBe(1)
   })
 
   it('rejects an unknown gift before touching the GB-Link', async () => {

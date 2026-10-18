@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Gen3GameId } from '../../../services/saveLibrary'
 import type {
-  Camp,
   StorageProvider,
   StoredCollectionResult,
 } from '../../../services/storage'
@@ -11,20 +10,17 @@ import {
   useStorageOffline,
   useStorageProvider,
 } from '../useStorage'
-import { isStale } from './collectionResults'
 import {
-  CAMP_SOURCE,
-  type CabinScanStatus,
-  type CampScanStatus,
-  type CollectionDefinition,
-  type LabSourceId,
+  loadCollectionSources,
+  subscribeCollectionUpdates,
+  updateCollections,
+} from './collectionService'
+import type {
+  CabinScanStatus,
+  CampScanStatus,
+  CollectionDefinition,
+  LabSourceId,
 } from './collectionTypes'
-import { GEN_3_GAMES } from './labStore'
-import { campFingerprint, campPokemonCount } from './scanCamp'
-import {
-  evaluateResearchSnapshot,
-  scanResearchSnapshot,
-} from './researchSnapshot'
 
 export type ScanPhase = 'loading' | 'scanning' | 'idle'
 export interface CollectionScanState {
@@ -94,19 +90,28 @@ export function useCollectionScans(
     force: false,
   })
   const handled = useRef(0)
-  const memory = useRef<{
-    provider: StorageProvider
-    key: string
-    snapshot: Awaited<ReturnType<typeof scanResearchSnapshot>>
-  } | null>(null)
   const selectedKey = selected === null ? '*' : selected.join(',')
+
+  // Results stored elsewhere (the hub's background update) are re-read here.
+  const origin = useRef({})
+  useEffect(
+    () =>
+      subscribeCollectionUpdates(provider, (from) => {
+        if (from !== origin.current)
+          setRequest((current) => ({
+            id: current.id + 1,
+            resetId: null,
+            force: false,
+          }))
+      }),
+    [provider]
+  )
 
   useEffect(() => {
     if (!ready || !selectionReady) return
     let cancelled = false
     const requested = request.id !== handled.current
     handled.current = request.id
-    const errors: Record<string, string> = {}
     const update = (patch: Partial<ResearchState>) => {
       if (!cancelled)
         setState((previous) => ({
@@ -123,153 +128,41 @@ export function useCollectionScans(
         unsaved: false,
       })
       try {
-        const [files, camp] = await Promise.all([
-          Promise.all(
-            GEN_3_GAMES.map(
-              async (id) => [id, await provider.getSave(id)] as const
-            )
-          ).then((entries) => Object.fromEntries(entries)),
-          // A Camp that can't be read must not stop the Cabins from scanning.
-          provider.getCamp(3).then(
-            (value): Camp | { error: string } => value,
-            (cause: unknown) => ({ error: storageErrorMessage(cause) })
-          ),
-        ])
+        const sources = await loadCollectionSources(provider, selected)
         if (cancelled) return
-        const campError = 'error' in camp ? camp.error : null
-        const campData = 'error' in camp ? null : camp
-        const campCount = campData ? campPokemonCount(campData) : null
-        // By default Camp Sites count once they hold a Pokémon, like Cabins
-        // once they hold a save; an explicit selection decides otherwise.
-        const campWanted =
-          selected === null
-            ? (campCount ?? 0) > 0
-            : selected.includes(CAMP_SOURCE)
-        const campTarget = campWanted && campData !== null
-        const fingerprint =
-          campData && campTarget ? campFingerprint(campData) : null
-        const saves = Object.fromEntries(
-          GEN_3_GAMES.map((id) => [id, files[id]?.updatedAt ?? null])
-        )
-        const targets = GEN_3_GAMES.filter(
-          (id) => (selected === null || selected.includes(id)) && files[id]
-        )
-        update({ saves, targets, campCount, campTarget })
-        if (requested && request.resetId)
-          await provider.discardCollectionResult(request.resetId)
-        const history = Object.fromEntries(
-          await Promise.all(
-            definitions.map(async (definition) => {
-              try {
-                return [
-                  definition.id,
-                  await provider.getCollectionResult(definition.id),
-                ] as const
-              } catch (cause) {
-                errors[definition.id] = storageErrorMessage(cause)
-                return [definition.id, null] as const
-              }
-            })
-          )
-        )
-        if (cancelled) return
-        update({ results: history, errors })
-        if (offline) {
-          update({ phase: 'idle' })
-          return
-        }
-        const stale = definitions.filter(
-          (definition) =>
-            (requested && request.force) ||
-            !history[definition.id] ||
-            isStale(
-              history[definition.id]!,
-              definition,
-              targets,
-              saves,
-              fingerprint
-            ) !== null
-        )
-        if (stale.length === 0) {
-          update({ phase: 'idle' })
-          return
-        }
-        if ((targets.length > 0 || campTarget) && !adapter) {
+        update({
+          saves: sources.saves,
+          targets: sources.targets,
+          campCount: sources.campCount,
+          campTarget: sources.campTarget,
+        })
+        const outcome = await updateCollections({
+          provider,
+          adapter,
+          definitions,
+          sources,
+          force: requested && request.force,
+          resetId: requested ? request.resetId : null,
+          readOnly: offline,
+          origin: origin.current,
+          onHistory: (results, errors) => update({ results, errors }),
+          onScanning: () => update({ phase: 'scanning' }),
+        })
+        if (outcome.waitingForPkHex) {
           update({
             waitingForPkHex: true,
             phase: pkhexLoading ? 'loading' : 'idle',
           })
           return
         }
-        update({ phase: 'scanning' })
-        const key = [
-          ...targets.map((id) => `${id}@${saves[id]?.getTime()}`),
-          fingerprint ?? '',
-        ].join('|')
-        let snapshot =
-          memory.current?.provider === provider &&
-          memory.current.key === key &&
-          !(requested && request.force)
-            ? memory.current.snapshot
-            : null
-        if (!snapshot) {
-          snapshot =
-            targets.length === 0 && !campTarget
-              ? { pokemon: [], cabins: [], camp: null }
-              : await scanResearchSnapshot(
-                  provider,
-                  adapter!,
-                  targets,
-                  files,
-                  campTarget ? campData : null
-                )
-          if (cancelled) return
-          memory.current = snapshot.cabins.some(
-            (cabin) => cabin.state === 'error'
-          )
-            ? null
-            : { provider, key, snapshot }
-        }
-        const results = {
-          ...history,
-          ...evaluateResearchSnapshot(
-            stale,
-            snapshot,
-            history,
-            new Date().toISOString()
-          ),
-        }
-        const campStatus: CampScanStatus | null =
-          campWanted && campError
-            ? { state: 'error', message: campError }
-            : (snapshot.camp ?? null)
-        const partial =
-          snapshot.cabins.some((cabin) => cabin.state === 'error') ||
-          campStatus?.state === 'error'
-        let unsaved = partial || (targets.length === 0 && !campTarget)
         update({
-          results,
-          cabins: snapshot.cabins,
-          camp: campStatus,
-          unsaved,
+          phase: 'idle',
+          results: outcome.results,
+          errors: outcome.errors,
+          cabins: outcome.cabins,
+          camp: outcome.camp,
+          unsaved: outcome.unsaved,
         })
-        if (!unsaved) {
-          for (const definition of stale) {
-            if (cancelled) return
-            // Failed history reads must not overwrite history with a fresh empty baseline.
-            if (errors[definition.id]) {
-              unsaved = true
-              continue
-            }
-            try {
-              await provider.putCollectionResult(results[definition.id]!)
-            } catch (cause) {
-              errors[definition.id] = storageErrorMessage(cause)
-              unsaved = true
-            }
-          }
-        }
-        update({ phase: 'idle', errors: { ...errors }, unsaved })
       } catch (cause) {
         update({
           phase: 'idle',

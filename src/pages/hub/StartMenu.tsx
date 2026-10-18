@@ -33,8 +33,10 @@ export function StartMenu({
     }
   }
   const start = () => {
-    if (startup.sourceId) onStart()
-    else {
+    if (startup.sourceId) {
+      startup.updateCollections()
+      onStart()
+    } else {
       setChooseSource(true)
       dialog.current?.showModal()
     }
@@ -45,6 +47,7 @@ export function StartMenu({
     try {
       await startup.provider.saveSettings({ spriteSourceId: sourceId })
       dialog.current?.close()
+      startup.updateCollections()
       onStart()
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))

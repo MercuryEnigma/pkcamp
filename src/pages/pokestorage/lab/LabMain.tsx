@@ -66,7 +66,7 @@ export function LabMain({
   const toMenu = () => setScreen({ name: 'menu' })
   const inResearch = RESEARCH_SCREENS.has(screen.name)
 
-  // Tasks leave the GB-Link connected for the next one; release it on leaving.
+  // Tasks release the GB-Link as they finish; this also covers leaving midway.
   useEffect(() => {
     if (!inResearch) return
     return () => {

@@ -22,6 +22,11 @@ export interface GbLinkTransport {
   onData(listener: (payload: Uint8Array) => void): () => void
   /** Every status and data payload of any length, with its serial channel. */
   onFrame(listener: (channel: number, payload: Uint8Array) => void): () => void
+  /**
+   * Called once when the link drops on its own (unplugged, or a USB read
+   * failed), so the owner can release it. Not called by `close()`.
+   */
+  onDetach?(listener: () => void): () => void
 }
 
 interface UsbTransferInResultLike {
@@ -90,6 +95,8 @@ const USB_FILTERS = [
 ]
 
 const SERIAL_FILTERS = [{ usbVendorId: 0x2fe3 }]
+/** Closing never waits longer than this for the read loops to stop. */
+const READ_STOP_TIMEOUT_MS = 1000
 const STATUS_ENDPOINT = 1
 const DATA_ENDPOINT = 2
 
@@ -120,6 +127,7 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
   private readonly frameListeners = new Set<
     (channel: number, payload: Uint8Array) => void
   >()
+  private readonly detachListeners = new Set<() => void>()
   private readonly decoder = new GbLinkSerialFrameDecoder()
   private readTasks: Promise<void>[] = []
 
@@ -145,6 +153,16 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     if (this.connected) return
     const host = browserNavigator()
     if (!host) throw new Error('This browser has no USB device APIs.')
+
+    // A GB-Link this site may already use reconnects without the chooser.
+    if (!options?.previouslyGrantedOnly && host.usb?.getDevices) {
+      try {
+        await this.open({ previouslyGrantedOnly: true, signal })
+        return
+      } catch {
+        signal?.throwIfAborted()
+      }
+    }
 
     if (options?.previouslyGrantedOnly) {
       const devices = (await host.usb?.getDevices?.()) ?? []
@@ -211,7 +229,17 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     } catch {
       // The port may already have disappeared.
     }
-    await Promise.allSettled(this.readTasks)
+    // A pending USB read only settles when data arrives or the device closes,
+    // so close it before waiting for the reads, or this waits forever.
+    try {
+      await this.usbDevice?.close()
+    } catch {
+      // Ignore a device that was physically disconnected.
+    }
+    await Promise.race([
+      Promise.allSettled(this.readTasks),
+      new Promise((resolve) => setTimeout(resolve, READ_STOP_TIMEOUT_MS)),
+    ])
     this.readTasks = []
 
     try {
@@ -228,11 +256,6 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
       await this.serialPort?.close()
     } catch {
       // Ignore a port that was physically disconnected.
-    }
-    try {
-      await this.usbDevice?.close()
-    } catch {
-      // Ignore a device that was physically disconnected.
     }
 
     this.usbDevice = null
@@ -272,6 +295,18 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
   ): () => void {
     this.frameListeners.add(listener)
     return () => this.frameListeners.delete(listener)
+  }
+
+  onDetach(listener: () => void): () => void {
+    this.detachListeners.add(listener)
+    return () => this.detachListeners.delete(listener)
+  }
+
+  /** The link dropped without `close()`: report it once. */
+  private detached(): void {
+    if (this.closing || !this.connected) return
+    this.connected = false
+    for (const listener of this.detachListeners) listener()
   }
 
   private async openUsb(device: UsbDeviceLike): Promise<void> {
@@ -345,7 +380,7 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
         this.emitStatus(statusFrom(payload))
       }
     } catch {
-      if (!this.closing) this.connected = false
+      this.detached()
     }
   }
 
@@ -369,7 +404,7 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
         this.emitData(payload)
       }
     } catch {
-      if (!this.closing) this.connected = false
+      this.detached()
     }
   }
 
@@ -393,7 +428,7 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     } catch {
       // Closing and unplugging both terminate the reader.
     } finally {
-      if (!this.closing && reader === this.serialReader) this.connected = false
+      if (reader === this.serialReader) this.detached()
     }
   }
 

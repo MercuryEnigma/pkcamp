@@ -5,7 +5,6 @@ import { GAME_LABEL } from '../gameDisplay'
 import {
   type Constraint,
   type CollectionDefinition,
-  type EntryStatus,
   type ConstraintField,
   type EntryConstraints,
   type PokemonLocation,
@@ -253,10 +252,10 @@ export function formatRelative(iso: string, now = Date.now()): string {
   return 'just now'
 }
 
-export type StatusFilter = 'all' | 'missing' | EntryStatus
+export type StatusFilter = 'all' | 'registered' | 'missing'
 
 export const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'All' },
-  { value: 'owned', label: 'Registered' },
+  { value: 'registered', label: 'Registered' },
   { value: 'missing', label: 'Missing' },
 ]

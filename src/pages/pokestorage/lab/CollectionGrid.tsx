@@ -14,7 +14,11 @@ import type { SpriteResolver } from '../../../services/sprites'
 import type { StoredCollectionResult } from '../../../services/storage'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from '../spriteDisplay'
 import { SpriteCredit } from '../SpriteCredit'
-import { type CollectionDefinition, type EntryStatus } from './collectionTypes'
+import {
+  isRegistered,
+  type CollectionDefinition,
+  type EntryStatus,
+} from './collectionTypes'
 import {
   entryDexNumber,
   collectionEntryLabel,
@@ -162,9 +166,7 @@ export function CollectionGrid({
     const visible = group.entryIds.filter(
       (id) =>
         (filter === 'all' ||
-          (filter === 'missing'
-            ? statusOf(id) !== 'owned'
-            : statusOf(id) === filter)) &&
+          isRegistered(statusOf(id)) === (filter === 'registered')) &&
         (needle === '' || matchesQuery(definition, id, needle))
     )
     return { group, visible }
@@ -190,11 +192,7 @@ export function CollectionGrid({
   const activeStatus = activeId ? statusOf(activeId) : 'unseen'
   const activeDex = activeConstraints ? entryDexNumber(activeConstraints) : null
   const statusLabel = (status: EntryStatus) =>
-    status === 'owned'
-      ? 'Registered'
-      : status === 'seen'
-        ? 'Previously registered'
-        : 'Missing'
+    isRegistered(status) ? 'Registered' : 'Missing'
   const groupNames = sections
     .filter((section) => section.visible.length > 0)
     .map((section) => section.group.name)
@@ -338,14 +336,14 @@ export function CollectionGrid({
                       alt=""
                       loading="lazy"
                       className={
-                        status === 'owned' ? '' : 'pokedex-row-missing'
+                        isRegistered(status) ? '' : 'pokedex-row-missing'
                       }
                     />
                     <span className="pokedex-row-name">
                       {collectionEntryLabel(definition, entryId)}
                     </span>
                     <span className="pokedex-row-status" aria-hidden="true">
-                      {status === 'owned' ? '✓' : '·'}
+                      {isRegistered(status) ? '✓' : '·'}
                     </span>
                   </button>
                 </li>
@@ -378,7 +376,7 @@ export function EntryDetails({
   if (!constraints) return null
   const entry = result.entries[entryId]
   const status = entry?.status ?? 'unseen'
-  const registered = status === 'owned'
+  const registered = isRegistered(status)
   const label = collectionEntryLabel(definition, entryId)
   const dex = entryDexNumber(constraints)
   const display = resolveSpriteDisplay(
@@ -421,11 +419,14 @@ export function EntryDetails({
           {label}
         </h1>
         <span className={`lab-status lab-status--${status}`}>
-          {registered ? 'Registered' : status === 'seen' ? 'Seen' : 'Missing'}
+          {registered ? 'Registered' : 'Missing'}
         </span>
-        {status === 'seen' && entry?.lastOwnedAt && (
+        {status === 'seen' && (
           <p className="lab-note">
-            Previously registered · Last owned {formatDate(entry.lastOwnedAt)}
+            Not in any selected Cabin or Camp Site now
+            {entry?.lastOwnedAt
+              ? ` · Last owned ${formatDate(entry.lastOwnedAt)}`
+              : ''}
           </p>
         )}
       </section>

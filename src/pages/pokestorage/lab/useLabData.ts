@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { StorageProvider } from '../../../services/storage'
 import { storageErrorMessage, useStorageProvider } from '../useStorage'
-import { isBuiltInId } from './builtInCollections'
+import { BUILT_IN_COLLECTIONS, isBuiltInId } from './builtInCollections'
 import type { CollectionDefinition, LabSourceId } from './collectionTypes'
 import {
   discardUploadedCollection,
@@ -140,6 +140,60 @@ export function useLabData() {
     return true
   }
 
+  /** Clears a built-in collection's stored result, after the player confirms. */
+  async function clearHistory(definition: CollectionDefinition) {
+    if (
+      !window.confirm(
+        `Clear the saved history of "${definition.name}"? Entries no longer in a Cabin or Camp Site will go back to Missing.`
+      )
+    ) {
+      return false
+    }
+    try {
+      await provider.discardCollectionResult(definition.id)
+      return true
+    } catch (cause) {
+      setErrors([`Not cleared: ${storageErrorMessage(cause)}`])
+      return false
+    }
+  }
+
+  /**
+   * Removes every uploaded collection and clears every stored result,
+   * built-ins included, after the player confirms once.
+   */
+  async function removeAll(): Promise<boolean> {
+    if (
+      !window.confirm(
+        'Delete all uploaded collections and clear the saved history of every collection? This cannot be undone.'
+      )
+    ) {
+      return false
+    }
+    setErrors([])
+    const failed: string[] = []
+    const kept: CollectionDefinition[] = []
+    for (const definition of uploads) {
+      try {
+        await discardUploadedCollection(provider, definition.id)
+      } catch (cause) {
+        failed.push(`${definition.name}: ${storageErrorMessage(cause)}`)
+        kept.push(definition)
+      }
+    }
+    update({ uploads: kept })
+    for (const definition of [...BUILT_IN_COLLECTIONS, ...uploads]) {
+      if (kept.includes(definition)) continue
+      try {
+        await provider.discardCollectionResult(definition.id)
+      } catch (cause) {
+        failed.push(`${definition.name}: ${storageErrorMessage(cause)}`)
+      }
+    }
+    if (failed.length > 0) setErrors(failed.map((f) => `Not deleted: ${f}`))
+    return failed.length === 0
+  }
+
   return {
     ready: current !== null,
     sources: current?.sources ?? null,
@@ -149,5 +203,7 @@ export function useLabData() {
     clearErrors: () => setErrors([]),
     upload,
     remove,
+    clearHistory,
+    removeAll,
   }
 }

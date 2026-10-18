@@ -97,6 +97,15 @@ const EXACT_VERSION: Record<string, GameVersion> = {
 }
 
 /**
+ * Aggregate names the adapter still treats as one game. Ruby and Sapphire
+ * saves share a format with no version byte, so PKHeX.Core reports only `RS`;
+ * the two play identically, so either Cabin accepts the pair.
+ */
+const FAMILY_VERSION: Record<string, { exact: GameVersion; label: string }> = {
+  RS: { exact: 'RubySapphire', label: 'Ruby/Sapphire' },
+}
+
+/**
  * PKHeX.Core `EntityContext` names → generation number. The lettered contexts
  * are sub-generations: `Gen7b` is LGPE, `Gen8a` PLA, `Gen8b` BDSP, `Gen9a`
  * Legends Z-A.
@@ -148,6 +157,14 @@ export function defaultWasmBaseUrl(): string | undefined {
 
 function versionIdentity(game: Game): GameVersionIdentity {
   const generation = GENERATION[game.generation] ?? 3
+  const family = FAMILY_VERSION[game.saveVersion]
+  if (family) {
+    return {
+      exact: family.exact,
+      approximateGeneration: generation,
+      aggregated: family.label,
+    }
+  }
   // `isVersionAggregated` means PKHeX.Core itself stored only a family (Gen 1
   // saves carry no version byte at all, so Red/Blue/Yellow are one value).
   if (game.isVersionAggregated) {

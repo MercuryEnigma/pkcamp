@@ -37,22 +37,26 @@ export interface GbaDumperOptions {
 }
 
 export interface GbaSaveOptions extends GbaDumperOptions {
-  /** When set, a cartridge for any other game is refused before reading. */
-  gameId?: Gen3GameId
+  /**
+   * When set, a cartridge for any other game is refused before reading. A
+   * list accepts any of its games (Ruby and Sapphire saves are interchangeable).
+   */
+  gameId?: Gen3GameId | readonly Gen3GameId[]
   /** Called with the inserted cartridge's header once it has been read. */
   onCartridge?(info: GbaCartInfo): void
 }
 
 export interface WriteGbaSaveOptions extends GbaSaveOptions {
-  /** The game `save` belongs to; the cartridge must match it. */
-  gameId: Gen3GameId
+  /** The game (or games) `save` belongs to; the cartridge must match. */
+  gameId: Gen3GameId | readonly Gen3GameId[]
   /** The save to write over the cartridge's save. */
   save: Uint8Array
   /**
    * Keeps the save currently on the cartridge. The cartridge is only written
-   * after this resolves, so a failed backup leaves it untouched.
+   * after this resolves, so a failed backup leaves it untouched. `gameId` is
+   * the cartridge's game, read from its header.
    */
-  backUpCartridgeSave(save: Uint8Array): Promise<void>
+  backUpCartridgeSave(save: Uint8Array, gameId: Gen3GameId): Promise<void>
 }
 
 /** Decodes the bundled dumper from its base64 data URL. */
@@ -102,24 +106,27 @@ async function withDumper<T>(
 /**
  * Like `withDumper`, but first reads the cartridge header, reports it, and
  * refuses a cartridge for a game other than `gameId` when one is given.
+ * `operation` receives the cartridge's game, or null for a non-Gen 3 game.
  */
 function withCartridge<T>(
   transport: GbLinkTransport,
   options: GbaSaveOptions,
-  operation: (cart: GbaCartClient) => Promise<T>
+  operation: (cart: GbaCartClient, game: Gen3GameId | null) => Promise<T>
 ): Promise<T> {
   return withDumper(transport, options, async (cart) => {
     options.onStatus?.('Checking the cartridge…')
     const info = await cart.readInfo()
     if (!info) throw new Error('No GBA cartridge was detected.')
     options.onCartridge?.(info)
+    const game = gameIdFromCode(info.code)
     const { gameId } = options
-    if (gameId && !info.code.startsWith(GAME_CODE_PREFIX[gameId])) {
+    const expected = typeof gameId === 'string' ? [gameId] : gameId
+    if (expected && !(game && expected.includes(game))) {
       throw new Error(
         `This cartridge is ${info.title || info.code}, which doesn't match the expected game.`
       )
     }
-    return operation(cart)
+    return operation(cart, game)
   })
 }
 
@@ -139,14 +146,16 @@ export function writeGbaSave(
   transport: GbLinkTransport,
   options: WriteGbaSaveOptions
 ): Promise<void> {
-  return withCartridge(transport, options, async (cart) => {
+  return withCartridge(transport, options, async (cart, game) => {
+    // withCartridge has refused any cartridge outside the required `gameId`.
+    if (!game) throw new Error('This cartridge is not a supported game.')
     options.onStatus?.('Backing up the cartridge save first…')
     const cartridgeSave = await cart.dumpSave((done, total) =>
       options.onStatus?.(
         `Backing up the cartridge save first… ${Math.floor((done / total) * 100)}%`
       )
     )
-    await options.backUpCartridgeSave(cartridgeSave)
+    await options.backUpCartridgeSave(cartridgeSave, game)
     options.onStatus?.('Sending the backup…')
     await cart.restoreSave(options.save, (done, total) => {
       options.onProgress?.(done, total)

@@ -196,7 +196,8 @@
   background: var(--camp-border-soft);
 }
 
-.lab-status--owned {
+.lab-status--owned,
+.lab-status--seen {
   color: #fff;
   background: var(--camp-leaf);
 }
@@ -849,8 +850,7 @@
   object-fit: contain;
   image-rendering: pixelated;
 }
-.pokedex-preview-display--unseen img,
-.pokedex-preview-display--seen img {
+.pokedex-preview-display--unseen img {
   filter: grayscale(0.8);
   opacity: 0.7;
 }

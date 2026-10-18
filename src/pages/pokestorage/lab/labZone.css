@@ -797,3 +797,32 @@ button.lab-station:hover .lab-station-action {
     font-size: 0.7rem;
   }
 }
+
+/* Settings → Data: one row per stored collection. */
+.lab-data-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lab-data-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 0;
+  border-top: 1px solid var(--camp-border-soft);
+}
+
+.lab-data-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lab-data-name small {
+  color: var(--camp-muted);
+}

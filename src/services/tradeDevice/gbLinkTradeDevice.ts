@@ -149,6 +149,7 @@ export class GbLinkTradeDevice implements TradeDevice {
   private cachedFirmware: string | null = null
   private connecting: AbortController | null = null
   private disconnecting: Promise<void> | null = null
+  private removeDetach: (() => void) | null = null
 
   constructor(
     dependencies: GbLinkTradeDeviceDependencies = defaultDependencies
@@ -170,6 +171,9 @@ export class GbLinkTradeDevice implements TradeDevice {
   }): Promise<void> {
     options?.signal?.throwIfAborted()
     if (this.transport?.attached) return
+    // The last link dropped without a disconnect: release it, then reconnect.
+    if (this.transport && !this.disconnecting) await this.disconnect()
+    options?.signal?.throwIfAborted()
     if (!this.supported) {
       throw new TradeDeviceError(
         this.id,
@@ -192,6 +196,11 @@ export class GbLinkTradeDevice implements TradeDevice {
       controller.signal.throwIfAborted()
       this.transport = transport
       this.currentState = 'connected'
+      this.removeDetach =
+        transport.onDetach?.(() => {
+          if (this.transport === transport)
+            void this.disconnect().catch(() => {})
+        }) ?? null
     } catch (error) {
       try {
         await transport.close()
@@ -242,6 +251,8 @@ export class GbLinkTradeDevice implements TradeDevice {
     const transport = this.requireTransport()
     await transport.sendCommand(GB_LINK_COMMAND.rebootBootloader)
     this.cancelTrade()
+    this.removeDetach?.()
+    this.removeDetach = null
     this.transport = null
     this.cachedFirmware = null
     this.currentState = 'disconnected'
@@ -260,6 +271,8 @@ export class GbLinkTradeDevice implements TradeDevice {
 
     this.currentState = 'disconnecting'
     this.cancelTrade()
+    this.removeDetach?.()
+    this.removeDetach = null
     this.transport = null
     this.disconnecting = Promise.resolve().then(async () => {
       try {

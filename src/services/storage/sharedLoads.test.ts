@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
-import { FileStoreProvider } from './fileStoreProvider'
+import { emptyCamp, FileStoreProvider } from './fileStoreProvider'
 import { MemoryFileStore } from './fileStore'
 import {
   shareStorageLoads,
   settingsSnapshot,
+  subscribeDataChanges,
   subscribeSettings,
 } from './sharedLoads'
 
@@ -110,5 +111,35 @@ describe('shared storage loading', () => {
     first.sites.pop()
     expect(second.sites).toHaveLength(10)
     expect(read).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('data change events', () => {
+  it('reports each save and Camp write once it succeeds', async () => {
+    const { provider } = setup()
+    const listener = vi.fn()
+    const unsubscribe = subscribeDataChanges(provider, listener)
+    await provider.putSave('emerald', new Uint8Array([1]))
+    await provider.discardSave('emerald')
+    await provider.saveCamp(3, emptyCamp())
+    expect(listener.mock.calls).toEqual([
+      [{ kind: 'save', gameId: 'emerald' }],
+      [{ kind: 'save', gameId: 'emerald' }],
+      [{ kind: 'camp', generation: 3 }],
+    ])
+    unsubscribe()
+    await provider.putSave('ruby', new Uint8Array([1]))
+    expect(listener).toHaveBeenCalledTimes(3)
+  })
+
+  it('reports nothing when a write fails', async () => {
+    const { raw, provider } = setup()
+    vi.spyOn(raw, 'putSave').mockRejectedValue(new Error('offline'))
+    const listener = vi.fn()
+    subscribeDataChanges(provider, listener)
+    await expect(
+      provider.putSave('emerald', new Uint8Array([1]))
+    ).rejects.toThrow('offline')
+    expect(listener).not.toHaveBeenCalled()
   })
 })
