@@ -4,10 +4,12 @@ import { ZoneCard } from '../pokestorage/ZoneCard'
 export function WorldMap({
   onCamp,
   onLab,
+  onArcade,
   onBack,
 }: {
   onCamp: () => void
   onLab: () => void
+  onArcade: () => void
   onBack: () => void
 }) {
   return (
@@ -30,7 +32,7 @@ export function WorldMap({
           <ZoneCard
             label="Arcade Zone"
             sublabel="Play your adventure"
-            comingSoon
+            onClick={onArcade}
           />
           {/* {['Battle Zone', 'Safari Zone', 'Pelago Zone'].map(
             (label) => (

@@ -318,6 +318,10 @@ export class FileStoreProvider implements StorageProvider {
     return { bytes: file.bytes, extension: name.slice(gameId.length + 1) }
   }
 
+  async hasRom(gameId: GameId): Promise<boolean> {
+    return (await this.romFileNames(gameId)).length > 0
+  }
+
   async putRom(gameId: GameId, rom: StoredRom): Promise<void> {
     const extension = rom.extension.replace(/^\./, '').toLowerCase()
     if (!/^[a-z0-9]+$/.test(extension)) {

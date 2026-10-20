@@ -1,5 +1,5 @@
 import type { GbaCartInfo } from '../../../services/gbaSaveDump/gbaCartClient'
-import { gameIdFromCode } from '../../../services/gbaSaveDump/readGbaSave'
+import { gen3GameIdFromCode } from '../../../services/saveLibrary'
 import { GAME_LABEL } from '../gameDisplay'
 
 /** Saves `bytes` to the player's computer through the browser's download. */
@@ -17,7 +17,7 @@ export function cartridgeFileName(
   info: GbaCartInfo,
   extension: string
 ): string {
-  const gameId = gameIdFromCode(info.code)
+  const gameId = gen3GameIdFromCode(info.code)
   const name = gameId ? `Pokemon ${GAME_LABEL[gameId]}` : info.title || 'GBA'
   const safe = `${name} (${info.code})`.replace(/[\\/:*?"<>|]/g, '_')
   return `${safe}.${extension}`

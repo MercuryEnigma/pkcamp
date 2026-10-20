@@ -12,3 +12,4 @@ export type {
   Gen9GameId,
 } from './types'
 export { ROSTER, ALL_GAME_IDS, generationOf } from './roster'
+export { GEN_3_GAME_CODE_PREFIX, gen3GameIdFromCode } from './gen3GameCode'

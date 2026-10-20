@@ -112,6 +112,25 @@ describe('shared storage loading', () => {
     expect(second.sites).toHaveLength(10)
     expect(read).toHaveBeenCalledTimes(1)
   })
+
+  it('shares ROM presence checks and invalidates them after writes', async () => {
+    const { raw, provider } = setup()
+    const check = vi.spyOn(raw, 'hasRom')
+    expect(
+      await Promise.all([
+        provider.hasRom('emerald'),
+        provider.hasRom('emerald'),
+      ])
+    ).toEqual([false, false])
+    expect(check).toHaveBeenCalledTimes(1)
+    await provider.putRom('emerald', {
+      bytes: new Uint8Array([1]),
+      extension: 'gba',
+    })
+    expect(await provider.hasRom('emerald')).toBe(true)
+    await provider.discardRom('emerald')
+    expect(await provider.hasRom('emerald')).toBe(false)
+  })
 })
 
 describe('data change events', () => {

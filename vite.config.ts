@@ -80,10 +80,58 @@ function pkhexWasmAssets(): Plugin {
   }
 }
 
+/** Serves the threaded mGBA loader unchanged so its worker URL stays valid. */
+function mgbaWasmAssets(): Plugin {
+  let sourceDir = ''
+  // Pthread workers must remain inside the isolation service worker's scope.
+  const publicDir = 'arcade/mgba'
+  return {
+    name: 'mgba-wasm-assets',
+    configResolved(config) {
+      sourceDir = resolve(
+        config.root,
+        'node_modules/@thenick775/mgba-wasm/dist'
+      )
+    },
+    configureServer(server) {
+      const prefix = `${server.config.base}${publicDir}/`
+      server.middlewares.use((req, res, next) => {
+        const url = req.url?.split('?')[0]
+        if (!url || !url.startsWith(prefix)) return next()
+        const rel = decodeURIComponent(url.slice(prefix.length))
+        if (!rel || rel.includes('..')) return next()
+        const file = join(sourceDir, rel)
+        if (!file.startsWith(sourceDir) || !existsSync(file)) return next()
+        res.setHeader(
+          'Content-Type',
+          MIME[extname(file)] ?? 'application/octet-stream'
+        )
+        createReadStream(file).pipe(res)
+      })
+    },
+    writeBundle() {
+      // Without these files the Arcade page builds but cannot start a game.
+      if (!existsSync(sourceDir)) {
+        throw new Error(`mGBA assets not found at ${sourceDir}; run npm ci.`)
+      }
+      const outDir = resolve(this.environment.config.build.outDir, publicDir)
+      cpSync(sourceDir, outDir, { recursive: true, dereference: true })
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), pkhexWasmAssets()],
+  plugins: [react(), pkhexWasmAssets(), mgbaWasmAssets()],
   base: '/pkcamp/',
+  build: {
+    rolldownOptions: {
+      input: {
+        main: resolve(import.meta.dirname, 'index.html'),
+        arcade: resolve(import.meta.dirname, 'arcade/index.html'),
+      },
+    },
+  },
   // vitest's default include glob otherwise picks up vendor/pkhex-wasm's own
   // e2e specs (which need @playwright/test, not installed here) alongside
   // our own tests. Scope test discovery to our own source.
@@ -102,7 +150,7 @@ export default defineConfig({
   // that doesn't exist in this repo and aborts the scan. Pin the real entry
   // explicitly instead of relying on the glob.
   optimizeDeps: {
-    entries: ['index.html'],
+    entries: ['index.html', 'arcade/index.html'],
     // pkhex-wasm's own README asks bundlers to exclude it from pre-bundling;
     // pre-bundling was also trying (and failing) to read a .map file the
     // .NET wasm runtime references but doesn't ship.

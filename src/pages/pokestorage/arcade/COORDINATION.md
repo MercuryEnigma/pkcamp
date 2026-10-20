@@ -1,0 +1,16 @@
+# Arcade coordination
+
+Implementation and review history is archived in
+[the October handoff](../../../../docs/archive/ARCADE_COORDINATION_2026-10.md).
+
+The release implementation uses `ArcadePlayer`, `GbaController`, and
+`services/emulator/mgbaRuntime`. UI is split into the player, menu, toolbar,
+confirmation dialogs, input hook, and layout hook. Shared save synchronization
+remains in `arcadeSync.ts`.
+
+Current requirements and outstanding device/deployment checks are tracked in
+[the plan](../../../../docs/ARCADE_ZONE_PLAN.md),
+[the roadmap](../../../../docs/ARCADE_ZONE_ROADMAP.md), and
+[runtime evidence](../../../../docs/ARCADE_RUNTIME.md).
+
+Do not commit private ROMs, saves, or browser-generated output.

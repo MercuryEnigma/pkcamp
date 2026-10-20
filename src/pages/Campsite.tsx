@@ -7,12 +7,19 @@ import './hub/hub.css'
 import { PokeStorageMain } from './pokestorage/PokeStorageMain'
 import { LabMain } from './pokestorage/lab/LabMain'
 import type { CampDestination } from './pokestorage/PokeStorageMain'
+import { ArcadeMain } from './pokestorage/arcade/ArcadeMain'
+
+type Area = 'start' | 'campsite' | 'options' | 'pokemon' | 'arcade'
+
+function initialArea(): Area {
+  return new URLSearchParams(window.location.search).get('zone') === 'arcade'
+    ? 'arcade'
+    : 'start'
+}
 
 export function Campsite() {
   const startup = useHubStartup()
-  const [active, setActive] = useState<
-    'start' | 'campsite' | 'options' | 'pokemon'
-  >('start')
+  const [active, setActive] = useState<Area>(initialArea)
   // A Lab entry opened its Cabin or Camp Site in the Camp Zone. The Lab stays
   // mounted (hidden) so Back returns to the same entry.
   const [fromLab, setFromLab] = useState<{
@@ -39,7 +46,16 @@ export function Campsite() {
         <WorldMap
           onCamp={() => setActive('pokemon')}
           onLab={() => setActive('options')}
+          onArcade={() => setActive('arcade')}
           onBack={() => setActive('start')}
+        />
+      )}
+      {active === 'arcade' && (
+        <ArcadeMain
+          onBack={() => {
+            window.history.replaceState(null, '', import.meta.env.BASE_URL)
+            setActive('campsite')
+          }}
         />
       )}
       {active == 'pokemon' && (

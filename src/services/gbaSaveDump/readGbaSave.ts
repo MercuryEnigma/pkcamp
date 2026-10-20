@@ -1,4 +1,4 @@
-import type { Gen3GameId } from '../saveLibrary'
+import { gen3GameIdFromCode, type Gen3GameId } from '../saveLibrary'
 import { GB_LINK_COMMAND, GB_LINK_MODE } from '../tradeDevice/gbLinkProtocol.ts'
 import type { GbLinkTransport } from '../tradeDevice/gbLinkTransport.ts'
 import { GbaCartClient, type GbaCartInfo } from './gbaCartClient.ts'
@@ -7,23 +7,6 @@ import { multiboot } from './multiboot.ts'
 // Inlined (about 80 KB of base64) so starting a read needs no network
 // request that could fail mid-flow.
 import dumperDataUrl from './vendor/gb-cart-doctor/gba-cart-dumper_mb.gba?url&inline'
-
-/** Game code prefixes; the fourth letter is the region. */
-export const GAME_CODE_PREFIX: Record<Gen3GameId, string> = {
-  ruby: 'AXV',
-  sapphire: 'AXP',
-  emerald: 'BPE',
-  firered: 'BPR',
-  leafgreen: 'BPG',
-}
-
-/** The Gen 3 game a cartridge code belongs to, or null for any other game. */
-export function gameIdFromCode(code: string): Gen3GameId | null {
-  const entry = Object.entries(GAME_CODE_PREFIX).find(([, prefix]) =>
-    code.startsWith(prefix)
-  )
-  return entry ? (entry[0] as Gen3GameId) : null
-}
 
 /** Microseconds between SPI words and bytes per word, as Cart Doctor uses. */
 const TIMING_CONFIG = new Uint8Array([36, 0, 0, 4])
@@ -118,7 +101,7 @@ function withCartridge<T>(
     const info = await cart.readInfo()
     if (!info) throw new Error('No GBA cartridge was detected.')
     options.onCartridge?.(info)
-    const game = gameIdFromCode(info.code)
+    const game = gen3GameIdFromCode(info.code)
     const { gameId } = options
     const expected = typeof gameId === 'string' ? [gameId] : gameId
     if (expected && !(game && expected.includes(game))) {

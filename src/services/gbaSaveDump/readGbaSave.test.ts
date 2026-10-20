@@ -4,7 +4,6 @@ import type { GbLinkTransport } from '../tradeDevice/gbLinkTransport.ts'
 import { GBA_CART as C } from './gbaCartClient.ts'
 import { encryptWord } from './multiboot.ts'
 import {
-  gameIdFromCode,
   readGbaBios,
   readGbaRom,
   readGbaSave,
@@ -329,12 +328,6 @@ describe('readGbaSave', () => {
 })
 
 describe('game detection', () => {
-  it('maps cartridge codes to Gen 3 games', () => {
-    expect(gameIdFromCode('BPEE')).toBe('emerald')
-    expect(gameIdFromCode('AXPJ')).toBe('sapphire')
-    expect(gameIdFromCode('AGBJ')).toBeNull()
-  })
-
   it('reads any cartridge when no game is expected and reports its header', async () => {
     const emerald: Cart = { code: 'BPEE', title: 'POKEMON EMER', save }
     const seen: string[] = []

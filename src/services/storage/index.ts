@@ -113,6 +113,9 @@ class ActiveStorage implements StorageProvider {
   getRom(gameId: GameId) {
     return this.provider.getRom(gameId)
   }
+  hasRom(gameId: GameId) {
+    return this.provider.hasRom(gameId)
+  }
   putRom(gameId: GameId, rom: StoredRom) {
     return this.provider.putRom(gameId, rom)
   }

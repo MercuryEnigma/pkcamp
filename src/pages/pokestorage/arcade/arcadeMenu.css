@@ -1,0 +1,494 @@
+/* Pause menu and dialogs. Base controls first, followed by responsive rules. */
+.arcade-menu {
+  text-align: left;
+  overscroll-behavior: contain;
+  max-height: calc(100dvh - 1.5rem);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--camp-wood);
+  background: var(--camp-paper);
+  width: min(28rem, 100vw - 1.5rem);
+  color: var(--camp-text);
+  --cab-focus: var(--camp-forest);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px #183a2947;
+  box-sizing: border-box;
+  scrollbar-gutter: stable;
+}
+.arcade-menu-view {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  min-width: 0;
+}
+.arcade-menu-body {
+  gap: 0.6rem;
+  display: grid;
+  min-width: 0;
+}
+.arcade-menu-view[hidden] {
+  display: none;
+}
+.arcade-dialog .arcade-menu-body {
+  padding: 0.6rem 1rem 1rem;
+}
+.arcade-menu-header {
+  align-items: center;
+  min-height: 2.75rem;
+  display: flex;
+  border-bottom: 1px solid var(--camp-border-soft);
+  padding-bottom: 0.75rem;
+  gap: 0.75rem;
+}
+.arcade-menu-header h2 {
+  margin: 0;
+  line-height: 1.2;
+  color: var(--camp-text);
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 1.15rem;
+  font-weight: 750;
+}
+.arcade-menu-back {
+  min-height: 2.75rem;
+  font: inherit;
+  cursor: pointer;
+  padding: 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--camp-leaf);
+  box-shadow: none;
+  border: 1px solid var(--camp-border-soft);
+  background: var(--camp-canvas);
+  border-radius: 8px;
+  flex: none;
+  padding-inline: 0.75rem;
+}
+.arcade-menu-save {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  border: 1px solid var(--camp-border-soft);
+  background: var(--camp-canvas);
+  color: var(--camp-text);
+  box-shadow: none;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+}
+.arcade-menu-note {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--camp-muted);
+}
+.arcade-menu-alert {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--camp-text);
+  box-shadow: none;
+  background: #f7ddd2;
+  border: 1px solid #d8a18e;
+  border-radius: 8px;
+  padding: 0.65rem 0.75rem;
+}
+.arcade-menu-list {
+  display: grid;
+  gap: 0.5rem;
+}
+.arcade-menu-item,
+.arcade-menu-row button,
+.arcade-menu-files button {
+  font: inherit;
+  cursor: pointer;
+  border: 1px solid var(--camp-panel-border);
+  background: var(--camp-panel);
+  color: var(--camp-text);
+  border-radius: 8px;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.85rem;
+  font-weight: 650;
+  line-height: 1.35;
+  box-shadow: 0 1px 2px rgb(73 53 34 / 12%);
+}
+.arcade-menu-item {
+  text-align: left;
+  align-items: center;
+  gap: 0.6rem;
+  display: flex;
+  font-size: 1rem;
+}
+.arcade-menu-item--next::after {
+  content: '›' / '';
+  margin-left: auto;
+  font-size: 1.3rem;
+}
+.arcade-menu-setting {
+  align-items: center;
+  display: grid;
+  border: 1px solid var(--camp-border-soft);
+  color: var(--camp-text);
+  border-radius: 8px;
+  min-height: 3.4rem;
+  background: var(--camp-canvas);
+  box-shadow: none;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+.arcade-menu .arcade-speed {
+  box-shadow: none;
+  justify-self: stretch;
+  border-color: var(--camp-panel-border);
+  background: var(--camp-paper);
+  border-radius: 8px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-columns: auto;
+  width: 100%;
+  min-width: 0;
+}
+.arcade-menu-sound {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.45rem;
+  display: grid;
+}
+.arcade-menu-sound input[type='range'] {
+  width: 100%;
+  min-height: 2.75rem;
+  margin: 0;
+  accent-color: var(--camp-forest);
+  min-width: 0;
+}
+.arcade-menu-check {
+  cursor: pointer;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  font-size: 0.9rem;
+  display: inline-flex;
+  margin: 0;
+  font-weight: 600;
+}
+.arcade-menu-check input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  accent-color: var(--camp-forest);
+  flex-shrink: 0;
+}
+.arcade-menu-advanced {
+  min-height: 2.75rem;
+  font: inherit;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  justify-self: center;
+  padding: 0 0.75rem;
+  font-size: 0.82rem;
+  text-decoration: underline;
+  border-top: 1px solid var(--camp-border-soft);
+  border-radius: 0;
+  width: 100%;
+  margin-top: 0.15rem;
+  color: var(--camp-leaf);
+}
+.arcade-menu-link {
+  min-height: 2.75rem;
+  font: inherit;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  justify-self: center;
+  padding: 0 0.75rem;
+  font-size: 0.82rem;
+  text-decoration: underline;
+  color: var(--camp-leaf);
+}
+.arcade-menu-row {
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  gap: 0.45rem;
+  display: grid;
+}
+.arcade-menu-row button {
+  font-size: 0.85rem;
+}
+.arcade-menu-files button {
+  font-size: 0.85rem;
+}
+.arcade-menu button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.arcade-menu-files {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  display: grid;
+  align-items: stretch;
+}
+.arcade-menu::backdrop {
+  background: #24342894;
+}
+.arcade-dialog .arcade-menu-header {
+  padding: 1rem 1rem 0;
+  padding-bottom: 0.75rem;
+}
+.arcade-menu-save[data-status='saved'] {
+  border-left: 4px solid var(--camp-leaf);
+  box-shadow: none;
+}
+.arcade-menu-item--primary {
+  border-color: var(--camp-forest);
+  background: var(--camp-forest);
+  color: #fff;
+}
+.arcade-menu-item:focus-visible {
+  border-color: var(--camp-forest);
+  background: var(--camp-panel-hover);
+  color: var(--camp-text);
+  outline: 3px solid var(--camp-forest);
+  outline-offset: 2px;
+}
+.arcade-menu-row button:focus-visible {
+  border-color: var(--camp-forest);
+  background: var(--camp-panel-hover);
+  color: var(--camp-text);
+  outline: 3px solid var(--camp-forest);
+  outline-offset: 2px;
+}
+.arcade-menu-files button:focus-visible {
+  border-color: var(--camp-forest);
+  background: var(--camp-panel-hover);
+  color: var(--camp-text);
+  outline: 3px solid var(--camp-forest);
+  outline-offset: 2px;
+}
+.arcade-menu .arcade-speed button + button {
+  border-left-color: var(--camp-panel-border);
+}
+.arcade-menu * {
+  box-sizing: border-box;
+}
+.arcade-menu-item--next:focus-visible::after {
+  content: '›' / '';
+  font-size: 1.3rem;
+}
+.arcade-menu-setting:has(.arcade-speed) {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding-block: 0.4rem;
+}
+.arcade-menu .arcade-speed button {
+  border-radius: 0;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding-inline: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+.arcade-advanced-section {
+  border: 1px solid var(--camp-border-soft);
+  background: var(--camp-canvas);
+  border-radius: 8px;
+  gap: 0.65rem;
+  padding: 0.85rem;
+  display: grid;
+}
+.arcade-advanced-section h3 {
+  color: var(--camp-leaf);
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+.arcade-advanced-section .arcade-menu-note {
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.arcade-binding {
+  padding-block: 0.5rem;
+  width: 100%;
+  min-height: 2.75rem;
+  color: var(--camp-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+}
+.arcade-keycap {
+  text-overflow: ellipsis;
+  max-width: 65%;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1px solid var(--camp-wood);
+  background: var(--camp-paper);
+  min-width: 2.25rem;
+  height: 1.9rem;
+  color: var(--camp-text);
+  white-space: nowrap;
+  border-bottom-width: 3px;
+  border-radius: 6px;
+  flex: none;
+  justify-content: center;
+  align-items: center;
+  padding: 0 0.55rem;
+  font:
+    700 0.78rem ui-monospace,
+    monospace;
+  display: inline-flex;
+}
+.arcade-menu[data-view='buttons'] {
+  width: min(40rem, 100vw - 1.5rem);
+}
+/* Keyboard binding editor. */
+.arcade-bindings {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 1rem;
+  display: grid;
+}
+.arcade-binding-group--shortcuts {
+  grid-column: 1/-1;
+}
+.arcade-binding-group h3 {
+  color: var(--camp-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+.arcade-binding-group ul {
+  border: 1px solid var(--camp-border-soft);
+  background: var(--camp-canvas);
+  border-radius: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  overflow: hidden;
+}
+.arcade-binding-group li + li {
+  border-top: 1px solid var(--camp-border-soft);
+}
+.arcade-binding-group--shortcuts ul {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.arcade-binding-group--shortcuts li:nth-child(2) {
+  border-top: 0;
+}
+.arcade-binding-group--shortcuts li:nth-child(2n) {
+  border-left: 1px solid var(--camp-border-soft);
+}
+.arcade-binding:focus-visible {
+  outline: 3px solid var(--camp-forest);
+  outline-offset: -3px;
+}
+.arcade-binding[aria-pressed='true'] {
+  background: var(--camp-panel);
+}
+.arcade-binding[aria-pressed='true'] .arcade-keycap {
+  color: var(--camp-muted);
+  border-style: dashed;
+  border-bottom-width: 1px;
+  font-family: inherit;
+  font-weight: 600;
+}
+.arcade-keycap[data-empty] {
+  color: var(--camp-muted);
+  border-style: dashed;
+  border-bottom-width: 1px;
+  font-family: inherit;
+  font-weight: 600;
+}
+.arcade-binding-group--shortcuts li.arcade-binding-restart {
+  border-left: 0;
+  grid-column: 1/-1;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  display: grid;
+}
+.arcade-restart-confirm {
+  border-left: 1px solid var(--camp-border-soft);
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+.arcade-menu :focus-visible:not(:where(.arcade-binding)) {
+  outline: 3px solid var(--camp-forest);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .arcade-menu .arcade-speed button:hover {
+    background: #ffffff2e;
+  }
+  .arcade-menu-item:hover {
+    border-color: var(--camp-panel-border);
+    background: var(--camp-panel-hover);
+    color: var(--camp-text);
+  }
+  .arcade-menu-row button:enabled:hover {
+    border-color: var(--camp-panel-border);
+    background: var(--camp-panel-hover);
+    color: var(--camp-text);
+  }
+  .arcade-menu-files button:enabled:hover {
+    border-color: var(--camp-panel-border);
+    background: var(--camp-panel-hover);
+    color: var(--camp-text);
+  }
+  .arcade-menu-back:hover {
+    border-color: var(--camp-panel-border);
+    background: var(--camp-panel-hover);
+    color: var(--camp-text);
+  }
+  .arcade-menu-item--primary:hover {
+    border-color: var(--camp-forest);
+    color: #fff;
+    background: #356447;
+  }
+  .arcade-binding:hover {
+    background: var(--camp-panel);
+  }
+}
+@media (pointer: coarse) {
+  .arcade-menu .arcade-speed button {
+    min-height: 2.75rem;
+  }
+}
+@media (orientation: landscape) and (max-height: 32rem) {
+  .arcade-menu {
+    max-height: calc(100dvh - 1rem);
+  }
+  .arcade-menu-view {
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+}
+@media (max-width: 36rem) {
+  .arcade-bindings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .arcade-binding-group--shortcuts ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .arcade-binding-group--shortcuts li:nth-child(2) {
+    border-top: 1px solid var(--camp-border-soft);
+  }
+  .arcade-binding-group--shortcuts li:nth-child(2n) {
+    border-left: 0;
+  }
+}

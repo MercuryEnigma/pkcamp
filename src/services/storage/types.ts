@@ -150,6 +150,8 @@ export interface StorageProvider {
   getHardwareSave(gameId: GameId): Promise<StoredSave | null>
 
   getRom(gameId: GameId): Promise<StoredRom | null>
+  /** Checks the ROM slot without downloading its bytes. */
+  hasRom(gameId: GameId): Promise<boolean>
   putRom(gameId: GameId, rom: StoredRom): Promise<void>
   discardRom(gameId: GameId): Promise<void>
 

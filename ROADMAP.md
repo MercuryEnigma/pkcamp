@@ -71,10 +71,13 @@
 
 ## Arcade Zone
 
+Detailed sequencing and acceptance evidence are tracked in the
+[Arcade checklist](docs/ARCADE_ZONE_ROADMAP.md).
+
 - [ ] Verify mGBA WASM formats, browsers, performance, input, audio, and asset/worker loading.
 - [ ] Build a player-provided ROM spike that works from the deployed base path.
-- [ ] Define shared emulator lifecycle, save I/O, controls, audio, errors, and capabilities.
-- [ ] Add play/pause/reset, fullscreen, mappings, and clear recovery states.
+- [x] Define shared emulator lifecycle, save I/O, controls, audio, errors, and capabilities.
+- [x] Add play/pause/reset, fullscreen, mappings, and clear recovery states.
 - [ ] Prove explicit save import/export and Dropbox backup/restore across reloads.
 - [ ] Verify repeated mount/unmount cleanup and recovery with multiple supplied games.
 - [ ] Publish the supported-browser matrix and decide ROM-persistence policy.

@@ -24,6 +24,9 @@ It is a modified distribution, not an official release of the upstream projects.
   records the Facade integration, ribbon API, binding, and packaging changes.
 - Poké Transporter GB and ribbon icons are copied unmodified, as recorded in
   their provenance files.
+- mGBA WASM 2.5.1 is copied unmodified from its npm package into the production
+  runtime. pkCamp supplies a separate player entry, scoped isolation worker,
+  in-memory file staging, controls, and save integration around it.
 
 On 2026-10-17, dated in-file modification notices were also added to `trade/rfu.js`
 and `cable/cable.js`, preserving upstream comments. The SDK is now pinned and the

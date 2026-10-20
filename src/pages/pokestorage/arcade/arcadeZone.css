@@ -1,0 +1,219 @@
+/* Shared Camp palette for the Arcade chooser and player.
+ * Per-game version colors accent cartridge edges and titles. */
+
+body:has(.arcade-zone) {
+  background: #5a7a52;
+}
+
+.camp-zone.arcade-zone {
+  --camp-dropbox-paper: #fff8e4;
+  --camp-dropbox-wood: #a66b3d;
+  --camp-dropbox-blue: #24523a;
+  accent-color: #24523a;
+}
+
+.arcade-zone .camp-root {
+  --camp-grass: #5a7a52;
+  --camp-canvas: #f6e8bd;
+  --camp-paper: #fff8e4;
+  --camp-wood: #a66b3d;
+  --camp-ink: #493522;
+  --camp-forest: #24523a;
+  --camp-campfire: #e96b3c;
+
+  --camp-bg: var(--camp-grass);
+  --camp-board: var(--camp-canvas);
+  --camp-surface: var(--camp-paper);
+  --camp-panel: #f0dca3;
+  --camp-panel-hover: #e8cb8a;
+  --camp-panel-border: var(--camp-wood);
+  --camp-border-soft: #e4d2a8;
+  --camp-text: var(--camp-ink);
+  --camp-muted: #7b6248;
+  --camp-accent: var(--camp-campfire);
+  --camp-accent-soft: rgb(233 107 60 / 18%);
+  --camp-leaf: var(--camp-forest);
+  --camp-shadow: 0 2px 4px rgb(73 53 34 / 18%);
+
+  --arcade-version: #8a5a30;
+
+  background: var(--camp-grass);
+  border-color: var(--camp-panel-border);
+}
+
+.arcade-zone [data-version='ruby'] {
+  --arcade-version: #b8322a;
+}
+.arcade-zone [data-version='sapphire'] {
+  --arcade-version: #2d5aa8;
+}
+.arcade-zone [data-version='emerald'] {
+  --arcade-version: #23845a;
+}
+.arcade-zone [data-version='firered'] {
+  --arcade-version: #d0502a;
+}
+.arcade-zone [data-version='leafgreen'] {
+  --arcade-version: #4f8f34;
+}
+
+.arcade-zone .camp-content {
+  box-shadow: 0 4px 16px rgb(59 39 22 / 22%);
+}
+
+/* A wider Camp board with five cartridge-shaped game buttons. */
+.arcade-select {
+  width: min(52rem, 100%);
+  max-width: 52rem;
+}
+.arcade-game-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.85rem;
+  width: 100%;
+}
+.arcade-game-card {
+  position: relative;
+  grid-column: span 2;
+  display: block;
+  /* Retail GBA cartridges are roughly 60 × 35 mm. */
+  aspect-ratio: 12 / 7;
+  min-height: 0;
+  margin-top: 0.45rem;
+  padding: 1.65rem 0.8rem 1rem;
+  border: 2px solid #445244;
+  border-radius: 11px;
+  background: #77836f;
+  color: var(--camp-text);
+  box-shadow:
+    inset 0 0 0 3px rgb(255 255 255 / 12%),
+    inset 0 -5px 0 rgb(49 62 50 / 18%),
+    var(--camp-shadow);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    filter 0.12s ease,
+    translate 0.12s ease;
+}
+.arcade-game-card::before {
+  content: '';
+  position: absolute;
+  top: -0.55rem;
+  right: -0.32rem;
+  left: -0.32rem;
+  height: 0.85rem;
+  border: 2px solid #445244;
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  background: #77836f;
+  box-shadow: inset 0 5px 0 var(--arcade-version);
+}
+.arcade-game-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0.42rem;
+  left: 50%;
+  translate: -50% 0;
+  width: 0;
+  height: 0;
+  border-top: 0.48rem solid #4f5d4e;
+  border-right: 0.38rem solid transparent;
+  border-left: 0.38rem solid transparent;
+  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 16%));
+}
+.arcade-game-card:nth-child(4) {
+  grid-column: 2 / span 2;
+}
+.arcade-game-card:hover {
+  filter: brightness(1.06);
+  translate: 0 -2px;
+}
+.arcade-game-card:active {
+  translate: 0;
+}
+.arcade-game-card:focus-visible {
+  outline: none;
+  filter: drop-shadow(0 0 4px var(--camp-leaf)) brightness(1.04);
+}
+.arcade-cartridge-mark {
+  position: absolute;
+  top: 0.55rem;
+  right: 0;
+  left: 0;
+  color: #4f5d4e;
+  font-size: 0.48rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-align: center;
+  text-shadow: 0 1px rgb(255 255 255 / 20%);
+}
+.arcade-cartridge-label {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--camp-panel-border);
+  border-radius: 7px 7px 4px 4px;
+  background: var(--camp-panel);
+  text-align: center;
+  box-shadow:
+    inset 0 0 0 2px rgb(255 248 228 / 32%),
+    0 2px 3px rgb(49 62 50 / 24%);
+}
+.arcade-game-heading {
+  display: block;
+  padding: 0.75rem 0.9rem 0;
+  text-align: center;
+}
+.arcade-game-name {
+  color: var(--arcade-version);
+  font-size: 1rem;
+  font-weight: 750;
+}
+.arcade-game-save {
+  align-self: center;
+  padding: 0 0.9rem;
+  color: var(--camp-muted);
+  font-size: 1.1rem;
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: center;
+}
+.arcade-game-rom {
+  padding: 0.6rem 0.9rem 0.65rem;
+  border-top: 1px solid var(--camp-border-soft);
+  color: #b23a1f;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+}
+.arcade-game-rom[data-ready='true'] {
+  color: var(--camp-leaf);
+}
+@media (max-width: 42rem) {
+  .arcade-game-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .arcade-game-card,
+  .arcade-game-card:nth-child(4) {
+    grid-column: auto;
+  }
+  .arcade-game-card:last-child {
+    grid-column: 1 / -1;
+    width: calc(50% - 0.425rem);
+    justify-self: center;
+  }
+}
+@media (max-width: 28rem) {
+  .arcade-game-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .arcade-game-card,
+  .arcade-game-card:nth-child(4),
+  .arcade-game-card:last-child {
+    grid-column: auto;
+    width: 100%;
+  }
+}

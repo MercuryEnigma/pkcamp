@@ -182,6 +182,7 @@ describe('saves', () => {
 describe('ROMs', () => {
   it('is null when missing', async () => {
     expect(await provider.getRom('ruby')).toBeNull()
+    expect(await provider.hasRom('ruby')).toBe(false)
   })
 
   it('round trips', async () => {
@@ -189,6 +190,7 @@ describe('ROMs', () => {
     const rom = await provider.getRom('ruby')
     expect(arr(rom!.bytes)).toEqual([1, 2])
     expect(rom!.extension).toBe('gba')
+    expect(await provider.hasRom('ruby')).toBe(true)
   })
 
   it('normalizes a leading dot and case', async () => {
@@ -225,6 +227,7 @@ describe('ROMs', () => {
     await provider.putSave('ruby', bytes(2))
     await provider.discardRom('ruby')
     expect(await provider.getRom('ruby')).toBeNull()
+    expect(await provider.hasRom('ruby')).toBe(false)
     expect(await provider.getSave('ruby')).not.toBeNull()
   })
 

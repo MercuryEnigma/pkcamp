@@ -139,7 +139,18 @@ export function packageLicenses({ output, framework }) {
     const licenses = readdirSync(directory).filter((file) =>
       /^(LICEN[CS]E|COPYING|NOTICE)(\.|$)/i.test(file)
     )
-    if (!licenses.length) throw new Error(`No license text found for ${key}`)
+    // @thenick775/mgba-wasm declares MPL-2.0 but its npm tarball omits the
+    // license file. Package the identical MPL text already preserved for the
+    // mGBA-derived cable component, while keeping the package's own title.
+    if (!licenses.length && key === '@thenick775/mgba-wasm@2.5.1') {
+      include(
+        'src/services/tradeDevice/vendor/gb-link-switch-ldn/cable/LICENSE.MPL-2.0',
+        `npm/${key}/LICENSE.MPL-2.0`,
+        `${key} — MPL-2.0`
+      )
+    } else if (!licenses.length) {
+      throw new Error(`No license text found for ${key}`)
+    }
     for (const file of licenses) {
       const source = relative(root, join(directory, file))
       include(
@@ -221,6 +232,10 @@ export function packageLicenses({ output, framework }) {
     [
       'Poké Transporter GB source',
       'https://github.com/Striaton-Lab-Team/Poke_Transporter_GB/tree/1.2.1',
+    ],
+    [
+      'mGBA WASM source (pinned npm revision)',
+      'https://github.com/thenick775/mgba/tree/e974b288bd7e5cfc7c7b96f8b4d32b673ddfb68c',
     ],
   ]
   writeFileSync(
