@@ -19,6 +19,8 @@ export {
   defaultWasmBaseUrl,
 } from './pkhexWasmBackend.ts'
 export type { PkhexWasmBackendOptions } from './pkhexWasmBackend.ts'
+export { pkhexRuntime, PkhexRuntime } from './runtime.ts'
+export type { PkhexRuntimeSnapshot } from './runtime.ts'
 export type {
   BoxLocation,
   BoxNode,

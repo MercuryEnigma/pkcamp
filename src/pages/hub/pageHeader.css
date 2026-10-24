@@ -1,0 +1,96 @@
+/* The shared page header: Back and the game on the light side, then a diagonal
+   edge into the page name and the GitHub and Dropbox badges. */
+.site-page-actions {
+  display: flex;
+  gap: 0.65rem;
+}
+.site-page-actions .camp-dropbox-badge {
+  position: static;
+  overflow: visible;
+}
+.site-page-actions .camp-source-link {
+  order: -1;
+}
+
+.site-page-header {
+  display: flex;
+  flex: none;
+  align-items: stretch;
+  background: var(--camp-panel);
+}
+.site-page-back {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.25rem;
+  border: 0;
+  background: transparent;
+  color: var(--camp-text);
+  font-weight: 700;
+  cursor: pointer;
+}
+.site-page-back:hover {
+  background: var(--camp-panel-hover);
+}
+.site-page-game {
+  flex: 1;
+  align-self: center;
+  overflow: hidden;
+  padding-left: 0.25rem;
+  font-weight: 700;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The diagonal edge divides the light side from the page name and badges. */
+.site-page-right {
+  display: grid;
+  grid-template-columns: minmax(7rem, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  min-width: min(24rem, 45vw);
+  padding: 0.5rem 0.85rem 0.5rem 3.25rem;
+  background: var(--camp-leaf);
+  clip-path: polygon(1.6rem 0, 100% 0, 100% 100%, 0 100%);
+  color: #fff;
+}
+.site-page-title {
+  margin: 0;
+  color: inherit;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  text-align: center;
+  white-space: nowrap;
+}
+
+@media (max-width: 34rem) {
+  .site-page-back {
+    justify-content: center;
+    align-self: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0.5rem;
+    padding: 0;
+    border: 1px solid var(--camp-panel-border);
+    border-radius: 50%;
+  }
+  .site-page-back-label,
+  .site-page-game {
+    display: none;
+  }
+  .site-page-right {
+    flex: 1;
+    grid-template-columns: minmax(4rem, 1fr) auto;
+    min-width: 0;
+    padding-left: 2.5rem;
+  }
+  .site-page-title {
+    font-size: 1rem;
+  }
+  .site-page-actions .camp-dropbox-badge,
+  .site-page-actions .camp-source-link {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}

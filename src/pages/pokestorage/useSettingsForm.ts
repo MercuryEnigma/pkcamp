@@ -71,10 +71,13 @@ export type CabinSelection = Gen3GameId | 'campsites'
 
 export function useSettingsForm({
   initialTab = 'backups',
+  initialCabin = GEN_3_GAMES[0],
   savedMessage,
 }: {
   /** Tab to open first. */
   initialTab?: SettingsTab
+  /** Cabin the Backup & Restore picker starts on. */
+  initialCabin?: CabinSelection
   /** Shown once Save Settings succeeds. */
   savedMessage: string
 }) {
@@ -87,9 +90,8 @@ export function useSettingsForm({
   const [spriteSourceId, setSpriteSourceId] = useState(DEFAULT_SPRITE_SOURCE_ID)
   const [settingsLoaded, setSettingsLoaded] = useState(false)
   const [siteCounts, setSiteCounts] = useState<SiteCounts | null>(null)
-  const [selectedCabin, setSelectedCabin] = useState<CabinSelection>(
-    GEN_3_GAMES[0]
-  )
+  const [selectedCabin, setSelectedCabin] =
+    useState<CabinSelection>(initialCabin)
   const [camps, setCamps] = useState<Camps | null>(null)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)

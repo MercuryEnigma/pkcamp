@@ -1,0 +1,35 @@
+/* One centered column, 60% of the width; full width on phones. */
+.patch-notes {
+  display: flex;
+  justify-content: center;
+}
+.patch-notes-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 60%;
+}
+.patch-notes time {
+  color: var(--camp-muted);
+  font-weight: 700;
+}
+.patch-notes-video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 8px;
+}
+.patch-notes-footer {
+  margin: 0;
+  color: var(--camp-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 42rem) {
+  .patch-notes-column {
+    width: 100%;
+  }
+}
+.patch-notes-column > .site-panel {
+  flex: none;
+}

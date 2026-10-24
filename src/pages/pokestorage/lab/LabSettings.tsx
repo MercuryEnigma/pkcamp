@@ -1,6 +1,9 @@
+import { useState } from 'react'
+import { OptionGroup } from '../../hub/OptionGroup'
+import { Panel } from '../../hub/Panel'
+import { useActiveGame } from '../../context/useActiveGame'
+import { GbLinkFirmwareSettings } from '../GbLinkFirmwareSettings'
 import { useConfirmNavigation } from '../navigationGuard'
-import '../camp.css'
-import './labZone.css'
 import {
   CabinBackupCard,
   CabinPicker,
@@ -9,151 +12,119 @@ import {
   SpriteSourcePicker,
 } from '../SettingsSections'
 import { useSettingsForm, type SettingsTab } from '../useSettingsForm'
-import { GbLinkFirmwareSettings } from '../GbLinkFirmwareSettings'
+import { ArcadeSettings } from './ArcadeSettings'
 import { LabCollectionData } from './LabCollectionData'
+import './labSettings.css'
 
 export type { SettingsTab }
 
-const SETTINGS_TABS: ReadonlyArray<{ id: SettingsTab; label: string }> = [
+const TABS: ReadonlyArray<{ id: SettingsTab | 'arcade'; label: string }> = [
   { id: 'backups', label: 'Backup & Restore' },
   { id: 'appearance', label: 'Appearance' },
   { id: 'storage', label: 'Data' },
   { id: 'hardware', label: 'Hardware' },
+  { id: 'arcade', label: 'Arcade' },
 ]
 
-/** The Lab Zone settings page. Settings logic lives in `useSettingsForm`. */
+/** Every site setting, in tabs. Settings logic lives in `useSettingsForm`. */
 export function LabSettings({
-  onBack,
-  initialTab = 'backups',
+  tab,
+  onTabChange,
 }: {
-  onBack: () => void
-  /** Tab to open first. */
-  initialTab?: SettingsTab
+  /** The tab named by the URL. */
+  tab: SettingsTab
+  onTabChange: (tab: SettingsTab) => void
 }) {
   const confirmLeave = useConfirmNavigation()
+  const { gameId } = useActiveGame()
   const form = useSettingsForm({
-    initialTab,
+    initialTab: tab,
+    initialCabin: gameId ?? undefined,
     savedMessage: 'Settings saved.',
   })
-  const {
-    tab,
-    setTab,
-    selectedCabin,
-    camps,
-    siteCounts,
-    saving,
-    offline,
-    message,
-    handleSave,
-  } = form
+  const { selectedCabin, camps, siteCounts, saving, offline, message } = form
+  // The Arcade tab is not yet addressable by URL, so it is local state.
+  const [arcade, setArcade] = useState(false)
+  const active: SettingsTab | 'arcade' = arcade ? 'arcade' : form.tab
+
+  // A link such as the Dropbox badge can change the tab while this is open.
+  const [shownTab, setShownTab] = useState(tab)
+  if (shownTab !== tab) {
+    setShownTab(tab)
+    form.setTab(tab)
+    setArcade(false)
+  }
+
+  const choose = (next: SettingsTab | 'arcade') => {
+    if (next === active) return
+    if ((active === 'hardware' || active === 'backups') && !confirmLeave())
+      return
+    setArcade(next === 'arcade')
+    if (next !== 'arcade') onTabChange(next)
+  }
 
   return (
-    <div className="camp-root">
-      <div className="camp-content">
-        <header className="camp-page-header">
+    <div className="settings-page">
+      <OptionGroup
+        label="Settings"
+        layout="rail"
+        options={TABS.map((item) => [item.id, item.label] as const)}
+        value={active}
+        onChange={choose}
+      />
+      <Panel label={TABS.find((item) => item.id === active)?.label ?? ''}>
+        <h2>{TABS.find((item) => item.id === active)?.label}</h2>
+
+        {active === 'backups' && (
+          <>
+            <p>Manage the save backup for each game.</p>
+            <CabinPicker form={form} />
+            {selectedCabin === 'campsites' ? (
+              <CampsitesCard form={form} />
+            ) : (
+              <CabinBackupCard form={form} gameId={selectedCabin} />
+            )}
+          </>
+        )}
+
+        {active === 'appearance' && (
+          <>
+            <p>Choose how Pokémon appear throughout pkCamp.</p>
+            <SpriteSourcePicker form={form} />
+          </>
+        )}
+
+        {active === 'storage' && (
+          <>
+            <p>
+              Where your backups, Camping Pokémon, collections, and settings are
+              kept.
+            </p>
+            <DataStorageControls form={form} />
+            <LabCollectionData offline={offline} />
+          </>
+        )}
+
+        {active === 'hardware' && <GbLinkFirmwareSettings />}
+        {active === 'arcade' && <ArcadeSettings />}
+
+        {offline && active !== 'hardware' && active !== 'arcade' && (
+          <p className="camp-status">
+            Dropbox is unreachable. Your data is read-only until it reconnects.
+          </p>
+        )}
+        {message && <p className="camp-status">{message}</p>}
+        {active !== 'hardware' && active !== 'arcade' && (
           <button
             type="button"
-            className="camp-back"
-            onClick={() => {
-              if (confirmLeave()) onBack()
-            }}
+            className="camp-confirm-btn"
+            disabled={!camps || !siteCounts || saving || offline}
+            onClick={() => void form.handleSave()}
           >
-            ← Back
+            {saving ? 'Saving…' : 'Save Settings'}
           </button>
-          <div className="camp-page-heading">
-            <p className="camp-eyebrow">Lab Zone · Settings</p>
-            <h1 className="camp-title">Settings</h1>
-            <p className="camp-page-subtitle">
-              Manage save backups, Camp Sites, and appearance.
-            </p>
-          </div>
-          <span className="camp-page-header-spacer" aria-hidden="true" />
-        </header>
-
-        <div className="camp-panel camp-settings-panel">
-          <div
-            className="camp-settings-tabs"
-            role="tablist"
-            aria-label="settings section"
-          >
-            {SETTINGS_TABS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                role="tab"
-                aria-selected={tab === item.id}
-                className={`camp-settings-tab${tab === item.id ? ' camp-settings-tab--active' : ''}`}
-                onClick={() => {
-                  if (item.id === tab) return
-                  if (
-                    (tab === 'hardware' || tab === 'backups') &&
-                    !confirmLeave()
-                  )
-                    return
-                  setTab(item.id)
-                }}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          {tab === 'backups' && (
-            <section className="camp-settings-section">
-              <h2>Backup &amp; Restore</h2>
-              <p>Manage the saves assigned to your GBA Lodge cabins.</p>
-              <p className="camp-lodge-label">GBA Lodge</p>
-              <CabinPicker form={form} />
-
-              {selectedCabin === 'campsites' ? (
-                <CampsitesCard form={form} />
-              ) : (
-                <CabinBackupCard form={form} gameId={selectedCabin} />
-              )}
-            </section>
-          )}
-
-          {tab === 'appearance' && (
-            <section className="camp-settings-section">
-              <h2>Appearance</h2>
-              <p>Choose how Pokémon appear throughout PkCamp.</p>
-              <SpriteSourcePicker form={form} />
-            </section>
-          )}
-
-          {tab === 'storage' && (
-            <section className="camp-settings-section">
-              <h2>Data</h2>
-              <p>
-                Where your backups, Camping Pokémon, collections, and settings
-                are kept.
-              </p>
-              <DataStorageControls form={form} />
-              <LabCollectionData offline={offline} />
-            </section>
-          )}
-
-          {tab === 'hardware' && <GbLinkFirmwareSettings />}
-
-          {offline && tab !== 'hardware' && (
-            <p className="camp-status">
-              Dropbox is unreachable. Your data is read-only until it
-              reconnects.
-            </p>
-          )}
-          {message && <p className="camp-status">{message}</p>}
-          {tab !== 'hardware' && (
-            <button
-              type="button"
-              className="camp-confirm-btn"
-              disabled={!camps || !siteCounts || saving || offline}
-              onClick={() => void handleSave()}
-            >
-              {saving ? 'Saving…' : 'Save Settings'}
-            </button>
-          )}
-        </div>
-      </div>
+        )}
+      </Panel>
     </div>
   )
 }

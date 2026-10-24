@@ -1,0 +1,200 @@
+.camp-page {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+}
+.camp-stage {
+  display: flex;
+  flex: 1;
+  gap: 0.75rem;
+  min-height: 0;
+}
+.camp-side,
+.camp-details {
+  display: flex;
+  flex: 45;
+  min-width: 0;
+  min-height: 0;
+}
+.camp-side > .site-panel {
+  flex: 1;
+}
+.camp-details {
+  flex-direction: column;
+  overflow: auto;
+}
+.camp-details-empty {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  min-height: 0;
+  color: var(--camp-muted);
+  text-align: center;
+}
+.tool-selector {
+  display: flex;
+  flex: 10;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.tool-selector button {
+  display: grid;
+  place-items: center;
+  width: clamp(2.5rem, 5vw, 3.5rem);
+  aspect-ratio: 1;
+  border: 2px solid var(--camp-panel-border);
+  border-radius: 10px;
+  background: var(--camp-surface);
+  color: var(--camp-text);
+  cursor: pointer;
+}
+.tool-selector button svg {
+  width: 60%;
+  fill: currentColor;
+}
+.tool-selector button[aria-pressed='true'] {
+  background: var(--camp-leaf);
+  color: #fff;
+}
+
+.storage-grid-nav {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.storage-grid-nav button {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--camp-panel-border);
+  border-radius: 8px;
+  background: var(--camp-panel);
+  color: var(--camp-text);
+  cursor: pointer;
+}
+.storage-grid-pill {
+  margin: 0;
+  padding: 0.3rem 1.1rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--camp-leaf);
+  color: #fff;
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.storage-grid-body {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  min-height: 0;
+  container-type: size;
+}
+.storage-slots {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 0.4rem;
+  width: min(100cqw, 120cqh);
+}
+
+.camp-bar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.75rem;
+}
+.camp-bar-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.camp-bar-message {
+  flex: 1;
+  margin: 0;
+  color: var(--camp-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+.camp-bar-center {
+  margin-inline: auto;
+}
+.camp-mode-nav {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+.camp-mode-nav button {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid var(--camp-panel-border);
+  border-radius: 8px;
+  background: var(--camp-panel);
+  color: var(--camp-text);
+  cursor: pointer;
+}
+.camp-mode-pill {
+  min-width: 8.5rem;
+  margin: 0;
+  padding: 0.35rem 0.85rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--camp-leaf);
+  color: #fff;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trade-panel {
+  flex: 1;
+}
+.trade-sides {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.trade-sides > * {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+.trade-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 42rem) {
+  .camp-stage {
+    flex-direction: column;
+    overflow: auto;
+  }
+  .camp-side,
+  .camp-details {
+    flex: 1 0 15rem;
+  }
+  .camp-details {
+    order: 3;
+  }
+  .tool-selector {
+    flex: none;
+    flex-direction: row;
+  }
+  .camp-bar {
+    flex-wrap: wrap;
+  }
+  .camp-bar-message {
+    order: 3;
+    flex: 1 0 100%;
+  }
+  .camp-mode-nav {
+    margin-left: auto;
+  }
+}

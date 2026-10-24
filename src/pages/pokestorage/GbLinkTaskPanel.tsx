@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { GbaCartInfo } from '../../services/gbaSaveDump/gbaCartClient'
-import { gbLinkTradeDevice } from '../../services/tradeDevice'
+import { device } from '../../services/device'
 import { useNavigationGuard } from './navigationGuard'
 
 export interface GbLinkTaskContext {
@@ -38,6 +38,7 @@ type GbLinkTaskPanelProps = {
 export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
+  const [progress, setProgress] = useState<number | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const mounted = useRef(false)
   useNavigationGuard(
@@ -68,21 +69,23 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
       if (mounted.current && !controller.signal.aborted) setStatus(message)
     }
     setRunning(true)
+    setProgress(null)
     setStatus(
-      gbLinkTradeDevice.state === 'connected'
+      device.state === 'connected'
         ? 'Starting…'
         : 'Connecting… Choose your GB-Link if the browser asks.'
     )
     try {
-      await gbLinkTradeDevice.connect({ signal: controller.signal })
+      await device.connect({ signal: controller.signal })
       controller.signal.throwIfAborted()
       const result = await props.run({
         signal: controller.signal,
         onStatus: report,
-        onProgress: (done, total) =>
-          report(
-            `${props.progressLabel}… ${Math.floor((done / total) * 100)}%`
-          ),
+        onProgress: (done, total) => {
+          if (mounted.current && !controller.signal.aborted)
+            setProgress(done / total)
+          report(`${props.progressLabel}… ${Math.floor((done / total) * 100)}%`)
+        },
         onCartridge: (info) =>
           report(`Detected ${info.title || info.code} (${info.code}).`),
       })
@@ -93,8 +96,7 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
         setStatus(props.describeError(cause, controller.signal.aborted))
     } finally {
       // Another tool may still hold the GB-Link (a refused "busy" start).
-      if (gbLinkTradeDevice.state !== 'trading')
-        await gbLinkTradeDevice.disconnect().catch(() => {})
+      if (device.state !== 'trading') await device.disconnect().catch(() => {})
       abortRef.current = null
       if (mounted.current) setRunning(false)
     }
@@ -122,7 +124,7 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
         <button
           type="button"
           className="camp-upload-btn camp-upload-btn--primary"
-          disabled={busy || props.disabled || !gbLinkTradeDevice.supported}
+          disabled={busy || props.disabled || !device.supported}
           onClick={() => void start()}
         >
           {startLabel}
@@ -144,10 +146,13 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
           </button>
         )}
       </div>
-      {!gbLinkTradeDevice.supported && (
+      {!device.supported && (
         <p className="camp-status">
           This browser does not support connecting to the GB-Link.
         </p>
+      )}
+      {busy && progress !== null && (
+        <progress value={progress} max={1} aria-label={props.progressLabel} />
       )}
       {status && (
         <p className="camp-status" aria-live="polite">

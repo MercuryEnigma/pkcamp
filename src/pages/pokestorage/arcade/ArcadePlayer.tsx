@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   GbaInputTracker,
   type GbaButton,
@@ -13,7 +13,7 @@ import {
 } from '../../../services/emulator/gbaRom'
 import { ROSTER, type Gen3GameId } from '../../../services/saveLibrary'
 import type { StorageProvider } from '../../../services/storage'
-import { DropboxMenu } from '../../hub/DropboxMenu'
+import { PageHeader } from '../../hub/PageHeader'
 import { GAME_LABEL } from '../gameDisplay'
 import { storageErrorMessage, useStorageProvider } from '../useStorage'
 import {
@@ -43,6 +43,7 @@ import { ToolbarButton, SpeedPicker } from './PlayerControls'
 import { SPEEDS, type Speed } from './speeds'
 import { PlayerDialogs } from './PlayerDialogs'
 import { GbaController } from './GbaController'
+import { routeHref } from '../../routing'
 import '../camp.css'
 import '../../hub/hub.css'
 import './arcadeZone.css'
@@ -523,13 +524,18 @@ export function ArcadePlayer() {
 
   const retrySave = () => syncRef.current?.dispatch({ type: 'retry' })
 
+  /** Where leaving goes once any unsaved progress is dealt with. */
+  const exitTargetRef = useRef<string | null>(null)
   const navigateAway = () => {
     leavingRef.current = true
-    window.location.href = `${import.meta.env.BASE_URL}?zone=arcade`
+    window.location.assign(
+      exitTargetRef.current ?? routeHref('hub', { gameId })
+    )
   }
 
   /** Back and Exit Arcade: leave directly only when nothing is at stake. */
-  const leave = () => {
+  const leave = (target: string | null = null) => {
+    exitTargetRef.current = target
     if (decision.kind === 'leave') {
       navigateAway()
       return
@@ -669,33 +675,36 @@ export function ArcadePlayer() {
     (bootError === null || bootBytes !== save)
   const filesLocked = loadingFiles || fileBusy || busy
 
-  const header = (title: ReactNode, statusText: string) => (
-    <header className="camp-page-header arcade-marquee">
-      <button type="button" className="camp-back" onClick={leave}>
-        ← Exit
-      </button>
-      <div className="camp-page-heading">
-        <h1 className="camp-title">{title}</h1>
-        <p className="camp-page-subtitle" role="status">
-          {statusText}
-        </p>
-      </div>
-    </header>
+  const header = (statusText: string) => (
+    <>
+      <PageHeader
+        page="Arcade"
+        gameId={gameId}
+        onBack={() => leave()}
+        // The Dropbox badge reaches storage settings through the same exit
+        // protections as Back.
+        onOpenSettings={() =>
+          leave(routeHref('lab', { gameId, mode: 'settings', tab: 'storage' }))
+        }
+      />
+      <p className="arcade-status" role="status">
+        {statusText}
+      </p>
+    </>
   )
 
   // Direct entry without a valid `?game=` has nothing to play.
   if (!gameId) {
     return (
       <div className="camp-zone arcade-zone arcade-player">
-        <DropboxMenu />
         <main className="camp-root">
           <div className="camp-content arcade-cabinet">
-            {header('Arcade', 'No game chosen')}
+            {header('No game chosen')}
             <div className="arcade-messages">
               <p className="arcade-message">
                 Choose Ruby, Sapphire, Emerald, FireRed, or LeafGreen in the
                 Arcade Zone.{' '}
-                <button type="button" onClick={leave}>
+                <button type="button" onClick={() => leave()}>
                   Choose a game
                 </button>
               </p>
@@ -723,17 +732,9 @@ export function ArcadePlayer() {
 
   return (
     <div className="camp-zone arcade-zone arcade-player">
-      <DropboxMenu />
       <main className="camp-root">
         <div className="camp-content arcade-cabinet" data-version={gameId}>
-          {header(
-            <>
-              {/* Hidden visually on narrow screens; still read aloud. */}
-              <span className="arcade-title-prefix">Pokémon </span>
-              {GAME_LABEL[gameId]}
-            </>,
-            status
-          )}
+          {header(status)}
 
           <div className="arcade-messages">
             {!crossOriginIsolated && (

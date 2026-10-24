@@ -75,6 +75,8 @@ export type StoredCollectionMatch = (
   species: number
   form: number
   nickname: string
+  originalTrainerName: string
+  originalTrainerId: number
   level: number
   shiny: boolean
 }
@@ -82,7 +84,7 @@ export type StoredCollectionMatch = (
 /** One collection's last scan result, stored at pokedex/{collectionId}.json. */
 export interface StoredCollectionResult {
   /** File-format version. */
-  version: 1
+  version: 2
   collectionId: string
   collectionName: string
   /** Definition `metadata.version` at scan time. */
@@ -129,6 +131,8 @@ export interface StorageProvider {
 
   /** The newest save for a game, or null if none is stored. */
   getSave(gameId: GameId): Promise<StoredSave | null>
+  /** Checks the save slot without downloading its bytes. */
+  hasSave(gameId: GameId): Promise<boolean>
   /** The save that the newest day's first update replaced, if any. */
   getPreviousSave(gameId: GameId): Promise<Uint8Array | null>
   putSave(gameId: GameId, bytes: Uint8Array): Promise<void>

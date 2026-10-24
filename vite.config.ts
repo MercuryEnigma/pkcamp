@@ -128,6 +128,9 @@ export default defineConfig({
     rolldownOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
+        hub: resolve(import.meta.dirname, 'hub/index.html'),
+        camp: resolve(import.meta.dirname, 'camp/index.html'),
+        lab: resolve(import.meta.dirname, 'lab/index.html'),
         arcade: resolve(import.meta.dirname, 'arcade/index.html'),
       },
     },
@@ -150,7 +153,13 @@ export default defineConfig({
   // that doesn't exist in this repo and aborts the scan. Pin the real entry
   // explicitly instead of relying on the glob.
   optimizeDeps: {
-    entries: ['index.html', 'arcade/index.html'],
+    entries: [
+      'index.html',
+      'hub/index.html',
+      'camp/index.html',
+      'lab/index.html',
+      'arcade/index.html',
+    ],
     // pkhex-wasm's own README asks bundlers to exclude it from pre-bundling;
     // pre-bundling was also trying (and failing) to read a .map file the
     // .NET wasm runtime references but doesn't ship.

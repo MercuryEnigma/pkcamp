@@ -1,0 +1,66 @@
+.settings-page {
+  display: flex;
+  gap: 1rem;
+  height: 100%;
+}
+.settings-page > .option-group {
+  flex: 1;
+  min-width: 0;
+}
+.settings-page > .site-panel {
+  flex: 3;
+}
+.settings-bindings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.settings-bindings section {
+  flex: 1 1 12rem;
+}
+.settings-bindings ul {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.settings-binding {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--camp-panel-border);
+  border-radius: 8px;
+  background: var(--camp-panel);
+  color: var(--camp-text);
+  cursor: pointer;
+}
+.settings-binding[aria-pressed='true'] {
+  background: var(--camp-leaf);
+  color: #fff;
+}
+.settings-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 42rem) {
+  .settings-page {
+    flex-direction: column;
+  }
+  .settings-page > .option-group {
+    flex: none;
+    padding-bottom: 0.25rem;
+    scroll-snap-type: x proximity;
+  }
+  .settings-page > .option-group .option {
+    scroll-snap-align: start;
+  }
+  .settings-page > .site-panel {
+    flex: 1;
+  }
+}

@@ -27,7 +27,9 @@ import { useStorageOffline } from './useStorage'
 /** Props shared by every two-sided trade page. */
 export interface TradeViewProps {
   /** Receives the box open for `initialGameId`, to reopen in its Cabin. */
-  onBack: (box?: number) => void
+  onBack?: (box?: number) => void
+  /** Called after a trade or revert changed what is stored. */
+  onTraded?: () => void
   initialGameId?: Gen3GameId
   /** Box to open for `initialGameId`, e.g. the one open in its Cabin. */
   initialBox?: number
@@ -39,6 +41,7 @@ export interface TradeViewProps {
  */
 export function useTradeSession({
   onBack,
+  onTraded,
   initialGameId,
   initialBox,
 }: TradeViewProps) {
@@ -146,6 +149,7 @@ export function useTradeSession({
       setLeft(clearSelection)
       setRight(clearSelection)
       setReload((value) => value + 1)
+      onTraded?.()
     } catch (cause) {
       setMessage(describeError(cause))
     } finally {
@@ -163,6 +167,7 @@ export function useTradeSession({
       setLeft(clearSelection)
       setRight(clearSelection)
       setReload((value) => value + 1)
+      onTraded?.()
       setMessage(
         'Trade reverted in PkCamp. Pokémon on a Game Boy Advance or Switch are not changed.'
       )
@@ -187,7 +192,7 @@ export function useTradeSession({
 
   const handleBack = () => {
     if (!confirmLeave()) return
-    onBack(boxRef.current)
+    onBack?.(boxRef.current)
   }
 
   /** Everything a side's panel needs except its visible name. */

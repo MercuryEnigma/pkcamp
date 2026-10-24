@@ -14,9 +14,8 @@ import type {
 } from '../../../services/mysteryGift/types'
 import { gbLinkErrorMessage } from '../gbLinkTask'
 import { useNavigationGuard } from '../navigationGuard'
-import './cartridgeSaves.css'
-import './researchPage.css'
-import './mysteryGifts.css'
+import { OptionGroup } from '../../hub/OptionGroup'
+import { ToolPage } from './ToolPage'
 
 const TARGETS: readonly (readonly [GiftTarget, string])[] = [
   ['gba', 'GBA'],
@@ -142,7 +141,7 @@ const describeError = (cause: unknown) =>
   gbLinkErrorMessage(cause, 'The Mystery Gift group could not open.')
 
 /** Sends one of PkCamp's Mystery Gifts to a GBA (GB-Link) or the Switch (ESP32). */
-export function MysteryGifts({ onBack }: { onBack(): void }) {
+export function MysteryGifts() {
   const [target, setTarget] = useState<GiftTarget>('gba')
   const [giftId, setGiftId] = useState(MYSTERY_GIFTS[0].id)
   const [phase, setPhase] = useState<Phase>('idle')
@@ -151,7 +150,7 @@ export function MysteryGifts({ onBack }: { onBack(): void }) {
   const linkRef = useRef<GiftLink | null>(null)
   const attempt = useRef<AbortController | null>(null)
   const active = phase !== 'idle'
-  const confirmNavigation = useNavigationGuard(
+  useNavigationGuard(
     active,
     'A Mystery Gift group is open. Close it and leave?'
   )
@@ -313,171 +312,122 @@ export function MysteryGifts({ onBack }: { onBack(): void }) {
   }
 
   return (
-    <div className="camp-root lab-saves-root research-page">
-      <div className="camp-content lab-saves-content research-page-content">
-        <header className="camp-page-header">
-          <button
-            type="button"
-            className="camp-back"
-            onClick={() => {
-              if (confirmNavigation()) onBack()
-            }}
-          >
-            ← Back
-          </button>
-          <div className="camp-page-heading">
-            <p className="camp-eyebrow">Research Tools</p>
-            <h1 className="camp-title">Mystery Gifts</h1>
-            <p className="camp-page-subtitle">
-              Send Wonder Cards to a GBA or the Switch.
-            </p>
-          </div>
-          <span className="camp-page-header-spacer" aria-hidden="true" />
-        </header>
-
-        <section
-          className="lab-save-workspace research-page-body"
-          aria-label="Mystery Gift tools"
-        >
-          <div className="lab-save-tasks" aria-label="Choose your hardware">
-            {TARGETS.map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                className={`camp-settings-tab${target === value ? ' camp-settings-tab--active' : ''}`}
-                aria-pressed={target === value}
-                disabled={active}
-                onClick={() => {
-                  setTarget(value)
-                  setMessage(null)
-                }}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          <div className="lab-save-info">
-            <p className="research-optional">{GAMES[target]}</p>
-            <h2 className="lab-gift-heading">Choose a gift</h2>
-            <div
-              className="lab-chips lab-gift-grid"
-              role="group"
-              aria-label="Choose a gift"
-            >
-              {MYSTERY_GIFTS.map((candidate) => (
-                <button
-                  key={candidate.id}
-                  type="button"
-                  className={`lab-chip${giftId === candidate.id ? ' lab-chip--active' : ''}`}
-                  aria-pressed={giftId === candidate.id}
-                  disabled={phase === 'opening' || phase === 'stopping'}
-                  onClick={() => chooseGift(candidate.id)}
-                >
-                  {candidate.label}
-                </button>
-              ))}
-            </div>
-            <p>{gift.description}</p>
-            <p>
-              <a
-                className="lab-gift-more"
-                href={MORE_GIFTS_URL[target]}
-                target="_blank"
-                rel="noreferrer"
-              >
-                More gifts for the {CONSOLE[target]} on gblink.io →
-              </a>
-            </p>
-          </div>
-
-          <div className="camp-gba-task">
-            <p className="camp-gba-task-title">Send {gift.label}</p>
-            <ol className="camp-gba-steps">
-              {STEPS[target].map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ol>
-            <details className="lab-gift-help">
-              <summary>No MYSTERY GIFT on the menu?</summary>
-              <ol className="camp-gba-steps">
-                <li>Read the questionnaire at a Poké Mart counter.</li>
-                <li>Enter LINK TOGETHER WITH ALL.</li>
-                <li>Save your game.</li>
-                <li>Restart the game to return to the main menu.</li>
-              </ol>
-            </details>
-            {target === 'switch' && (
-              <p className="camp-gba-task-note">
-                Set up your Switch keys in the Trade Table first.
-              </p>
+    <ToolPage
+      label="Choose your hardware"
+      options={TARGETS}
+      value={target}
+      onChange={(value) => {
+        setTarget(value)
+        setMessage(null)
+      }}
+      disabled={active}
+      choices={
+        <>
+          <p>{GAMES[target]}</p>
+          <h2>Choose a gift</h2>
+          <OptionGroup
+            label="Choose a gift"
+            layout="grid"
+            options={MYSTERY_GIFTS.map(
+              (item) => [item.id, item.label] as const
             )}
-            <div className="camp-local-actions">
-              {phase === 'idle' || phase === 'opening' ? (
+            value={giftId}
+            onChange={chooseGift}
+            disabled={phase === 'opening' || phase === 'stopping'}
+          />
+          <p>{gift.description}</p>
+          <p>
+            <a href={MORE_GIFTS_URL[target]} target="_blank" rel="noreferrer">
+              More gifts for the {CONSOLE[target]} on gblink.io →
+            </a>
+          </p>
+        </>
+      }
+      task={
+        <div className="camp-gba-task">
+          <p className="camp-gba-task-title">Send {gift.label}</p>
+          <ol className="camp-gba-steps">
+            {STEPS[target].map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+          <details className="lab-gift-help">
+            <summary>No MYSTERY GIFT on the menu?</summary>
+            <ol className="camp-gba-steps">
+              <li>Read the questionnaire at a Poké Mart counter.</li>
+              <li>Enter LINK TOGETHER WITH ALL.</li>
+              <li>Save your game.</li>
+              <li>Restart the game to return to the main menu.</li>
+            </ol>
+          </details>
+          {target === 'switch' && (
+            <p className="camp-gba-task-note">Set up your Switch keys first.</p>
+          )}
+          <div className="camp-local-actions">
+            {phase === 'idle' || phase === 'opening' ? (
+              <button
+                type="button"
+                className="camp-upload-btn camp-upload-btn--primary"
+                disabled={phase === 'opening'}
+                onClick={() => void open()}
+              >
+                {phase === 'opening' ? 'Starting…' : 'Start'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="camp-upload-btn"
+                disabled={phase === 'stopping'}
+                onClick={() => void close()}
+              >
+                Stop
+              </button>
+            )}
+            {phase === 'opening' && (
+              <button
+                type="button"
+                className="camp-text-btn"
+                onClick={() => void close()}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+          {decision && (
+            <div className="lab-gift-decision" role="alert">
+              <p>{decisionMessage(decision, target)}</p>
+              <div className="camp-local-actions">
                 <button
                   type="button"
                   className="camp-upload-btn camp-upload-btn--primary"
-                  disabled={phase === 'opening'}
-                  onClick={() => void open()}
+                  onClick={() => {
+                    linkRef.current?.decide(true)
+                    setDecision(null)
+                  }}
                 >
-                  {phase === 'opening' ? 'Starting…' : 'Start'}
+                  Send it again
                 </button>
-              ) : (
                 <button
                   type="button"
                   className="camp-upload-btn"
-                  disabled={phase === 'stopping'}
-                  onClick={() => void close()}
+                  onClick={() => {
+                    linkRef.current?.decide(false)
+                    setDecision(null)
+                  }}
                 >
-                  Stop
+                  Keep the one it has
                 </button>
-              )}
-              {phase === 'opening' && (
-                <button
-                  type="button"
-                  className="camp-text-btn"
-                  onClick={() => void close()}
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
-            {decision && (
-              <div className="lab-gift-decision" role="alert">
-                <p>{decisionMessage(decision, target)}</p>
-                <div className="camp-local-actions">
-                  <button
-                    type="button"
-                    className="camp-upload-btn camp-upload-btn--primary"
-                    onClick={() => {
-                      linkRef.current?.decide(true)
-                      setDecision(null)
-                    }}
-                  >
-                    Send it again
-                  </button>
-                  <button
-                    type="button"
-                    className="camp-upload-btn"
-                    onClick={() => {
-                      linkRef.current?.decide(false)
-                      setDecision(null)
-                    }}
-                  >
-                    Keep the one it has
-                  </button>
-                </div>
               </div>
-            )}
-            {message && (
-              <p className="camp-status" aria-live="polite">
-                <strong>{message.headline}</strong>
-                {message.hint && <> {message.hint}</>}
-              </p>
-            )}
-          </div>
-        </section>
-      </div>
-    </div>
+            </div>
+          )}
+          {message && (
+            <p className="camp-status" aria-live="polite">
+              <strong>{message.headline}</strong>
+              {message.hint && <> {message.hint}</>}
+            </p>
+          )}
+        </div>
+      }
+    />
   )
 }

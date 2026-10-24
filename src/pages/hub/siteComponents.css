@@ -1,0 +1,156 @@
+/* Styles for the shared page components: SiteCard, Panel and OptionGroup. */
+
+.site-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.45rem, 1.5cqmin, 0.85rem);
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(1rem, 4cqmin, 2.75rem);
+  overflow: hidden;
+  border: 2px solid var(--camp-panel-border);
+  border-radius: 14px;
+  background: linear-gradient(145deg, var(--camp-panel), #f7e8bb);
+  color: var(--camp-text);
+  text-align: center;
+  box-shadow:
+    inset 0 1px rgb(255 255 255 / 40%),
+    var(--camp-shadow);
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    border-color 0.12s ease,
+    background 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.site-card:hover:not(:disabled) {
+  border-color: var(--camp-leaf);
+  background: linear-gradient(145deg, var(--camp-panel-hover), #f5e1a9);
+  box-shadow: 0 4px 8px rgb(73 53 34 / 18%);
+  transform: translateY(-2px);
+}
+.site-card:active:not(:disabled) {
+  box-shadow: var(--camp-shadow);
+  transform: translateY(0);
+}
+.site-card strong {
+  max-width: 100%;
+  color: inherit;
+  font-size: clamp(1.35rem, 5cqmin, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+.site-card strong::after {
+  content: '';
+  display: block;
+  width: clamp(2.25rem, 8cqmin, 4.5rem);
+  height: 0.2rem;
+  margin: clamp(0.45rem, 1.5cqmin, 0.8rem) auto 0;
+  border-radius: 999px;
+  background: var(--camp-leaf);
+  opacity: 0.75;
+}
+.site-card span {
+  max-width: 31ch;
+  color: var(--camp-muted);
+  font-size: clamp(0.8rem, 2cqmin, 1.05rem);
+  font-weight: 550;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+.site-card:disabled strong::after {
+  background: currentColor;
+}
+
+.site-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  padding: 1rem 1.25rem;
+  overflow: auto;
+  border: 1px solid var(--camp-border-soft);
+  border-radius: 12px;
+  background: var(--camp-surface);
+  box-shadow: 0 1px 2px rgb(73 53 34 / 8%);
+}
+.site-panel :is(h2, h3, p) {
+  margin: 0;
+}
+.site-panel p {
+  line-height: 1.4;
+}
+
+.option-group {
+  display: flex;
+  gap: 0.5rem;
+}
+.option-group--row {
+  flex-wrap: wrap;
+}
+.option-group--rail {
+  flex-direction: column;
+}
+.option-group--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 8rem), 1fr));
+}
+.option {
+  min-height: 2.5rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--camp-panel-border);
+  border-radius: 8px;
+  background: var(--camp-surface);
+  color: var(--camp-text);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease,
+    color 0.12s ease;
+}
+.option:hover:not(:disabled):not([aria-pressed='true']) {
+  background: var(--camp-panel);
+}
+.option-group--row .option {
+  min-width: 6rem;
+  text-align: center;
+}
+.option-group--grid .option {
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.option[aria-pressed='true'] {
+  background: var(--camp-leaf);
+  color: #fff;
+}
+
+@media (max-width: 42rem) {
+  .option-group--row .option {
+    flex: 1;
+  }
+  .option-group--rail {
+    flex-direction: row;
+    overflow-x: auto;
+  }
+  .option-group--rail .option {
+    flex: none;
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-card,
+  .option {
+    transition: none;
+  }
+}

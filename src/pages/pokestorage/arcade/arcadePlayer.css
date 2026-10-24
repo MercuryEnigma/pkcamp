@@ -43,43 +43,6 @@ body {
   border-radius: 10px;
   box-shadow: 0 4px 16px #24523a24;
 }
-.arcade-player .camp-page-header {
-  grid-template-columns: minmax(5.75rem, 1fr) minmax(0, auto) minmax(
-      5.75rem,
-      1fr
-    );
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-.arcade-player .camp-page-heading {
-  grid-area: 1/2;
-  min-width: 0;
-}
-.arcade-player .camp-title {
-  border-bottom: 3px solid var(--arcade-version);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  margin: 0;
-  font-size: 1.4rem;
-  font-weight: 800;
-  line-height: 1.2;
-  display: inline-block;
-  overflow: hidden;
-  color: var(--camp-text);
-}
-.arcade-player .camp-dropbox-badge {
-  top: calc(
-    var(--root-pad-top) + 1px + var(--cab-border) + var(--cab-pad-top) +
-      0.125rem
-  );
-  right: calc(var(--root-pad-x) + 1px + var(--cab-border) + var(--cab-pad-x));
-}
-.arcade-player .camp-source-link {
-  right: calc(
-    var(--root-pad-x) + 1px + var(--cab-border) + var(--cab-pad-x) + 3rem
-  );
-}
-.arcade-player .camp-back,
 .arcade-message button,
 .arcade-controller-shoulder,
 .arcade-controller-pill,
@@ -91,7 +54,6 @@ body {
   cursor: pointer;
   font-weight: 800;
 }
-.arcade-player .camp-back,
 .arcade-message button,
 .arcade-controller-shoulder,
 .arcade-controller-pill,
@@ -102,12 +64,6 @@ body {
   background: var(--camp-forest);
   color: #fff8e4;
   box-shadow: 0 2px 0 var(--cab-button-edge);
-}
-.arcade-player .camp-back {
-  white-space: nowrap;
-  min-height: 2.75rem;
-  margin: 0;
-  border-radius: 8px;
 }
 .arcade-message button {
   min-height: 2.75rem;
@@ -540,15 +496,7 @@ body {
   font-weight: 700;
   color: var(--camp-text);
 }
-.arcade-title-prefix {
-  clip-path: inset(50%);
-  white-space: nowrap;
-  width: 1px;
-  height: 1px;
-  position: absolute;
-  overflow: hidden;
-}
-.arcade-player .camp-page-subtitle {
+.arcade-status {
   clip-path: inset(50%);
   white-space: nowrap;
   width: 1px;
@@ -585,9 +533,6 @@ body {
   color: #fff8e4;
 }
 @media (hover: hover) {
-  .arcade-player .camp-back:hover {
-    background: var(--cab-button-hover);
-  }
   .arcade-message button:enabled:hover {
     background: var(--cab-button-hover);
   }
@@ -758,9 +703,6 @@ body {
   }
   .arcade-player .arcade-cabinet {
     padding-bottom: 0.5rem;
-  }
-  .arcade-player .camp-page-header {
-    margin-bottom: 0.3rem;
   }
   /* The compact landscape block below supplies the grid and controls. */
   .arcade-controller-center {

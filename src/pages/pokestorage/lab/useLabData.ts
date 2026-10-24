@@ -2,20 +2,16 @@ import { useEffect, useState } from 'react'
 import type { StorageProvider } from '../../../services/storage'
 import { storageErrorMessage, useStorageProvider } from '../useStorage'
 import { BUILT_IN_COLLECTIONS, isBuiltInId } from './builtInCollections'
-import type { CollectionDefinition, LabSourceId } from './collectionTypes'
+import type { CollectionDefinition } from './collectionTypes'
 import {
   discardUploadedCollection,
-  loadSelectedSources,
   loadUploadedCollections,
-  migrateBrowserLabData,
-  saveSelectedSources,
   saveUploadedCollection,
 } from './labStore'
 import { validateCollection } from './validateCollection'
 
 interface Loaded {
   provider: StorageProvider
-  sources: LabSourceId[] | null
   uploads: CollectionDefinition[]
 }
 
@@ -34,19 +30,12 @@ export function useLabData() {
     let cancelled = false
     async function load() {
       try {
-        await migrateBrowserLabData(provider).catch((cause: unknown) =>
-          // Offline or read-only: try again next time; still load what exists.
-          console.warn('Could not move browser Lab data into storage', cause)
-        )
-        const [sources, uploads] = await Promise.all([
-          loadSelectedSources(provider),
-          loadUploadedCollections(provider),
-        ])
-        if (!cancelled) setLoaded({ provider, sources, uploads })
+        const uploads = await loadUploadedCollections(provider)
+        if (!cancelled) setLoaded({ provider, uploads })
       } catch (cause) {
         if (cancelled) return
         setErrors([storageErrorMessage(cause)])
-        setLoaded({ provider, sources: null, uploads: [] })
+        setLoaded({ provider, uploads: [] })
       }
     }
     void load()
@@ -62,16 +51,6 @@ export function useLabData() {
     setLoaded((previous) =>
       previous?.provider === provider ? { ...previous, ...patch } : previous
     )
-
-  /** Saves the selection; the scan follows it right away either way. */
-  async function setSources(next: LabSourceId[]) {
-    update({ sources: next })
-    try {
-      await saveSelectedSources(provider, next)
-    } catch (cause) {
-      setErrors([`Sources not saved: ${storageErrorMessage(cause)}`])
-    }
-  }
 
   /** Validates and stores a file; resolves to the new id, or null if rejected. */
   async function upload(file: File): Promise<string | null> {
@@ -196,8 +175,6 @@ export function useLabData() {
 
   return {
     ready: current !== null,
-    sources: current?.sources ?? null,
-    setSources,
     uploads,
     errors,
     clearErrors: () => setErrors([]),

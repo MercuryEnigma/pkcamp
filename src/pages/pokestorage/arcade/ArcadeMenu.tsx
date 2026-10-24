@@ -1,26 +1,14 @@
 import type { SyncState } from './arcadeSync'
-import { keyLabel, type Bindable, type KeyBindings } from './keyBindings'
+import {
+  BINDING_GROUPS,
+  BINDING_NAME as BUTTON_NAME,
+  keyLabel,
+  type Bindable,
+  type KeyBindings,
+} from './keyBindings'
 import { SpeedPicker } from './PlayerControls'
 import type { Speed } from './speeds'
 import './arcadeMenu.css'
-
-const BUTTON_NAME: Readonly<Record<Bindable, string>> = {
-  up: 'Up',
-  down: 'Down',
-  left: 'Left',
-  right: 'Right',
-  a: 'A',
-  b: 'B',
-  l: 'L',
-  r: 'R',
-  start: 'Start',
-  select: 'Select',
-  menu: 'Menu',
-  mute: 'Mute sound',
-  speed: 'Speed toggle',
-  guide: 'Guide',
-  restart: 'Restart',
-}
 
 /**
  * Pause menu views stay mounted while inactive to preserve control state.
@@ -31,25 +19,6 @@ const VIEW_TITLE: Readonly<Record<Exclude<MenuView, 'main'>, string>> = {
   buttons: 'Controls',
   advanced: 'Advanced',
 }
-
-/** The Controls page's sections, like a game's key-binding settings. */
-const BINDING_GROUPS: readonly {
-  id: string
-  title: string
-  items: readonly Bindable[]
-}[] = [
-  { id: 'dpad', title: 'D-pad', items: ['up', 'down', 'left', 'right'] },
-  {
-    id: 'buttons',
-    title: 'Buttons',
-    items: ['a', 'b', 'start', 'select', 'l', 'r'],
-  },
-  {
-    id: 'shortcuts',
-    title: 'Shortcuts',
-    items: ['menu', 'mute', 'speed', 'guide', 'restart'],
-  },
-]
 
 interface ArcadeMenuProps {
   menuView: MenuView

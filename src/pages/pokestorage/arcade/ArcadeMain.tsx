@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { ROSTER, type Gen3GameId } from '../../../services/saveLibrary'
 import type { StorageProvider } from '../../../services/storage'
 import { DropboxMenu } from '../../hub/DropboxMenu'
-import { GAME_LABEL } from '../gameDisplay'
 import { storageErrorMessage, useStorageProvider } from '../useStorage'
+import { GameCartridge } from '../../hub/GameCartridge'
 import './arcadeZone.css'
 
 const GAMES = ROSTER[3] as readonly Gen3GameId[]
@@ -28,9 +28,9 @@ export function ArcadeMain({ onBack }: { onBack(): void }) {
       GAMES.map(async (gameId) => {
         const [rom, save] = await Promise.all([
           provider.hasRom(gameId),
-          provider.getSave(gameId),
+          provider.hasSave(gameId),
         ])
-        return [gameId, { rom, save: save !== null }] as const
+        return [gameId, { rom, save }] as const
       })
     )
       .then((entries) => {
@@ -84,49 +84,34 @@ export function ArcadeMain({ onBack }: { onBack(): void }) {
               {current.error}
             </p>
           )}
-          <div className="arcade-game-grid">
+          <div className="game-cartridge-grid">
             {GAMES.map((gameId) => {
               const files = current?.files[gameId]
               return (
-                <button
-                  type="button"
-                  onClick={() => openGame(gameId)}
+                <GameCartridge
                   key={gameId}
-                  className="arcade-game-card"
-                  data-version={gameId}
-                >
-                  <span className="arcade-cartridge-mark" aria-hidden="true">
-                    GAME BOY ADVANCE
-                  </span>
-                  <span className="arcade-cartridge-label">
-                    <span className="arcade-game-heading">
-                      <span className="arcade-game-name">
-                        {GAME_LABEL[gameId]}
-                      </span>
-                    </span>
-                    <span className="arcade-game-save">
-                      {current?.error
-                        ? 'Save unavailable'
-                        : !files
-                          ? 'Checking save…'
-                          : files.save
-                            ? 'Save ready'
-                            : 'New game'}
-                    </span>
-                    <span
-                      className="arcade-game-rom"
-                      data-ready={files?.rom === true}
-                    >
-                      {current?.error
-                        ? 'ROM unavailable'
-                        : !files
-                          ? 'Checking ROM…'
-                          : files.rom
-                            ? 'ROM ready'
-                            : 'ROM needed'}
-                    </span>
-                  </span>
-                </button>
+                  gameId={gameId}
+                  onSelect={() => openGame(gameId)}
+                  saveStatus={
+                    current?.error
+                      ? 'Save unavailable'
+                      : !files
+                        ? 'Checking save…'
+                        : files.save
+                          ? 'Save ready'
+                          : 'New game'
+                  }
+                  romStatus={
+                    current?.error
+                      ? 'ROM unavailable'
+                      : !files
+                        ? 'Checking ROM…'
+                        : files.rom
+                          ? 'ROM ready'
+                          : 'ROM needed'
+                  }
+                  romReady={files?.rom === true}
+                />
               )
             })}
           </div>

@@ -44,7 +44,7 @@ export function PokemonSlotIcon({
 }: {
   slot: SaveSlot
   resolver: SpriteResolver
-  size?: number
+  size?: number | string
   selected?: SlotSelection
   onClick?: () => void
 }) {

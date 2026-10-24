@@ -78,6 +78,8 @@ export function shareStorageLoads(provider: StorageProvider): StorageProvider {
   }
   const overrides: Partial<StorageProvider> = {
     getSave: (id) => loads.read(`save:${id}`, () => provider.getSave(id)),
+    hasSave: (id) =>
+      loads.read(`save-exists:${id}`, () => provider.hasSave(id)),
     hasRom: (id) => loads.read(`rom-exists:${id}`, () => provider.hasRom(id)),
     getCamp: (generation) =>
       loads.read(`camp:${generation}`, () => provider.getCamp(generation)),
@@ -112,10 +114,12 @@ export function shareStorageLoads(provider: StorageProvider): StorageProvider {
     },
     putSave: async (id, bytes) => {
       loads.invalidate(`save:${id}`)
+      loads.invalidate(`save-exists:${id}`)
       try {
         await provider.putSave(id, bytes)
       } finally {
         loads.invalidate(`save:${id}`)
+        loads.invalidate(`save-exists:${id}`)
       }
       changed({ kind: 'save', gameId: id })
     },
@@ -137,10 +141,12 @@ export function shareStorageLoads(provider: StorageProvider): StorageProvider {
     },
     discardSave: async (id) => {
       loads.invalidate(`save:${id}`)
+      loads.invalidate(`save-exists:${id}`)
       try {
         await provider.discardSave(id)
       } finally {
         loads.invalidate(`save:${id}`)
+        loads.invalidate(`save-exists:${id}`)
       }
       changed({ kind: 'save', gameId: id })
     },

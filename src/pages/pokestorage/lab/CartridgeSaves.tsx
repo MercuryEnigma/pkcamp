@@ -12,14 +12,12 @@ import {
   restoreErrorMessage,
   taskErrorMessage,
 } from '../gbLinkTask'
-import { useConfirmNavigation } from '../navigationGuard'
 import { gameIdsFromSave } from '../saveVersion'
 import { useStorageProvider } from '../useStorage'
 import { cartridgeFileName, downloadFile } from './downloadFile'
-import './cartridgeSaves.css'
-import './researchPage.css'
+import { ToolPage } from './ToolPage'
 
-type Task = 'read' | 'write' | 'repair'
+type Task = 'read' | 'write'
 
 interface RestoreFile {
   name: string
@@ -33,7 +31,6 @@ interface RestoreFile {
 const TASKS = [
   ['read', 'Back up'],
   ['write', 'Restore'],
-  ['repair', 'Repair'],
 ] as const
 
 const describeReadError = taskErrorMessage()
@@ -42,8 +39,7 @@ const describeReadError = taskErrorMessage()
  * Backs up and restores GBA cartridge saves over GB-Link. The game comes from
  * the cartridge (backup) or the chosen file (restore), never a menu.
  */
-export function CartridgeSaves({ onBack }: { onBack(): void }) {
-  const confirmNavigation = useConfirmNavigation()
+export function CartridgeSaves() {
   const { adapter } = usePkHex()
   const { ready } = useStorageProvider()
   const [task, setTask] = useState<Task>('read')
@@ -145,108 +141,55 @@ export function CartridgeSaves({ onBack }: { onBack(): void }) {
   )
 
   return (
-    <div className="camp-root lab-saves-root research-page">
-      <div className="camp-content lab-saves-content research-page-content">
-        <header className="camp-page-header">
-          <button
-            type="button"
-            className="camp-back"
-            onClick={() => {
-              if (confirmNavigation()) onBack()
-            }}
-          >
-            ← Back
-          </button>
-          <div className="camp-page-heading">
-            <p className="camp-eyebrow">Research Tools</p>
-            <h1 className="camp-title">Cartridge Saves</h1>
-            <p className="camp-page-subtitle">
-              Back up and restore GBA cartridge saves.
+    <ToolPage
+      label="Choose a task"
+      options={TASKS}
+      value={task}
+      onChange={setTask}
+      disabled={busy}
+      choices={
+        task === 'read' ? (
+          <>
+            <p>
+              Download the save from a GBA cartridge. The game is detected from
+              the cartridge.
             </p>
-          </div>
-          <span className="camp-page-header-spacer" aria-hidden="true" />
-        </header>
-
-        <section
-          className="lab-save-workspace research-page-body"
-          aria-label="Cartridge save tools"
-        >
-          <div className="lab-save-tasks" aria-label="Choose a task">
-            {TASKS.map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                className={`camp-settings-tab${task === value ? ' camp-settings-tab--active' : ''}`}
-                aria-pressed={task === value}
-                disabled={busy}
-                onClick={() => setTask(value)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
-          {task === 'read' && (
-            <>
-              <div className="lab-save-info">
-                <p>
-                  Download the save from a GBA cartridge. The game is detected
-                  from the cartridge.
-                </p>
-                <p className="research-optional">
-                  Switch save download is{' '}
-                  <span className="lab-tag">In research</span>
-                </p>
-              </div>
-              {backUp}
-            </>
-          )}
-
-          {task === 'write' && (
-            <>
-              <div className="lab-save-info">
-                <p>
-                  Choose a Ruby, Sapphire, Emerald, FireRed or LeafGreen .sav
-                  file. The game is detected from the file, and the cartridge
-                  must match it. A Ruby or Sapphire save fits either cartridge.
-                </p>
-              </div>
-              <label className="lab-save-game">
-                Save file
-                <input
-                  type="file"
-                  accept=".sav"
-                  disabled={busy || !adapter}
-                  onChange={(event) => void chooseFile(event.target.files?.[0])}
-                />
-              </label>
-              {!adapter && (
-                <p className="camp-status">Save tools are still loading…</p>
-              )}
-              {fileError && (
-                <p className="camp-status" role="status">
-                  {fileError}
-                </p>
-              )}
-              {restore && (
-                <p className="camp-status" role="status">
-                  {restore.name} is a Pokémon {restore.label} save.
-                </p>
-              )}
-              {restorePanel}
-            </>
-          )}
-
-          {task === 'repair' && (
-            <div className="lab-save-info">
-              <p>
-                Ruby and Sapphire berry glitch repair and clock changes are{' '}
-                <span className="lab-tag">Coming later</span>
+            <p>
+              Switch save download is{' '}
+              <span className="lab-tag">In research</span>
+            </p>
+          </>
+        ) : (
+          <>
+            <p>
+              Choose a Ruby, Sapphire, Emerald, FireRed or LeafGreen .sav file.
+              The cartridge must match the file. A Ruby or Sapphire save fits
+              either cartridge.
+            </p>
+            <label>
+              Save file
+              <input
+                type="file"
+                accept=".sav"
+                disabled={busy || !adapter}
+                onChange={(event) => void chooseFile(event.target.files?.[0])}
+              />
+            </label>
+            {!adapter && <p>Save tools are still loading…</p>}
+            {fileError && <p role="status">{fileError}</p>}
+            {restore && (
+              <p role="status">
+                {restore.name} is a Pokémon {restore.label} save.
               </p>
-            </div>
-          )}
-        </section>
-      </div>
-    </div>
+            )}
+          </>
+        )
+      }
+      task={
+        task === 'read'
+          ? backUp
+          : (restorePanel ?? <p>Choose a save file to restore.</p>)
+      }
+    />
   )
 }

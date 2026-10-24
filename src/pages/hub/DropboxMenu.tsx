@@ -4,8 +4,16 @@ import { DropboxBadge } from '../pokestorage/DropboxBadge'
 import { SourceLink } from './SourceLink'
 import { useDropboxStatus } from '../pokestorage/useStorage'
 
-/** Shared corner indicator and account controls for the hub menus. */
-export function DropboxMenu() {
+/**
+ * Shared corner indicator and account controls for the hub menus. Pages inside
+ * the app pass `onOpenSettings` to open Lab Settings → storage; isolated pages
+ * (and Start before setup) fall back to the account dialog.
+ */
+export function DropboxMenu({
+  onOpenSettings,
+}: {
+  onOpenSettings?: () => void
+} = {}) {
   const dialog = useRef<HTMLDialogElement>(null)
   const status = useDropboxStatus()
   const [busy, setBusy] = useState(false)
@@ -26,7 +34,9 @@ export function DropboxMenu() {
   return (
     <>
       <SourceLink />
-      <DropboxBadge onOpen={() => dialog.current?.showModal()} />
+      <DropboxBadge
+        onOpen={onOpenSettings ?? (() => dialog.current?.showModal())}
+      />
       <dialog
         ref={dialog}
         className="hub-dialog"

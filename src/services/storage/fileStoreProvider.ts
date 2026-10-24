@@ -243,6 +243,10 @@ export class FileStoreProvider implements StorageProvider {
     return file ? { bytes: file.bytes, updatedAt: file.modified } : null
   }
 
+  async hasSave(gameId: GameId): Promise<boolean> {
+    return (await this.newestSaveDay(gameId)) !== null
+  }
+
   async getPreviousSave(gameId: GameId): Promise<Uint8Array | null> {
     const day = await this.newestSaveDay(gameId)
     if (!day) return null
@@ -481,7 +485,7 @@ export class FileStoreProvider implements StorageProvider {
     if (
       typeof stored !== 'object' ||
       stored === null ||
-      stored.version !== 1 ||
+      stored.version !== 2 ||
       stored.collectionId !== collectionId
     ) {
       return null

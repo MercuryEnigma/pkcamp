@@ -44,6 +44,7 @@ describe('dayOf', () => {
 
 describe('saves', () => {
   it('has nothing initially', async () => {
+    expect(await provider.hasSave('ruby')).toBe(false)
     expect(await provider.getSave('ruby')).toBeNull()
     expect(await provider.getPreviousSave('ruby')).toBeNull()
     expect(await provider.listSaveDays('ruby')).toEqual([])
@@ -51,6 +52,7 @@ describe('saves', () => {
 
   it('first save creates the day with no previous', async () => {
     await provider.putSave('ruby', bytes(1))
+    expect(await provider.hasSave('ruby')).toBe(true)
     const save = await provider.getSave('ruby')
     expect(arr(save!.bytes)).toEqual([1])
     expect(save!.updatedAt).toEqual(clock)
@@ -629,7 +631,7 @@ describe('hardware backups', () => {
 
 describe('collection results', () => {
   const result: StoredCollectionResult = {
-    version: 1,
+    version: 2,
     collectionId: 'unown-dex',
     collectionName: 'Unown Dex',
     collectionVersion: '1.0.0',
@@ -651,6 +653,8 @@ describe('collection results', () => {
             species: 201,
             form: 0,
             nickname: 'UNOWN',
+            originalTrainerName: 'RED',
+            originalTrainerId: 12345,
             level: 5,
             shiny: false,
           },
@@ -683,7 +687,7 @@ describe('collection results', () => {
     expect(await provider.getCollectionResult('unown-dex')).toBeNull()
     await write('null')
     expect(await provider.getCollectionResult('unown-dex')).toBeNull()
-    await write(JSON.stringify({ ...result, version: 2 }))
+    await write(JSON.stringify({ ...result, version: 1 }))
     expect(await provider.getCollectionResult('unown-dex')).toBeNull()
     await write(JSON.stringify({ ...result, collectionId: 'other' }))
     expect(await provider.getCollectionResult('unown-dex')).toBeNull()

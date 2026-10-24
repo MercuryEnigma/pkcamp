@@ -37,6 +37,8 @@ export function toStoredMatch(scanned: ScannedPokemon): StoredMatch {
     species: node.species,
     form: node.form,
     nickname: node.nickname,
+    originalTrainerName: node.originalTrainerName,
+    originalTrainerId: node.originalTrainerId,
     level: node.level,
     shiny: node.shiny,
   }
@@ -102,7 +104,7 @@ export function toStoredResult(
   camp: CampScanStatus | null = null
 ): StoredCollectionResult {
   return {
-    version: 1,
+    version: 2,
     collectionId: definition.id,
     collectionName: definition.name,
     collectionVersion: definition.metadata.version,

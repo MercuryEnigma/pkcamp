@@ -92,6 +92,9 @@ class ActiveStorage implements StorageProvider {
   getSave(gameId: GameId) {
     return this.provider.getSave(gameId)
   }
+  hasSave(gameId: GameId) {
+    return this.provider.hasSave(gameId)
+  }
   getPreviousSave(gameId: GameId) {
     return this.provider.getPreviousSave(gameId)
   }

@@ -47,6 +47,43 @@ export const BINDING_ORDER: readonly Bindable[] = [
 
 const BINDABLE = BINDING_ORDER
 
+export const BINDING_NAME: Readonly<Record<Bindable, string>> = {
+  up: 'Up',
+  down: 'Down',
+  left: 'Left',
+  right: 'Right',
+  a: 'A',
+  b: 'B',
+  l: 'L',
+  r: 'R',
+  start: 'Start',
+  select: 'Select',
+  menu: 'Menu',
+  mute: 'Mute sound',
+  speed: 'Speed toggle',
+  guide: 'Guide',
+  restart: 'Restart',
+}
+
+/** The Controls page's sections, like a game's key-binding settings. */
+export const BINDING_GROUPS: readonly {
+  id: string
+  title: string
+  items: readonly Bindable[]
+}[] = [
+  { id: 'dpad', title: 'D-pad', items: ['up', 'down', 'left', 'right'] },
+  {
+    id: 'buttons',
+    title: 'Buttons',
+    items: ['a', 'b', 'start', 'select', 'l', 'r'],
+  },
+  {
+    id: 'shortcuts',
+    title: 'Shortcuts',
+    items: ['menu', 'mute', 'speed', 'guide', 'restart'],
+  },
+]
+
 export const DEFAULT_KEY_BINDINGS: KeyBindings = {
   up: 'ArrowUp',
   down: 'ArrowDown',

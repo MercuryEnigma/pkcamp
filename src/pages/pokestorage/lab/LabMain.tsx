@@ -1,49 +1,63 @@
 import { useEffect, useState } from 'react'
 import { gbLinkTradeDevice } from '../../../services/tradeDevice'
+import { useAppNavigation } from '../../context/appNavigation'
+import { SitePage } from '../../hub/SitePage'
+
+import {
+  routeHref,
+  resolveRoute,
+  type AppRoute,
+  type LabMode,
+} from '../../routing'
 import { NavigationScopeProvider } from '../navigationGuard'
-import { NewsPage } from '../../NewsPage'
-import '../camp.css'
-import { DropboxBadge } from '../DropboxBadge'
-import { SourceLink } from '../../hub/SourceLink'
 import type { CampDestination } from '../PokeStorageMain'
 import { useStorageProvider } from '../useStorage'
-import { CollectionView } from './CollectionView'
-import './lab.css'
-import { LabMenu } from './LabMenu'
-import { LabSettings, type SettingsTab } from './LabSettings'
-import { LabTradeTable } from './LabTradeTable'
-import { ResearchTools } from './ResearchTools'
 import { CartridgeSaves } from './CartridgeSaves'
-import { RomBiosDumps } from './RomBiosDumps'
+import { CollectionView } from './CollectionView'
+import { LabMenu } from './LabMenu'
+import { LabSettings } from './LabSettings'
 import { MysteryGifts } from './MysteryGifts'
+import { PatchNotes } from './PatchNotes'
 import { PokeTransporter } from './PokeTransporter'
-import './labZone.css'
+import { ResearchTools } from './ResearchTools'
+import { RomBiosDumps } from './RomBiosDumps'
 
-type Screen =
-  | { name: 'menu' }
-  | { name: 'collections' }
-  | { name: 'trade' }
-  | { name: 'research' }
-  | { name: 'cartridge-saves' }
-  | { name: 'rom-bios-dumps' }
-  | { name: 'mystery-gifts' }
-  | { name: 'poke-transporter' }
-  | { name: 'settings'; tab?: SettingsTab }
-  | { name: 'news' }
+type LabRoute = Extract<AppRoute, { page: 'lab' }>
 
-/** Research Tools screens share one GB-Link session between their tasks. */
-const RESEARCH_SCREENS: ReadonlySet<Screen['name']> = new Set([
-  'research',
-  'cartridge-saves',
-  'rom-bios-dumps',
-  'mystery-gifts',
-  'poke-transporter',
+const TITLE: Record<LabMode, string> = {
+  collection: 'PC',
+  transporter: 'Transporter',
+  tools: 'Research Tools',
+  gifts: 'Mystery Gifts',
+  saves: 'Cartridge Saves',
+  dumps: 'ROM / BIOS Dumps',
+  settings: 'Settings',
+  news: 'Patch Notes',
+}
+/** Each mode's Back target; the three tools return to Research Tools. */
+const PARENT: Record<LabMode, LabMode | null> = {
+  collection: null,
+  transporter: null,
+  tools: null,
+  gifts: 'tools',
+  saves: 'tools',
+  dumps: 'tools',
+  settings: null,
+  news: null,
+}
+/** Tasks that share one GB-Link session. */
+const RESEARCH_MODES: ReadonlySet<LabMode | null> = new Set([
+  'tools',
+  'gifts',
+  'saves',
+  'dumps',
+  'transporter',
 ])
 
 /**
- * The Lab Zone: Pokédex Collections, the Trade Table, and Research Tools.
- * Storage is site-wide, so the Trade Table and Settings work on the
- * same saves and Camp Sites as the Camp Zone.
+ * The Lab: its menu and every mode behind `/lab/?mode=`. The route decides
+ * the page; this component stays mounted (hidden) while the player visits
+ * Camp from a PC entry, so Back returns to the same entry.
  */
 export function LabMain({
   onBack,
@@ -51,20 +65,36 @@ export function LabMain({
   campReturns,
   hidden = false,
 }: {
+  /** Leaves the Lab for the Hub. */
   onBack: () => void
-  /**
-   * Leaves for a Camp Zone screen (a Pokédex entry's Cabin or Camp Site).
-   * The Lab is kept mounted and hidden meanwhile, so Back returns here.
-   */
+  /** Opens a PC entry's save or Camp Site match in Camp. */
   onOpenInCamp: (destination: CampDestination) => void
-  /** Bumped each time the player comes back from the Camp Zone. */
+  /** Bumped each time the player comes back from Camp. */
   campReturns: number
   hidden?: boolean
 }) {
-  const [screen, setScreen] = useState<Screen>({ name: 'menu' })
+  const { location, navigate } = useAppNavigation()
   const { provider } = useStorageProvider()
-  const toMenu = () => setScreen({ name: 'menu' })
-  const inResearch = RESEARCH_SCREENS.has(screen.name)
+  const resolved = resolveRoute(location)
+  const [route, setRoute] = useState<LabRoute>({
+    page: 'lab',
+    gameId: null,
+    mode: null,
+    tab: null,
+  })
+  // Keep the last Lab route while the Lab is hidden behind Camp.
+  if (
+    resolved.kind === 'route' &&
+    resolved.route.page === 'lab' &&
+    (resolved.route.gameId !== route.gameId ||
+      resolved.route.mode !== route.mode ||
+      resolved.route.tab !== route.tab)
+  )
+    setRoute(resolved.route)
+  const { gameId, mode, tab } = route
+  const go = (next: LabMode | null) =>
+    navigate(routeHref('lab', { gameId, mode: next }))
+  const inResearch = RESEARCH_MODES.has(mode)
 
   // Tasks release the GB-Link as they finish; this also covers leaving midway.
   useEffect(() => {
@@ -76,87 +106,70 @@ export function LabMain({
 
   return (
     <NavigationScopeProvider value={!hidden}>
-      <div className="camp-zone lab-zone" hidden={hidden}>
-        <SourceLink />
-        <DropboxBadge
-          onOpen={() => {
-            setScreen({ name: 'settings', tab: 'storage' })
-          }}
-        />
-        {renderScreen()}
+      <div hidden={hidden}>
+        {mode === null ? (
+          <LabMenu
+            gameId={gameId}
+            onBack={onBack}
+            onSelectCollections={() => go('collection')}
+            onSelectTransporter={() => go('transporter')}
+            onSelectResearch={() => go('tools')}
+            onSelectSettings={() => go('settings')}
+            onSelectNews={() => go('news')}
+          />
+        ) : (
+          <SitePage
+            page={TITLE[mode]}
+            gameId={gameId}
+            onBack={() => go(PARENT[mode])}
+          >
+            {renderMode(mode)}
+          </SitePage>
+        )}
       </div>
     </NavigationScopeProvider>
   )
 
-  function renderScreen() {
-    switch (screen.name) {
-      case 'collections':
+  function renderMode(current: LabMode) {
+    switch (current) {
+      case 'collection':
         return (
           <CollectionView
-            onBack={toMenu}
             onOpenInCamp={onOpenInCamp}
             campReturns={campReturns}
           />
         )
-      case 'trade':
-        return <LabTradeTable onBack={toMenu} />
-      case 'research':
+      case 'transporter':
+        return <PokeTransporter />
+      case 'tools':
         return (
           <ResearchTools
-            onBack={toMenu}
-            onOpenSaves={() => setScreen({ name: 'cartridge-saves' })}
-            onOpenDumps={() => setScreen({ name: 'rom-bios-dumps' })}
-            onOpenGifts={() => setScreen({ name: 'mystery-gifts' })}
-            onOpenTransporter={() => setScreen({ name: 'poke-transporter' })}
+            onOpenGifts={() => go('gifts')}
+            onOpenSaves={() => go('saves')}
+            onOpenDumps={() => go('dumps')}
           />
         )
-      case 'cartridge-saves':
-        return <CartridgeSaves onBack={() => setScreen({ name: 'research' })} />
-      case 'rom-bios-dumps':
-        return <RomBiosDumps onBack={() => setScreen({ name: 'research' })} />
-      case 'mystery-gifts':
-        return <MysteryGifts onBack={() => setScreen({ name: 'research' })} />
-      case 'poke-transporter':
-        return (
-          <PokeTransporter onBack={() => setScreen({ name: 'research' })} />
-        )
+      case 'gifts':
+        return <MysteryGifts />
+      case 'saves':
+        return <CartridgeSaves />
+      case 'dumps':
+        return <RomBiosDumps />
       case 'settings':
         return (
           <LabSettings
-            key={`${screen.tab ?? 'backups'}:${provider.id}`}
-            initialTab={screen.tab}
-            onBack={toMenu}
+            key={`${tab ?? 'backups'}:${provider.id}`}
+            tab={tab ?? 'backups'}
+            onTabChange={(next) =>
+              navigate(
+                routeHref('lab', { gameId, mode: 'settings', tab: next }),
+                { replace: true }
+              )
+            }
           />
         )
       case 'news':
-        return (
-          <div className="camp-root">
-            <div className="camp-content">
-              <header className="camp-page-header">
-                <button type="button" className="camp-back" onClick={toMenu}>
-                  ← Back
-                </button>
-                <div className="camp-page-heading">
-                  <p className="camp-eyebrow">Lab Zone</p>
-                  <h1 className="camp-title">Patch Notes</h1>
-                </div>
-                <span className="camp-page-header-spacer" aria-hidden="true" />
-              </header>
-              <NewsPage />
-            </div>
-          </div>
-        )
-      case 'menu':
-        return (
-          <LabMenu
-            onBack={onBack}
-            onSelectCollections={() => setScreen({ name: 'collections' })}
-            onSelectTrade={() => setScreen({ name: 'trade' })}
-            onSelectResearch={() => setScreen({ name: 'research' })}
-            onSelectSettings={() => setScreen({ name: 'settings' })}
-            onSelectNews={() => setScreen({ name: 'news' })}
-          />
-        )
+        return <PatchNotes />
     }
   }
 }

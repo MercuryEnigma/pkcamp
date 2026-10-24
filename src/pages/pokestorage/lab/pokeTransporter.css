@@ -1,29 +1,106 @@
-.transporter-backups {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-  gap: 0.8rem;
+.transporter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
 }
-.transporter-backups > div {
+.transporter-main {
+  display: flex;
+  flex: 1;
+  gap: 0.75rem;
+  min-height: 0;
+}
+.transporter-steps {
+  display: flex;
+  flex: 3;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.transporter-steps button {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--camp-panel-border);
+  border-radius: 8px;
+  background: var(--camp-surface);
+  color: var(--camp-text);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.transporter-steps button[aria-current='step'] {
+  background: var(--camp-leaf);
+  color: #fff;
+}
+.transporter-steps button > :last-child {
+  margin-left: auto;
+}
+.transporter-indicator {
+  display: none;
+  margin: 0;
+  font-weight: 700;
+}
+.transporter-step {
+  display: flex;
+  flex: 7;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  min-height: 0;
+}
+.transporter-step > .site-panel {
+  flex: 1;
+}
+.transporter-nav {
+  display: flex;
+  flex: none;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.transporter-backups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.transporter-backup {
+  display: flex;
+  flex: 1 1 12rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
   min-width: 0;
 }
-.transporter-backups h3 {
-  margin: 0.4rem 0;
-  font-size: 0.85rem;
-  color: var(--camp-text);
-}
-.transporter-backups p,
-.transporter-credits {
-  overflow-wrap: anywhere;
-  font-size: 0.75rem;
+.transporter-warning {
+  font-weight: 700;
 }
 .transporter-credits {
+  flex: none;
   margin: 0;
   color: var(--camp-muted);
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
 }
 .transporter-credits a {
   color: inherit;
 }
-.transporter-backups button {
-  max-width: 100%;
-  white-space: normal;
+
+@media (max-width: 42rem) {
+  .transporter-steps {
+    display: none;
+  }
+  .transporter-indicator {
+    display: block;
+  }
+  .transporter-main {
+    flex-direction: column;
+  }
+  .transporter-nav {
+    justify-content: space-between;
+  }
 }
