@@ -298,7 +298,7 @@ describe.skipIf(missing.length > 0)(
         }
       })
 
-      it("reads each Pokemon's own OT id, distinct from the save's trainer for traded ones", () => {
+      it("reads each Pokemon's own OT IDs, distinct from the save's trainer for traded ones", () => {
         // Values are personal: assert only range and that some differ.
         const game = load(FIXTURES.emerald)
         const mons = [
@@ -309,6 +309,9 @@ describe.skipIf(missing.length > 0)(
           expect(Number.isInteger(mon.originalTrainerId)).toBe(true)
           expect(mon.originalTrainerId).toBeGreaterThanOrEqual(0)
           expect(mon.originalTrainerId).toBeLessThanOrEqual(0xffff)
+          expect(Number.isInteger(mon.originalTrainerSecretId)).toBe(true)
+          expect(mon.originalTrainerSecretId).toBeGreaterThanOrEqual(0)
+          expect(mon.originalTrainerSecretId).toBeLessThanOrEqual(0xffff)
         }
         expect(
           mons.some((mon) => mon.originalTrainerId !== game.trainer.id)
@@ -388,6 +391,7 @@ describe.skipIf(missing.length > 0)(
             nickname: 'PIKACHU',
             originalTrainerName: 'RED',
             originalTrainerId: 0,
+            originalTrainerSecretId: 0,
             heldItem: 0,
             heldItemName: '',
             nature: null,

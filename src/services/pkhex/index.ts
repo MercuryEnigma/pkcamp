@@ -20,6 +20,7 @@ export {
 } from './pkhexWasmBackend.ts'
 export type { PkhexWasmBackendOptions } from './pkhexWasmBackend.ts'
 export { pkhexRuntime, PkhexRuntime } from './runtime.ts'
+export { natureStatEffect } from './natureStatEffect.ts'
 export type { PkhexRuntimeSnapshot } from './runtime.ts'
 export type {
   BoxLocation,

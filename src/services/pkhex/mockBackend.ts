@@ -78,6 +78,7 @@ const pikachu: PokemonNode = {
   nickname: 'PIKACHU',
   originalTrainerName: 'RED',
   originalTrainerId: 12345,
+  originalTrainerSecretId: 54321,
   heldItem: 0,
   heldItemName: '',
   nature: HARDY,
@@ -105,6 +106,7 @@ const eevee: PokemonNode = {
   // A traded Pokemon: its original trainer differs from the save's.
   originalTrainerName: 'BLUE',
   originalTrainerId: 67890,
+  originalTrainerSecretId: 22222,
   heldItem: 0,
   heldItemName: '',
   nature: HARDY,
@@ -131,6 +133,7 @@ const togepiEgg: PokemonNode = {
   nickname: 'Egg',
   originalTrainerName: 'RED',
   originalTrainerId: 12345,
+  originalTrainerSecretId: 54321,
   heldItem: 0,
   heldItemName: '',
   nature: HARDY,

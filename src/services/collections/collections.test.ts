@@ -30,6 +30,7 @@ function node(species: number): PokemonNode {
     nickname: `MON${species}`,
     originalTrainerName: 'RED',
     originalTrainerId: 12345,
+    originalTrainerSecretId: 54321,
     heldItem: 0,
     heldItemName: '',
     nature: { id: 0, name: 'Hardy' },

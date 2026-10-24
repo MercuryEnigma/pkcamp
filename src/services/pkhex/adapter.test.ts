@@ -67,6 +67,7 @@ describe('initializePokemonSaveAdapter', () => {
       nickname: 'CHARIZARD',
       originalTrainerName: 'ASH',
       originalTrainerId: 1,
+      originalTrainerSecretId: 2,
       heldItem: 0,
       heldItemName: '',
       nature: { id: 3, name: 'Adamant' },

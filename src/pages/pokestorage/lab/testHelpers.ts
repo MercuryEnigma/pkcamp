@@ -22,6 +22,7 @@ export function makeNode(overrides: Partial<PokemonNode> = {}): PokemonNode {
     nickname: 'MON',
     originalTrainerName: 'RED',
     originalTrainerId: 1,
+    originalTrainerSecretId: 2,
     heldItem: 0,
     heldItemName: '',
     nature: { id: 0, name: 'Hardy' },

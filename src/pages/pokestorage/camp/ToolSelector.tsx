@@ -1,12 +1,15 @@
 export type StorageTool = 'view' | 'moveOne' | 'groupMove'
 
-const TOOLS: readonly { id: StorageTool; label: string; icon: string }[] = [
+const TOOLS: readonly { id: StorageTool; label: string; icon?: string }[] = [
   {
     id: 'view',
     label: 'View',
-    icon: 'M12 5a7 7 0 1 0 0 14 7 7 0 0 0 0-14Zm0 4a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z',
   },
-  { id: 'moveOne', label: 'Move one', icon: 'M6 6h12v12H6z' },
+  {
+    id: 'moveOne',
+    label: 'Move one',
+    icon: 'M3 8h17m0 0-4-4m4 4-4 4M21 16H4m0 0 4-4m-4 4 4 4',
+  },
   {
     id: 'groupMove',
     label: 'Move a group',
@@ -37,8 +40,46 @@ export function ToolSelector({
           disabled={disabled?.includes(tool.id)}
           onClick={() => onChange(tool.id)}
         >
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-            <path d={tool.icon} fillRule="evenodd" />
+          <svg
+            className={tool.id === 'view' ? 'tool-icon-view' : undefined}
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+          >
+            {tool.id === 'view' ? (
+              <>
+                <circle
+                  className="tool-icon-view-shell"
+                  cx="12"
+                  cy="12"
+                  r="9"
+                  stroke="var(--camp-text)"
+                  strokeWidth="1.8"
+                />
+                <path
+                  d="M3 12h18"
+                  stroke="var(--camp-text)"
+                  strokeWidth="1.8"
+                />
+                <circle
+                  className="tool-icon-view-center"
+                  cx="12"
+                  cy="12"
+                  r="3.2"
+                  stroke="var(--camp-text)"
+                  strokeWidth="1.8"
+                />
+              </>
+            ) : (
+              <path
+                d={tool.icon}
+                fill={tool.id === 'groupMove' ? 'currentColor' : 'none'}
+                stroke={tool.id === 'groupMove' ? 'none' : 'currentColor'}
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            )}
           </svg>
         </button>
       ))}

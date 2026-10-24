@@ -1,18 +1,18 @@
-/* Tracks are percentages of the body: 5 columns (PC 60%, right column 40%)
-   by 10 rows (top 60%, bottom 40%). Settings fills the bottom 40% of the
-   right 60%; Patch Notes sits in the open bottom left. On phones it is a 2 × 2 grid. */
+/* Tracks are percentages of the body: 5 columns (left 40%, right 60%) by 10
+   rows. Left: Transporter 40%, Research Tools 40%, Patch Notes 20%. Right: PC
+   top 60%, Settings bottom 40%. On phones it is a 2 × 2 grid. */
 .lab-menu {
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(10, 1fr);
   grid-template-areas:
-    'pc pc pc transporter transporter'
-    'pc pc pc transporter transporter'
-    'pc pc pc transporter transporter'
-    'pc pc pc tools tools'
-    'pc pc pc tools tools'
-    'pc pc pc tools tools'
-    'news news settings settings settings'
-    'news news settings settings settings'
+    'transporter transporter pc pc pc'
+    'transporter transporter pc pc pc'
+    'transporter transporter pc pc pc'
+    'transporter transporter pc pc pc'
+    'tools tools pc pc pc'
+    'tools tools pc pc pc'
+    'tools tools settings settings settings'
+    'tools tools settings settings settings'
     'news news settings settings settings'
     'news news settings settings settings';
 }
@@ -56,7 +56,7 @@
 .lab-link {
   grid-area: news;
   justify-self: center;
-  align-self: end;
+  align-self: center;
   min-width: 8rem;
   padding: 0.5rem 0.85rem;
   border: 1px solid transparent;

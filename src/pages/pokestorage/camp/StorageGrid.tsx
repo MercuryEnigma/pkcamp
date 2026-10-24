@@ -1,4 +1,5 @@
 import type { SaveSlot } from '../../../services/pkhex'
+import type { Gen3GameId } from '../../../services/saveLibrary'
 import type { SpriteResolver } from '../../../services/sprites'
 import { Panel } from '../../hub/Panel'
 import { PokemonSlotIcon, type SlotSelection } from '../PokemonSlotIcon'
@@ -11,6 +12,8 @@ import { COLUMNS, GRID_SIZE } from './groupMove'
 export function StorageGrid({
   label,
   title,
+  source,
+  gameId,
   slots,
   resolver,
   selection,
@@ -22,6 +25,9 @@ export function StorageGrid({
   label: string
   /** The pill: "Box 1", "Party", "Camp 1". */
   title: string
+  /** A visual cue for the save cartridge or the Camp Sites. */
+  source: 'save' | 'camp'
+  gameId?: Gen3GameId | null
   slots: readonly SaveSlot[]
   resolver: SpriteResolver
   selection: (slot: number) => SlotSelection
@@ -32,12 +38,28 @@ export function StorageGrid({
   return (
     <Panel label={label} className="storage-grid">
       <div className="storage-grid-nav">
-        <button type="button" aria-label="Previous" onClick={onPrevious}>
-          ◀
+        <button
+          type="button"
+          aria-label={`Previous ${label}`}
+          onClick={onPrevious}
+        >
+          <span aria-hidden="true">◀</span>
         </button>
+        <span
+          className="storage-grid-source"
+          data-game={source === 'save' ? gameId : undefined}
+          aria-hidden="true"
+        >
+          {source === 'save' ? (
+            <span className="storage-grid-cartridge-icon" />
+          ) : (
+            <span className="storage-grid-tent-icon" />
+          )}
+        </span>
         <h2 className="storage-grid-pill">{title}</h2>
-        <button type="button" aria-label="Next" onClick={onNext}>
-          ▶
+        <span className="storage-grid-counterweight" aria-hidden="true" />
+        <button type="button" aria-label={`Next ${label}`} onClick={onNext}>
+          <span aria-hidden="true">▶</span>
         </button>
       </div>
       <div className="storage-grid-body">

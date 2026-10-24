@@ -1,14 +1,18 @@
-import { useState } from 'react'
-import type { PokemonNode, StatSpread } from '../../services/pkhex'
+import {
+  natureStatEffect,
+  type PokemonNode,
+  type StatSpread,
+} from '../../services/pkhex'
 import type { SpriteResolver } from '../../services/sprites'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from './spriteDisplay'
 import { SpriteCredit } from './SpriteCredit'
 import { DEX_NAME } from './dexNames'
+import type { DetailsView } from './pokemonDetailsPages'
 
 const GENDER_SYMBOL: Record<PokemonNode['gender'], string> = {
   Male: '♂',
   Female: '♀',
-  Genderless: '',
+  Genderless: '○',
 }
 
 const GENDER_TO_SPRITE: Record<
@@ -25,76 +29,51 @@ const NOT_YET_AVAILABLE = '—'
 
 type StatKey = keyof StatSpread
 
-/**
- * Every nature's boosted/lowered stat, by name (not by PKHeX's numeric
- * nature id, so this doesn't depend on assuming a particular id scheme).
- * The five neutral natures (`null`) affect no stat.
- */
-const NATURE_EFFECT: Record<string, { boost: StatKey; lower: StatKey } | null> =
-  {
-    Hardy: null,
-    Lonely: { boost: 'attack', lower: 'defense' },
-    Brave: { boost: 'attack', lower: 'speed' },
-    Adamant: { boost: 'attack', lower: 'specialAttack' },
-    Naughty: { boost: 'attack', lower: 'specialDefense' },
-    Bold: { boost: 'defense', lower: 'attack' },
-    Docile: null,
-    Relaxed: { boost: 'defense', lower: 'speed' },
-    Impish: { boost: 'defense', lower: 'specialAttack' },
-    Lax: { boost: 'defense', lower: 'specialDefense' },
-    Timid: { boost: 'speed', lower: 'attack' },
-    Hasty: { boost: 'speed', lower: 'defense' },
-    Serious: null,
-    Jolly: { boost: 'speed', lower: 'specialAttack' },
-    Naive: { boost: 'speed', lower: 'specialDefense' },
-    Modest: { boost: 'specialAttack', lower: 'attack' },
-    Mild: { boost: 'specialAttack', lower: 'defense' },
-    Quiet: { boost: 'specialAttack', lower: 'speed' },
-    Bashful: null,
-    Rash: { boost: 'specialAttack', lower: 'specialDefense' },
-    Calm: { boost: 'specialDefense', lower: 'attack' },
-    Gentle: { boost: 'specialDefense', lower: 'defense' },
-    Sassy: { boost: 'specialDefense', lower: 'speed' },
-    Careful: { boost: 'specialDefense', lower: 'specialAttack' },
-    Quirky: null,
-  }
-
-function natureStatClass(pokemon: PokemonNode, statKey: StatKey): string {
-  const effect = pokemon.nature ? NATURE_EFFECT[pokemon.nature.name] : null
-  if (!effect) return ''
-  if (effect.boost === statKey) return ' camp-details-stat-row--boosted'
-  if (effect.lower === statKey) return ' camp-details-stat-row--lowered'
-  return ''
-}
-
-type DetailsView = 'overview' | 'movesTraits' | 'statsTraining'
-
 function speciesName(nationalDex: number): string {
   return DEX_NAME[nationalDex] ?? `#${nationalDex}`
 }
 
-function NicknameRow({ pokemon }: { pokemon: PokemonNode }) {
+export function PokemonDetailsHeader({
+  pokemon,
+}: {
+  pokemon: PokemonNode | null
+}) {
   return (
-    <div className="camp-details-row camp-details-header">
-      <span className="camp-details-nickname">
-        {pokemon.nickname || speciesName(pokemon.species)}
+    <div className="camp-details-view-header">
+      <span className="camp-details-view-end" aria-hidden="true" />
+      <span
+        className="camp-details-view-shiny"
+        title={pokemon?.shiny ? 'Shiny' : undefined}
+        aria-label={pokemon?.shiny ? 'Shiny Pokémon' : undefined}
+      >
+        {pokemon?.shiny && (
+          <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+            <path d="M10 4Q10 13 19 13Q10 13 10 22Q10 13 1 13Q10 13 10 4ZM19 0.5Q19 5 23.5 5Q19 5 19 9.5Q19 5 14.5 5Q19 5 19 0.5ZM19.5 16.0Q19.5 19.5 23.0 19.5Q19.5 19.5 19.5 23.0Q19.5 19.5 16.0 19.5Q19.5 19.5 19.5 16.0Z" />
+          </svg>
+        )}
       </span>
-      <span className="camp-details-badges">
-        {pokemon.shiny && <span title="Shiny">★</span>}
-        <span>Lv. {pokemon.level}</span>
-        <span>{GENDER_SYMBOL[pokemon.gender]}</span>
+      <h2 className="camp-details-view-name">
+        {pokemon ? pokemon.nickname || speciesName(pokemon.species) : 'Pokémon'}
+      </h2>
+      <span className="camp-details-view-level">
+        {pokemon && (
+          <>
+            <span>Lv. {pokemon.level}</span>
+            <span
+              className="camp-details-view-gender"
+              data-gender={pokemon.gender}
+              aria-label={
+                pokemon.gender === 'Genderless'
+                  ? 'Genderless or unknown'
+                  : pokemon.gender
+              }
+            >
+              {GENDER_SYMBOL[pokemon.gender]}
+            </span>
+          </>
+        )}
       </span>
-    </div>
-  )
-}
-
-function SpeciesRow({ pokemon }: { pokemon: PokemonNode }) {
-  return (
-    <div className="camp-details-row camp-details-species">
-      <span>
-        {speciesName(pokemon.species)} · #
-        {String(pokemon.species).padStart(3, '0')}
-      </span>
+      <span className="camp-details-view-end" aria-hidden="true" />
     </div>
   )
 }
@@ -110,32 +89,26 @@ function spriteDisplay(pokemon: PokemonNode, resolver: SpriteResolver) {
   })
 }
 
-/**
- * The species row plus sprite, in the same size/position on every view --
- * only its transparency changes (full on Overview, where it's the subject;
- * faint on Moves & Traits / Stats, where it's a quiet constant
- * behind the page's actual new content) so flipping between views doesn't
- * jump the image around.
- */
-function TopRow({
+function IdentityBlock({
   pokemon,
   resolver,
-  faint = false,
 }: {
   pokemon: PokemonNode
   resolver: SpriteResolver
-  faint?: boolean
 }) {
   const display = spriteDisplay(pokemon, resolver)
   return (
-    <div className="camp-details-top">
-      <div className="camp-details-top-text">
-        <SpeciesRow pokemon={pokemon} />
+    <div className="camp-details-identity">
+      <div className="camp-details-identity-text">
+        <div className="camp-details-species">
+          {speciesName(pokemon.species)} · #
+          {String(pokemon.species).padStart(3, '0')}
+        </div>
       </div>
       <div className="camp-details-artwork">
         <img
           key={spriteDisplayImageSrc(display)}
-          className={`camp-details-sprite${faint ? ' camp-details-sprite--faint' : ''}`}
+          className="camp-details-sprite"
           src={spriteDisplayImageSrc(display)}
           alt={pokemon.nickname || speciesName(pokemon.species)}
           onError={(e) => {
@@ -148,29 +121,10 @@ function TopRow({
   )
 }
 
-function Overview({
-  pokemon,
-  resolver,
-}: {
-  pokemon: PokemonNode
-  resolver: SpriteResolver
-}) {
+function Overview({ pokemon }: { pokemon: PokemonNode }) {
   return (
     <>
-      <NicknameRow pokemon={pokemon} />
-      <TopRow pokemon={pokemon} resolver={resolver} />
-
-      {/* Same position/size as Moves & Traits' Nature/Ability row below. */}
-      <div className="camp-details-row">
-        <div className="camp-details-field">
-          <span className="camp-details-label">Held Item</span>
-          <span className="camp-details-value">
-            {pokemon.heldItemName || 'No held item'}
-          </span>
-        </div>
-      </div>
-
-      <div className="camp-details-row">
+      <div className="camp-details-pair camp-details-pair--three">
         <div className="camp-details-field">
           <span className="camp-details-label">Original Trainer</span>
           <span className="camp-details-value">
@@ -183,9 +137,15 @@ function Overview({
             {pokemon.originalTrainerId}
           </span>
         </div>
+        <div className="camp-details-field">
+          <span className="camp-details-label">SID</span>
+          <span className="camp-details-value">
+            {pokemon.originalTrainerSecretId}
+          </span>
+        </div>
       </div>
 
-      <div className="camp-details-row camp-details-ribbons">
+      <div className="camp-details-section camp-details-ribbons">
         <div className="camp-details-field">
           <span className="camp-details-label">Ribbons</span>
           {pokemon.ribbons.length === 0 ? (
@@ -213,36 +173,31 @@ function Overview({
   )
 }
 
-function MovesAndTraits({
-  pokemon,
-  resolver,
-}: {
-  pokemon: PokemonNode
-  resolver: SpriteResolver
-}) {
+function MovesAndTraits({ pokemon }: { pokemon: PokemonNode }) {
   return (
     <>
-      <NicknameRow pokemon={pokemon} />
-      <TopRow pokemon={pokemon} resolver={resolver} faint />
-
-      {/* Same position/size as Overview's Held Item row above. */}
-      <div className="camp-details-row">
-        <div className="camp-details-field">
-          <span className="camp-details-label">Nature</span>
-          <span className="camp-details-value">
-            {pokemon.nature?.name ?? NOT_YET_AVAILABLE}
-          </span>
-        </div>
+      <div className="camp-details-pair camp-details-pair--three">
         <div className="camp-details-field">
           <span className="camp-details-label">Ability</span>
           <span className="camp-details-value">
             {pokemon.ability?.name ?? NOT_YET_AVAILABLE}
           </span>
         </div>
+        <div className="camp-details-field">
+          <span className="camp-details-label">Held Item</span>
+          <span className="camp-details-value">
+            {pokemon.heldItemName || 'No held item'}
+          </span>
+        </div>
+        <div className="camp-details-field">
+          <span className="camp-details-label">Nature</span>
+          <span className="camp-details-value">
+            {pokemon.nature?.name ?? NOT_YET_AVAILABLE}
+          </span>
+        </div>
       </div>
-
-      <p className="camp-details-section-title">Moves</p>
-      <div className="camp-details-row camp-details-moves">
+      <div className="camp-details-section camp-details-moves">
+        <p className="camp-details-section-title">Moves</p>
         {pokemon.moves.every((move) => move === null) ? (
           <span>No moves</span>
         ) : (
@@ -250,8 +205,8 @@ function MovesAndTraits({
             {pokemon.moves.map((move, index) =>
               move ? (
                 <li key={index}>
-                  <span>{move.name}</span>
-                  <span className="camp-card-sub">PP {move.pp}</span>
+                  <span className="camp-details-move-name">{move.name}</span>
+                  <span className="camp-details-move-pp">PP {move.pp}</span>
                 </li>
               ) : (
                 <li key={index} className="camp-card-sub">
@@ -275,11 +230,13 @@ function StatRow({
   statKey: StatKey
   pokemon: PokemonNode
 }) {
+  const effect = natureStatEffect(pokemon.nature, statKey)
   return (
-    <div
-      className={`camp-details-stat-row${natureStatClass(pokemon, statKey)}`}
-    >
-      <span className="camp-details-stat-name">{label}</span>
+    <div className="camp-details-stat-row">
+      <span className="camp-details-stat-name">
+        <span>{label}</span>
+        {effect && <span className="camp-details-stat-effect">({effect})</span>}
+      </span>
       <span className="camp-details-stat-value">{pokemon.stats[statKey]}</span>
       <span className="camp-details-stat-iv">{pokemon.ivs[statKey]}</span>
       <span className="camp-details-stat-ev">{pokemon.evs[statKey]}</span>
@@ -287,123 +244,54 @@ function StatRow({
   )
 }
 
-const STAT_GROUPS: ReadonlyArray<
-  ReadonlyArray<{ label: string; statKey: StatKey }>
-> = [
-  [
-    { label: 'HP', statKey: 'hp' },
-    { label: 'Attack', statKey: 'attack' },
-    { label: 'Defense', statKey: 'defense' },
-  ],
-  [
-    { label: 'Sp. Atk', statKey: 'specialAttack' },
-    { label: 'Sp. Def', statKey: 'specialDefense' },
-    { label: 'Speed', statKey: 'speed' },
-  ],
+const STATS: ReadonlyArray<{ label: string; statKey: StatKey }> = [
+  { label: 'HP', statKey: 'hp' },
+  { label: 'Attack', statKey: 'attack' },
+  { label: 'Defense', statKey: 'defense' },
+  { label: 'Sp. Atk', statKey: 'specialAttack' },
+  { label: 'Sp. Def', statKey: 'specialDefense' },
+  { label: 'Speed', statKey: 'speed' },
 ]
 
-function StatsAndTraining({
-  pokemon,
-  resolver,
-}: {
-  pokemon: PokemonNode
-  resolver: SpriteResolver
-}) {
+function StatsAndTraining({ pokemon }: { pokemon: PokemonNode }) {
   return (
-    <>
-      <NicknameRow pokemon={pokemon} />
-      <TopRow pokemon={pokemon} resolver={resolver} faint />
-
+    <div className="camp-details-section camp-details-stats-section">
       <p className="camp-details-section-title">Stats</p>
-      <div className="camp-details-stats-columns">
-        {STAT_GROUPS.map((group) => (
-          <div className="camp-details-stats" key={group[0].statKey}>
-            <div className="camp-details-stats-header">
-              <span />
-              <span>Stat</span>
-              <span>IV</span>
-              <span>EV</span>
-            </div>
-            {group.map(({ label, statKey }) => (
-              <StatRow
-                key={statKey}
-                label={label}
-                statKey={statKey}
-                pokemon={pokemon}
-              />
-            ))}
-          </div>
+      <div className="camp-details-stats">
+        <div className="camp-details-stats-header">
+          <span />
+          <span>Stat</span>
+          <span>IV</span>
+          <span>EV</span>
+        </div>
+        {STATS.map(({ label, statKey }) => (
+          <StatRow
+            key={statKey}
+            label={label}
+            statKey={statKey}
+            pokemon={pokemon}
+          />
         ))}
       </div>
-    </>
+    </div>
   )
-}
-
-const NEXT_VIEW: Record<DetailsView, DetailsView | null> = {
-  overview: 'movesTraits',
-  movesTraits: 'statsTraining',
-  statsTraining: null,
-}
-const PREVIOUS_VIEW: Record<DetailsView, DetailsView | null> = {
-  overview: null,
-  movesTraits: 'overview',
-  statsTraining: 'movesTraits',
-}
-const VIEW_LABEL: Record<DetailsView, string> = {
-  overview: 'Overview',
-  movesTraits: 'Moves & Traits',
-  statsTraining: 'Stats',
 }
 
 export function PokemonDetails({
   pokemon,
   resolver,
+  view,
 }: {
   pokemon: PokemonNode
   resolver: SpriteResolver
+  view: DetailsView
 }) {
-  // Deliberately not reset when `pokemon` changes — clicking a different
-  // Pokémon while viewing e.g. Stats & Training should stay on that view.
-  const [view, setView] = useState<DetailsView>('overview')
-  const previousView = PREVIOUS_VIEW[view]
-  const nextView = NEXT_VIEW[view]
-
   return (
-    <div className="camp-panel camp-details">
-      {view === 'overview' && (
-        <Overview pokemon={pokemon} resolver={resolver} />
-      )}
-      {view === 'movesTraits' && (
-        <MovesAndTraits pokemon={pokemon} resolver={resolver} />
-      )}
-      {view === 'statsTraining' && (
-        <StatsAndTraining pokemon={pokemon} resolver={resolver} />
-      )}
-
-      <div className="camp-details-nav">
-        {previousView ? (
-          <button
-            type="button"
-            className="camp-details-nav-link"
-            onClick={() => setView(previousView)}
-          >
-            ← {VIEW_LABEL[previousView]}
-          </button>
-        ) : (
-          <span />
-        )}
-        {nextView ? (
-          <button
-            type="button"
-            className="camp-details-nav-link"
-            onClick={() => setView(nextView)}
-          >
-            {VIEW_LABEL[nextView]} →
-          </button>
-        ) : (
-          <span />
-        )}
-      </div>
+    <div className="camp-details-content">
+      <IdentityBlock pokemon={pokemon} resolver={resolver} />
+      {view === 'overview' && <Overview pokemon={pokemon} />}
+      {view === 'movesTraits' && <MovesAndTraits pokemon={pokemon} />}
+      {view === 'statsTraining' && <StatsAndTraining pokemon={pokemon} />}
     </div>
   )
 }

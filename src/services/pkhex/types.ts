@@ -135,6 +135,8 @@ export interface PokemonNode {
    * which differs from the save's trainer for traded Pokemon.
    */
   originalTrainerId: number
+  /** The original trainer's displayed Secret ID on this Pokemon. */
+  originalTrainerSecretId: number
   /** Held-item id in this Pokemon's own format's item index space (0 = none). */
   heldItem: number
   /** Held-item display name; `''` when nothing is held. */

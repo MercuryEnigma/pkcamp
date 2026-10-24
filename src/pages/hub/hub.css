@@ -262,17 +262,41 @@ button {
 
 /* ---- Hub ---- */
 
-/* Tracks are 20% of the body each way: Arcade 40 × 40 top left, Camp 60 × 60
-   top right, Lab 60 × 40 bottom left, bottom right left open. */
+/* Tracks are 20% of the body each way: Arcade 40 × 80 top left, Change game
+   40 × 20 below it, Camp 60 × 60 top right, Lab 60 × 40 directly below Camp. */
 .hub-map {
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(5, 1fr);
   grid-template-areas:
     'arcade arcade camp camp camp'
     'arcade arcade camp camp camp'
-    '. . camp camp camp'
-    'lab lab lab . .'
-    'lab lab lab . .';
+    'arcade arcade camp camp camp'
+    'arcade arcade lab lab lab'
+    'change change lab lab lab';
+}
+.hub-map-change {
+  grid-area: change;
+  justify-self: center;
+  align-self: center;
+  min-width: 8rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: rgb(255 248 228 / 46%);
+  color: var(--camp-text);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 650;
+  text-align: center;
+  cursor: pointer;
+}
+.hub-map-change span {
+  margin-right: 0.35rem;
+}
+.hub-map-change:hover {
+  border-color: var(--camp-border-soft);
+  background: var(--camp-surface);
+  color: var(--camp-leaf);
 }
 .hub-map-arcade {
   grid-area: arcade;
@@ -373,10 +397,11 @@ button {
   }
   .hub-map {
     grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto;
     grid-template-areas:
       'arcade camp'
-      'lab lab';
+      'lab lab'
+      'change change';
     align-content: start;
     height: auto;
   }

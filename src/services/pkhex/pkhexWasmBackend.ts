@@ -209,6 +209,7 @@ function toNode(mon: Pokemon): PokemonNode {
     originalTrainerName: mon.owner.name,
     // Facade Pokemon.Id: the displayed ID, not the save trainer's.
     originalTrainerId: mon.ownerDisplayId.tid,
+    originalTrainerSecretId: mon.ownerDisplayId.sid,
     heldItem: mon.heldItem,
     heldItemName: mon.heldItemName,
     nature: toRef(mon.nature),

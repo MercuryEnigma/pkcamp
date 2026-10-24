@@ -558,9 +558,9 @@ One page with two grids. The left grid is always the save; the right side change
 
 #### Left grid: the save
 
-- The game save's **box or party**, in a rounded panel. The panel name is a pill, e.g. **( Box 1 )** or **( Party )**, between **<** and **>** arrows that step through the party and boxes.
+- The game save's **box or party** sits in a rounded window. Its green header contains the previous arrow, game cartridge icon, centered name, an empty counterweight matching the icon's width, and the next arrow. The arrows are integrated into the header.
 - A **6 × 5** slot grid (30 slots, one GBA box). The party shows its 6 slots.
-- **No game selected:** the left grid is a **Camp Site** instead (e.g. **( Camp 1 )**).
+- **No game selected:** the left grid is a **Camp Site** instead (e.g. **Campsite 1**).
 
 #### Right side: depends on `mode`
 
@@ -572,8 +572,9 @@ One page with two grids. The left grid is always the save; the right side change
 
 #### Bottom bar: mode and actions
 
-- **Bottom right**: a single-value left-right selector matching the grid headers. It reads **◀ Campsite ▶** for `mode=campsite` or **◀ {Game} Boxes ▶** for `mode=move`. Both arrows switch to the other destination. With no game selected it's hidden, since only `move` is available.
-- **Bottom left**:
+- **Below the right storage grid**: an attached green footer reads **◀ Campsite ▶** for `mode=campsite` or **◀ {Game} Boxes ▶** for `mode=move`. Both arrows switch to the other destination. With no game selected it's hidden, since only `move` is available.
+- **In View**: the right side has a green header with the selected Pokémon's nickname, level, and gender, and its footer switches between **Overview**, **Moves & Traits**, and **Stats**. The panel content has no scrollbar.
+- **Below the left grid, aligned with the right footer**:
   - **Trade**: opens `mode=trade`.
   - **Save**: **appears only when an action has made changes**. It writes the changes through `activeGame`.
 - **In `mode=trade`**, the bottom bar shows only an **End trade** button, centered. It returns to `mode=move`.
@@ -598,7 +599,7 @@ The **tool selector**, a vertical set of three icon buttons between the two grid
 | **[ ]** | **Grid**           | `groupMove`  | Selects a rectangle of slots and moves them as a group |
 
 - As today, the party allows **View** only.
-- **View details:** while View is selected, the right side is always the **Pokémon page panel**. It shows a prompt until a Pokémon is selected from the save grid, then displays that Pokémon's details. On mobile the same panel is stacked below the save grid. Choosing Move or Grid restores the destination grid.
+- **View details:** while View is selected, the right side is always the **Pokémon page panel**. It shows a prompt until a Pokémon is selected from the save grid, then displays that Pokémon's details. On mobile the same panel is stacked below the save grid. Choosing Move or Grid restores the destination grid. The View tool's Poké Ball is outlined when inactive and filled when selected.
 
 ### Mobile layout
 
@@ -622,4 +623,4 @@ The **tool selector**, a vertical set of three icon buttons between the two grid
 
 - The desktop's left and right halves stack: the **save on top**, the **mode's right side below**.
 - The **tool selector** (View / Move / Grid) runs as a horizontal row between the two halves.
-- The **bottom bar** (Save, Trade, and the Campsite | Save selector) sits under both halves.
+- **Trade** (and Save when needed) sits immediately below the first grid. The Campsite/Boxes selector is attached to the second grid; in View, that footer becomes the detail-page selector.

@@ -37,6 +37,10 @@ export function WorldMap({
           description="Collections and research"
           onClick={onLab}
         />
+        <button type="button" className="hub-map-change" onClick={onBack}>
+          <span aria-hidden="true">←</span>
+          Change game
+        </button>
       </nav>
     </SitePage>
   )

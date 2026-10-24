@@ -10,9 +10,14 @@ import { SitePage } from '../../hub/SitePage'
 import { resolveRoute, routeHref } from '../../routing'
 import { GAME_LABEL } from '../gameDisplay'
 import { useNavigationGuard } from '../navigationGuard'
-import { PokemonDetails } from '../PokemonDetails'
+import { PokemonDetails, PokemonDetailsHeader } from '../PokemonDetails'
 import type { CampDestination } from '../PokeStorageMain'
 import { useStorageOffline, useSpriteResolver } from '../useStorage'
+import {
+  DETAILS_VIEWS,
+  DETAILS_VIEW_LABEL,
+  type DetailsView,
+} from '../pokemonDetailsPages'
 import { GRID_SIZE, groupCells, planGroupMove } from './groupMove'
 import { StorageGrid } from './StorageGrid'
 import { ToolSelector, type StorageTool } from './ToolSelector'
@@ -67,6 +72,7 @@ export function CampPage({
   const boxCount = save?.boxes.length ?? 0
 
   const [tool, setTool] = useState<StorageTool>('view')
+  const [detailsView, setDetailsView] = useState<DetailsView>('overview')
   const [leftPage, setLeftPage] = useState(
     destination?.name === 'cabin' && destination.box !== undefined
       ? destination.box
@@ -160,7 +166,7 @@ export function CampPage({
   const titleOf = (side: Side): string => {
     const kind = side === 'left' ? leftKind : rightKind
     const index = side === 'left' ? leftIndex : rightIndex
-    if (kind === 'camp') return `Camp ${index + 1}`
+    if (kind === 'camp') return `Campsite ${index + 1}`
     return index < boxCount ? save!.boxes[index].name : 'Party'
   }
   const step = (side: Side, delta: number) => {
@@ -182,6 +188,14 @@ export function CampPage({
   const chooseTool = (next: StorageTool) => {
     setTool(next)
     cancel(MESSAGE[next])
+  }
+  const stepDetailsView = (delta: number) => {
+    const index = DETAILS_VIEWS.indexOf(detailsView)
+    setDetailsView(
+      DETAILS_VIEWS[
+        (index + delta + DETAILS_VIEWS.length) % DETAILS_VIEWS.length
+      ]
+    )
   }
 
   const fail = (cause: unknown) =>
@@ -372,7 +386,12 @@ export function CampPage({
     )
 
   return (
-    <SitePage page="Camp" gameId={gameId} onBack={onBack}>
+    <SitePage
+      page="Camp"
+      gameId={gameId}
+      onBack={onBack}
+      bodyClassName="camp-site-body"
+    >
       <div className="camp-page">
         {trading ? (
           <TradePanel gameId={gameId} onTraded={reloadGame} />
@@ -382,6 +401,8 @@ export function CampPage({
               <StorageGrid
                 label={hasGame ? 'Save' : 'Camp Site'}
                 title={titleOf('left')}
+                source={leftKind}
+                gameId={gameId}
                 slots={slotsOf('left')}
                 resolver={resolver}
                 selection={selectionOf('left')}
@@ -389,51 +410,7 @@ export function CampPage({
                 onNext={() => step('left', 1)}
                 onSlot={(slot) => clickSlot('left', slot)}
               />
-            </div>
-            <ToolSelector
-              value={tool}
-              onChange={chooseTool}
-              disabled={partyOpen ? ['moveOne', 'groupMove'] : undefined}
-            />
-            {tool === 'view' ? (
-              <Panel label="Pokémon" className="camp-details">
-                {selected ? (
-                  <PokemonDetails pokemon={selected} resolver={resolver} />
-                ) : (
-                  <div className="camp-details-empty">
-                    <p>Select a Pokémon to view its details.</p>
-                  </div>
-                )}
-              </Panel>
-            ) : (
-              <div className="camp-side camp-right">
-                <StorageGrid
-                  label={rightKind === 'save' ? 'Save' : 'Camp Site'}
-                  title={titleOf('right')}
-                  slots={slotsOf('right')}
-                  resolver={resolver}
-                  selection={selectionOf('right')}
-                  onPrevious={() => step('right', -1)}
-                  onNext={() => step('right', 1)}
-                  onSlot={(slot) => clickSlot('right', slot)}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="camp-bar">
-          {trading ? (
-            <button
-              type="button"
-              className="camp-upload-btn camp-bar-center"
-              onClick={() => goMode('move')}
-            >
-              End trade
-            </button>
-          ) : (
-            <>
-              <div className="camp-bar-actions">
+              <div className="camp-side-footer camp-left-footer">
                 <button
                   type="button"
                   className="camp-upload-btn"
@@ -458,11 +435,74 @@ export function CampPage({
                   </button>
                 )}
               </div>
-              <p className="camp-bar-message" role="status">
-                {message}
-              </p>
-              {hasGame && (
-                <div className="camp-mode-nav" aria-label="Right side">
+            </div>
+            <ToolSelector
+              value={tool}
+              onChange={chooseTool}
+              disabled={partyOpen ? ['moveOne', 'groupMove'] : undefined}
+            />
+            <div
+              className={`camp-side camp-right${tool === 'view' ? ' camp-right--view' : ''}`}
+            >
+              {tool === 'view' ? (
+                <Panel label="Pokémon" className="camp-details">
+                  <PokemonDetailsHeader pokemon={selected} />
+                  {selected ? (
+                    <PokemonDetails
+                      pokemon={selected}
+                      resolver={resolver}
+                      view={detailsView}
+                    />
+                  ) : (
+                    <div className="camp-details-empty">
+                      <p>Select a Pokémon to view its details.</p>
+                    </div>
+                  )}
+                </Panel>
+              ) : (
+                <StorageGrid
+                  label={rightKind === 'save' ? 'Save' : 'Camp Site'}
+                  title={titleOf('right')}
+                  source={rightKind}
+                  gameId={gameId}
+                  slots={slotsOf('right')}
+                  resolver={resolver}
+                  selection={selectionOf('right')}
+                  onPrevious={() => step('right', -1)}
+                  onNext={() => step('right', 1)}
+                  onSlot={(slot) => clickSlot('right', slot)}
+                />
+              )}
+              {tool === 'view' ? (
+                <div
+                  className="camp-mode-nav camp-view-nav"
+                  role="group"
+                  aria-label="Pokémon page"
+                >
+                  <button
+                    type="button"
+                    aria-label="Previous Pokémon page"
+                    onClick={() => stepDetailsView(-1)}
+                  >
+                    <span aria-hidden="true">◀</span>
+                  </button>
+                  <p className="camp-mode-pill">
+                    {DETAILS_VIEW_LABEL[detailsView]}
+                  </p>
+                  <button
+                    type="button"
+                    aria-label="Next Pokémon page"
+                    onClick={() => stepDetailsView(1)}
+                  >
+                    <span aria-hidden="true">▶</span>
+                  </button>
+                </div>
+              ) : hasGame ? (
+                <div
+                  className="camp-mode-nav"
+                  role="group"
+                  aria-label="Right side"
+                >
                   <button
                     type="button"
                     aria-label="Previous right side"
@@ -470,7 +510,7 @@ export function CampPage({
                       goMode(mode === 'campsite' ? 'move' : 'campsite')
                     }
                   >
-                    ◀
+                    <span aria-hidden="true">◀</span>
                   </button>
                   <p className="camp-mode-pill">
                     {mode === 'campsite'
@@ -484,11 +524,29 @@ export function CampPage({
                       goMode(mode === 'campsite' ? 'move' : 'campsite')
                     }
                   >
-                    ▶
+                    <span aria-hidden="true">▶</span>
                   </button>
                 </div>
+              ) : (
+                <div className="camp-side-footer" aria-hidden="true" />
               )}
-            </>
+            </div>
+          </div>
+        )}
+
+        <div className="camp-bar">
+          {trading ? (
+            <button
+              type="button"
+              className="camp-upload-btn camp-bar-center"
+              onClick={() => goMode('move')}
+            >
+              End trade
+            </button>
+          ) : (
+            <p className="camp-bar-message" role="status">
+              {message}
+            </p>
           )}
         </div>
       </div>
