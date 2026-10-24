@@ -35,7 +35,8 @@ the version being served, including local modifications and build scripts.
 
 React, React DOM, Scheduler, fflate, i18next, react-i18next, @babel/runtime,
 html-parse-stringify, and use-sync-external-store retain their package licenses
-(currently MIT). Versions are pinned by `package-lock.json`. The license packager
+(currently MIT). pdfjs-dist (Mozilla pdf.js, Apache-2.0) draws the PDF artwork of
+imported controller skins; it is loaded only when a skin needs it. Versions are pinned by `package-lock.json`. The license packager
 includes their original license texts and copyright statements, recursively
 including production dependencies. Development tools retain their own licenses;
 using a tool to build pkCamp does not relicense that tool or its output.

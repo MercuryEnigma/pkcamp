@@ -7,16 +7,19 @@ import {
   type KeyBindings,
 } from './keyBindings'
 import { SpeedPicker } from './PlayerControls'
+import { SkinManager } from './skins/delta/SkinManager'
+import type { SkinLibraryState } from './skins/delta/useSkinLibrary'
 import type { Speed } from './speeds'
 import './arcadeMenu.css'
 
 /**
  * Pause menu views stay mounted while inactive to preserve control state.
  */
-export type MenuView = 'main' | 'buttons' | 'advanced'
+export type MenuView = 'main' | 'buttons' | 'skins' | 'advanced'
 
 const VIEW_TITLE: Readonly<Record<Exclude<MenuView, 'main'>, string>> = {
   buttons: 'Controls',
+  skins: 'Skins',
   advanced: 'Advanced',
 }
 
@@ -49,6 +52,7 @@ interface ArcadeMenuProps {
   rom: Uint8Array | null
   downloadRom(): void
   chooseRom(): void
+  skinLibrary: SkinLibraryState
 }
 
 export function ArcadeMenu({
@@ -80,6 +84,7 @@ export function ArcadeMenu({
   rom,
   downloadRom,
   chooseRom,
+  skinLibrary,
 }: ArcadeMenuProps) {
   const subView = (view: Exclude<MenuView, 'main'>) => (
     <header className="arcade-menu-header">
@@ -174,6 +179,13 @@ export function ArcadeMenu({
           </button>
           <button
             type="button"
+            className="arcade-menu-item arcade-menu-item--next"
+            onClick={() => setMenuView('skins')}
+          >
+            Skins
+          </button>
+          <button
+            type="button"
             className="arcade-menu-item"
             onClick={exitFromMenu}
           >
@@ -255,6 +267,13 @@ export function ArcadeMenu({
           >
             Restore default keys
           </button>
+        </div>
+      </div>
+
+      <div className="arcade-menu-view" hidden={menuView !== 'skins'}>
+        {subView('skins')}
+        <div className="arcade-menu-body">
+          <SkinManager library={skinLibrary} />
         </div>
       </div>
 

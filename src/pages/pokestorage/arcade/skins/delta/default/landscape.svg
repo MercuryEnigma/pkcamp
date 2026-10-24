@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="812" height="375" viewBox="0 0 812 375" font-family="system-ui, sans-serif" font-weight="700" text-anchor="middle">
+  <rect x="15" y="15" width="100" height="40" rx="20.0" fill="#5b5185"/>
+  <text x="65.0" y="40.76" font-size="16" fill="#d9d3f2" letter-spacing="0.6">L</text>
+  <rect x="697" y="15" width="100" height="40" rx="20.0" fill="#5b5185"/>
+  <text x="747.0" y="40.76" font-size="16" fill="#d9d3f2" letter-spacing="0.6">R</text>
+  <rect x="291" y="15" width="73" height="26" rx="13.0" fill="#8577c7"/>
+  <text x="327.5" y="31.24" font-size="9" fill="#f3f0ff" letter-spacing="0.6">RESTART</text>
+  <rect x="371" y="15" width="73" height="26" rx="13.0" fill="#8577c7"/>
+  <text x="407.5" y="31.24" font-size="9" fill="#f3f0ff" letter-spacing="0.6">MENU</text>
+  <rect x="451" y="15" width="73" height="26" rx="13.0" fill="#8577c7"/>
+  <text x="487.5" y="31.24" font-size="9" fill="#f3f0ff" letter-spacing="0.6">SPEED</text>
+  <path d="M83.13 199h54.74v53.129999999999995h53.129999999999995v54.74h-53.129999999999995v53.129999999999995h-54.74v-53.129999999999995h-53.129999999999995v-54.74h53.129999999999995z" fill="#5b5185"/>
+  <circle cx="110.5" cy="279.5" r="11.270000000000001" fill="#2a2540"/>
+  <circle cx="744.5" cy="265.5" r="37.5" fill="#5b5185"/>
+  <text x="744.5" y="274.86" font-size="26" fill="#d9d3f2" letter-spacing="0.5">A</text>
+  <circle cx="669.5" cy="322.5" r="37.5" fill="#5b5185"/>
+  <text x="669.5" y="331.86" font-size="26" fill="#d9d3f2" letter-spacing="0.5">B</text>
+  <rect x="323" y="335" width="73" height="26" rx="13.0" fill="#5b5185"/>
+  <text x="359.5" y="351.24" font-size="9" fill="#d9d3f2" letter-spacing="0.6">SELECT</text>
+  <rect x="416" y="335" width="73" height="26" rx="13.0" fill="#5b5185"/>
+  <text x="452.5" y="351.24" font-size="9" fill="#d9d3f2" letter-spacing="0.6">START</text>
+</svg>

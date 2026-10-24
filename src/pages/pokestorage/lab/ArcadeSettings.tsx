@@ -12,9 +12,11 @@ import {
   saveKeyBindings,
   type Bindable,
 } from '../arcade/keyBindings'
+import { SkinManager } from '../arcade/skins/delta/SkinManager'
+import { useSkinLibrary } from '../arcade/skins/delta/useSkinLibrary'
 
 /**
- * The Arcade's key bindings and restart confirmation. These are the same
+ * The Arcade's key bindings, restart confirmation, and controller skins. These are the same
  * settings as the Arcade's in-game menu, read and written through the same
  * helpers, so a change here applies the next time the Arcade opens.
  */
@@ -22,6 +24,7 @@ export function ArcadeSettings() {
   const [bindings, setBindings] = useState(loadKeyBindings)
   const [confirmRestart, setConfirmRestart] = useState(loadConfirmRestart)
   const [capturing, setCapturing] = useState<Bindable | null>(null)
+  const skinLibrary = useSkinLibrary()
 
   useEffect(() => {
     if (!capturing) return
@@ -90,6 +93,10 @@ export function ArcadeSettings() {
       >
         Restore default keys
       </button>
+      <section aria-labelledby="settings-skin">
+        <h3 id="settings-skin">Controller skin</h3>
+        <SkinManager library={skinLibrary} />
+      </section>
     </>
   )
 }

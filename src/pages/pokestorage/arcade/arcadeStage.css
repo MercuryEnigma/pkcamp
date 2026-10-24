@@ -1,0 +1,66 @@
+/*
+ * The game screen's own pieces and the save-status line under it. Where
+ * everything sits is the skin's job (skins/delta/deltaSkin.css).
+ */
+.arcade-stage {
+  --gap: clamp(0.4rem, 1.4vmin, 0.75rem);
+  --strip: 1.25rem;
+  /* Breathing room under the page header. */
+  margin-top: clamp(0.6rem, 2vh, 1.25rem);
+}
+.arcade-border-screen {
+  position: relative;
+  background: #05060d;
+  overflow: hidden;
+}
+.arcade-screen {
+  display: block;
+  image-rendering: pixelated;
+}
+.arcade-border-screen:fullscreen {
+  background: #000;
+  place-items: center;
+  display: grid;
+}
+.arcade-border-screen:fullscreen .arcade-screen {
+  aspect-ratio: 3/2;
+  width: min(100vw, 150vh);
+  height: auto;
+}
+
+.arcade-bezel-strip {
+  height: var(--strip);
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
+  display: flex;
+}
+.arcade-save-chip {
+  margin: 0;
+  color: var(--camp-text);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.72rem;
+  font-weight: 700;
+  overflow: hidden;
+}
+.arcade-save-chip[data-status='saved'] {
+  color: var(--camp-forest);
+}
+.arcade-save-chip button {
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.72rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--cab-button-edge);
+  border-radius: 8px;
+  background: var(--camp-forest);
+  color: #fff8e4;
+  cursor: pointer;
+  position: relative;
+}
+.arcade-save-chip button::after {
+  content: '';
+  position: absolute;
+  inset: -0.75rem -0.25rem;
+}

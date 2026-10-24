@@ -1,0 +1,88 @@
+/*
+ * The skin fills the stage above the save-status line. The stage and
+ * this layer share a top-left corner, which the screen's pixel offsets assume.
+ */
+.arcade-stage[data-skin] {
+  --strip: 1.5rem;
+  --skin-chrome: calc(var(--strip) + var(--gap));
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-self: stretch;
+  width: 100%;
+  position: relative;
+  isolation: isolate;
+}
+.arcade-stage[data-skin] .delta-skin {
+  position: absolute;
+  inset: 0 0 var(--skin-chrome) 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.delta-skin-box {
+  position: absolute;
+  pointer-events: none;
+}
+.delta-skin-backdrop {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  z-index: 0;
+}
+/* Art sits under the screen, or over it when the skin overlays the game. */
+.delta-skin-art {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  z-index: 0;
+}
+.delta-skin-box[data-overlay] .delta-skin-art {
+  z-index: 2;
+}
+.delta-skin-hit {
+  position: absolute;
+  z-index: 3;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: pointer;
+}
+.delta-skin-hit[data-debug] {
+  box-sizing: border-box;
+  border: 1px solid red;
+  background: rgb(255 0 0 / 0.15);
+}
+/* The screen wrapper and its chrome flatten so the screen can be placed. */
+.arcade-stage[data-skin]
+  :is(.arcade-screen-area, .arcade-screen-column, .arcade-bezel) {
+  display: contents;
+}
+.arcade-stage[data-skin] .arcade-border-screen:not(:fullscreen) {
+  z-index: 1;
+  border: 0;
+  border-radius: 0;
+  background: #05060d;
+}
+.arcade-stage[data-skin] .arcade-border-screen:not(:fullscreen) .arcade-screen {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  object-fit: contain;
+  box-shadow: none;
+  border-radius: 0;
+}
+.arcade-stage[data-skin] .arcade-bezel-strip {
+  justify-content: center;
+}
+.arcade-stage[data-skin] .arcade-save-chip {
+  color: var(--camp-text);
+}
+.arcade-stage[data-skin] .arcade-save-chip[data-status='saved'] {
+  color: var(--camp-forest);
+}
+
+/* Short windows scroll the page; a skin sizes itself to what is left. */
+.arcade-stage[data-skin] {
+  min-height: 0;
+  flex: 1 1 0;
+}

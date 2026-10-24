@@ -36,13 +36,16 @@ import {
   saveConfirmRestart,
   type ArcadeAction,
 } from './keyBindings'
-import { useControllerLayout } from './useControllerLayout'
 import { useGbaInput } from './useGbaInput'
+import { useMediaQuery } from './useMediaQuery'
 import { ArcadeMenu, type MenuView } from './ArcadeMenu'
-import { ToolbarButton, SpeedPicker } from './PlayerControls'
 import { SPEEDS, type Speed } from './speeds'
 import { PlayerDialogs } from './PlayerDialogs'
-import { GbaController } from './GbaController'
+import './arcadeStage.css'
+import type { SkinAction } from './skins/delta/controllerSkin'
+import { DeltaSkinController } from './skins/delta/DeltaSkinController'
+import { useDeltaSkin } from './skins/delta/useDeltaSkin'
+import { useSkinLibrary } from './skins/delta/useSkinLibrary'
 import { routeHref } from '../../routing'
 import '../camp.css'
 import '../../hub/hub.css'
@@ -75,6 +78,10 @@ function fullscreenSupported(): boolean {
   return typeof document !== 'undefined' && document.fullscreenEnabled === true
 }
 
+/** Touch screens small enough that a skin should use its iPhone layout. */
+const PHONE_QUERY =
+  '(pointer: coarse) and (max-width: 37.5rem), (pointer: coarse) and (max-height: 37.5rem)'
+
 export function ArcadePlayer() {
   const gameId = selectedGame()
   const gameName = gameId ? `Pokémon ${GAME_LABEL[gameId]}` : 'Arcade'
@@ -91,9 +98,17 @@ export function ArcadePlayer() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const startingRef = useRef<AbortController | null>(null)
   const fileTaskRef = useRef(false)
-  useControllerLayout(canvasRef, gameId)
   const romInputRef = useRef<HTMLInputElement>(null)
   const saveInputRef = useRef<HTMLInputElement>(null)
+  const portrait = useMediaQuery('(orientation: portrait)')
+  const phone = useMediaQuery(PHONE_QUERY)
+  const skinLibrary = useSkinLibrary()
+  const skin = useDeltaSkin(skinLibrary, {
+    orientation: portrait ? 'portrait' : 'landscape',
+    device: phone ? 'phone' : 'desktop',
+  })
+  /** Speed to return to when a held fast-forward is released. */
+  const fastForwardFromRef = useRef<Speed | null>(null)
   const sessionRef = useRef<MgbaSession | null>(null)
   const inputRef = useRef<GbaInputTracker | null>(null)
   const saveCheckTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -644,6 +659,20 @@ export function ArcadePlayer() {
       ? inputRef.current?.setSource(source, [button])
       : inputRef.current?.releaseSource(source)
 
+  const handleSkinAction = (action: SkinAction, pressed: boolean) => {
+    if (action === 'fastForward') {
+      if (pressed) {
+        fastForwardFromRef.current ??= speed
+        changeSpeed(SPEEDS[SPEEDS.length - 1])
+      } else if (fastForwardFromRef.current !== null) {
+        changeSpeed(fastForwardFromRef.current)
+        fastForwardFromRef.current = null
+      }
+    } else if (pressed) {
+      shortcutRef.current(action)
+    }
+  }
+
   /** The newest save to download: the running game's, else the next boot. */
   const downloadSave = () => {
     const bytes = (running ? readSnapshot()?.bytes : null) ?? bootBytes
@@ -761,7 +790,7 @@ export function ArcadePlayer() {
             {error && <p className="arcade-message">{error}</p>}
           </div>
 
-          <div className="arcade-stage">
+          <div className="arcade-stage" data-skin="delta">
             <div className="arcade-screen-area">
               <div className="arcade-screen-column">
                 <div className="arcade-bezel">
@@ -799,66 +828,20 @@ export function ArcadePlayer() {
                     </p>
                   </div>
                 </div>
-                {/* Desktop only: Menu, speed, and Restart under the screen. */}
-                <div className="arcade-bar">
-                  <ToolbarButton
-                    label="Menu"
-                    glyph="☰"
-                    onClick={openMenu}
-                    className="arcade-bar-menu"
-                    opensDialog
-                  />
-                  <div className="arcade-bar-speed">
-                    <SpeedPicker
-                      labelId="arcade-bar-speed"
-                      speed={speed}
-                      onChange={changeSpeed}
-                    />
-                    <span
-                      id="arcade-bar-speed"
-                      className="arcade-round-caption"
-                    >
-                      Speed
-                    </span>
-                  </div>
-                  <ToolbarButton
-                    label="Restart"
-                    glyph="↻"
-                    onClick={restart}
-                    className="arcade-bar-restart"
-                    disabled={!running}
-                    title={running ? undefined : 'Start a game first'}
-                  />
-                </div>
               </div>
             </div>
-            <GbaController
+            <DeltaSkinController
+              skin={skin}
+              screenRef={screenRef}
               disabled={!running || paused}
-              onButton={handleButton}
-              center={
-                <ToolbarButton
-                  label="Menu"
-                  glyph="☰"
-                  onClick={openMenu}
-                  className="arcade-deck-menu"
-                  opensDialog
-                />
+              onButtonDown={(button, source) =>
+                handleButton(button, true, source)
               }
+              onButtonUp={(button, source) =>
+                handleButton(button, false, source)
+              }
+              onAction={handleSkinAction}
             />
-            {/* Desktop only, below the D-pad. */}
-            <div className="arcade-guide">
-              <button
-                type="button"
-                className="arcade-guide-button"
-                disabled
-                aria-describedby="arcade-guide-note"
-              >
-                Guide
-              </button>
-              <span id="arcade-guide-note" className="arcade-guide-note">
-                Coming soon
-              </span>
-            </div>
           </div>
         </div>
 
@@ -920,6 +903,7 @@ export function ArcadePlayer() {
               rom={rom}
               downloadRom={() => rom && download(rom, `${fileBase}.gba`)}
               chooseRom={() => romInputRef.current?.click()}
+              skinLibrary={skinLibrary}
             />
           </div>
         </dialog>

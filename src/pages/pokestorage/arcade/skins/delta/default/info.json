@@ -1,0 +1,324 @@
+{
+  "name": "pkCamp Default",
+  "identifier": "dev.pkcamp.gba.default",
+  "gameTypeIdentifier": "com.rileytestut.delta.game.gba",
+  "representations": {
+    "iphone": {
+      "edgeToEdge": {
+        "portrait": {
+          "assets": {
+            "resizable": "portrait.svg"
+          },
+          "mappingSize": {
+            "width": 320,
+            "height": 274
+          },
+          "extendedEdges": {
+            "top": 7,
+            "bottom": 7,
+            "left": 7,
+            "right": 7
+          },
+          "items": [
+            {
+              "inputs": {
+                "up": "up",
+                "down": "down",
+                "left": "left",
+                "right": "right"
+              },
+              "frame": {
+                "x": 6,
+                "y": 56,
+                "width": 132,
+                "height": 132
+              },
+              "extendedEdges": {
+                "top": 15,
+                "bottom": 15,
+                "left": 15,
+                "right": 15
+              }
+            },
+            {
+              "inputs": ["a"],
+              "frame": {
+                "x": 241,
+                "y": 62,
+                "width": 64,
+                "height": 64
+              },
+              "extendedEdges": {
+                "right": 15
+              }
+            },
+            {
+              "inputs": ["b"],
+              "frame": {
+                "x": 176,
+                "y": 121,
+                "width": 64,
+                "height": 64
+              }
+            },
+            {
+              "inputs": ["l"],
+              "frame": {
+                "x": 0,
+                "y": 0,
+                "width": 88,
+                "height": 29
+              },
+              "extendedEdges": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 0
+              }
+            },
+            {
+              "inputs": ["r"],
+              "frame": {
+                "x": 232,
+                "y": 0,
+                "width": 88,
+                "height": 29
+              },
+              "extendedEdges": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 0
+              }
+            },
+            {
+              "inputs": ["quickLoad"],
+              "frame": {
+                "x": 94,
+                "y": 3,
+                "width": 42,
+                "height": 23
+              },
+              "extendedEdges": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 0
+              }
+            },
+            {
+              "inputs": ["menu"],
+              "frame": {
+                "x": 141,
+                "y": 3,
+                "width": 42,
+                "height": 23
+              },
+              "extendedEdges": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 0
+              }
+            },
+            {
+              "inputs": ["toggleFastForward"],
+              "frame": {
+                "x": 188,
+                "y": 3,
+                "width": 42,
+                "height": 23
+              },
+              "extendedEdges": {
+                "top": 0,
+                "bottom": 0,
+                "left": 0,
+                "right": 0
+              }
+            },
+            {
+              "inputs": ["select"],
+              "frame": {
+                "x": 124,
+                "y": 205,
+                "width": 21,
+                "height": 21
+              },
+              "extendedEdges": {
+                "bottom": 13
+              }
+            },
+            {
+              "inputs": ["start"],
+              "frame": {
+                "x": 176,
+                "y": 205,
+                "width": 21,
+                "height": 21
+              },
+              "extendedEdges": {
+                "bottom": 13
+              }
+            }
+          ]
+        },
+        "landscape": {
+          "assets": {
+            "resizable": "landscape.svg"
+          },
+          "mappingSize": {
+            "width": 812,
+            "height": 375
+          },
+          "extendedEdges": {
+            "top": 15,
+            "bottom": 15,
+            "left": 15,
+            "right": 15
+          },
+          "translucent": true,
+          "items": [
+            {
+              "inputs": {
+                "up": "up",
+                "down": "down",
+                "left": "left",
+                "right": "right"
+              },
+              "frame": {
+                "x": 30,
+                "y": 199,
+                "width": 161,
+                "height": 161
+              },
+              "extendedEdges": {
+                "left": 30,
+                "top": 20,
+                "right": 20,
+                "bottom": 20
+              }
+            },
+            {
+              "inputs": ["a"],
+              "frame": {
+                "x": 707,
+                "y": 228,
+                "width": 75,
+                "height": 75
+              },
+              "extendedEdges": {
+                "bottom": 0,
+                "right": 30
+              }
+            },
+            {
+              "inputs": ["b"],
+              "frame": {
+                "x": 632,
+                "y": 285,
+                "width": 75,
+                "height": 75
+              },
+              "extendedEdges": {
+                "right": 0
+              }
+            },
+            {
+              "inputs": ["a", "b"],
+              "frame": {
+                "x": 707,
+                "y": 303,
+                "width": 75,
+                "height": 57
+              },
+              "extendedEdges": {
+                "top": 0,
+                "left": 0,
+                "right": 30
+              }
+            },
+            {
+              "inputs": ["l"],
+              "frame": {
+                "x": 15,
+                "y": 15,
+                "width": 100,
+                "height": 40
+              }
+            },
+            {
+              "inputs": ["r"],
+              "frame": {
+                "x": 697,
+                "y": 15,
+                "width": 100,
+                "height": 40
+              }
+            },
+            {
+              "inputs": ["quickLoad"],
+              "frame": {
+                "x": 291,
+                "y": 15,
+                "width": 73,
+                "height": 26
+              },
+              "extendedEdges": {
+                "right": 3
+              }
+            },
+            {
+              "inputs": ["menu"],
+              "frame": {
+                "x": 371,
+                "y": 15,
+                "width": 73,
+                "height": 26
+              },
+              "extendedEdges": {
+                "left": 3,
+                "right": 3
+              }
+            },
+            {
+              "inputs": ["toggleFastForward"],
+              "frame": {
+                "x": 451,
+                "y": 15,
+                "width": 73,
+                "height": 26
+              },
+              "extendedEdges": {
+                "left": 3
+              }
+            },
+            {
+              "inputs": ["select"],
+              "frame": {
+                "x": 323,
+                "y": 335,
+                "width": 73,
+                "height": 26
+              },
+              "extendedEdges": {
+                "right": 10
+              }
+            },
+            {
+              "inputs": ["start"],
+              "frame": {
+                "x": 416,
+                "y": 335,
+                "width": 73,
+                "height": 26
+              },
+              "extendedEdges": {
+                "left": 10
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -3,9 +3,9 @@
 Implementation and review history is archived in
 [the October handoff](../../../../docs/archive/ARCADE_COORDINATION_2026-10.md).
 
-The release implementation uses `ArcadePlayer`, `GbaController`, and
-`services/emulator/mgbaRuntime`. UI is split into the player, menu, toolbar,
-confirmation dialogs, input hook, and layout hook. Shared save synchronization
+The release implementation uses `ArcadePlayer`, the controller skin
+renderer (`skins/delta/`), and `services/emulator/mgbaRuntime`. UI is split
+into the player, menu, confirmation dialogs, input hook, and skin loader. Shared save synchronization
 remains in `arcadeSync.ts`.
 
 Current requirements and outstanding device/deployment checks are tracked in
