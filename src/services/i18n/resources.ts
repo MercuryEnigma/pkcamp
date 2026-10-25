@@ -30,6 +30,8 @@ import settingsEs from './settings/es.json'
 import startEs from './start/es.json'
 import tradeEs from './trade/es.json'
 import transporterEs from './transporter/es.json'
+import pokedex from './pokedex/en.json'
+import pokedexEs from './pokedex/es.json'
 
 /** English is the source of truth for namespace and key types. */
 export const english = {
@@ -49,6 +51,7 @@ export const english = {
   start: start,
   trade: trade,
   transporter: transporter,
+  pokedex: pokedex,
 }
 
 export const resources = {
@@ -70,5 +73,6 @@ export const resources = {
     start: startEs,
     trade: tradeEs,
     transporter: transporterEs,
+    pokedex: pokedexEs,
   },
 }

@@ -1,0 +1,222 @@
+.guide-reference {
+  min-width: 0;
+  font-size: 0.85rem;
+}
+.guide-reference p {
+  margin: 0.4rem 0;
+}
+.guide-reference .guide-species-link {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.guide-species-link[data-selected='true'] {
+  font-weight: 700;
+}
+.guide-method {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.85em;
+}
+.guide-muted {
+  opacity: 0.75;
+}
+.guide-reference .guide-move-note {
+  margin: 0.4rem 0;
+  font-size: 0.85em;
+}
+.guide-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+}
+.guide-section-title {
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.guide-page-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  opacity: 0.8;
+}
+.guide-page-nav button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.guide-options {
+  min-width: 0;
+}
+.guide-option-tabs {
+  display: flex;
+  width: 100%;
+  gap: 0.25rem;
+  margin: 0.35rem 0 0.7rem;
+}
+.guide-option-tabs button {
+  flex: 1 1 0;
+  width: 100%;
+  min-width: 0;
+  max-width: 10rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+.guide-option-tabs button[aria-selected='true'] {
+  font-weight: 700;
+  box-shadow: inset 0 -2px 0 currentColor;
+}
+.guide-option-panel {
+  min-width: 0;
+}
+.guide-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.guide-data-table th,
+.guide-data-table td {
+  padding: 0.4rem;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  overflow-wrap: anywhere;
+  vertical-align: top;
+}
+.guide-data-table th:first-child,
+.guide-data-table td:first-child {
+  width: 48%;
+}
+.guide-data-table--stats {
+  table-layout: fixed;
+}
+.guide-data-table--stats th,
+.guide-data-table--stats td {
+  width: auto;
+  padding-inline: 0.2rem;
+  text-align: center;
+}
+.guide-data-table--stats th:first-child,
+.guide-data-table--stats td:first-child {
+  width: auto;
+}
+.guide-data-table--stats td {
+  font-size: 1.1em;
+  font-weight: 700;
+}
+
+/*
+ * The Species Data screen: hero column beside the paged reference. Hosts set
+ * --species-muted, --species-sprite-well and --species-text; Camp colours
+ * are the fallback.
+ */
+.species-data-view {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: minmax(11rem, 1fr) minmax(0, 2.9fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+.species-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+.species-hero h2 {
+  margin: 0;
+  color: var(--species-text, var(--camp-text));
+  font-size: 1.25rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.species-hero-sprite {
+  display: grid;
+  place-items: center;
+  /* Leaves room for the name, stamp and credit under it. */
+  width: min(100%, 14rem, max(5rem, calc(100cqh - 15rem)));
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--species-sprite-well, var(--camp-panel));
+}
+.species-hero-sprite img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.species-data {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  min-height: 0;
+  padding-right: 0.5rem;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.species-data h4,
+.species-data p {
+  margin: 0;
+}
+.species-data-heading {
+  margin: 0;
+  color: var(--species-muted, var(--camp-muted));
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.species-data-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 0;
+  padding-top: 0.25rem;
+  overflow: auto;
+}
+@media (max-width: 42rem) {
+  .species-data-view {
+    flex: none;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+  .species-data,
+  .species-data-panel {
+    overflow: visible;
+  }
+  .species-hero-sprite {
+    width: min(100%, 12rem);
+  }
+}

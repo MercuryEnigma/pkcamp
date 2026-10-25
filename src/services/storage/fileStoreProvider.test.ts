@@ -195,6 +195,19 @@ describe('ROMs', () => {
     expect(await provider.hasRom('ruby')).toBe(true)
   })
 
+  it('stores extracted Pokédex data beside the game ROM', async () => {
+    const data = bytes(5, 8, 13)
+    await provider.putRom('ruby', { bytes: bytes(1), extension: 'gba' })
+    await provider.putPokedex('ruby', { bytes: data })
+    expect(arr((await provider.getPokedex('ruby'))?.bytes)).toEqual([5, 8, 13])
+    expect(arr((await store.read('saves/ruby/pokedex.json'))?.bytes)).toEqual([
+      5, 8, 13,
+    ])
+    await provider.discardPokedex('ruby')
+    expect(await provider.getPokedex('ruby')).toBeNull()
+    expect(await provider.getRom('ruby')).not.toBeNull()
+  })
+
   it('normalizes a leading dot and case', async () => {
     await provider.putRom('ruby', { bytes: bytes(1), extension: '.GBA' })
     expect((await provider.getRom('ruby'))!.extension).toBe('gba')

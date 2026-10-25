@@ -14,6 +14,10 @@
   border-radius: 6px;
   background: var(--pc-casing);
   color: var(--pc-text);
+  /* Shared Species Data screen (guide/referenceSections.css). */
+  --species-muted: var(--pc-muted);
+  --species-sprite-well: var(--pc-sprite-well);
+  --species-text: var(--pc-text);
 }
 .pc-label {
   color: var(--pc-muted);
@@ -62,7 +66,8 @@
   border: 4px solid var(--pc-graphite);
   border-radius: 4px;
   background: var(--pc-screen);
-  box-shadow: inset 0 2px 6px color-mix(in srgb, var(--pc-shadow) 18%, transparent);
+  box-shadow: inset 0 2px 6px
+    color-mix(in srgb, var(--pc-shadow) 18%, transparent);
 }
 .pc-screen-body {
   display: flex;
@@ -315,35 +320,45 @@
 }
 
 /* Screen 3: entry */
+.pc-entry-heading {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+.pc-entry-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.pc-entry-tabs button {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--pc-screen-line);
+  border-radius: 4px;
+  background: var(--pc-paper);
+  color: var(--pc-muted);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.pc-entry-tabs button[aria-selected='true'] {
+  border-color: var(--pc-red);
+  color: var(--pc-red-text);
+}
 .pc-entry-view {
   display: grid;
   flex: 1;
   min-height: 0;
   grid-template-columns: minmax(11rem, 1fr) minmax(0, 1.3fr) minmax(0, 1.6fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: 1rem;
   align-items: stretch;
 }
-.pc-entry-hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  text-align: center;
-}
-.pc-entry-sprite {
-  display: grid;
-  place-items: center;
-  /* Leaves room for the name, stamp and credit under it. */
-  width: min(100%, 14rem, max(5rem, calc(100cqh - 15rem)));
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: var(--pc-sprite-well);
-}
-.pc-entry-sprite img {
-  width: 80%;
-  height: 80%;
-  object-fit: contain;
-  image-rendering: pixelated;
+.pc-entry-view > .pc-entry-section {
+  min-height: 0;
+  overflow: auto;
 }
 .pc-stamp {
   padding: 0.2rem 1rem;
@@ -389,6 +404,39 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+.pc-found-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.pc-found-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--pc-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.pc-found-nav button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--pc-screen-line);
+  border-radius: 4px;
+  background: var(--pc-paper);
+  color: var(--pc-text);
+  font: inherit;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.pc-found-nav button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 .pc-found-card {
   display: grid;
@@ -784,9 +832,10 @@
   .pc-entry-view {
     flex: none;
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
   }
-  .pc-entry-sprite {
-    width: min(100%, 12rem);
+  .pc-entry-view > .pc-entry-section {
+    overflow: visible;
   }
   .pc-found {
     flex: none;

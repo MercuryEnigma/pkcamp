@@ -11,6 +11,7 @@ import {
   type StorageSettings,
   type StoredCollectionResult,
   type StoredRom,
+  type StoredPokedex,
   type StoredSave,
 } from './types'
 
@@ -23,6 +24,7 @@ import {
  *   saves/{gameId}/{YYYY-MM-DD}/hardware.sav   cartridge save kept before
  *                                              overwriting the cartridge
  *   saves/{gameId}/{gameId}.{gba|gb|gbc|nds…}
+ *   saves/{gameId}/pokedex.json   ROM-derived Gen III reference data
  *   camp/gen-{n}/camp.json         site positions and file details
  *   camp/gen-{n}/{id}.pk{n}
  *   pokedex/{collectionId}.json    last scan result of one collection
@@ -375,6 +377,19 @@ export class FileStoreProvider implements StorageProvider {
     for (const name of await this.romFileNames(gameId)) {
       await this.store.delete(`${savesFolder(gameId)}/${name}`)
     }
+  }
+
+  async getPokedex(gameId: GameId): Promise<StoredPokedex | null> {
+    const file = await this.store.read(`${savesFolder(gameId)}/pokedex.json`)
+    return file ? { bytes: file.bytes } : null
+  }
+
+  async putPokedex(gameId: GameId, pokedex: StoredPokedex): Promise<void> {
+    await this.store.write(`${savesFolder(gameId)}/pokedex.json`, pokedex.bytes)
+  }
+
+  async discardPokedex(gameId: GameId): Promise<void> {
+    await this.store.delete(`${savesFolder(gameId)}/pokedex.json`)
   }
 
   private async readCampManifest(

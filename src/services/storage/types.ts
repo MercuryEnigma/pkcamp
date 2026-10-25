@@ -43,6 +43,11 @@ export interface StoredRom {
   extension: string
 }
 
+/** Serialized ROM-derived Pokédex data kept beside a game's ROM. */
+export interface StoredPokedex {
+  bytes: Uint8Array
+}
+
 /** Player preferences that follow the player's selected storage. */
 export interface StorageSettings {
   /** Sprite source id, or null for the app default. */
@@ -166,6 +171,10 @@ export interface StorageProvider {
   hasRom(gameId: GameId): Promise<boolean>
   putRom(gameId: GameId, rom: StoredRom): Promise<void>
   discardRom(gameId: GameId): Promise<void>
+
+  getPokedex(gameId: GameId): Promise<StoredPokedex | null>
+  putPokedex(gameId: GameId, pokedex: StoredPokedex): Promise<void>
+  discardPokedex(gameId: GameId): Promise<void>
 
   /** A generation's Camp; a new generation has the default site count. */
   getCamp(generation: Generation): Promise<Camp>

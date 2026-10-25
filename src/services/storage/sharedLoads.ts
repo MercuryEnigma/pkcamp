@@ -29,9 +29,10 @@ export class SharedLoads {
   }
 }
 
-/** A save or Camp that was written or removed. */
+/** Stored game data that was written or removed. */
 export type DataChange =
-  { kind: 'save'; gameId: GameId } | { kind: 'camp'; generation: Generation }
+  | { kind: 'save' | 'rom'; gameId: GameId }
+  | { kind: 'camp'; generation: Generation }
 
 interface SharedProvider {
   provider: StorageProvider
@@ -78,6 +79,9 @@ export function shareStorageLoads(provider: StorageProvider): StorageProvider {
   }
   const overrides: Partial<StorageProvider> = {
     getSave: (id) => loads.read(`save:${id}`, () => provider.getSave(id)),
+    getRom: (id) => loads.read(`rom:${id}`, () => provider.getRom(id)),
+    getPokedex: (id) =>
+      loads.read(`pokedex:${id}`, () => provider.getPokedex(id)),
     hasSave: (id) =>
       loads.read(`save-exists:${id}`, () => provider.hasSave(id)),
     hasRom: (id) => loads.read(`rom-exists:${id}`, () => provider.hasRom(id)),
@@ -125,18 +129,46 @@ export function shareStorageLoads(provider: StorageProvider): StorageProvider {
     },
     putRom: async (id, rom) => {
       loads.invalidate(`rom-exists:${id}`)
+      loads.invalidate(`rom:${id}`)
+      loads.invalidate(`pokedex:${id}`)
       try {
         await provider.putRom(id, rom)
+        await provider.discardPokedex(id)
       } finally {
         loads.invalidate(`rom-exists:${id}`)
+        loads.invalidate(`rom:${id}`)
+        loads.invalidate(`pokedex:${id}`)
       }
+      changed({ kind: 'rom', gameId: id })
     },
     discardRom: async (id) => {
       loads.invalidate(`rom-exists:${id}`)
+      loads.invalidate(`rom:${id}`)
+      loads.invalidate(`pokedex:${id}`)
       try {
         await provider.discardRom(id)
+        await provider.discardPokedex(id)
       } finally {
         loads.invalidate(`rom-exists:${id}`)
+        loads.invalidate(`rom:${id}`)
+        loads.invalidate(`pokedex:${id}`)
+      }
+      changed({ kind: 'rom', gameId: id })
+    },
+    putPokedex: async (id, pokedex) => {
+      loads.invalidate(`pokedex:${id}`)
+      try {
+        await provider.putPokedex(id, pokedex)
+      } finally {
+        loads.invalidate(`pokedex:${id}`)
+      }
+    },
+    discardPokedex: async (id) => {
+      loads.invalidate(`pokedex:${id}`)
+      try {
+        await provider.discardPokedex(id)
+      } finally {
+        loads.invalidate(`pokedex:${id}`)
       }
     },
     discardSave: async (id) => {
@@ -192,7 +224,7 @@ export function subscribeSettings(
   return settingsState(provider).subscribe(listener)
 }
 
-/** Calls `listener` after each save or Camp write through this provider. */
+/** Calls `listener` after each save, ROM or Camp write through this provider. */
 export function subscribeDataChanges(
   provider: StorageProvider,
   listener: (change: DataChange) => void

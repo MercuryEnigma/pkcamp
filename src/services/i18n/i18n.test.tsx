@@ -36,6 +36,7 @@ const namespaces = [
   'news',
   'arcade',
   'services',
+  'pokedex',
 ]
 
 afterEach(async () => {

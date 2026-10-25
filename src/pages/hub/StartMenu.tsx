@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
 import { activeGame } from '../../services/activeGame'
+import { guide } from '../../services/guide'
 import { device } from '../../services/device'
 import { assertArcadeRomMatchesGame } from '../../services/emulator/gbaRom'
 import { ROSTER, type Gen3GameId } from '../../services/saveLibrary'
@@ -142,7 +143,11 @@ export function StartMenu({
   }
   const choose = (id: Gen3GameId) => {
     const hasSave = current?.files[id]?.save
-    afterSetup(() => (hasSave ? onOpenGame(id) : onChooseGame(id)))
+    afterSetup(() => {
+      void guide.select(id, startup.provider)
+      if (hasSave) onOpenGame(id)
+      else onChooseGame(id)
+    })
   }
   const openRom = (id: Gen3GameId) => {
     setRomGameId(id)

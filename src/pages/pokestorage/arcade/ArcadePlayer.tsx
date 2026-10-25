@@ -57,6 +57,8 @@ import '../camp.css'
 import '../../hub/hub.css'
 import './arcadeZone.css'
 import './arcadePlayer.css'
+import { PokedexGuide } from './PokedexGuide'
+import { guide } from '../../../services/guide'
 
 /** How long a shortcut's confirmation shows under the screen. */
 const FLASH_MS = 1500
@@ -99,6 +101,11 @@ export function ArcadePlayer() {
     ? t('ArcadePlayer.pokemon', { value1: GAME_LABEL[gameId] })
     : t('ArcadePlayer.arcade')
   const { provider, ready } = useStorageProvider()
+  // Arcade is a separate document for emulator isolation. Hydrate the same
+  // GuideService here at startup, before the Guide dialog can be opened.
+  useEffect(() => {
+    if (ready) void guide.select(gameId, provider)
+  }, [gameId, provider, ready])
   useSavedTheme()
   /** The screen alone; fullscreen shows just the game. */
   const screenRef = useRef<HTMLDivElement>(null)
@@ -107,7 +114,7 @@ export function ArcadePlayer() {
   const exitRef = useRef<HTMLDialogElement>(null)
   const restartRef = useRef<HTMLDialogElement>(null)
   /** Which dialog paused play, so closing that one resumes it. */
-  const pausedByRef = useRef<'menu' | 'exit' | 'restart' | null>(null)
+  const pausedByRef = useRef<'menu' | 'exit' | 'restart' | 'guide' | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const startingRef = useRef<AbortController | null>(null)
   const fileTaskRef = useRef(false)
@@ -156,6 +163,7 @@ export function ArcadePlayer() {
   const shortcutRef = useRef<(action: ArcadeAction) => void>(() => {})
   /** A shortcut's short confirmation, e.g. "Speed 2×". */
   const [flash, setFlash] = useState<string | null>(null)
+  const [guideOpen, setGuideOpen] = useState(false)
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const {
     bindings,
@@ -700,7 +708,11 @@ export function ArcadePlayer() {
         return
       }
       case 'guide':
-        showFlash(t('arcade:ArcadePlayer.gameGuidesAreComingSoon'))
+        if (running && !paused) {
+          pause('guide')
+          pausedByRef.current = 'guide'
+        }
+        setGuideOpen(true)
         return
       case 'restart':
         restart()
@@ -989,6 +1001,15 @@ export function ArcadePlayer() {
         hidden
         onChange={(event) => void importRom(event.target)}
       />
+      {guideOpen && (
+        <PokedexGuide
+          gameId={gameId}
+          onClose={() => {
+            setGuideOpen(false)
+            if (pausedByRef.current === 'guide') resume()
+          }}
+        />
+      )}
       <input
         ref={saveInputRef}
         type="file"

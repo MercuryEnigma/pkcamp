@@ -44,6 +44,11 @@ export function packageLicenses({ output, framework }) {
     'THIRD-PARTY-NOTICES.md',
     'Credits and component licenses'
   )
+  include(
+    'src/services/guide/HEXMANIAC-ADVANCE-LICENSE.txt',
+    'hexmaniac-advance/LICENSE.txt',
+    'HexManiac Advance reference data — MIT'
+  )
   include('MODIFICATIONS.md', 'MODIFICATIONS.md', 'pkCamp modifications')
 
   const vendors = [

@@ -154,6 +154,16 @@ function redirectBaseSlash(): Plugin {
 export default defineConfig({
   plugins: [react(), redirectBaseSlash(), pkhexWasmAssets(), mgbaWasmAssets()],
   base: '/pkcamp/',
+  // An isolated Arcade document can only start workers served with its
+  // isolation headers. Keep built worker entries and imports in that scope.
+  worker: {
+    rolldownOptions: {
+      output: {
+        entryFileNames: 'arcade/workers/[name]-[hash].js',
+        chunkFileNames: 'arcade/workers/[name]-[hash].js',
+      },
+    },
+  },
   build: {
     rolldownOptions: {
       input: {

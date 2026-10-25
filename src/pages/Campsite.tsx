@@ -10,6 +10,7 @@ import type { CampDestination } from './pokestorage/PokeStorageMain'
 import { useAppNavigation } from './context/appNavigation'
 import { resolveRoute, routeHref } from './routing'
 import { activeGame } from '../services/activeGame'
+import { guide } from '../services/guide'
 import { usePkHex } from './context/PkHexContext'
 import type { StorageProvider } from '../services/storage'
 
@@ -69,6 +70,11 @@ export function Campsite() {
 
   const routePage = resolved.kind === 'route' ? resolved.route.page : null
   const routeGameId = resolved.kind === 'route' ? resolved.route.gameId : null
+  // Reference loading starts with game selection, independently of PKHeX.
+  // This service instance survives Hub, Camp and Lab route changes.
+  useEffect(() => {
+    if (startup.ready) void guide.select(routeGameId, startup.provider)
+  }, [routeGameId, startup.provider, startup.ready])
   useEffect(() => {
     if (!startup.ready) return
     const providerChanged =

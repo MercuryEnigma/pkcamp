@@ -30,6 +30,8 @@ import { PcFilterScreen } from './PcFilterScreen'
 import { PokemonView } from './PokemonView'
 import { GEN_3_GAMES } from './labStore'
 import { useLabData } from './useLabData'
+import { guide } from '../../../services/guide'
+import { useGuide } from '../../context/useGuide'
 import './pc.css'
 
 /** Entry ids in group order, then any entry no group lists. */
@@ -78,6 +80,7 @@ export function CollectionView({
   const filters = useMemo(() => activeFilters(entryFilters), [entryFilters])
   // The Pokédex button names the collection once one has been opened.
   const [opened, setOpened] = useState(false)
+  const reference = useGuide()
 
   const currentId = state.currentId ?? state.enabledIds[0] ?? null
   const definition =
@@ -100,6 +103,15 @@ export function CollectionView({
   }, [campReturns])
 
   const definitionId = definition.id
+  const selectedDexNumber = selectedId
+    ? entryDexNumber(definition.pokemon[selectedId])
+    : null
+  const referenceSpecies =
+    reference.gameId === gameId && selectedDexNumber !== null
+      ? (guide.getSpecies(selectedDexNumber) ?? null)
+      : null
+  const referenceStatus =
+    reference.gameId === gameId ? reference.status : 'loading'
   const saveScroll = useCallback(
     (scrollTop: number) =>
       collections.updateWorkspace(definitionId, { scrollTop }),
@@ -250,7 +262,10 @@ export function CollectionView({
         <button
           type="button"
           aria-pressed={active === 'grid' || active === 'entry'}
-          onClick={() => setScreen('grid')}
+          onClick={() => {
+            setOpened(true)
+            setScreen('grid')
+          }}
         >
           {opened
             ? collectionDisplay(definition).name
@@ -358,6 +373,12 @@ export function CollectionView({
             registered={isRegistered(entryStatus)}
             matches={matches}
             resolver={resolver}
+            referenceSpecies={referenceSpecies}
+            referenceStatus={referenceStatus}
+            referenceTitle={reference.dataset?.game.title ?? null}
+            referenceDataset={
+              reference.gameId === gameId ? reference.dataset : null
+            }
             canOpen={(match) => 'camp' in match || match.gameId === gameId}
             onOpenInCamp={open}
             onBack={() => setScreen('grid')}

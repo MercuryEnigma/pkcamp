@@ -11,6 +11,7 @@ import type {
   StorageSettings,
   StoredCollectionResult,
   StoredRom,
+  StoredPokedex,
 } from './types'
 
 export type {
@@ -24,6 +25,7 @@ export type {
   StorageSettings,
   StoredCollectionResult,
   StoredRom,
+  StoredPokedex,
   StoredSave,
 } from './types'
 export {
@@ -130,6 +132,15 @@ class ActiveStorage implements StorageProvider {
   }
   discardRom(gameId: GameId) {
     return this.provider.discardRom(gameId)
+  }
+  getPokedex(gameId: GameId) {
+    return this.provider.getPokedex(gameId)
+  }
+  putPokedex(gameId: GameId, pokedex: StoredPokedex) {
+    return this.provider.putPokedex(gameId, pokedex)
+  }
+  discardPokedex(gameId: GameId) {
+    return this.provider.discardPokedex(gameId)
   }
   getCamp(generation: Generation) {
     return this.provider.getCamp(generation)

@@ -1,0 +1,128 @@
+.pokedex-guide,
+.pokedex-guide * {
+  box-sizing: border-box;
+}
+.pokedex-guide {
+  position: fixed;
+  inset: 5vh 5vw;
+  z-index: 1000;
+  width: min(90vw, 70rem);
+  max-width: none;
+  max-height: 90vh;
+  margin: auto;
+  padding: 1.25rem;
+  overflow: auto;
+  color: var(--camp-text);
+  background: var(--camp-surface);
+  border: 4px solid var(--camp-panel-border);
+  border-radius: 1rem;
+  box-shadow: 0 1rem 4rem
+    color-mix(in srgb, var(--camp-shadow-color) 60%, transparent);
+  font:
+    1rem/1.45 'Inter',
+    'Nunito',
+    system-ui,
+    sans-serif;
+  text-align: left;
+}
+.pokedex-guide::backdrop {
+  background: color-mix(in srgb, var(--camp-shadow-color) 70%, transparent);
+}
+/* Dialog chrome only; the Species Data screen styles its own controls. */
+.pokedex-guide-header button,
+.pokedex-guide-list button,
+.pokedex-guide > [role='status'] button,
+.pokedex-guide input {
+  border: 1px solid var(--camp-panel-border);
+  border-radius: 4px;
+  background: var(--camp-panel);
+  color: var(--camp-text);
+  font: inherit;
+}
+.pokedex-guide button {
+  cursor: pointer;
+}
+.pokedex-guide button:focus-visible,
+.pokedex-guide input:focus-visible {
+  outline: 2px solid var(--camp-leaf);
+  outline-offset: 2px;
+}
+.pokedex-guide-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+.pokedex-guide-header p {
+  margin: 0;
+  opacity: 0.7;
+}
+.pokedex-guide-header h2 {
+  margin: 0.25rem 0 1rem;
+}
+.pokedex-guide-header button {
+  padding: 0 0.5rem;
+  font-size: 1.5rem;
+}
+.pokedex-guide-content {
+  display: grid;
+  grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
+  gap: 1.25rem;
+}
+.pokedex-guide-content > section {
+  min-width: 0;
+}
+.pokedex-guide-list label {
+  display: grid;
+  gap: 0.35rem;
+}
+.pokedex-guide-list input {
+  width: 100%;
+  min-width: 0;
+  padding: 0.6rem;
+}
+.pokedex-guide-list ul {
+  max-height: 55vh;
+  overflow: auto;
+  padding: 0;
+  list-style: none;
+}
+.pokedex-guide-list li button {
+  width: 100%;
+  padding: 0.5rem;
+  text-align: left;
+}
+.pokedex-guide-list li button[aria-pressed='true'] {
+  background: var(--camp-panel-hover);
+}
+.pokedex-guide-details {
+  display: flex;
+  flex-direction: column;
+  height: 65vh;
+  min-width: 0;
+  min-height: 0;
+}
+.pokedex-guide-warning {
+  padding: 0.6rem;
+  background: var(--camp-panel-hover);
+}
+/* The Species Data screen needs the dialog's full width before it stacks. */
+@media (max-width: 60rem) {
+  .pokedex-guide-content {
+    grid-template-columns: 1fr;
+  }
+  .pokedex-guide-list ul {
+    max-height: 25vh;
+  }
+}
+@media (max-width: 680px) {
+  .pokedex-guide {
+    inset: 2vh 2vw;
+    width: 96vw;
+    max-height: 96vh;
+    padding: 0.85rem;
+  }
+  .pokedex-guide-details {
+    height: auto;
+  }
+}

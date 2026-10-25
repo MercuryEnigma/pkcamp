@@ -1,4 +1,4 @@
-# Gen III Pokédex Service
+# Guide Service: Gen III Pokédex Reference
 
 ## Purpose
 
@@ -8,7 +8,7 @@ The Arcade Guide uses this data for species and location research. The Lab PC us
 
 ## Extraction and data model
 
-- Implement the parser under `src/services/pokedex`, independently of React, storage, and translation rendering.
+- Implement the parser under `src/services/guide`, independently of React, storage, and translation rendering.
 - Use HexManiac Advance as the reference for ROM readers, pointers, text decoding, table definitions, discovery, and optional TOML metadata. Retain required license attribution for ported code and definitions.
 - Identify supported ROM layouts using headers, revisions, and structural validation. Run extraction in a Web Worker.
 - Extract identity, base stats, types, catch rate, experience, EV yields, abilities, breeding data, held items, learnsets, evolutions, Pokédex text, measurements, and wild encounters.
@@ -23,24 +23,38 @@ The Arcade Guide uses this data for species and location research. The Lab PC us
 
 ## Public service and lifecycle
 
-Expose these capabilities:
+`GuideService` owns one retained dataset for the selected ROM. The exported
+`guide` instance survives Hub, Camp, and Lab navigation. Selecting a game starts
+initialization immediately, independently of save parsing. Screens subscribe to
+`getSnapshot` with `useGuide` and query already retained data:
 
 ```ts
-extract(rom, options?): Promise<PokedexDataset>
-load(gameId, options?): Promise<PokedexDataset>
-getSpecies(dataset, nationalDexNumber)
-getEvolutionFamily(dataset, nationalDexNumber)
-getEncounters(dataset, nationalDexNumber)
-getLocation(dataset, mapId)
-searchSpecies(dataset, query)
+guide.select(gameId, provider, options?): Promise<void>
+guide.getSnapshot(): GuideSnapshot
+guide.subscribe(listener): () => void
+guide.getSpecies(nationalDexNumber)
+guide.getEvolutionFamily(nationalDexNumber)
+guide.getEncounters(nationalDexNumber)
+guide.getLocation(mapId)
+guide.searchSpecies(query)
+guide.refresh(): Promise<void>
+guide.clear(): void
 ```
 
-- `extract` accepts ROM bytes or a file and optional TOML metadata, without persisting results.
-- `load` reads the selected game's ROM and sidecar through Storage Service, validates them, and extracts and persists when necessary.
-- Lookup functions receive an explicit dataset so simultaneous consumers cannot accidentally read another game's information.
-- Include schema version, extractor version, ROM SHA-256, metadata fingerprint, detected game details, capability availability, and structured warnings in each dataset.
-- Share concurrent loads for the same ROM and metadata. Reject obsolete results when the selected game, ROM, metadata, or storage provider changes.
-- Expose loading, ready, unsupported, and error states to consumers. Extraction failure must not prevent playing the ROM or browsing collections.
+- Repeat selections share initialization or reuse the in-memory dataset. Querying
+  a species or opening a view performs no storage reads or extraction.
+- `extract` remains a pure ROM-to-dataset operation under `services/guide`, backed
+  by a worker with no UI, storage, or translation dependencies.
+- Keep the dataset frozen in memory until the game, ROM, metadata, or provider
+  changes. Abort obsolete workers and reject obsolete results.
+- Subscribe to successful ROM changes in Storage Service and initialize again
+  automatically when the selected ROM is replaced or removed.
+- Expose idle, loading, ready, unavailable, unsupported, and error states.
+  Extraction failure must not prevent playing or browsing collections.
+- Arcade is a separate document for emulator isolation. Initialize its service
+  alongside startup ROM loading and hydrate its sidecar before opening Guide.
+- Include schema version, extractor version, ROM SHA-256, metadata fingerprint,
+  detected game details, capability availability, and structured warnings.
 
 ## Storage and localization
 
@@ -70,7 +84,7 @@ Extend the i18n service with move-name resolution and evolution-description form
 
 - Replace the Arcade Guide placeholder with species search, species details, evolution-family navigation, and location encounter browsing.
 - Let the Lab PC load the selected game's dataset independently of whether Arcade has been opened.
-- Add reference information to the existing collection entry screen, linked by National Dex number.
+- Add reference information in a dedicated tab on the existing collection entry screen, linked by National Dex number. Preserve the three-column collection requirements and matches layout.
 - Clearly identify the reference ROM when collection matches span multiple games.
 - Preserve collection requirements, registration, matches, and Camp navigation.
 - Show unavailable or partial reference information without blocking existing screens or silently substituting vanilla facts for unsupported hack data.
@@ -100,3 +114,15 @@ Add meaningful regression tests alongside each stage:
 - Run the relevant Vitest suites, `npm run check:i18n`, lint, and production build.
 
 Acceptance: a supported ROM produces one reusable dataset that powers both screens, survives reload through the selected storage backend, and never presents uncertain mappings as verified facts.
+
+Implementation architecture and lifecycle details: [Guide service](../src/services/guide/ARCHITECTURE.md).
+
+## Implemented reference expansion
+
+The shared Guide and PC reference views now include full evolution families,
+level-up/egg/TM-HM move tabs, ordinary wild encounter locations and slot chances,
+and derived evolution/breeding acquisition routes. Egg moves include inherited
+moves and compatible potential fathers derived from ROM learnsets and breeding
+rules. Referenced species can be opened in place. Stationary and gift encounter
+extraction remains future work. See the Guide service architecture for capability
+and rule details.

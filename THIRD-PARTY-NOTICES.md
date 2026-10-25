@@ -41,7 +41,15 @@ includes their original license texts and copyright statements, recursively
 including production dependencies. Development tools retain their own licenses;
 using a tool to build pkCamp does not relicense that tool or its output.
 
+## ROM extraction reference
+
 ## Protocol references and related projects
+
+[HexManiac Advance](https://github.com/haven1433/HexManiacAdvance) is the
+reference for the initial vanilla Gen III ROM table anchors. Its MIT notice is
+preserved at
+[src/services/guide/HEXMANIAC-ADVANCE-LICENSE.txt](src/services/guide/HEXMANIAC-ADVANCE-LICENSE.txt)
+and packaged at `licenses/hexmaniac-advance/LICENSE.txt`.
 
 [GBLink-Firmware](https://github.com/GB-Link/GBLink-Firmware) and
 [Celio-Client](https://github.com/Celio-Link/Celio-Client) (GPL v3) were protocol
