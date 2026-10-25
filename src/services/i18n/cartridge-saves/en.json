@@ -1,0 +1,40 @@
+{
+  "GbaSavePanel": {
+    "cabin": "{{value1}} Cabin",
+    "restoreToGba": "Restore {{cabin}} to GBA",
+    "backUpFromGba": "Back up {{cabin}} from GBA",
+    "readingTheSave": "Reading the save",
+    "sendingTheBackup": "Sending the backup",
+    "ifTheInitialBackupCompletedItIsStoredAsThe": "If the initial backup completed, it is stored as the hardware backup in this Cabin.",
+    "savingTheBackup": "Saving the {{value1}} backup…",
+    "theCartridgeSaveWasOverwritten": "The cartridge save was overwritten.",
+    "insertAndPowerOnWhileHoldingStartSelect": "Insert {{value1}} and power on while holding START + SELECT.",
+    "theCartridgeSCurrentSaveWillBeBackedUpBefore": "The cartridge's current save will be backed up before {{cabin}} is written to it."
+  },
+  "CartridgeSaves": {
+    "backUp": "Back up",
+    "restore": "Restore",
+    "isASaveRestoreSupportsRubySapphireEmeraldFireredAnd": "{{name}} is a {{aggregated}} save. Restore supports Ruby, Sapphire, Emerald, FireRed and LeafGreen.",
+    "or": " or ",
+    "isnTASaveFilePkhexCanRead": "{{name}} isn't a save file PKHeX can read.",
+    "backUpACartridgeSave": "Back up a cartridge save",
+    "readingTheSave": "Reading the save",
+    "downloaded": "Downloaded {{name}}.",
+    "restore2": "Restore {{name}}",
+    "sendingTheSave": "Sending the save",
+    "overwriteTheSaveOnTheCartridgeWith": "Overwrite the save on the {{label}} cartridge with {{name}}?",
+    "ifTheFirstStepFinishedItsPreviousSaveIsThat": "If the first step finished, its previous save is that game's Cabin hardware backup.",
+    "restoredToTheCartridgeItsPreviousSaveIsTheCabin": "Restored {{name}} to the {{label}} cartridge. Its previous save is the {{label3}} Cabin's hardware backup.",
+    "chooseATask": "Choose a task",
+    "downloadTheSaveFromAGbaCartridgeTheGameIs": "Download the save from a GBA cartridge. The game is detected from the cartridge.",
+    "switchSaveDownloadIs": "Switch save download is",
+    "inResearch": "In research",
+    "chooseARubySapphireEmeraldFireredOrLeafgreenSavFile": "Choose a Ruby, Sapphire, Emerald, FireRed or LeafGreen .sav file. The cartridge must match the file. A Ruby or Sapphire save fits either cartridge.",
+    "saveFile": "Save file",
+    "saveToolsAreStillLoading": "Save tools are still loading…",
+    "isAPokeMonSave": "{{name}} is a Pokémon {{label}} save.",
+    "chooseASaveFileToRestore": "Choose a save file to restore.",
+    "insertAndPowerOnWhileHoldingStartSelect": "Insert {{label}} and power on while holding START + SELECT.",
+    "theCartridgeSCurrentSaveIsStoredFirstAsIts": "The cartridge's current save is stored first as its game's Cabin hardware backup."
+  }
+}

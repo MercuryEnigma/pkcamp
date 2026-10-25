@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import { shareStorageLoads } from './sharedLoads'
 import type { GameId, Generation } from '../saveLibrary'
 import { MemoryFileStore, type FileStore } from './fileStore'
@@ -50,7 +51,12 @@ export const localFileStore: FileStore = createLocalStore()
 
 /** Browser-local storage, used whenever no cloud account is connected. */
 export const localStorageProvider: StorageProvider = shareStorageLoads(
-  new FileStoreProvider(localFileStore, { id: 'local', label: 'This browser' })
+  new FileStoreProvider(localFileStore, {
+    id: 'local',
+    get label() {
+      return i18n.t('services:storage.thisBrowser')
+    },
+  })
 )
 
 type Listener = (provider: StorageProvider) => void

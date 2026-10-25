@@ -3,14 +3,18 @@
 Arcade lets players play Ruby, Sapphire, Emerald, FireRed, and LeafGreen using
 mGBA WASM directly. pkCamp owns the player UI, controls, and shared ROM/save
 handling through a small emulator adapter. gbajs3 is an implementation reference.
-The [roadmap](ARCADE_ZONE_ROADMAP.md) tracks implementation and verification.
+The [site roadmap](../ROADMAP.md#arcade-zone) tracks remaining work.
 
-## Two-page flow
+## Game-first flow
 
-The world menu opens a five-game chooser showing ROM/save availability and the
-active storage source. Selecting a game opens its player; Back returns to the
-chooser, then the world menu. File tools and help stay inline or in dialogs.
-Missing ROMs prompt an import on the player page; missing saves allow a new game.
+The player picks a game once on Start, from cartridge cards showing ROM/save
+availability. Start can also manage a game's ROM without entering the Hub. The
+Hub's Arcade card opens `/pkcamp/arcade/?game={gameId}` with a full page load
+and is disabled when no game is selected. Exit Arcade returns to
+`/pkcamp/hub/?game={gameId}`; a missing or invalid `?game=` redirects to the
+Hub. The player is the only Arcade page. File tools and help stay in its menu
+and dialogs. A missing ROM prompts Insert ROM on the player; a missing save
+allows a new game.
 
 ## Shared ROMs and saves
 
@@ -39,7 +43,9 @@ session data for Retry or Download SAV without switching storage silently.
 ## Controls and responsive layout
 
 Provide visible D-pad, A, B, L, R, Start, and Select buttons, with simultaneous
-touch inputs and keyboard support. Release held inputs when focus is lost or
+touch inputs and keyboard support. On-screen controls are drawn by a controller
+skin: a built-in default, or Delta `.deltaskin` files imported and managed in
+the Arcade tab of Lab Settings and stored on this device. Release held inputs when focus is lost or
 play stops. Include Play/Pause, Reset, Mute/Volume, and supported Fullscreen.
 Start audio through a user gesture and pause when the page is hidden.
 
@@ -67,7 +73,6 @@ explicit save I/O and emulator-owned persistence disabled.
 Keep zone UI under `pages/pokestorage/arcade/` and runtime bindings under
 `services/emulator/`. Lazy-load matched JS/WASM assets, clean up runtime and
 input resources on exit, and include required licenses and source/build links.
-Build the shared-file session before the two pages and responsive controller.
 
 Verify all five games from Arcade through automatic save sync, Cabin reload,
 and Lab refresh with local storage and Dropbox. Cover invalid files, new-game saves,

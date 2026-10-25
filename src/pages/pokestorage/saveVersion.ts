@@ -1,6 +1,7 @@
+import { i18n } from '../../services/i18n'
 import type { SaveGame } from '../../services/pkhex'
 import type { Gen3GameId } from '../../services/saveLibrary'
-import { GAME_LABEL } from './gameDisplay'
+import { getGameLabel } from './gameDisplay'
 
 const EXPECTED_VERSION: Readonly<
   Record<Gen3GameId, SaveGame['version']['exact']>
@@ -26,7 +27,10 @@ export function assertSaveMatchesCabin(
     (exact === 'RubySapphire' && RUBY_SAPPHIRE.has(gameId))
   if (!matches) {
     throw new Error(
-      `This is a ${save.version.aggregated} save, not a ${GAME_LABEL[gameId]} save.`
+      i18n.t('camp:saveVersion.thisIsASaveNotASave', {
+        aggregated: save.version.aggregated,
+        value2: getGameLabel(gameId),
+      })
     )
   }
 }

@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 /**
  * Public adapter boundary for reading Pokemon save files.
  *
@@ -62,7 +63,11 @@ function assertValidIndex(
 ): void {
   if (!Number.isInteger(index) || index < 0 || index >= slots.length) {
     throw new RangeError(
-      `${label} index ${index} is out of bounds (0..${slots.length - 1})`
+      i18n.t('services:adapter.indexIsOutOfBounds0', {
+        label: label,
+        index: index,
+        value3: slots.length - 1,
+      })
     )
   }
 }
@@ -87,12 +92,21 @@ export function initializePokemonSaveAdapter(
       let disposed = false
 
       const requireOpen = (): void => {
-        if (disposed) throw new Error('Cannot use a disposed save')
+        if (disposed)
+          throw new Error(i18n.t('services:adapter.cannotUseADisposedSave'))
       }
       const slotAt = (location: BoxLocation): SaveSlot => {
-        assertValidIndex(data.boxes, location.box, 'Box')
+        assertValidIndex(
+          data.boxes,
+          location.box,
+          i18n.t('services:adapter.box')
+        )
         const box = data.boxes[location.box]
-        assertValidIndex(box.slots, location.slot, 'Box slot')
+        assertValidIndex(
+          box.slots,
+          location.slot,
+          i18n.t('services:adapter.boxSlot')
+        )
         return box.slots[location.slot]
       }
       const writeSlot = (location: BoxLocation, pokemon: SaveSlot): void => {
@@ -110,7 +124,8 @@ export function initializePokemonSaveAdapter(
           const source = slotAt(from)
           const destination = slotAt(to)
           if (locationKey(from) === locationKey(to)) return
-          if (source === null) throw new Error('Cannot move an empty box slot')
+          if (source === null)
+            throw new Error(i18n.t('services:adapter.cannotMoveAnEmptyBoxSlot'))
 
           writeSlot(to, source)
           writeSlot(from, destination)
@@ -118,7 +133,9 @@ export function initializePokemonSaveAdapter(
         movePokemonGroup(moves: readonly PokemonMove[]): void {
           requireOpen()
           if (moves.length === 0)
-            throw new Error('A group move must contain at least one slot')
+            throw new Error(
+              i18n.t('services:adapter.aGroupMoveMustContainAtLeastOneSlot')
+            )
 
           const sourceKeys = new Set<string>()
           const destinationKeys = new Set<string>()
@@ -126,21 +143,35 @@ export function initializePokemonSaveAdapter(
             const fromKey = locationKey(from)
             const toKey = locationKey(to)
             if (sourceKeys.has(fromKey))
-              throw new Error(`Duplicate group-move source ${fromKey}`)
+              throw new Error(
+                i18n.t('services:adapter.duplicateGroupMoveSource', {
+                  fromKey: fromKey,
+                })
+              )
             if (destinationKeys.has(toKey))
-              throw new Error(`Duplicate group-move destination ${toKey}`)
+              throw new Error(
+                i18n.t('services:adapter.duplicateGroupMoveDestination', {
+                  toKey: toKey,
+                })
+              )
             sourceKeys.add(fromKey)
             destinationKeys.add(toKey)
             return { from, to, pokemon: slotAt(from), destination: slotAt(to) }
           })
 
           if (!snapshot.some(({ pokemon }) => pokemon !== null)) {
-            throw new Error('Cannot move a group containing only empty slots')
+            throw new Error(
+              i18n.t(
+                'services:adapter.cannotMoveAGroupContainingOnlyEmptySlots'
+              )
+            )
           }
           for (const { to, destination } of snapshot) {
             if (destination !== null && !sourceKeys.has(locationKey(to))) {
               throw new Error(
-                'Group move destination overlaps a Pokémon outside the selected group'
+                i18n.t(
+                  'services:adapter.groupMoveDestinationOverlapsAPokeMonOutsideTheSelected'
+                )
               )
             }
           }
@@ -183,7 +214,7 @@ export function initializePokemonSaveAdapter(
       slotIndex: number,
       pokemon: PokemonNode | null
     ): PartyNode {
-      assertValidIndex(party, slotIndex, 'Party slot')
+      assertValidIndex(party, slotIndex, i18n.t('services:adapter.partySlot'))
       const next = party.slice()
       next[slotIndex] = pokemon
       return next
@@ -194,7 +225,7 @@ export function initializePokemonSaveAdapter(
       slotIndex: number,
       pokemon: PokemonNode | null
     ): BoxNode {
-      assertValidIndex(box.slots, slotIndex, 'Box slot')
+      assertValidIndex(box.slots, slotIndex, i18n.t('services:adapter.boxSlot'))
       const slots = box.slots.slice()
       slots[slotIndex] = pokemon
       return { name: box.name, slots }

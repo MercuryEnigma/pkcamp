@@ -1,3 +1,5 @@
+import { collectionDisplay } from './collectionDisplay'
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import type { StorageProvider } from '../../../services/storage'
 import { storageErrorMessage, useStorageProvider } from '../useStorage'
@@ -21,6 +23,8 @@ interface Loaded {
  * has loaded, `ready` is false and nothing should be scanned.
  */
 export function useLabData() {
+  const { t } = useTranslation(['lab', 'common'] as const)
+
   const { provider, ready: storageReady } = useStorageProvider()
   const [loaded, setLoaded] = useState<Loaded | null>(null)
   const [errors, setErrors] = useState<string[]>([])
@@ -60,7 +64,9 @@ export function useLabData() {
       json = JSON.parse(await file.text())
     } catch (cause) {
       const reason = cause instanceof Error ? cause.message : String(cause)
-      setErrors([`${file.name} is not valid JSON: ${reason}`])
+      setErrors([
+        t('useLabData.isNotValidJson', { name: file.name, reason: reason }),
+      ])
       return null
     }
     const result = validateCollection(json)
@@ -71,21 +77,30 @@ export function useLabData() {
     const { definition } = result
     if (isBuiltInId(definition.id)) {
       setErrors([
-        `id: "${definition.id}" is a built-in collection and cannot be replaced`,
+        t('useLabData.idIsABuiltInCollectionAndCannotBeReplaced', {
+          id: definition.id,
+        }),
       ])
       return null
     }
     const exists = uploads.some((c) => c.id === definition.id)
     if (
       exists &&
-      !window.confirm(`Replace the uploaded collection "${definition.id}"?`)
+      !window.confirm(
+        t('useLabData.replaceTheUploadedCollection', { id: definition.id })
+      )
     ) {
       return null
     }
     try {
       await saveUploadedCollection(provider, definition)
     } catch (cause) {
-      setErrors([`${file.name} was not saved: ${storageErrorMessage(cause)}`])
+      setErrors([
+        t('useLabData.wasNotSaved', {
+          name: file.name,
+          value2: storageErrorMessage(cause),
+        }),
+      ])
       return null
     }
     update({
@@ -99,7 +114,9 @@ export function useLabData() {
     if (isBuiltInId(definition.id)) return false
     if (
       !window.confirm(
-        `Remove "${definition.name}" and its saved history? This cannot be undone.`
+        t('useLabData.removeAndItsSavedHistoryThisCannotBeUndone', {
+          name: collectionDisplay(definition).name,
+        })
       )
     ) {
       return false
@@ -107,7 +124,9 @@ export function useLabData() {
     try {
       await discardUploadedCollection(provider, definition.id)
     } catch (cause) {
-      setErrors([`Not removed: ${storageErrorMessage(cause)}`])
+      setErrors([
+        t('useLabData.notRemoved', { value1: storageErrorMessage(cause) }),
+      ])
       return false
     }
     update({ uploads: uploads.filter((c) => c.id !== definition.id) })
@@ -123,7 +142,9 @@ export function useLabData() {
   async function clearHistory(definition: CollectionDefinition) {
     if (
       !window.confirm(
-        `Clear the saved history of "${definition.name}"? Entries no longer in a Cabin or Camp Site will go back to Missing.`
+        t('useLabData.clearTheSavedHistoryOfEntriesNoLongerInA', {
+          name: collectionDisplay(definition).name,
+        })
       )
     ) {
       return false
@@ -132,7 +153,9 @@ export function useLabData() {
       await provider.discardCollectionResult(definition.id)
       return true
     } catch (cause) {
-      setErrors([`Not cleared: ${storageErrorMessage(cause)}`])
+      setErrors([
+        t('useLabData.notCleared', { value1: storageErrorMessage(cause) }),
+      ])
       return false
     }
   }
@@ -144,7 +167,7 @@ export function useLabData() {
   async function removeAll(): Promise<boolean> {
     if (
       !window.confirm(
-        'Delete all uploaded collections and clear the saved history of every collection? This cannot be undone.'
+        t('useLabData.deleteAllUploadedCollectionsAndClearTheSavedHistoryOf')
       )
     ) {
       return false
@@ -156,7 +179,12 @@ export function useLabData() {
       try {
         await discardUploadedCollection(provider, definition.id)
       } catch (cause) {
-        failed.push(`${definition.name}: ${storageErrorMessage(cause)}`)
+        failed.push(
+          t('useLabData.collectionFailure', {
+            name: collectionDisplay(definition).name,
+            value2: storageErrorMessage(cause),
+          })
+        )
         kept.push(definition)
       }
     }
@@ -166,10 +194,16 @@ export function useLabData() {
       try {
         await provider.discardCollectionResult(definition.id)
       } catch (cause) {
-        failed.push(`${definition.name}: ${storageErrorMessage(cause)}`)
+        failed.push(
+          t('useLabData.collectionFailure', {
+            name: collectionDisplay(definition).name,
+            value2: storageErrorMessage(cause),
+          })
+        )
       }
     }
-    if (failed.length > 0) setErrors(failed.map((f) => `Not deleted: ${f}`))
+    if (failed.length > 0)
+      setErrors(failed.map((f) => t('useLabData.notDeleted', { f: f })))
     return failed.length === 0
   }
 

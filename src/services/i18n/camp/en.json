@@ -1,0 +1,93 @@
+{
+  "appNavigation": {
+    "useappnavigationRequiresNavigationprovider": "useAppNavigation requires NavigationProvider"
+  },
+  "DropboxBadge": {
+    "dropboxConnected": "Dropbox connected",
+    "connectingToDropbox": "Connecting to Dropbox…",
+    "dropboxUnreachableSavingIsPaused": "Dropbox unreachable. Saving is paused.",
+    "notConnectedToDropboxSavingInThisBrowser": "Not connected to Dropbox. Saving in this browser.",
+    "openStorageSettings": "{{label}} Open storage settings.",
+    "connectionDetails": "{{label}}\n{{message}}"
+  },
+  "GbLinkTaskPanel": {
+    "aCartridgeTransferIsActiveCancelItAndLeave": "A cartridge transfer is active. Cancel it and leave?",
+    "starting": "Starting…",
+    "connectingChooseYourGbLinkIfTheBrowserAsks": "Connecting… Choose your GB-Link if the browser asks.",
+    "detected": "Detected {{value1}} ({{code}}).",
+    "ifTheBrowserAsksChooseYourGbLink": "If the browser asks, choose your GB-Link.",
+    "cancellingCloseTheDeviceChooserIfItIsStillOpen": "Cancelling… Close the device chooser if it is still open.",
+    "thisBrowserDoesNotSupportConnectingToTheGbLink": "This browser does not support connecting to the GB-Link.",
+    "pressStartButtonBelow": "Press the start button below.",
+    "pressStartBelow": "Press Start below.",
+    "transferProgress": "{{progressLabel}}… {{value2}}%"
+  },
+  "SpriteCredit": {
+    "imageCreditOpensSourceInANewTab": "Image credit: {{name}} (opens source in a new tab)"
+  },
+  "gbLinkTask": {
+    "connectTheGbLinkToThisComputerAndYourGba": "Connect the GB-Link to this computer and your GBA.",
+    "insertTheCartridgeAndPowerOnWhileHoldingStartSelect": "Insert the cartridge and power on while holding START + SELECT.",
+    "theOperationFailed": "The operation failed.",
+    "noDeviceWasChosen": "No device was chosen.",
+    "cancelled": "Cancelled.",
+    "theRestoreWasInterrupted": "The restore was interrupted.",
+    "theCartridgeMayHaveBeenChangedCheckTheCartridgeBefore": "{{reason}} The cartridge may have been changed. {{backupNote}} Check the cartridge before retrying.",
+    "errorWithRetry": "{{message}} {{retry}}"
+  },
+  "saveVersion": {
+    "thisIsASaveNotASave": "This is a {{aggregated}} save, not a {{value2}} save."
+  },
+  "CampPage": {
+    "chooseACamperToViewTheirDetails": "Choose a camper to view their details.",
+    "selectAPokeMonThenChooseItsDestination": "Select a Pokémon, then choose its destination.",
+    "selectTwoCornersOfAGroupThenItsTopLeft": "Select two corners of a group, then its top-left destination.",
+    "youHaveUnsavedChangesLeaveWithoutSavingThem": "You have unsaved changes. Leave without saving them?",
+    "campsite": "Campsite {{value1}}",
+    "party": "Party",
+    "thatMoveFailed": "That move failed.",
+    "partyPokeMonAreViewOnly": "Party Pokémon are view-only.",
+    "chooseAnOccupiedSlotFirst": "Choose an occupied slot first.",
+    "chooseTheDestinationOccupiedSlotsSwap": "Choose the destination. Occupied slots swap.",
+    "moveCancelled": "Move cancelled.",
+    "movedSaveWhenYouAreFinished": "Moved. Save when you are finished.",
+    "selectTheOppositeCornerOfTheGroup": "Select the opposite corner of the group.",
+    "bothCornersMustBeInTheSamePanel": "Both corners must be in the same panel.",
+    "selectTheGroupSTopLeftDestination": "Select the group’s top-left destination.",
+    "cannotMoveAGroupOfEmptySlots": "Cannot move a group of empty slots.",
+    "theDestinationGroupMustBeEmpty": "The destination group must be empty.",
+    "groupMovedSaveWhenYouAreFinished": "Group moved. Save when you are finished.",
+    "someChangesWereNotSaved": "Some changes were not saved: {{value1}}",
+    "saved": "Saved.",
+    "camp": "Camp",
+    "theSaveCouldNotBeLoaded": "The save could not be loaded.",
+    "campSite": "Camp Site",
+    "trade": "Trade",
+    "saveYourChangesBeforeTrading": "Save your changes before trading.",
+    "pokeMon": "Pokémon",
+    "selectAPokeMonToViewItsDetails": "Select a Pokémon to view its details.",
+    "pokeMonPage": "Pokémon page",
+    "previousPokeMonPage": "Previous Pokémon page",
+    "nextPokeMonPage": "Next Pokémon page",
+    "rightSide": "Right side",
+    "previousRightSide": "Previous right side",
+    "campsite2": "Campsite",
+    "boxes": "{{value1}} Boxes",
+    "nextRightSide": "Next right side",
+    "endTrade": "End trade",
+    "unknownError": "unknown error"
+  },
+  "StorageGrid": {
+    "previous": "Previous {{label}}",
+    "next": "Next {{label}}"
+  },
+  "ToolSelector": {
+    "view": "View",
+    "moveOne": "Move one",
+    "moveAGroup": "Move a group",
+    "storageTool": "Storage tool"
+  },
+  "groupMove": {
+    "thatGroupWouldExtendBeyondTheDestination": "That group would extend beyond the destination."
+  }
+}

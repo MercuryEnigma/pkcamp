@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import { spriteAttribution, type SpriteAttribution } from './attribution'
 import {
   SUPPORTED_DEX_RANGE,
@@ -49,8 +50,8 @@ export type SpriteResolution = SpriteAvailableResult | SpriteFallbackResult
 function buildLabel(request: SpriteRequest): string {
   const parts: string[] = [request.displayName]
   if (request.formId) parts.push(`(${request.formId})`)
-  if (request.shiny) parts.push('Shiny')
-  if (request.egg) parts.push('Egg')
+  if (request.shiny) parts.push(i18n.t('services:resolver.shiny'))
+  if (request.egg) parts.push(i18n.t('services:resolver.egg'))
   return parts.join(' ')
 }
 

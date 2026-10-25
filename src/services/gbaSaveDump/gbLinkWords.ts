@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import type { GbLinkTransport } from '../tradeDevice/gbLinkTransport.ts'
 
 /**
@@ -10,7 +11,11 @@ const READ_TIMEOUT_MS = 3000
 
 export class LinkTimeoutError extends Error {
   constructor() {
-    super('The GB-Link stopped answering. Is the link cable connected?')
+    super(
+      i18n.t(
+        'services:gbLinkWords.theGbLinkStoppedAnsweringIsTheLinkCableConnected'
+      )
+    )
     this.name = 'LinkTimeoutError'
   }
 }

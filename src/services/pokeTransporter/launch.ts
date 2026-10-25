@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import { gbLinkTradeDevice } from '../tradeDevice'
 import { decodeBundledRom, sendMultiboot } from '../gbaSaveDump/sendMultiboot'
 import type { GbaDumperOptions } from '../gbaSaveDump/readGbaSave'
@@ -8,7 +9,9 @@ export const TRANSPORTER_SHA256 =
 
 export async function verifyTransporter(rom: Uint8Array) {
   if (rom.length !== 124024)
-    throw new Error('Poké Transporter ROM has an unexpected size.')
+    throw new Error(
+      i18n.t('services:launch.pokeTransporterRomHasAnUnexpectedSize')
+    )
   const hash = new Uint8Array(
     await crypto.subtle.digest('SHA-256', rom.slice().buffer)
   )
@@ -17,19 +20,23 @@ export async function verifyTransporter(rom: Uint8Array) {
     TRANSPORTER_SHA256
   ) {
     throw new Error(
-      'Poké Transporter ROM verification failed. Reload PkCamp before retrying.'
+      i18n.t(
+        'services:launch.pokeTransporterRomVerificationFailedReloadPkcampBeforeRetrying'
+      )
     )
   }
 }
 
 export async function launchTransporter(options: GbaDumperOptions) {
   const rom = decodeBundledRom(romUrl)
-  options.onStatus?.('Verifying Poké Transporter GB v1.2.1…')
+  options.onStatus?.(i18n.t('services:launch.verifyingPokeTransporterGbV121'))
   await verifyTransporter(rom)
   options.signal.throwIfAborted()
   const lease = gbLinkTradeDevice.claim(options.signal)
   try {
-    options.onStatus?.('Waiting for the GBA in multiboot mode…')
+    options.onStatus?.(
+      i18n.t('services:launch.waitingForTheGbaInMultibootMode')
+    )
     await sendMultiboot(lease.transport, rom, lease.signal, options.onProgress)
   } finally {
     lease.free()

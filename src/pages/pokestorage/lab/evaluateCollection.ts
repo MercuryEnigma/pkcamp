@@ -1,3 +1,4 @@
+import { i18n } from '../../../services/i18n'
 import type { PokemonNode } from '../../../services/pkhex'
 import type {
   CollectionDefinition,
@@ -33,16 +34,23 @@ function integer(min: number, max = Number.MAX_SAFE_INTEGER) {
     typeof value === 'number' && Number.isInteger(value)
       ? value >= min && value <= max
         ? null
-        : `must be between ${min} and ${max}`
-      : 'must be an integer'
+        : i18n.t('collections:evaluateCollection.mustBeBetweenAnd', {
+            min: min,
+            max: max,
+          })
+      : i18n.t('collections:evaluateCollection.mustBeAnInteger')
 }
 
 function boolean(value: Scalar): string | null {
-  return typeof value === 'boolean' ? null : 'must be true or false'
+  return typeof value === 'boolean'
+    ? null
+    : i18n.t('collections:evaluateCollection.mustBeTrueOrFalse')
 }
 
 function text(value: Scalar): string | null {
-  return typeof value === 'string' ? null : 'must be a string'
+  return typeof value === 'string'
+    ? null
+    : i18n.t('collections:evaluateCollection.mustBeAString')
 }
 
 /** A game-data id (number) or its English name (string). */
@@ -50,7 +58,7 @@ function idOrName(value: Scalar): string | null {
   if (typeof value === 'number') return integer(0)(value)
   return typeof value === 'string' && value.trim() !== ''
     ? null
-    : 'must be an id number or a name'
+    : i18n.t('collections:evaluateCollection.mustBeAnIdNumberOrAName')
 }
 
 function matchesRef(
@@ -85,7 +93,7 @@ export const FIELD_MATCHERS: Record<ConstraintField, FieldMatcher> = {
     check: (v) =>
       typeof v === 'string' && GENDERS.includes(lower(v))
         ? null
-        : 'must be "Male", "Female", or "Genderless"',
+        : i18n.t('collections:evaluateCollection.mustBeMaleFemaleOrGenderless'),
     test: (n, v) => typeof v === 'string' && lower(n.gender) === lower(v),
   },
   shiny: { check: boolean, test: (n, v) => n.shiny === v },
@@ -120,7 +128,7 @@ export const FIELD_MATCHERS: Record<ConstraintField, FieldMatcher> = {
 function nonEmptyText(value: Scalar): string | null {
   return typeof value === 'string' && value.trim() !== ''
     ? null
-    : 'must be a non-empty string'
+    : i18n.t('collections:evaluateCollection.mustBeANonEmptyString')
 }
 
 /** Every field an entry may use; single source for validation. */
@@ -133,9 +141,17 @@ export function satisfies(
   // Validation rejects these; failing here too keeps an unchecked field from
   // ever marking an entry as owned.
   const keys = Object.keys(constraints)
-  if (keys.length === 0) throw new Error('An entry has no constraints.')
+  if (keys.length === 0)
+    throw new Error(
+      i18n.t('collections:evaluateCollection.anEntryHasNoConstraints')
+    )
   const unsupported = keys.find((key) => !Object.hasOwn(FIELD_MATCHERS, key))
-  if (unsupported) throw new Error(`"${unsupported}" is not supported yet.`)
+  if (unsupported)
+    throw new Error(
+      i18n.t('collections:evaluateCollection.isNotSupportedYet', {
+        unsupported: unsupported,
+      })
+    )
   for (const field of SUPPORTED_FIELDS) {
     const constraint = constraints[field]
     if (constraint === undefined) continue

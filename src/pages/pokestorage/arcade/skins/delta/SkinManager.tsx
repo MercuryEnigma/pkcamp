@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useId, useRef, useState } from 'react'
 import type { SkinLibraryState } from './useSkinLibrary'
 import './skinManager.css'
@@ -7,6 +8,8 @@ import './skinManager.css'
  * the Arcade's menu and the Lab's settings can each present it their way.
  */
 export function SkinManager({ library }: { library: SkinLibraryState }) {
+  const { t } = useTranslation(['arcade', 'common'] as const)
+
   const { skins, selectedId, error, importSkin, selectSkin, deleteSkin } =
     library
   const group = useId()
@@ -28,15 +31,24 @@ export function SkinManager({ library }: { library: SkinLibraryState }) {
 
   return (
     <div className="skin-manager">
-      <ul className="skin-manager-list" aria-label="Controller skins">
-        <li>{option(null, 'Default')}</li>
+      <ul
+        className="skin-manager-list"
+        aria-label={t('SkinManager.controllerSkins')}
+      >
+        <li>{option(null, t('common:actions.default'))}</li>
         {skins.map((skin) => (
           <li key={skin.id}>
             {option(skin.id, skin.name)}
             <button
               type="button"
               className="skin-manager-delete"
-              aria-label={`${confirming === skin.id ? 'Confirm delete' : 'Delete'} ${skin.name}`}
+              aria-label={t('SkinManager.deleteSkinLabel', {
+                value1:
+                  confirming === skin.id
+                    ? t('arcade:SkinManager.confirmDelete')
+                    : t('common:actions.delete'),
+                name: skin.name,
+              })}
               onClick={() => {
                 if (confirming === skin.id) {
                   setConfirming(null)
@@ -45,7 +57,9 @@ export function SkinManager({ library }: { library: SkinLibraryState }) {
               }}
               onBlur={() => setConfirming(null)}
             >
-              {confirming === skin.id ? 'Confirm?' : 'Delete'}
+              {confirming === skin.id
+                ? t('SkinManager.confirm')
+                : t('common:actions.delete')}
             </button>
           </li>
         ))}
@@ -55,7 +69,7 @@ export function SkinManager({ library }: { library: SkinLibraryState }) {
         className="skin-manager-import"
         onClick={() => fileRef.current?.click()}
       >
-        Import Delta Skin…
+        {t('SkinManager.importDeltaSkin')}
       </button>
       <input
         ref={fileRef}
@@ -70,7 +84,7 @@ export function SkinManager({ library }: { library: SkinLibraryState }) {
       />
       <p className="skin-manager-note" role="status" data-error={!!error}>
         {error ??
-          'Delta .deltaskin files for Game Boy Advance. Skins are saved on this device.'}
+          t('SkinManager.deltaDeltaskinFilesForGameBoyAdvanceSkinsAreSaved')}
       </p>
     </div>
   )

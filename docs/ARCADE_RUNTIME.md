@@ -15,8 +15,8 @@ npm run verify:arcade
 ```
 
 `verify-arcade-bootstrap` repeats 20 fresh first visits and checks isolation,
-refresh, and that the main app stays outside the worker. `verify-arcade-chooser`
-covers the five cartridges, direct entry, Back, and an invalid `?game=`.
+refresh, and that the main app stays outside the worker. `verify-game-choose`
+covers the five Start cartridges, direct Arcade entry, Exit, and an invalid `?game=`.
 `verify-arcade-layout` checks overflow, the 3:2 display, 44-pixel touch targets,
 desktop control alignment, and the three menu views at seven viewports.
 

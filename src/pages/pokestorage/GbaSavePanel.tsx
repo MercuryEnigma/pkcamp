@@ -1,11 +1,12 @@
+import { useTranslation } from 'react-i18next'
 import type { Gen3GameId } from '../../services/saveLibrary'
 import { storage } from '../../services/storage'
 import { gbLinkTradeDevice } from '../../services/tradeDevice'
 import { usePkHex } from '../context/PkHexContext'
-import { GAME_LABEL } from './gameDisplay'
+import { getGameLabel } from './gameDisplay'
 import { GbLinkTaskPanel } from './GbLinkTaskPanel'
 import {
-  CONNECT_STEP,
+  getConnectStep,
   restoreErrorMessage,
   taskErrorMessage,
 } from './gbLinkTask'
@@ -34,30 +35,40 @@ type GbaSavePanelProps = {
 
 /** Reads or writes a Cabin's cartridge save on a GBA connected via GB-Link. */
 export function GbaSavePanel(props: GbaSavePanelProps) {
+  const { t } = useTranslation(['cartridge-saves', 'common'] as const)
+
   const { gameId } = props
   const { adapter } = usePkHex()
-  const cabin = `${GAME_LABEL[gameId]} Cabin`
+  const cabin = t('GbaSavePanel.cabin', { value1: getGameLabel(gameId) })
 
   return (
     <GbLinkTaskPanel
       title={
         props.mode === 'write'
-          ? `Restore ${cabin} to GBA`
-          : `Back up ${cabin} from GBA`
+          ? t('GbaSavePanel.restoreToGba', { cabin: cabin })
+          : t('GbaSavePanel.backUpFromGba', { cabin: cabin })
       }
       steps={[
-        CONNECT_STEP,
-        `Insert ${GAME_LABEL[gameId]} and power on while holding START + SELECT.`,
+        getConnectStep(),
+        t(
+          'cartridge-saves:GbaSavePanel.insertAndPowerOnWhileHoldingStartSelect',
+          { value1: getGameLabel(gameId) }
+        ),
       ]}
       note={
         props.mode === 'write'
-          ? `The cartridge's current save will be backed up before ${cabin} is written to it.`
+          ? t(
+              'cartridge-saves:GbaSavePanel.theCartridgeSCurrentSaveWillBeBackedUpBefore',
+              { cabin: cabin }
+            )
           : undefined
       }
       progressLabel={
-        props.mode === 'read' ? 'Reading the save' : 'Sending the backup'
+        props.mode === 'read'
+          ? t('GbaSavePanel.readingTheSave')
+          : t('GbaSavePanel.sendingTheBackup')
       }
-      startLabel="Continue"
+      startLabel={t('common:actions.continue')}
       disabled={!adapter}
       onBeforeStart={props.onBeforeStart}
       onClose={props.onClose}
@@ -66,7 +77,7 @@ export function GbaSavePanel(props: GbaSavePanelProps) {
           ? restoreErrorMessage(
               cause,
               cancelled,
-              'If the initial backup completed, it is stored as the hardware backup in this Cabin.'
+              t('GbaSavePanel.ifTheInitialBackupCompletedItIsStoredAsThe')
             )
           : describeReadError(cause, cancelled)
       }
@@ -83,7 +94,9 @@ export function GbaSavePanel(props: GbaSavePanelProps) {
         if (props.mode === 'read') {
           const bytes = await gbLinkTradeDevice.readSave({ ...task, gameId })
           assertMatches(bytes)
-          task.onStatus(`Saving the ${GAME_LABEL[gameId]} backup…`)
+          task.onStatus(
+            t('GbaSavePanel.savingTheBackup', { value1: getGameLabel(gameId) })
+          )
           await storage.putSave(gameId, bytes)
           props.onSave(bytes)
           return
@@ -98,7 +111,7 @@ export function GbaSavePanel(props: GbaSavePanelProps) {
             storage.putHardwareSave(gameId, cartridgeSave),
         })
         props.onWritten()
-        return 'The cartridge save was overwritten.'
+        return t('GbaSavePanel.theCartridgeSaveWasOverwritten')
       }}
     />
   )

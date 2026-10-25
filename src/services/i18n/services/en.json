@@ -1,0 +1,286 @@
+{
+  "gbaRom": {
+    "thisIsNotASupportedPokeMonRubySapphireEmerald": "This is not a supported Pokémon Ruby, Sapphire, Emerald, FireRed, or LeafGreen GBA ROM.",
+    "thisRomBelongsToNot": "This ROM belongs to {{gameId}}, not {{expected}}."
+  },
+  "mgbaRuntime": {
+    "mgbaIsAlreadyBoundToAnotherScreenReloadThePlayer": "mGBA is already bound to another screen. Reload the player.",
+    "mgbaCouldNotLoadThisRom": "mGBA could not load this ROM."
+  },
+  "gbLinkWords": {
+    "theGbLinkStoppedAnsweringIsTheLinkCableConnected": "The GB-Link stopped answering. Is the link cable connected?"
+  },
+  "gbaCartClient": {
+    "noGbaCartridgeWasDetected": "No GBA cartridge was detected.",
+    "thisCartridgeHasNoSaveMemory": "This cartridge has no save memory.",
+    "theBackupIsBytesButTheCartridgeSaveIsBytes": "The backup is {{length}} bytes but the cartridge save is {{saveSize}} bytes.",
+    "theGbaSaveReaderIsNotResponding": "The GBA save reader is not responding.",
+    "theGbaSaveReaderDidNotAcceptTheCommand": "The GBA save reader did not accept the command.",
+    "theGbaSaveReaderStoppedMidOperation": "The GBA save reader stopped mid-operation.",
+    "timedOutWaitingForTheGba": "Timed out waiting for the GBA.",
+    "theGbaSaveWriterLostSyncTryAgain": "The GBA save writer lost sync. Try again.",
+    "theBackupKeptArrivingCorruptedCheckTheLinkCable": "The backup kept arriving corrupted. Check the link cable.",
+    "theDataKeptArrivingCorruptedCheckTheLinkCable": "The data kept arriving corrupted. Check the link cable."
+  },
+  "multiboot": {
+    "multibootRomIsTooLarge": "Multiboot ROM is too large.",
+    "theGbaDidNotStartMultibootTryAgain": "The GBA did not start multiboot. Try again.",
+    "theGbaMultibootHandshakeFailed": "The GBA multiboot handshake failed.",
+    "theMultibootTransferWasCorruptedTryAgain": "The multiboot transfer was corrupted. Try again.",
+    "theGbaDidNotConfirmTheMultibootTransfer": "The GBA did not confirm the multiboot transfer."
+  },
+  "readGbSave": {
+    "noSaveDumpStartedResetTheGbaAndTryAgain": "No save dump started. Reset the GBA and try again, then press B in the dumper.",
+    "theGbGbcSaveChecksumRepeatedlyFailedNoDownloadWas": "The GB/GBC save checksum repeatedly failed. No download was created; reset and retry.",
+    "sendingTheGbGbcBackupTool": "Sending the GB/GBC backup tool…",
+    "waitForTheGbcScreenInsertYourGbGbcGame": "Wait for the GBC screen. Insert your GB/GBC game, then press B to back up its save."
+  },
+  "readGbaSave": {
+    "sendingTheCartridgeToolToTheGba": "Sending the cartridge tool to the GBA…",
+    "theGbaCartridgeToolDidNotStartTryAgain": "The GBA cartridge tool did not start. Try again.",
+    "checkingTheCartridge": "Checking the cartridge…",
+    "noGbaCartridgeWasDetected": "No GBA cartridge was detected.",
+    "thisCartridgeIsWhichDoesnTMatchTheExpectedGame": "This cartridge is {{value1}}, which doesn't match the expected game.",
+    "readingTheSave": "Reading the save…",
+    "thisCartridgeIsNotASupportedGame": "This cartridge is not a supported game.",
+    "backingUpTheCartridgeSaveFirst": "Backing up the cartridge save first…",
+    "backingUpTheCartridgeSaveFirst2": "Backing up the cartridge save first… {{value1}}%",
+    "sendingTheBackup": "Sending the backup…",
+    "writingToTheCartridgeKeepTheGbaOnUntilThis": "Writing to the cartridge. Keep the GBA on until this finishes.",
+    "readingTheRom": "Reading the ROM…",
+    "readingTheBios": "Reading the BIOS…"
+  },
+  "gbaGift": {
+    "unknownMysteryGift": "Unknown Mystery Gift: {{id}}",
+    "mysteryGiftNeedsGbLinkFirmwareOrNewerOpenSettings": "Mystery Gift needs GB-Link firmware {{MIN_GBA_SWITCH_FIRMWARE}} or newer{{value2}}. Open Settings → Hardware to update it.",
+    "theGbLinkLeftWirelessAdapterMode": "The GB-Link left Wireless Adapter mode.",
+    "theGbLinkDisconnected": "The GB-Link disconnected.",
+    "theMysteryGiftGroupStopped": "The Mystery Gift group stopped.",
+    "theGbLinkDidnTStartWirelessAdapterModeUnplug": "The GB-Link didn't start Wireless Adapter mode. Unplug it, plug it back in, and try again.",
+    "thisGbLinkHas": "; this GB-Link has {{firmware}}"
+  },
+  "gifts": {
+    "alteringCave": "Altering Cave",
+    "changesTheWildPokeMonInAlteringCaveEachDelivery": "Changes the wild Pokémon in Altering Cave. Each delivery moves it to the next one.",
+    "fastForward4": "Fast Forward ×4",
+    "pressRToRunTheGameUpToFourTimes": "Press R to run the game up to four times as fast, and R again to play normally.",
+    "pokeMonFollow": "Pokémon Follow",
+    "yourLeadPokeMonWalksBehindYouInTheOverworld": "Your lead Pokémon walks behind you in the overworld, when the game has a sprite for it.",
+    "pcAnywhere": "PC Anywhere",
+    "pressRInTheFieldToOpenThePokeMon": "Press R in the field to open the Pokémon Storage System from anywhere.",
+    "reusableTms": "Reusable TMs",
+    "teachingAMoveWithATmNoLongerUsesThe": "Teaching a move with a TM no longer uses the TM up.",
+    "trader": "Trader",
+    "evolvesAPartyPokeMonThatNormallyEvolvesByTrading": "Evolves a party Pokémon that normally evolves by trading, such as Kadabra or Machoke."
+  },
+  "switchGift": {
+    "unknownMysteryGift": "Unknown Mystery Gift: {{id}}",
+    "theEsp32Disconnected": "The ESP32 disconnected.",
+    "theMysteryGiftGroupStopped": "The Mystery Gift group stopped."
+  },
+  "adapter": {
+    "indexIsOutOfBounds0": "{{label}} index {{index}} is out of bounds (0..{{value3}})",
+    "cannotUseADisposedSave": "Cannot use a disposed save",
+    "cannotMoveAnEmptyBoxSlot": "Cannot move an empty box slot",
+    "aGroupMoveMustContainAtLeastOneSlot": "A group move must contain at least one slot",
+    "duplicateGroupMoveSource": "Duplicate group-move source {{fromKey}}",
+    "duplicateGroupMoveDestination": "Duplicate group-move destination {{toKey}}",
+    "cannotMoveAGroupContainingOnlyEmptySlots": "Cannot move a group containing only empty slots",
+    "groupMoveDestinationOverlapsAPokeMonOutsideTheSelected": "Group move destination overlaps a Pokémon outside the selected group",
+    "box": "Box",
+    "boxSlot": "Box slot",
+    "partySlot": "Party slot"
+  },
+  "pkhexWasmBackend": {
+    "genApproximate": "Gen {{generation}} (approximate)",
+    "pkhexWasmBackendCannotEditADisposedSave": "pkhex-wasm backend: cannot edit a disposed save",
+    "pkhexWasmBackendCannotPlaceAPokemonnodeThisBackendDid": "pkhex-wasm backend: cannot place a PokemonNode this backend did not produce",
+    "pkhexWasmBackendCannotSerializeADisposedSave": "pkhex-wasm backend: cannot serialize a disposed save",
+    "cannotExportForeignPokemon": "pkhex-wasm backend: cannot export a PokemonNode this backend did not produce — PokemonNode carries no PID/experience/met data, so valid .pkm bytes cannot be reconstructed from it. Export nodes obtained from loadSave() or loadPokemonFile()."
+  },
+  "launch": {
+    "pokeTransporterRomHasAnUnexpectedSize": "Poké Transporter ROM has an unexpected size.",
+    "pokeTransporterRomVerificationFailedReloadPkcampBeforeRetrying": "Poké Transporter ROM verification failed. Reload PkCamp before retrying.",
+    "verifyingPokeTransporterGbV121": "Verifying Poké Transporter GB v1.2.1…",
+    "waitingForTheGbaInMultibootMode": "Waiting for the GBA in multiboot mode…"
+  },
+  "resolver": {
+    "shiny": "Shiny",
+    "egg": "Egg"
+  },
+  "resources": {
+    "spriteConcurrencyMustBeAPositiveInteger": "Sprite concurrency must be a positive integer.",
+    "couldNotLoadSprite": "Could not load sprite: {{path}}"
+  },
+  "fileStoreProvider": {
+    "invalidCollectionId": "Invalid collection id {{collectionId}}.",
+    "aCampNeedsAtLeastOneCampSite": "A Camp needs at least one Camp Site.",
+    "eachCampSiteHoldsExactlyPokeMon": "Each Camp Site holds exactly {{CAMP_SITE_SIZE}} Pokémon.",
+    "invalidCampPokeMonId": "Invalid Camp Pokémon id {{id}}.",
+    "duplicateCampPokeMonId": "Duplicate Camp Pokémon id {{id}}.",
+    "invalidRomFileExtension": "Invalid ROM file extension \"{{extension}}\".",
+    "campSitesWereSavedByANewerVersionOfPkcamp": "Camp Sites were saved by a newer version of PkCamp (format {{version}}).",
+    "theCampSitesFileIsDamagedAndCannotBeRead": "The Camp Sites file is damaged and cannot be read.",
+    "missingPokemonFile": "Camp Pokémon file {{id}} is missing."
+  },
+  "indexedDbFileStore": {
+    "localStorageRequestFailed": "Local storage request failed.",
+    "localStorageWriteFailed": "Local storage write failed.",
+    "localStorageWriteWasAborted": "Local storage write was aborted.",
+    "unableToOpenLocalStorage": "Unable to open local storage.",
+    "localStorageIsBlockedByAnotherTab": "Local storage is blocked by another tab."
+  },
+  "esp32TradeDevice": {
+    "anEsp32TradeNeedsSixPartySlotsAtLeastTwo": "An ESP32 trade needs six party slots, at least two Pokémon, and an occupied selected slot.",
+    "thisBrowserDoesNotSupportWebSerial": "This browser does not support Web Serial.",
+    "theEsp32IsBusy": "The ESP32 is busy.",
+    "theProdKeysFileIsMissingOrHasAnInvalid": "The prod.keys file is missing or has an invalid value for: {{value1}}.",
+    "theEsp32Rejected": "The ESP32 rejected: {{value1}}.",
+    "aTradeIsAlreadyRunning": "A trade is already running.",
+    "theEsp32NeedsTheRequiredSwitchKeysBeforeTrading": "The ESP32 needs the required Switch keys before trading.",
+    "theSwitchSGameCanTTradeWithThisGba": "The Switch's game can't trade with this GBA yet.",
+    "readyToTrade": "Ready to trade.",
+    "linkedToTheSwitchSRoom": "Linked to the Switch's room.",
+    "gbaCableLinkOpen": "GBA cable link open.",
+    "mysteryGiftNeedsEsp32FirmwareOrNewer": "Mystery Gift needs ESP32 firmware {{minFirmware}} or newer{{value2}}.",
+    "theEsp32NeedsYourSwitchKeysAddProdKeysOn": "The ESP32 needs your Switch keys. Add prod.keys on the Trade Table first.",
+    "noTradeIsActive": "No trade is active.",
+    "connectTheEsp32BeforeTrading": "Connect the ESP32 before trading.",
+    "relayingBetweenTheGbaAndTheSwitch": "Relaying between the GBA and the Switch.",
+    "thisBoardHas": "; this board has {{version}}"
+  },
+  "gbLinkFirmwareUpdate": {
+    "couldNotCheckTheLatestFirmwareTryAgain": "Could not check the latest firmware. Try again.",
+    "theFirmwareCatalogIsUnavailable": "The firmware catalog is unavailable.",
+    "noCompatibleGbLinkFirmwareWasFound": "No compatible GB-Link firmware was found.",
+    "theFirmwareDownloadIsIncomplete": "The firmware download is incomplete.",
+    "theFirmwareIsNotACompleteGbLinkRp2040Image": "The firmware is not a complete GB-Link RP2040 image. No update was started.",
+    "gbLinkIsBusyFinishTheCurrentTaskFirst": "GB-Link is busy. Finish the current task first.",
+    "useChromeOrEdgeForAutomaticFirmwareUpdates": "Use Chrome or Edge for automatic firmware updates.",
+    "selectYourGbLinkToFinishCheckingTheUpdate": "Select your GB-Link to finish checking the update.",
+    "chooseYourGbLink": "Choose your GB-Link.",
+    "couldNotReadTheInstalledVersionReconnectGbLinkAnd": "Could not read the installed version. Reconnect GB-Link and try again.",
+    "checkingTheLatestFirmware": "Checking the latest firmware…",
+    "yourGbLinkIsUpToDate": "Your GB-Link is up to date.",
+    "preparingFirmware": "Preparing firmware {{version}}…",
+    "couldNotDownloadFirmwareYourGbLinkHasNotBeen": "Could not download firmware. Your GB-Link has not been changed.",
+    "restartingGbLinkIntoUpdateMode": "Restarting GB-Link into update mode…",
+    "unplugGbLinkHoldBootselWhilePluggingItBackIn": "Unplug GB-Link. Hold BOOTSEL while plugging it back in, then press the button below.",
+    "unplugGbLinkHoldBootselWhilePluggingItBackIn2": "Unplug GB-Link. Hold BOOTSEL while plugging it back in, then select RP2 Boot below.",
+    "pressTheButtonBelowAndSelectRp2BootToFinish": "Press the button below and select RP2 Boot to finish the update.",
+    "selectTheGbLinkRp2BootDevice": "Select the GB-Link RP2 Boot device.",
+    "updatingGbLinkKeepItPluggedIn": "Updating GB-Link… Keep it plugged in.",
+    "couldNotOpenGbLinkInUpdateMode": "Could not open GB-Link in update mode.",
+    "checkingTheWrittenFirmwareKeepItPluggedIn": "Checking the written firmware… Keep it plugged in.",
+    "firmwareVerificationFailedKeepGbLinkConnectedAndRetryThe": "Firmware verification failed. Keep GB-Link connected and retry the update.",
+    "reconnectingGbLink": "Reconnecting GB-Link…",
+    "firmwareWrittenAndCheckedPressTheButtonBelowToReconnect": "Firmware written and checked. Press the button below to reconnect GB-Link.",
+    "couldNotConfirmTheNewFirmwareVersionReconnectAndTry": "Could not confirm the new firmware version. Reconnect and try again.",
+    "gbLinkIsUpToDate": "GB-Link is up to date: {{current}}."
+  },
+  "gbLinkProtocol": {
+    "aGbLinkSerialPayloadCannotExceed64Bytes": "A GB-Link serial payload cannot exceed 64 bytes."
+  },
+  "gbLinkTradeDevice": {
+    "aGbLinkTradeNeedsSixPartySlotsAndAn": "A GB-Link trade needs six party slots and an occupied selected slot.",
+    "theTradeWasCancelled": "The trade was cancelled.",
+    "timedOutWaitingForTheGbLinkAdapter": "Timed out waiting for the GB-Link adapter.",
+    "thisBrowserSupportsNeitherWebusbNorWebSerial": "This browser supports neither WebUSB nor Web Serial.",
+    "theGbLinkIsBusy": "The GB-Link is busy.",
+    "aGbLinkTradeIsAlreadyRunning": "A GB-Link trade is already running.",
+    "preparingTheGbLinkAdapter": "Preparing the GB-Link adapter.",
+    "gbLinkPokeMonDataMustBe100Bytes": "GB-Link Pokémon data must be 100 bytes.",
+    "chooseThePokeMonOnTheConnectedGameBoyAdvance": "Choose the Pokémon on the connected Game Boy Advance.",
+    "connectTheGbLinkBeforeTrading": "Connect the GB-Link before trading."
+  },
+  "gbLinkTransport": {
+    "thisBrowserHasNoUsbDeviceApis": "This browser has no USB device APIs.",
+    "selectYourGbLinkToReconnect": "Select your GB-Link to reconnect.",
+    "thisBrowserSupportsNeitherWebusbNorWebSerial": "This browser supports neither WebUSB nor Web Serial.",
+    "aGbLinkDataPayloadCannotExceed64Bytes": "A GB-Link data payload cannot exceed 64 bytes.",
+    "theGbLinkSerialPortDidNotExposeReadableAnd": "The GB-Link serial port did not expose readable and writable streams.",
+    "theGbLinkIsNotConnected": "The GB-Link is not connected.",
+    "theGbLinkSerialWriterIsUnavailable": "The GB-Link serial writer is unavailable.",
+    "theGbLinkUsbDeviceIsUnavailable": "The GB-Link USB device is unavailable.",
+    "gbLinkUsbWriteFailed": "GB-Link USB write failed: {{status}}."
+  },
+  "localTradeDevice": {
+    "tradesRunThroughRuntrade": "{{label}} trades run through runTrade.",
+    "saveBackup": "Save backup",
+    "theSelectedBackupIsNoLongerStored": "The selected backup is no longer stored.",
+    "theSelectedBackupSlotIsNowEmpty": "The selected backup slot is now empty.",
+    "theSelectedBackupSlotChangedBeforeTheTrade": "The selected backup slot changed before the trade.",
+    "campSites": "Camp Sites",
+    "theSelectedCampSitePositionIsNowEmpty": "The selected Camp Site position is now empty.",
+    "theSelectedCampSiteSlotChangedBeforeTheTrade": "The selected Camp Site slot changed before the trade."
+  },
+  "service": {
+    "missingTradeDevice": "Missing trade device: {{id}}",
+    "unknownTradeDevice": "Unknown trade device: {{id}}"
+  },
+  "tradeRoutes": {
+    "thoseTwoSourcesCannotTradeWithEachOther": "Those two sources cannot trade with each other.",
+    "twoPokeMonAreRequiredToEnterASwitchTrade": "Two Pokémon are required to enter a Switch trade.",
+    "theRoomClosedWithoutCompletingATrade": "The room closed without completing a trade.",
+    "chooseTheGameOnTheGba": "Choose the game on the GBA.",
+    "gbaSwitchNeedsGbLinkFirmwareOrNewer": "GBA ↔ Switch needs GB-Link firmware {{MIN_GBA_SWITCH_FIRMWARE}} or newer.",
+    "selectOnePokeMonFirst": "Select one Pokémon first."
+  },
+  "dropboxAccount": {
+    "somethingWentWrong": "Something went wrong.",
+    "dropboxIsNotConfigured": "Dropbox is not configured.",
+    "theDropboxSignInCouldNotBeVerifiedTryAgain": "The Dropbox sign-in could not be verified. Try again.",
+    "dropboxSignInWasCancelled": "Dropbox sign-in was cancelled.",
+    "dropboxDidNotAllowPkcampToStaySignedIn": "Dropbox did not allow PkCamp to stay signed in.",
+    "youAreSignedOutOfDropboxSignInToDropbox": "You are signed out of Dropbox. Sign in to Dropbox again.",
+    "dropbox": "Dropbox",
+    "signedInToDropboxButCopyingThisBrowserSData": "Signed in to Dropbox, but copying this browser's data failed: {{value1}}"
+  },
+  "dropboxAuth": {
+    "yourDropboxSignInExpiredSignInToDropboxAgain": "Your Dropbox sign-in expired. Sign in to Dropbox again.",
+    "couldNotReachDropboxCheckYourConnectionAndTryAgain": "Could not reach Dropbox. Check your connection and try again.",
+    "dropboxSignInFailed": "Dropbox sign-in failed ({{value1}}).",
+    "dropboxIsHavingProblemsTryAgainShortly": "Dropbox is having problems. Try again shortly.",
+    "badRequest": "bad request"
+  },
+  "dropboxFileStore": {
+    "couldNotReachDropboxCheckYourConnectionAndTryAgain": "Could not reach Dropbox. Check your connection and try again.",
+    "dropboxRejectedTheSignInSignInToDropboxAgain": "Dropbox rejected the sign-in. Sign in to Dropbox again.",
+    "dropboxIsBusyRightNowTryAgainShortly": "Dropbox is busy right now. Try again shortly.",
+    "dropboxIsHavingProblemsTryAgainShortly": "Dropbox is having problems. Try again shortly.",
+    "dropboxDeniedAccessToPkcampDataSignInToDropbox": "Dropbox denied access to PkCamp data. Sign in to Dropbox again.",
+    "dropboxCouldNot": "Dropbox could not {{what}} ({{status}} {{summary}}).",
+    "dropboxCouldNot409": "Dropbox could not {{what}} (409 {{summary}}).",
+    "delete": "delete {{path}}",
+    "dropboxCouldNotRead409": "Dropbox could not read {{path}} (409 {{summary}}).",
+    "read": "read {{path}}",
+    "dropboxStoppedRespondingTryAgain": "Dropbox stopped responding. Try again.",
+    "yourDropboxIsFullSoPkcampCouldNotSave": "Your Dropbox is full, so PkCamp could not save.",
+    "dropboxCouldNotSave": "Dropbox could not save {{path}} ({{status}} {{summary}}).",
+    "list": "list {{value1}}",
+    "theAppFolder": "the app folder"
+  },
+  "storage": {
+    "thisBrowser": "This browser"
+  },
+  "activeGame": {
+    "thisIsASaveNotASave": "This is a {{aggregated}} save, not a {{value2}} save.",
+    "theCampPositionIsOutOfBounds": "The Camp position is out of bounds.",
+    "theSaveAdapterIsUnavailable": "The save adapter is unavailable.",
+    "theActiveGameHasNoSaveToEdit": "The active game has no save to edit.",
+    "theActiveCampIsUnavailable": "The active Camp is unavailable.",
+    "cannotMoveAnEmptyCampPosition": "Cannot move an empty Camp position.",
+    "aSelectedSaveAndCampAreRequired": "A selected save and Camp are required.",
+    "cannotMoveAnEmptyBoxSlot": "Cannot move an empty box slot.",
+    "theActiveGameHasNoSaveToWrite": "The active game has no save to write.",
+    "selectAGameBeforeReplacingItsSave": "Select a game before replacing its save.",
+    "noActiveSaveIsSelected": "No active save is selected.",
+    "theCommittedActiveGameIsUnavailable": "The committed active game is unavailable.",
+    "theCampIsUnavailable": "The Camp is unavailable.",
+    "theActiveGameIsNotReady": "The active game is not ready."
+  },
+  "collections": {
+    "enableTheCollectionBeforeOpeningIt": "Enable the collection before opening it.",
+    "atLeastOneCollectionMustRemainEnabled": "At least one collection must remain enabled."
+  }
+}

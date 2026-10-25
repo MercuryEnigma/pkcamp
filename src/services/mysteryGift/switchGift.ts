@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import { esp32TradeDevice } from '../tradeDevice'
 import type {
   GiftDecision,
@@ -27,7 +28,10 @@ export async function openSwitchGift(
   ])
   const find = (id: string): GiftEvent => {
     const event = findEvent(id)
-    if (!event) throw new Error(`Unknown Mystery Gift: ${id}`)
+    if (!event)
+      throw new Error(
+        i18n.t('services:switchGift.unknownMysteryGift', { id: id })
+      )
     return event
   }
   const firstEvent = find(giftId)
@@ -76,7 +80,9 @@ export async function openSwitchGift(
       .catch(() => {})
       .then(() => {
         if (!options?.signal?.aborted)
-          handlers.onFailed(new Error('The ESP32 disconnected.'))
+          handlers.onFailed(
+            new Error(i18n.t('services:switchGift.theEsp32Disconnected'))
+          )
       })
   }
   signal?.addEventListener('abort', onAbort, { once: true })
@@ -97,7 +103,8 @@ export async function openSwitchGift(
     starting = distribution.start(firstEvent)
     await starting
     signal?.throwIfAborted()
-    if (stopped) throw new Error('The Mystery Gift group stopped.')
+    if (stopped)
+      throw new Error(i18n.t('services:switchGift.theMysteryGiftGroupStopped'))
   } catch (error) {
     await stop()
     throw error

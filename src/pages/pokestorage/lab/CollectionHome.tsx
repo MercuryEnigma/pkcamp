@@ -1,3 +1,6 @@
+import { formatNumber } from '../../../services/i18n/format'
+import { collectionDisplay } from './collectionDisplay'
+import { useTranslation } from 'react-i18next'
 import type { SpriteResolver } from '../../../services/sprites'
 import type { StoredCollectionResult } from '../../../services/storage'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from '../spriteDisplay'
@@ -52,6 +55,8 @@ export function CollectionHome({
   onAdd: (id: string) => void
   onNew: () => void
 }) {
+  const { t } = useTranslation(['collections', 'common'] as const)
+
   const totals = definitions.reduce(
     (sum, { id }) => {
       const result = results[id]
@@ -67,22 +72,27 @@ export function CollectionHome({
     <div className="pc-screen-body">
       <header className="pc-summary">
         <div>
-          <h2>Pokédex research system</h2>
-          <span className="pc-label">Research progress</span>
+          <h2>{t('CollectionHome.pokeDexResearchSystem')}</h2>
+          <span className="pc-label">
+            {t('CollectionHome.researchProgress')}
+          </span>
         </div>
         <p className="pc-count" aria-live="polite">
           <strong>
-            {totals.registered} / {totals.total}
+            {t('common:format.progress', {
+              completed: formatNumber(totals.registered),
+              total: formatNumber(totals.total),
+            })}
           </strong>
-          <span className="pc-label">Registered</span>
+          <span className="pc-label">{t('CollectionHome.registered')}</span>
         </p>
         <PcMeter
           value={totals.registered}
           total={totals.total}
-          label="Registered"
+          label={t('CollectionHome.registered')}
         />
       </header>
-      <h3 className="pc-label">Collections</h3>
+      <h3 className="pc-label">{t('CollectionHome.collections')}</h3>
       <ul className="pc-tiles">
         {definitions.map((definition) => {
           const result = results[definition.id]
@@ -110,12 +120,21 @@ export function CollectionHome({
                   />
                 )}
                 <span className="pc-tile-text">
-                  <strong>{definition.name}</strong>
-                  <span>{result ? `${registered} / ${total}` : '—'}</span>
+                  <strong>{collectionDisplay(definition).name}</strong>
+                  <span>
+                    {result
+                      ? t('CollectionHome.registrationProgress', {
+                          registered: registered,
+                          total: total,
+                        })
+                      : '—'}
+                  </span>
                   <PcMeter
                     value={registered}
                     total={total}
-                    label={`${definition.name} registered`}
+                    label={t('CollectionHome.registered2', {
+                      name: collectionDisplay(definition).name,
+                    })}
                   />
                 </span>
               </button>
@@ -128,13 +147,13 @@ export function CollectionHome({
             className="pc-tile pc-tile--new"
             onClick={onNew}
           >
-            + New collection
+            {t('CollectionHome.newCollection')}
           </button>
         </li>
       </ul>
       {available.length > 0 && (
         <>
-          <h3 className="pc-label">Available to add</h3>
+          <h3 className="pc-label">{t('CollectionHome.availableToAdd')}</h3>
           <ul className="pc-tiles">
             {available.map((definition) => (
               <li key={definition.id}>
@@ -143,8 +162,8 @@ export function CollectionHome({
                   className="pc-tile pc-tile--available"
                   onClick={() => onAdd(definition.id)}
                 >
-                  <strong>{definition.name}</strong>
-                  <span className="pc-label">+ Add</span>
+                  <strong>{collectionDisplay(definition).name}</strong>
+                  <span className="pc-label">{t('CollectionHome.add')}</span>
                 </button>
               </li>
             ))}

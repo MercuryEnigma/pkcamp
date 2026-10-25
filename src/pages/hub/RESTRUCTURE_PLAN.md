@@ -100,6 +100,6 @@ Take these one at a time. Technical choices below remain open; the supplied sket
 6. Lab menu changes, and merging all settings into Lab Settings
 7. The PC rescan-one-save merge logic and its tests
 8. Deferred: starting a brand-new Arcade game when the selected game has no save
-9. Verify scripts (`verify-arcade-chooser` tests a page being removed) and the ARCHITECTURE docs
+9. Verify scripts (`verify-arcade-chooser` is now `verify-game-choose` and checks Start selection) and the ARCHITECTURE docs
 
 Permission note: implementation will need write access to `src/pages/Campsite.tsx` and to one root-level build file. Both are read-only for AI under `ai-permissions.toml`.

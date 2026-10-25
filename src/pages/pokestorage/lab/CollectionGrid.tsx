@@ -1,3 +1,5 @@
+import { collectionDisplay } from './collectionDisplay'
+import { useTranslation } from 'react-i18next'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import type { SpriteResolver } from '../../../services/sprites'
 import type { EntryStatus } from './collectionTypes'
@@ -7,7 +9,7 @@ import type { CollectionDefinition } from './collectionTypes'
 import { PcMeter } from './CollectionHome'
 import type { EntryFilterField } from './entryFilter'
 import {
-  STATUS_FILTERS,
+  getStatusFilters,
   collectionEntryLabel,
   entryDexNumber,
   entrySpriteRequest,
@@ -60,6 +62,8 @@ export function CollectionGrid({
   onClearFilter: (field: EntryFilterField) => void
   onBack: () => void
 }) {
+  const { t } = useTranslation(['collections', 'common'] as const)
+
   const list = useRef<HTMLUListElement>(null)
   const scroll = useRef(initialScroll)
   useLayoutEffect(() => {
@@ -71,28 +75,32 @@ export function CollectionGrid({
     <div className="pc-screen-body">
       <header className="pc-grid-header">
         <button type="button" className="pc-back" onClick={onBack}>
-          ‹ Collections
+          {t('CollectionGrid.collections')}
         </button>
-        <h2>{definition.name}</h2>
+        <h2>{collectionDisplay(definition).name}</h2>
         <p className="pc-count" aria-live="polite">
           <strong>
             {registered} / {total}
           </strong>
-          <span className="pc-label">Registered</span>
+          <span className="pc-label">{t('CollectionGrid.registered')}</span>
         </p>
-        <PcMeter value={registered} total={total} label="Registered" />
+        <PcMeter
+          value={registered}
+          total={total}
+          label={t('CollectionGrid.registered')}
+        />
       </header>
       <div className="pc-filters">
         <input
           type="search"
-          placeholder="Search Pokémon…"
-          aria-label="Search entries"
+          placeholder={t('CollectionGrid.searchPokeMon')}
+          aria-label={t('CollectionGrid.searchEntries')}
           value={query}
           onChange={(event) => onQuery(event.target.value)}
         />
         <OptionGroup
-          label="Status filter"
-          options={STATUS_FILTERS.map((o) => [o.value, o.label] as const)}
+          label={t('CollectionGrid.statusFilter')}
+          options={getStatusFilters().map((o) => [o.value, o.label] as const)}
           value={filter}
           onChange={onFilter}
         />
@@ -110,7 +118,7 @@ export function CollectionGrid({
       <ul
         ref={list}
         className="pc-grid"
-        aria-label="Entries"
+        aria-label={t('CollectionGrid.entries')}
         onScroll={(event) => {
           scroll.current = event.currentTarget.scrollTop
         }}
@@ -149,7 +157,11 @@ export function CollectionGrid({
                   <span
                     className="pc-cell-badge"
                     role="img"
-                    aria-label={status === 'owned' ? 'Owned' : 'Seen'}
+                    aria-label={
+                      status === 'owned'
+                        ? t('CollectionGrid.owned')
+                        : t('CollectionGrid.seen')
+                    }
                   />
                 )}
               </button>
@@ -158,7 +170,9 @@ export function CollectionGrid({
         })}
         {rows.length === 0 && (
           <li className="pc-empty">
-            {scanning ? 'Scanning…' : 'No entries match.'}
+            {scanning
+              ? t('CollectionGrid.scanning')
+              : t('CollectionGrid.noEntriesMatch')}
           </li>
         )}
       </ul>

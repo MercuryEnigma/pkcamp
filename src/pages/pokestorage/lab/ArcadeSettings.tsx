@@ -1,7 +1,8 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import {
-  BINDING_GROUPS,
-  BINDING_NAME,
+  getBindingGroups,
+  getBindingName,
   DEFAULT_KEY_BINDINGS,
   assignKey,
   canBind,
@@ -21,6 +22,8 @@ import { useSkinLibrary } from '../arcade/skins/delta/useSkinLibrary'
  * helpers, so a change here applies the next time the Arcade opens.
  */
 export function ArcadeSettings() {
+  const { t } = useTranslation(['settings', 'common'] as const)
+
   const [bindings, setBindings] = useState(loadKeyBindings)
   const [confirmRestart, setConfirmRestart] = useState(loadConfirmRestart)
   const [capturing, setCapturing] = useState<Bindable | null>(null)
@@ -44,9 +47,9 @@ export function ArcadeSettings() {
 
   return (
     <>
-      <p>Select an action, then press its new key. Esc cancels.</p>
+      <p>{t('ArcadeSettings.selectAnActionThenPressItsNewKeyEscCancels')}</p>
       <div className="settings-bindings">
-        {BINDING_GROUPS.map((group) => (
+        {getBindingGroups().map((group) => (
           <section key={group.id} aria-labelledby={`bindings-${group.id}`}>
             <h3 id={`bindings-${group.id}`}>{group.title}</h3>
             <ul>
@@ -55,14 +58,17 @@ export function ArcadeSettings() {
                   <button
                     type="button"
                     className="settings-binding"
-                    aria-label={`${BINDING_NAME[button]} key: ${keyLabel(bindings[button])}. Change`}
+                    aria-label={t('ArcadeSettings.keyChange', {
+                      value1: getBindingName()[button],
+                      value2: keyLabel(bindings[button]),
+                    })}
                     aria-pressed={capturing === button}
                     onClick={() => setCapturing(button)}
                   >
-                    <span>{BINDING_NAME[button]}</span>
+                    <span>{getBindingName()[button]}</span>
                     <kbd>
                       {capturing === button
-                        ? 'Press a key…'
+                        ? t('ArcadeSettings.pressAKey')
                         : keyLabel(bindings[button])}
                     </kbd>
                   </button>
@@ -81,7 +87,7 @@ export function ArcadeSettings() {
             saveConfirmRestart(event.target.checked)
           }}
         />
-        Confirm before restarting
+        {t('ArcadeSettings.confirmBeforeRestarting')}
       </label>
       <button
         type="button"
@@ -91,10 +97,10 @@ export function ArcadeSettings() {
           saveKeyBindings(DEFAULT_KEY_BINDINGS)
         }}
       >
-        Restore default keys
+        {t('ArcadeSettings.restoreDefaultKeys')}
       </button>
       <section aria-labelledby="settings-skin">
-        <h3 id="settings-skin">Controller skin</h3>
+        <h3 id="settings-skin">{t('ArcadeSettings.controllerSkin')}</h3>
         <SkinManager library={skinLibrary} />
       </section>
     </>

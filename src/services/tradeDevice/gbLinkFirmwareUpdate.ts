@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import { gbLinkTradeDevice } from './service'
 import { compareFirmwareVersions } from './gbLinkProtocol'
 import { Picoboot, type PicobootSession } from './vendor/picoflash/picoboot.js'
@@ -52,10 +53,16 @@ export async function latestGbLinkFirmware(
     signal: AbortSignal.timeout(10000),
   })
   if (!response.ok)
-    throw new Error('Could not check the latest firmware. Try again.')
+    throw new Error(
+      i18n.t(
+        'services:gbLinkFirmwareUpdate.couldNotCheckTheLatestFirmwareTryAgain'
+      )
+    )
   const catalog = (await response.json()) as { gblink?: unknown }
   if (!Array.isArray(catalog.gblink))
-    throw new Error('The firmware catalog is unavailable.')
+    throw new Error(
+      i18n.t('services:gbLinkFirmwareUpdate.theFirmwareCatalogIsUnavailable')
+    )
   const builds: FirmwareBuild[] = []
   for (const entry of catalog.gblink) {
     if (
@@ -77,14 +84,19 @@ export async function latestGbLinkFirmware(
       compareFirmwareVersions(b.version, a.version) ||
       Number(a.beta) - Number(b.beta)
   )
-  if (!builds[0]) throw new Error('No compatible GB-Link firmware was found.')
+  if (!builds[0])
+    throw new Error(
+      i18n.t('services:gbLinkFirmwareUpdate.noCompatibleGbLinkFirmwareWasFound')
+    )
   return builds[0]
 }
 
 /** Validate every block before allowing any erase, not just the UF2 magic. */
 export function prepareFirmware(bytes: Uint8Array) {
   if (!bytes.length || bytes.length % 512 || bytes.length > 4 * 1024 * 1024)
-    throw new Error('The firmware download is incomplete.')
+    throw new Error(
+      i18n.t('services:gbLinkFirmwareUpdate.theFirmwareDownloadIsIncomplete')
+    )
   const blocks = bytes.length / 512
   const seen = new Set<number>()
   for (let offset = 0; offset < bytes.length; offset += 512) {
@@ -104,7 +116,9 @@ export function prepareFirmware(bytes: Uint8Array) {
       address !== 0x10000000 + index * 256
     ) {
       throw new Error(
-        'The firmware is not a complete GB-Link RP2040 image. No update was started.'
+        i18n.t(
+          'services:gbLinkFirmwareUpdate.theFirmwareIsNotACompleteGbLinkRp2040Image'
+        )
       )
     }
     seen.add(index)
@@ -141,9 +155,17 @@ export class GbLinkFirmwareUpdater {
   ): Promise<UpdateResult> {
     signal?.throwIfAborted()
     if (this.working || this.deps.device.state === 'trading')
-      throw new Error('GB-Link is busy. Finish the current task first.')
+      throw new Error(
+        i18n.t(
+          'services:gbLinkFirmwareUpdate.gbLinkIsBusyFinishTheCurrentTaskFirst'
+        )
+      )
     if (!this.deps.usb)
-      throw new Error('Use Chrome or Edge for automatic firmware updates.')
+      throw new Error(
+        i18n.t(
+          'services:gbLinkFirmwareUpdate.useChromeOrEdgeForAutomaticFirmwareUpdates'
+        )
+      )
     this.working = true
     try {
       if (this.pending) {
@@ -155,12 +177,16 @@ export class GbLinkFirmwareUpdater {
         return await this.flash(device, callbacks, signal)
       }
       if (this.expectedVersion) {
-        callbacks.status('Select your GB-Link to finish checking the update.')
+        callbacks.status(
+          i18n.t(
+            'services:gbLinkFirmwareUpdate.selectYourGbLinkToFinishCheckingTheUpdate'
+          )
+        )
         await this.deps.device.connect({ signal })
         signal?.throwIfAborted()
         return await this.verifyVersion(callbacks)
       }
-      callbacks.status('Choose your GB-Link.')
+      callbacks.status(i18n.t('services:gbLinkFirmwareUpdate.chooseYourGbLink'))
       if (this.deps.device.state === 'connected')
         await this.deps.device.disconnect()
       signal?.throwIfAborted()
@@ -170,17 +196,27 @@ export class GbLinkFirmwareUpdater {
       callbacks.current(current)
       if (!current)
         throw new Error(
-          'Could not read the installed version. Reconnect GB-Link and try again.'
+          i18n.t(
+            'services:gbLinkFirmwareUpdate.couldNotReadTheInstalledVersionReconnectGbLinkAnd'
+          )
         )
-      callbacks.status('Checking the latest firmware…')
+      callbacks.status(
+        i18n.t('services:gbLinkFirmwareUpdate.checkingTheLatestFirmware')
+      )
       const build = await latestGbLinkFirmware(this.deps.fetch)
       signal?.throwIfAborted()
       callbacks.latest(build)
       if (compareFirmwareVersions(current, build.version) >= 0) {
-        callbacks.status('Your GB-Link is up to date.')
+        callbacks.status(
+          i18n.t('services:gbLinkFirmwareUpdate.yourGbLinkIsUpToDate')
+        )
         return 'current'
       }
-      callbacks.status(`Preparing firmware ${build.version}…`)
+      callbacks.status(
+        i18n.t('services:gbLinkFirmwareUpdate.preparingFirmware', {
+          version: build.version,
+        })
+      )
       const response = await this.deps.fetch(build.url, {
         signal: signal
           ? AbortSignal.any([signal, AbortSignal.timeout(20000)])
@@ -188,7 +224,9 @@ export class GbLinkFirmwareUpdater {
       })
       if (!response.ok)
         throw new Error(
-          'Could not download firmware. Your GB-Link has not been changed.'
+          i18n.t(
+            'services:gbLinkFirmwareUpdate.couldNotDownloadFirmwareYourGbLinkHasNotBeen'
+          )
         )
       const image = prepareFirmware(
         new Uint8Array(await response.arrayBuffer())
@@ -198,13 +236,17 @@ export class GbLinkFirmwareUpdater {
       const previous = new Set((await this.deps.usb.getDevices()).map(key))
       signal?.throwIfAborted()
       this.pending = { build, image }
-      callbacks.status('Restarting GB-Link into update mode…')
+      callbacks.status(
+        i18n.t('services:gbLinkFirmwareUpdate.restartingGbLinkIntoUpdateMode')
+      )
       try {
         await this.deps.device.rebootToBootloader()
       } catch {
         await this.deps.device.disconnect().catch(() => {})
         callbacks.status(
-          'Unplug GB-Link. Hold BOOTSEL while plugging it back in, then press the button below.'
+          i18n.t(
+            'services:gbLinkFirmwareUpdate.unplugGbLinkHoldBootselWhilePluggingItBackIn'
+          )
         )
       }
       for (let attempt = 0; attempt < 8; attempt++) {
@@ -222,8 +264,12 @@ export class GbLinkFirmwareUpdater {
       }
       callbacks.status(
         compareFirmwareVersions(current, '2.1.2') < 0
-          ? 'Unplug GB-Link. Hold BOOTSEL while plugging it back in, then select RP2 Boot below.'
-          : 'Press the button below and select RP2 Boot to finish the update.'
+          ? i18n.t(
+              'services:gbLinkFirmwareUpdate.unplugGbLinkHoldBootselWhilePluggingItBackIn2'
+            )
+          : i18n.t(
+              'services:gbLinkFirmwareUpdate.pressTheButtonBelowAndSelectRp2BootToFinish'
+            )
       )
       return 'select'
     } finally {
@@ -245,11 +291,15 @@ export class GbLinkFirmwareUpdater {
       device.productId !== 0x0003 ||
       !this.pending
     )
-      throw new Error('Select the GB-Link RP2 Boot device.')
+      throw new Error(
+        i18n.t('services:gbLinkFirmwareUpdate.selectTheGbLinkRp2BootDevice')
+      )
     const { build, image } = this.pending
     const boot = this.deps.boot(device)
     try {
-      callbacks.status('Updating GB-Link… Keep it plugged in.')
+      callbacks.status(
+        i18n.t('services:gbLinkFirmwareUpdate.updatingGbLinkKeepItPluggedIn')
+      )
       let connection:
         Awaited<ReturnType<PicobootSession['connect']>> | undefined
       for (let attempt = 0; attempt < 4; attempt++) {
@@ -262,19 +312,28 @@ export class GbLinkFirmwareUpdater {
           await this.deps.wait(400)
         }
       }
-      if (!connection) throw new Error('Could not open GB-Link in update mode.')
+      if (!connection)
+        throw new Error(
+          i18n.t('services:gbLinkFirmwareUpdate.couldNotOpenGbLinkInUpdateMode')
+        )
       signal?.throwIfAborted()
       // Once erase starts, complete writing, verification and reboot even if
       // the UI closes. An interrupted flash could leave the adapter unusable.
       await boot.flashEraseAndWrite(image.address, image.data)
-      callbacks.status('Checking the written firmware… Keep it plugged in.')
+      callbacks.status(
+        i18n.t(
+          'services:gbLinkFirmwareUpdate.checkingTheWrittenFirmwareKeepItPluggedIn'
+        )
+      )
       const read = await boot.flashRead(image.address, image.data.length)
       if (
         read.length !== image.data.length ||
         read.some((value, i) => value !== image.data[i])
       )
         throw new Error(
-          'Firmware verification failed. Keep GB-Link connected and retry the update.'
+          i18n.t(
+            'services:gbLinkFirmwareUpdate.firmwareVerificationFailedKeepGbLinkConnectedAndRetryThe'
+          )
         )
       this.expectedVersion = build.version
       this.pending = null
@@ -287,7 +346,7 @@ export class GbLinkFirmwareUpdater {
       await this.close(boot)
     }
     signal?.throwIfAborted()
-    callbacks.status('Reconnecting GB-Link…')
+    callbacks.status(i18n.t('services:gbLinkFirmwareUpdate.reconnectingGbLink'))
     for (let attempt = 0; attempt < 12; attempt++) {
       await this.deps.wait(250)
       signal?.throwIfAborted()
@@ -299,7 +358,9 @@ export class GbLinkFirmwareUpdater {
       return await this.verifyVersion(callbacks)
     }
     callbacks.status(
-      'Firmware written and checked. Press the button below to reconnect GB-Link.'
+      i18n.t(
+        'services:gbLinkFirmwareUpdate.firmwareWrittenAndCheckedPressTheButtonBelowToReconnect'
+      )
     )
     return 'verify'
   }
@@ -311,10 +372,16 @@ export class GbLinkFirmwareUpdater {
     callbacks.current(current)
     if (!current || compareFirmwareVersions(current, this.expectedVersion!) < 0)
       throw new Error(
-        'Could not confirm the new firmware version. Reconnect and try again.'
+        i18n.t(
+          'services:gbLinkFirmwareUpdate.couldNotConfirmTheNewFirmwareVersionReconnectAndTry'
+        )
       )
     this.expectedVersion = null
-    callbacks.status(`GB-Link is up to date: ${current}.`)
+    callbacks.status(
+      i18n.t('services:gbLinkFirmwareUpdate.gbLinkIsUpToDate', {
+        current: current,
+      })
+    )
     return 'updated'
   }
 

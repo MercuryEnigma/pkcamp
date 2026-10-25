@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import {
   GB_LINK_MAX_PAYLOAD,
   GB_LINK_SERIAL_CHANNEL,
@@ -152,7 +153,10 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     signal?.throwIfAborted()
     if (this.connected) return
     const host = browserNavigator()
-    if (!host) throw new Error('This browser has no USB device APIs.')
+    if (!host)
+      throw new Error(
+        i18n.t('services:gbLinkTransport.thisBrowserHasNoUsbDeviceApis')
+      )
 
     // A GB-Link this site may already use reconnects without the chooser.
     if (!options?.previouslyGrantedOnly && host.usb?.getDevices) {
@@ -175,7 +179,9 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
         )
       )
       if (matches.length !== 1)
-        throw new Error('Select your GB-Link to reconnect.')
+        throw new Error(
+          i18n.t('services:gbLinkTransport.selectYourGbLinkToReconnect')
+        )
       try {
         await this.openUsb(matches[0])
         signal?.throwIfAborted()
@@ -216,7 +222,11 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
 
     throw (
       webUsbError ??
-      new Error('This browser supports neither WebUSB nor Web Serial.')
+      new Error(
+        i18n.t(
+          'services:gbLinkTransport.thisBrowserSupportsNeitherWebusbNorWebSerial'
+        )
+      )
     )
   }
 
@@ -275,7 +285,9 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
 
   async sendData(payload: Uint8Array): Promise<void> {
     if (payload.length > GB_LINK_MAX_PAYLOAD) {
-      throw new RangeError('A GB-Link data payload cannot exceed 64 bytes.')
+      throw new RangeError(
+        i18n.t('services:gbLinkTransport.aGbLinkDataPayloadCannotExceed64Bytes')
+      )
     }
     await this.write(GB_LINK_SERIAL_CHANNEL.data, DATA_ENDPOINT, payload)
   }
@@ -327,7 +339,9 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     await port.open({ baudRate: 115200 })
     if (!port.readable || !port.writable) {
       throw new Error(
-        'The GB-Link serial port did not expose readable and writable streams.'
+        i18n.t(
+          'services:gbLinkTransport.theGbLinkSerialPortDidNotExposeReadableAnd'
+        )
       )
     }
     this.serialReader = port.readable.getReader()
@@ -343,20 +357,31 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
     usbEndpoint: number,
     payload: Uint8Array
   ): Promise<void> {
-    if (!this.connected) throw new Error('The GB-Link is not connected.')
+    if (!this.connected)
+      throw new Error(
+        i18n.t('services:gbLinkTransport.theGbLinkIsNotConnected')
+      )
     if (this.currentKind === 'webserial') {
       if (!this.serialWriter)
-        throw new Error('The GB-Link serial writer is unavailable.')
+        throw new Error(
+          i18n.t('services:gbLinkTransport.theGbLinkSerialWriterIsUnavailable')
+        )
       await this.serialWriter.write(
         encodeGbLinkSerialFrame(serialChannel, payload)
       )
       return
     }
     if (!this.usbDevice)
-      throw new Error('The GB-Link USB device is unavailable.')
+      throw new Error(
+        i18n.t('services:gbLinkTransport.theGbLinkUsbDeviceIsUnavailable')
+      )
     const result = await this.usbDevice.transferOut(usbEndpoint, payload)
     if (result.status && result.status !== 'ok') {
-      throw new Error(`GB-Link USB write failed: ${result.status}.`)
+      throw new Error(
+        i18n.t('services:gbLinkTransport.gbLinkUsbWriteFailed', {
+          status: result.status,
+        })
+      )
     }
   }
 

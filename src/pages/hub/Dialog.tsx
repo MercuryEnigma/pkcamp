@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, type ReactNode } from 'react'
 
 /** A modal dialog controlled by `open`; Esc and the Close button call `onClose`. */
@@ -12,6 +13,8 @@ export function Dialog({
   onClose: () => void
   children: ReactNode
 }) {
+  const { t } = useTranslation(['hub', 'common'] as const)
+
   const ref = useRef<HTMLDialogElement>(null)
   useEffect(() => {
     const dialog = ref.current
@@ -25,7 +28,7 @@ export function Dialog({
       {children}
       <div className="hub-dialog-actions">
         <button type="button" onClick={onClose}>
-          Close
+          {t('common:actions.close')}
         </button>
       </div>
     </dialog>

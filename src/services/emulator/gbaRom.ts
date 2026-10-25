@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import type { Gen3GameId } from '../saveLibrary'
 import { gen3GameIdFromCode } from '../saveLibrary'
 
@@ -35,11 +36,16 @@ export function assertArcadeRomMatchesGame(
   const identity = identifyArcadeRom(bytes)
   if (!identity) {
     throw new Error(
-      'This is not a supported Pokémon Ruby, Sapphire, Emerald, FireRed, or LeafGreen GBA ROM.'
+      i18n.t('services:gbaRom.thisIsNotASupportedPokeMonRubySapphireEmerald')
     )
   }
   if (identity.gameId !== expected) {
-    throw new Error(`This ROM belongs to ${identity.gameId}, not ${expected}.`)
+    throw new Error(
+      i18n.t('services:gbaRom.thisRomBelongsToNot', {
+        gameId: identity.gameId,
+        expected: expected,
+      })
+    )
   }
   return identity
 }

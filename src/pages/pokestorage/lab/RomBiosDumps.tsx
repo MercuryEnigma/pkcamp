@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+import { i18n } from '../../../services/i18n'
 import { useState } from 'react'
 import {
   gen3GameIdFromCode,
@@ -5,11 +7,11 @@ import {
 } from '../../../services/saveLibrary'
 import { storage } from '../../../services/storage'
 import { gbLinkTradeDevice } from '../../../services/tradeDevice'
-import { GAME_LABEL } from '../gameDisplay'
+import { getGameLabel } from '../gameDisplay'
 import { GbLinkTaskPanel } from '../GbLinkTaskPanel'
 import {
-  BOOT_STEP,
-  CONNECT_STEP,
+  getBootStep,
+  getConnectStep,
   readFromCartridge,
   taskErrorMessage,
 } from '../gbLinkTask'
@@ -18,10 +20,11 @@ import { ToolPage } from './ToolPage'
 
 type DumpTask = 'rom' | 'bios'
 
-const TASKS = [
-  ['rom', 'ROM dump'],
-  ['bios', 'BIOS dump'],
-] as const
+const getTasks = () =>
+  [
+    ['rom', i18n.t('rom-bios-dumps:RomBiosDumps.romDump')],
+    ['bios', i18n.t('rom-bios-dumps:RomBiosDumps.biosDump')],
+  ] as const
 
 interface RomDump {
   bytes: Uint8Array
@@ -30,10 +33,15 @@ interface RomDump {
   gameId: Gen3GameId | null
 }
 
-const dumpError = taskErrorMessage({ fallback: 'The dump failed. Try again.' })
+const getDumperror = () =>
+  taskErrorMessage({
+    fallback: i18n.t('rom-bios-dumps:RomBiosDumps.theDumpFailedTryAgain'),
+  })
 
 /** Downloads a GBA cartridge ROM or the GBA BIOS over GB-Link. */
 export function RomBiosDumps() {
+  const { t } = useTranslation(['rom-bios-dumps', 'common'] as const)
+
   const [task, setTask] = useState<DumpTask>('rom')
   const [busy, setBusy] = useState(false)
   const [dump, setDump] = useState<RomDump | null>(null)
@@ -42,7 +50,9 @@ export function RomBiosDumps() {
   const backUpToStorage = async (bytes: Uint8Array, gameId: Gen3GameId) => {
     try {
       await storage.putRom(gameId, { bytes, extension: 'gba' })
-      setStored(`Saved as the ${GAME_LABEL[gameId]} ROM.`)
+      setStored(
+        t('RomBiosDumps.savedAsTheRom', { value1: getGameLabel(gameId) })
+      )
     } catch (cause) {
       setStored(cause instanceof Error ? cause.message : String(cause))
     }
@@ -50,27 +60,26 @@ export function RomBiosDumps() {
 
   return (
     <ToolPage
-      label="Choose a task"
-      options={TASKS}
+      label={t('RomBiosDumps.chooseATask')}
+      options={getTasks()}
       value={task}
       onChange={setTask}
       disabled={busy}
       choices={
         task === 'rom' ? (
           <>
-            <p>
-              Download the ROM of any GBA cartridge. The game is detected from
-              the cartridge. Large games take several minutes.
-            </p>
+            <p>{t('RomBiosDumps.downloadTheRomOfAnyGbaCartridgeTheGameIs')}</p>
             {dump && (
               <>
-                <p role="status">Dumped {dump.name}.</p>
+                <p role="status">
+                  {t('RomBiosDumps.dumped', { name: dump.name })}
+                </p>
                 <button
                   type="button"
                   className="camp-upload-btn"
                   onClick={() => downloadFile(dump.bytes, dump.name)}
                 >
-                  Download
+                  {t('common:actions.download')}
                 </button>
                 {dump.gameId && (
                   <button
@@ -80,7 +89,7 @@ export function RomBiosDumps() {
                       void backUpToStorage(dump.bytes, dump.gameId!)
                     }
                   >
-                    Back up to storage for the Arcade
+                    {t('RomBiosDumps.backUpToStorageForTheArcade')}
                   </button>
                 )}
                 {stored && <p role="status">{stored}</p>}
@@ -89,8 +98,10 @@ export function RomBiosDumps() {
           </>
         ) : (
           <>
-            <p>Download the 16 KB BIOS from your GBA.</p>
-            <p>Downloads stay on your computer and are never synced.</p>
+            <p>{t('RomBiosDumps.downloadThe16KbBiosFromYourGba')}</p>
+            <p>
+              {t('RomBiosDumps.downloadsStayOnYourComputerAndAreNeverSynced')}
+            </p>
           </>
         )
       }
@@ -98,11 +109,11 @@ export function RomBiosDumps() {
         task === 'rom' ? (
           <GbLinkTaskPanel
             key="rom"
-            title="Dump a cartridge ROM"
-            steps={[CONNECT_STEP, BOOT_STEP]}
-            progressLabel="Reading the ROM"
+            title={t('rom-bios-dumps:RomBiosDumps.dumpRom')}
+            steps={[getConnectStep(), getBootStep()]}
+            progressLabel={t('RomBiosDumps.readingRom')}
             onBusyChange={setBusy}
-            describeError={dumpError}
+            describeError={getDumperror()}
             run={async (task) => {
               setDump(null)
               setStored(null)
@@ -117,24 +128,24 @@ export function RomBiosDumps() {
                 name,
                 gameId: cartridge ? gen3GameIdFromCode(cartridge.code) : null,
               })
-              return `Dumped ${name}.`
+              return t('RomBiosDumps.dumped', { name: name })
             }}
           />
         ) : (
           <GbLinkTaskPanel
             key="bios"
-            title="Dump the GBA BIOS"
+            title={t('rom-bios-dumps:RomBiosDumps.dumpBios')}
             steps={[
-              CONNECT_STEP,
-              'Power on the GBA while holding START + SELECT. A cartridge isn’t needed.',
+              getConnectStep(),
+              t('rom-bios-dumps:RomBiosDumps.biosBootStep'),
             ]}
-            progressLabel="Reading the BIOS"
+            progressLabel={t('RomBiosDumps.readingBios')}
             onBusyChange={setBusy}
-            describeError={dumpError}
+            describeError={getDumperror()}
             run={async (dump) => {
               const bytes = await gbLinkTradeDevice.readBios(dump)
               downloadFile(bytes, 'gba_bios.bin')
-              return 'Downloaded gba_bios.bin.'
+              return t('RomBiosDumps.downloadedGbaBiosBin')
             }}
           />
         )

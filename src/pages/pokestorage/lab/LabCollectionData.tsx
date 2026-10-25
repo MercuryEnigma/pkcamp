@@ -1,3 +1,5 @@
+import { collectionDisplay } from './collectionDisplay'
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { BUILT_IN_COLLECTIONS } from './builtInCollections'
 import type { CollectionDefinition } from './collectionTypes'
@@ -8,6 +10,8 @@ import { useLabData } from './useLabData'
  * deleted; built-ins stay, but their saved history can be cleared.
  */
 export function LabCollectionData({ offline }: { offline: boolean }) {
+  const { t } = useTranslation(['collections', 'common'] as const)
+
   const { ready, uploads, errors, remove, clearHistory, removeAll } =
     useLabData()
   const [message, setMessage] = useState<string | null>(null)
@@ -25,8 +29,12 @@ export function LabCollectionData({ offline }: { offline: boolean }) {
   const row = (definition: CollectionDefinition, uploaded: boolean) => (
     <li className="lab-data-row" key={definition.id}>
       <span className="lab-data-name">
-        {definition.name}
-        <small>{uploaded ? 'Uploaded' : 'Built-in'}</small>
+        {collectionDisplay(definition).name}
+        <small>
+          {uploaded
+            ? t('LabCollectionData.uploaded')
+            : t('LabCollectionData.builtIn')}
+        </small>
       </span>
       <button
         type="button"
@@ -34,14 +42,23 @@ export function LabCollectionData({ offline }: { offline: boolean }) {
         disabled={busy || offline}
         onClick={() =>
           void (uploaded
-            ? run(() => remove(definition), `"${definition.name}" deleted.`)
+            ? run(
+                () => remove(definition),
+                t('LabCollectionData.deleted', {
+                  name: collectionDisplay(definition).name,
+                })
+              )
             : run(
                 () => clearHistory(definition),
-                `"${definition.name}" history cleared.`
+                t('LabCollectionData.historyCleared', {
+                  name: collectionDisplay(definition).name,
+                })
               ))
         }
       >
-        {uploaded ? 'Delete' : 'Clear history'}
+        {uploaded
+          ? t('common:actions.delete')
+          : t('LabCollectionData.clearHistory')}
       </button>
     </li>
   )
@@ -49,12 +66,14 @@ export function LabCollectionData({ offline }: { offline: boolean }) {
   return (
     <div className="camp-cabin-card">
       <div className="camp-cabin-head">
-        <strong className="camp-cabin-name">Pokédex Collections</strong>
+        <strong className="camp-cabin-name">
+          {t('LabCollectionData.pokeDexCollections')}
+        </strong>
       </div>
       <p className="camp-cabin-status">
-        Collections and their registered history are kept in the active storage.
-        Built-in collections can't be deleted, only cleared; the next scan
-        rebuilds them from your saves.
+        {t(
+          'LabCollectionData.collectionsAndTheirRegisteredHistoryAreKeptInTheActive'
+        )}
       </p>
       {ready ? (
         <ul className="lab-data-list">
@@ -62,7 +81,7 @@ export function LabCollectionData({ offline }: { offline: boolean }) {
           {uploads.map((definition) => row(definition, true))}
         </ul>
       ) : (
-        <p className="lab-note">Loading collections…</p>
+        <p className="lab-note">{t('LabCollectionData.loadingCollections')}</p>
       )}
       {errors.length > 0 && (
         <div className="lab-warning" role="alert">
@@ -79,9 +98,11 @@ export function LabCollectionData({ offline }: { offline: boolean }) {
           type="button"
           className="camp-text-btn camp-text-btn--danger"
           disabled={!ready || busy || offline}
-          onClick={() => void run(removeAll, 'All collection data deleted.')}
+          onClick={() =>
+            void run(removeAll, t('LabCollectionData.allCollectionDataDeleted'))
+          }
         >
-          Delete all collections
+          {t('LabCollectionData.deleteAllCollections')}
         </button>
       </div>
     </div>

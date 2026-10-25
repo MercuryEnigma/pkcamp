@@ -1,3 +1,4 @@
+import { i18n } from '../../../../../services/i18n'
 import type { GbaButton } from '../../../../../services/emulator/input'
 import type {
   ControllerSkin,
@@ -111,7 +112,9 @@ export function normalizeDeltaSkin(
   if (!isPositive(nativeWidth) || !isPositive(nativeHeight)) {
     throw new DeltaSkinError(
       'invalid-layout',
-      `The ${orientation} layout has no valid mappingSize.`
+      i18n.t('arcade:normalizeDeltaSkin.theLayoutHasNoValidMappingsize', {
+        orientation: orientation,
+      })
     )
   }
 
@@ -129,7 +132,7 @@ export function normalizeDeltaSkin(
   })
 
   return {
-    name: info.name?.trim() || 'Delta skin',
+    name: info.name?.trim() || i18n.t('arcade:normalizeDeltaSkin.deltaSkin'),
     identifier: info.identifier ?? '',
     system: 'gba',
     orientation,
@@ -174,7 +177,9 @@ function placeScreen(
     if (!screen) {
       throw new DeltaSkinError(
         'missing-screen',
-        `The ${orientation} layout does not place the game screen.`
+        i18n.t('arcade:normalizeDeltaSkin.theLayoutDoesNotPlaceTheGameScreen', {
+          orientation: orientation,
+        })
       )
     }
     return {
@@ -242,7 +247,7 @@ function pickRepresentation(
   }
   throw new DeltaSkinError(
     'missing-orientation',
-    'The skin has no layout this player can use.'
+    i18n.t('arcade:normalizeDeltaSkin.theSkinHasNoLayoutThisPlayerCanUse')
   )
 }
 
@@ -280,7 +285,11 @@ function normalizeItem(
   const frame = rectOf(item.frame)
   const id = `item-${index}`
   if (!frame || !item.inputs) {
-    warnings.push(`Ignored item ${index + 1}: it has no usable frame.`)
+    warnings.push(
+      i18n.t('arcade:normalizeDeltaSkin.ignoredItemItHasNoUsableFrame', {
+        value1: index + 1,
+      })
+    )
     return null
   }
   const edges = item.extendedEdges ?? representation.extendedEdges
@@ -297,7 +306,12 @@ function normalizeItem(
     for (const name of item.inputs as readonly string[]) {
       if (GBA_INPUTS[name]) inputs.push(GBA_INPUTS[name])
       else if (ARCADE_ACTIONS[name]) actions.push(ARCADE_ACTIONS[name])
-      else warnings.push(`Ignored unsupported input “${name}”.`)
+      else
+        warnings.push(
+          i18n.t('arcade:normalizeDeltaSkin.ignoredUnsupportedInput', {
+            name: name,
+          })
+        )
     }
     if (inputs.length === 0 && actions.length === 0) return null
     return {
@@ -326,7 +340,11 @@ function normalizeItem(
       directions,
     }
   }
-  warnings.push(`Ignored item ${index + 1}: unsupported controls.`)
+  warnings.push(
+    i18n.t('arcade:normalizeDeltaSkin.ignoredItemUnsupportedControls', {
+      value1: index + 1,
+    })
+  )
   return null
 }
 
@@ -342,7 +360,10 @@ function pickBackground(
     assets?.resizable,
   ].filter((name): name is string => typeof name === 'string')
   if (named.length === 0) {
-    throw new DeltaSkinError('missing-asset', 'The layout has no artwork.')
+    throw new DeltaSkinError(
+      'missing-asset',
+      i18n.t('arcade:normalizeDeltaSkin.theLayoutHasNoArtwork')
+    )
   }
   let sawPdf = false
   for (const name of named) {
@@ -360,7 +381,10 @@ function pickBackground(
   throw sawPdf
     ? new DeltaSkinError(
         'unsupported-asset',
-        'This skin’s PDF artwork could not be drawn.'
+        i18n.t('arcade:normalizeDeltaSkin.thisSkinSPdfArtworkCouldNotBeDrawn')
       )
-    : new DeltaSkinError('missing-asset', 'The skin’s artwork file is missing.')
+    : new DeltaSkinError(
+        'missing-asset',
+        i18n.t('arcade:normalizeDeltaSkin.theSkinSArtworkFileIsMissing')
+      )
 }

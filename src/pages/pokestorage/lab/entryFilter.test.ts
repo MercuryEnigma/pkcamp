@@ -50,7 +50,7 @@ describe('entryMatchesFilter', () => {
 
   it('matches the found Pokémon’s moves, ability, item, ribbons and OT', () => {
     const yes = (
-      field: 'move' | 'ability' | 'item' | 'ribbon' | 'ot',
+      field: 'move' | 'ability' | 'nature' | 'item' | 'ribbon' | 'ot',
       text: string
     ) => entryMatchesFilter({ field, text }, entry)
     expect(yes('move', 'solar')).toBe(true)

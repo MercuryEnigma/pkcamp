@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import type { GameId, Generation } from '../saveLibrary'
 import type { FileStore } from './fileStore'
 import {
@@ -87,7 +88,11 @@ function campFilePath(generation: Generation, id: string): string {
 function collectionPath(collectionId: string): string {
   // The id becomes a file name, so it must not be able to leave the folder.
   if (!SAFE_NAME.test(collectionId)) {
-    throw new Error(`Invalid collection id ${collectionId}.`)
+    throw new Error(
+      i18n.t('services:fileStoreProvider.invalidCollectionId', {
+        collectionId: collectionId,
+      })
+    )
   }
   return `${POKEDEX_FOLDER}/${collectionId}.json`
 }
@@ -95,7 +100,11 @@ function collectionPath(collectionId: string): string {
 function labCollectionPath(collectionId: string): string {
   // The id becomes a file name, so it must not be able to leave the folder.
   if (!SAFE_NAME.test(collectionId)) {
-    throw new Error(`Invalid collection id ${collectionId}.`)
+    throw new Error(
+      i18n.t('services:fileStoreProvider.invalidCollectionId', {
+        collectionId: collectionId,
+      })
+    )
   }
   return `${LAB_COLLECTIONS_FOLDER}/${collectionId}.json`
 }
@@ -159,22 +168,34 @@ export function prefetchPaths(paths: readonly string[]): string[] {
 
 function validateCamp(camp: Camp): void {
   if (camp.sites.length < 1) {
-    throw new RangeError('A Camp needs at least one Camp Site.')
+    throw new RangeError(
+      i18n.t('services:fileStoreProvider.aCampNeedsAtLeastOneCampSite')
+    )
   }
   const ids = new Set<string>()
   for (const site of camp.sites) {
     if (site.length !== CAMP_SITE_SIZE) {
       throw new RangeError(
-        `Each Camp Site holds exactly ${CAMP_SITE_SIZE} Pokémon.`
+        i18n.t('services:fileStoreProvider.eachCampSiteHoldsExactlyPokeMon', {
+          CAMP_SITE_SIZE: CAMP_SITE_SIZE,
+        })
       )
     }
     for (const pokemon of site) {
       if (!pokemon) continue
       if (!SAFE_NAME.test(pokemon.id)) {
-        throw new Error(`Invalid Camp Pokémon id ${pokemon.id}.`)
+        throw new Error(
+          i18n.t('services:fileStoreProvider.invalidCampPokeMonId', {
+            id: pokemon.id,
+          })
+        )
       }
       if (ids.has(pokemon.id)) {
-        throw new Error(`Duplicate Camp Pokémon id ${pokemon.id}.`)
+        throw new Error(
+          i18n.t('services:fileStoreProvider.duplicateCampPokeMonId', {
+            id: pokemon.id,
+          })
+        )
       }
       ids.add(pokemon.id)
     }
@@ -188,7 +209,11 @@ function validateCamp(camp: Camp): void {
  */
 export class FileStoreProvider implements StorageProvider {
   readonly id: StorageProvider['id']
-  readonly label: string
+  private readonly providerLabel: () => string
+
+  get label(): string {
+    return this.providerLabel()
+  }
   private readonly store: FileStore
   private readonly now: () => Date
 
@@ -203,7 +228,7 @@ export class FileStoreProvider implements StorageProvider {
   ) {
     this.store = store
     this.id = options.id
-    this.label = options.label
+    this.providerLabel = () => options.label
     this.now = options.now ?? (() => new Date())
   }
 
@@ -329,7 +354,11 @@ export class FileStoreProvider implements StorageProvider {
   async putRom(gameId: GameId, rom: StoredRom): Promise<void> {
     const extension = rom.extension.replace(/^\./, '').toLowerCase()
     if (!/^[a-z0-9]+$/.test(extension)) {
-      throw new Error(`Invalid ROM file extension "${rom.extension}".`)
+      throw new Error(
+        i18n.t('services:fileStoreProvider.invalidRomFileExtension', {
+          extension: rom.extension,
+        })
+      )
     }
     const name = `${gameId}.${extension}`
     await this.store.write(`${savesFolder(gameId)}/${name}`, rom.bytes)
@@ -355,7 +384,10 @@ export class FileStoreProvider implements StorageProvider {
     const manifest = decodeJson(file.bytes) as CampManifest
     if (manifest.version !== CAMP_MANIFEST_VERSION) {
       throw new Error(
-        `Camp Sites were saved by a newer version of PkCamp (format ${manifest.version}).`
+        i18n.t(
+          'services:fileStoreProvider.campSitesWereSavedByANewerVersionOfPkcamp',
+          { version: manifest.version }
+        )
       )
     }
     // Positions are the Camp's meaning, so a manifest that does not hold
@@ -368,7 +400,11 @@ export class FileStoreProvider implements StorageProvider {
         (site) => !Array.isArray(site) || site.length !== CAMP_SITE_SIZE
       )
     ) {
-      throw new Error('The Camp Sites file is damaged and cannot be read.')
+      throw new Error(
+        i18n.t(
+          'services:fileStoreProvider.theCampSitesFileIsDamagedAndCannotBeRead'
+        )
+      )
     }
     return manifest
   }
@@ -386,7 +422,11 @@ export class FileStoreProvider implements StorageProvider {
               campFilePath(generation, entry.id)
             )
             if (!file) {
-              console.error(`Camp Pokémon file ${entry.id} is missing.`)
+              console.error(
+                i18n.t('services:fileStoreProvider.missingPokemonFile', {
+                  id: entry.id,
+                })
+              )
               return null
             }
             return {

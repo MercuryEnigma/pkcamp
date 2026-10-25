@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import { delay, type GbLinkWords } from './gbLinkWords.ts'
 
 // Port of the save, ROM and BIOS commands of GB-Link Cart Doctor's web/gba_cart.js
@@ -83,8 +84,14 @@ export class GbaCartClient {
     await this.command(GBA_CART.CMD_DUMP_SAVE)
     await this.waitDone(60_000)
     const [gameSize, saveSize] = await this.readWords(2)
-    if (gameSize === NO_CART) throw new Error('No GBA cartridge was detected.')
-    if (saveSize === 0) throw new Error('This cartridge has no save memory.')
+    if (gameSize === NO_CART)
+      throw new Error(
+        i18n.t('services:gbaCartClient.noGbaCartridgeWasDetected')
+      )
+    if (saveSize === 0)
+      throw new Error(
+        i18n.t('services:gbaCartClient.thisCartridgeHasNoSaveMemory')
+      )
     await this.waitDone(120_000)
     return this.streamIn(saveSize, onProgress)
   }
@@ -96,7 +103,10 @@ export class GbaCartClient {
     await this.command(GBA_CART.CMD_DUMP_ROM)
     await this.waitDone(30_000)
     const [gameSize] = await this.readWords(1)
-    if (gameSize === NO_CART) throw new Error('No GBA cartridge was detected.')
+    if (gameSize === NO_CART)
+      throw new Error(
+        i18n.t('services:gbaCartClient.noGbaCartridgeWasDetected')
+      )
     return this.streamIn(gameSize, onProgress)
   }
 
@@ -121,13 +131,22 @@ export class GbaCartClient {
     await this.command(GBA_CART.CMD_RESTORE)
     await this.waitDone(60_000)
     const [gameSize, saveSize] = await this.readWords(2)
-    if (gameSize === NO_CART) throw new Error('No GBA cartridge was detected.')
-    if (saveSize === 0) throw new Error('This cartridge has no save memory.')
+    if (gameSize === NO_CART)
+      throw new Error(
+        i18n.t('services:gbaCartClient.noGbaCartridgeWasDetected')
+      )
+    if (saveSize === 0)
+      throw new Error(
+        i18n.t('services:gbaCartClient.thisCartridgeHasNoSaveMemory')
+      )
     if (data.length !== saveSize) {
       // Anything but M_GO sends the payload back to idle without writing.
       await this.abort()
       throw new Error(
-        `The backup is ${data.length} bytes but the cartridge save is ${saveSize} bytes.`
+        i18n.t(
+          'services:gbaCartClient.theBackupIsBytesButTheCartridgeSaveIsBytes',
+          { length: data.length, saveSize: saveSize }
+        )
       )
     }
     await this.link.exchangeOne(GBA_CART.M_GO)
@@ -150,7 +169,9 @@ export class GbaCartClient {
         await this.link.exchangeOne(GBA_CART.M_ABORT)
       await delay(25, this.signal)
     }
-    throw new Error('The GBA save reader is not responding.')
+    throw new Error(
+      i18n.t('services:gbaCartClient.theGbaSaveReaderIsNotResponding')
+    )
   }
 
   private async command(cmd: number): Promise<void> {
@@ -165,7 +186,9 @@ export class GbaCartClient {
       }
       if ((await this.link.exchangeOne(GBA_CART.M_GO)) === echo) return
     }
-    throw new Error('The GBA save reader did not accept the command.')
+    throw new Error(
+      i18n.t('services:gbaCartClient.theGbaSaveReaderDidNotAcceptTheCommand')
+    )
   }
 
   private async waitDone(
@@ -183,11 +206,13 @@ export class GbaCartClient {
         return
       }
       if (word === GBA_CART.G_READY) {
-        throw new Error('The GBA save reader stopped mid-operation.')
+        throw new Error(
+          i18n.t('services:gbaCartClient.theGbaSaveReaderStoppedMidOperation')
+        )
       }
       await delay(200, signal)
     }
-    throw new Error('Timed out waiting for the GBA.')
+    throw new Error(i18n.t('services:gbaCartClient.timedOutWaitingForTheGba'))
   }
 
   private readWords(count: number): Promise<number[]> {
@@ -224,10 +249,14 @@ export class GbaCartClient {
         retries = 0
         onProgress?.(offset, data.length)
       } else if (verdict !== GBA_CART.G_FAIL) {
-        throw new Error('The GBA save writer lost sync. Try again.')
+        throw new Error(
+          i18n.t('services:gbaCartClient.theGbaSaveWriterLostSyncTryAgain')
+        )
       } else if (++retries > MAX_UPLOAD_RETRIES) {
         throw new Error(
-          'The backup kept arriving corrupted. Check the link cable.'
+          i18n.t(
+            'services:gbaCartClient.theBackupKeptArrivingCorruptedCheckTheLinkCable'
+          )
         )
       }
     }
@@ -261,7 +290,9 @@ export class GbaCartClient {
       } else if (++retries > MAX_SECTION_RETRIES) {
         await this.abort()
         throw new Error(
-          'The data kept arriving corrupted. Check the link cable.'
+          i18n.t(
+            'services:gbaCartClient.theDataKeptArrivingCorruptedCheckTheLinkCable'
+          )
         )
       } else {
         await this.link.exchangeOne(GBA_CART.M_FAIL)

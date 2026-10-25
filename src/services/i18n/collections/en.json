@@ -1,0 +1,294 @@
+{
+  "CollectionBuilder": {
+    "any": "Any",
+    "shiny": "Shiny",
+    "notShiny": "Not shiny",
+    "collectionDetails": "Collection details",
+    "name": "Name *",
+    "description": "Description",
+    "author": "Author",
+    "source": "Source",
+    "details": "Details",
+    "updated": "Updated",
+    "species": "Species *",
+    "species2": "Species",
+    "selectAPokeMon": "Select a Pokémon…",
+    "ribbonsAllRequired": "Ribbons (all required)",
+    "ribbons": "Ribbons",
+    "addARibbon": "Add a ribbon…",
+    "remove": "Remove {{name}}",
+    "nature": "Nature",
+    "ability": "Ability",
+    "move": "Move",
+    "ot": "OT",
+    "id": "ID",
+    "pokeMon": "Pokémon",
+    "added": "{{length}} added",
+    "addPokeMon": "+ Add Pokémon",
+    "edit": "Edit",
+    "andMore": "…and {{value1}} more.",
+    "savePokeMon": "Save Pokémon",
+    "addPokeMon2": "Add Pokémon",
+    "importFromSpreadsheetComingLater": "Import from spreadsheet · Coming later",
+    "createCollection": "Create collection"
+  },
+  "CollectionGrid": {
+    "collections": "‹ Collections",
+    "registered": "Registered",
+    "searchPokeMon": "Search Pokémon…",
+    "searchEntries": "Search entries",
+    "statusFilter": "Status filter",
+    "entries": "Entries",
+    "owned": "Owned",
+    "seen": "Seen",
+    "scanning": "Scanning…",
+    "noEntriesMatch": "No entries match."
+  },
+  "CollectionHome": {
+    "pokeDexResearchSystem": "Pokédex research system",
+    "researchProgress": "Research progress",
+    "registered": "Registered",
+    "collections": "Collections",
+    "registered2": "{{name}} registered",
+    "newCollection": "+ New collection",
+    "availableToAdd": "Available to add",
+    "add": "+ Add",
+    "registrationProgress": "{{registered}} / {{total}}"
+  },
+  "CollectionView": {
+    "pokeDexScreens": "Pokédex screens",
+    "collections": "Collections",
+    "addNewCollection": "Add New Collection",
+    "pokeDex": "Pokédex",
+    "filter": "Filter{{value1}}",
+    "pokeDexResearchSystem": "Pokédex research system",
+    "activeFilter": "{{value1}}: {{text}}",
+    "filterCount": " ({{length}})"
+  },
+  "LabCollectionData": {
+    "uploaded": "Uploaded",
+    "builtIn": "Built-in",
+    "deleted": "\"{{name}}\" deleted.",
+    "historyCleared": "\"{{name}}\" history cleared.",
+    "clearHistory": "Clear history",
+    "pokeDexCollections": "Pokédex Collections",
+    "collectionsAndTheirRegisteredHistoryAreKeptInTheActive": "Collections and their registered history are kept in the active storage. Built-in collections can't be deleted, only cleared; the next scan rebuilds them from your saves.",
+    "loadingCollections": "Loading collections…",
+    "deleteAllCollections": "Delete all collections",
+    "allCollectionDataDeleted": "All collection data deleted."
+  },
+  "PcFilterScreen": {
+    "selectAMove": "Select a move…",
+    "selectAnAbility": "Select an ability…",
+    "selectANature": "Select a nature…",
+    "selectAnItem": "Select an item…",
+    "selectARibbon": "Select a ribbon…",
+    "selectATrainer": "Select a trainer…",
+    "type": "Type",
+    "all": "All",
+    "resetFilters": "Reset filters",
+    "applyFilters": "Apply filters",
+    "selectAPokeMon": "Select a Pokémon…"
+  },
+  "builderDraft": {
+    "any": "{{name}} (any)",
+    "giveTheCollectionAName": "Give the collection a name.",
+    "theNameNeedsAtLeastOneLetterOrDigit": "The name needs at least one letter or digit.",
+    "addAtLeastOnePokeMon": "Add at least one Pokémon.",
+    "shiny": "Shiny",
+    "notShiny": "Not shiny",
+    "ribbon": "{{ribbon}} Ribbon",
+    "nature": "Nature {{nature}}",
+    "ability": "Ability {{ability}}",
+    "knows": "Knows {{move}}",
+    "ot": "OT {{ot}}",
+    "id": "ID {{trainerId}}",
+    "all": "All",
+    "unownFormLabel": "{{name}} {{letter}}"
+  },
+  "builtInCollections": {
+    "builtInCollectionIsInvalid": "Built-in collection {{name}} is invalid:\n{{value2}}"
+  },
+  "collectionResults": {
+    "theSelectedCabinsChangedSinceTheLastScan": "The selected Cabins changed since the last scan.",
+    "aSelectedCabinHasASaveThatWasNotScanned": "A selected Cabin has a save that was not scanned yet.",
+    "aCabinSaveChangedSinceTheLastScan": "A Cabin save changed since the last scan.",
+    "campSitesChangedSinceTheLastScan": "Camp Sites changed since the last scan.",
+    "collectionChanged": "The collection changed since the last scan."
+  },
+  "collectionTypes": {
+    "owned": "Owned",
+    "seen": "Seen",
+    "unseen": "Unseen"
+  },
+  "entryDisplay": {
+    "species": "Species: {{value1}}",
+    "form": "Form: {{value1}}",
+    "shiny": "Shiny: {{value1}}",
+    "egg": "Egg: {{value1}}",
+    "level": "Level: {{value1}}",
+    "nickname": "Nickname: {{value1}}",
+    "originalTrainer": "Original trainer: {{value1}}",
+    "heldItem": "Held item: {{value1}}",
+    "ability": "Ability: {{value1}}",
+    "nature": "Nature: {{value1}}",
+    "knowsAllOf": "Knows all of: {{value1}}",
+    "hasAllOfTheRibbons": "Has all of the ribbons: {{value1}}",
+    "anyOf": "Any of {{value1}}",
+    "species2": "Species",
+    "form2": "Form",
+    "shiny2": "Shiny",
+    "egg2": "Egg",
+    "level2": "Level",
+    "nickname2": "Nickname",
+    "originalTrainer2": "Original trainer",
+    "heldItem2": "Held item",
+    "ability2": "Ability",
+    "nature2": "Nature",
+    "move": "Move",
+    "ribbon": "Ribbon",
+    "allMoves": "All moves",
+    "allRibbons": "All ribbons",
+    "party": "{{game}} · Party",
+    "box": "Box {{value1}}",
+    "slot": "{{game}} · {{box}} slot {{value3}}",
+    "justNow": "just now",
+    "all": "All",
+    "registered": "Registered",
+    "missing": "Missing",
+    "visiting": "Visiting",
+    "gender": "Gender: {{value1}}",
+    "gender2": "Gender",
+    "trainerId": "Trainer ID",
+    "trainerIdRequirement": "Trainer ID: {{values}}",
+    "speciesFormLabel": "{{name}} {{value2}}",
+    "distinctEntryLabel": "{{label}} · {{entryId}}",
+    "speciesNumberAndName": "#{{v}} {{value2}}",
+    "knowsMove_one": "Knows the move: {{moves}}",
+    "knowsMove_other": "Knows any of: {{moves}}",
+    "hasRibbon_one": "Has the ribbon: {{ribbons}}",
+    "hasRibbon_other": "Has any of the ribbons: {{ribbons}}"
+  },
+  "entryFilter": {
+    "name": "Name",
+    "type": "Type",
+    "move": "Move",
+    "ability": "Ability",
+    "nature": "Nature",
+    "heldItem": "Held item",
+    "ribbon": "Ribbon",
+    "trainerOt": "Trainer (OT)"
+  },
+  "evaluateCollection": {
+    "mustBeBetweenAnd": "must be between {{min}} and {{max}}",
+    "mustBeAnInteger": "must be an integer",
+    "mustBeTrueOrFalse": "must be true or false",
+    "mustBeAString": "must be a string",
+    "mustBeAnIdNumberOrAName": "must be an id number or a name",
+    "mustBeMaleFemaleOrGenderless": "must be \"Male\", \"Female\", or \"Genderless\"",
+    "mustBeANonEmptyString": "must be a non-empty string",
+    "anEntryHasNoConstraints": "An entry has no constraints.",
+    "isNotSupportedYet": "\"{{unsupported}}\" is not supported yet."
+  },
+  "labStore": {
+    "campSites": "Camp Sites",
+    "cabin": "{{value1}} Cabin"
+  },
+  "validateCollection": {
+    "mustBeAnObject": "{{path}}: must be an object",
+    "needsAtLeastOneConstraintItWouldMatchAnything": "{{path}}: needs at least one constraint (it would match anything)",
+    "isNotSupportedYet": "{{fieldPath}}: \"{{key}}\" is not supported yet",
+    "mustBeANonEmptyArrayOfUniqueStrings": "{{fieldPath}}: must be a non-empty array of unique strings",
+    "mustNotBeAnEmptyArray": "{{fieldPath}}: must not be an empty array",
+    "mustBeAStringNumberOrBoolean": "{{itemPath}}: must be a string, number, or boolean",
+    "duplicateValue": "{{itemPath}}: duplicate value",
+    "groupsMustBeAnArray": "groups: must be an array",
+    "idMustBeANonEmptyString": "{{path}}.id: must be a non-empty string",
+    "idDuplicateGroupId": "{{path}}.id: duplicate group id \"{{id}}\"",
+    "nameMustBeANonEmptyString": "{{path}}.name: must be a non-empty string",
+    "mustBeAString": "{{path}}.{{key}}: must be a string",
+    "pokemonMustBeAnArrayOfEntryIds": "{{path}}.pokemon: must be an array of entry ids",
+    "mustBeAString2": "{{idPath}}: must be a string",
+    "duplicateEntryId": "{{idPath}}: duplicate entry id \"{{id}}\"",
+    "isNotAKeyOfPokemon": "{{idPath}}: \"{{id}}\" is not a key of pokemon",
+    "metadataMustBeAnObject": "metadata: must be an object",
+    "metadataUnknownField": "metadata.{{key}}: unknown field",
+    "metadataVersionMustBeANonEmptyString": "metadata.version: must be a non-empty string",
+    "metadataMustBeAString": "metadata.{{key}}: must be a string",
+    "rootMustBeAJsonObject": "(root): must be a JSON object",
+    "unknownField": "{{key}}: unknown field",
+    "schemaMustBeAString": "$schema: must be a string",
+    "schemaversionMustBeTheString1": "schemaVersion: must be the string \"1\"",
+    "schemaversionIsNotSupportedThisVersionOfPkcampReads": "schemaVersion: \"{{schemaVersion}}\" is not supported (this version of PkCamp reads \"{{SUPPORTED_SCHEMA_VERSION}}\")",
+    "idMustBeAString": "id: must be a string",
+    "idMustBe1LettersDigitsOrHyphensItBecomes": "id: must be 1-{{MAX_ID_LENGTH}} letters, digits, or hyphens (it becomes a file name)",
+    "nameMustBeANonEmptyString2": "name: must be a non-empty string",
+    "pokemonMustBeAnObjectKeyedByEntryId": "pokemon: must be an object keyed by entry id",
+    "constraintProblem": "{{itemPath}}: {{problem}}"
+  },
+  "builtIn": {
+    "gen3-in-game-trades": {
+      "name": "Gen 3 In-Game Trades",
+      "metadata": {
+        "description": "Every in-game trade Pokémon from Ruby, Sapphire, Emerald, FireRed, and LeafGreen, still unevolved. Matched by species, OT, and TID; any language's OT counts."
+      },
+      "groups": {
+        "ruby-sapphire": {
+          "name": "Ruby & Sapphire"
+        },
+        "emerald": {
+          "name": "Emerald"
+        },
+        "firered-leafgreen": {
+          "name": "FireRed & LeafGreen",
+          "details": "Lickitung is offered in both games, for Golduck in FireRed and Slowbro in LeafGreen."
+        },
+        "firered": {
+          "name": "FireRed"
+        },
+        "leafgreen": {
+          "name": "LeafGreen"
+        }
+      }
+    },
+    "gen3-living-dex": {
+      "name": "Gen 3 Dex",
+      "metadata": {
+        "description": "One of every Pokémon from Bulbasaur to Deoxys. Eggs do not count."
+      },
+      "groups": {
+        "kanto": {
+          "name": "Kanto"
+        },
+        "johto": {
+          "name": "Johto"
+        },
+        "hoenn": {
+          "name": "Hoenn"
+        }
+      }
+    },
+    "kanto-dex": {
+      "name": "Kanto Dex",
+      "metadata": {
+        "description": "The 151 Kanto Pokémon. Eggs do not count."
+      },
+      "groups": {
+        "kanto": {
+          "name": "Kanto"
+        }
+      }
+    },
+    "unown-dex": {
+      "name": "Unown Dex",
+      "metadata": {
+        "description": "All 28 Unown forms, A to Z, ! and ?. Eggs do not count."
+      },
+      "groups": {
+        "unown": {
+          "name": "Unown"
+        }
+      }
+    }
+  }
+}

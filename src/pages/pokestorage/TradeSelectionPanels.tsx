@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
 import type { SaveGame } from '../../services/pkhex'
 import type { Gen3GameId } from '../../services/saveLibrary'
@@ -10,7 +11,7 @@ import {
   type CampEntry,
   type CampPosition,
 } from './campPositions'
-import { GAME_LABEL } from './gameDisplay'
+import { getGameLabel } from './gameDisplay'
 import { GbaSavePanel } from './GbaSavePanel'
 import { PokemonSlotIcon } from './PokemonSlotIcon'
 import { assertSaveMatchesCabin } from './saveVersion'
@@ -34,13 +35,15 @@ function BoxNav({
   label: string
   onCycle: (delta: number) => void
 }) {
+  const { t } = useTranslation(['trade', 'common'] as const)
+
   return (
     <div className="camp-storage-nav">
       <button
         type="button"
         className="camp-nav-btn"
         onClick={() => onCycle(-1)}
-        aria-label={`Previous ${label}`}
+        aria-label={t('TradeSelectionPanels.previous', { label: label })}
       >
         ←
       </button>
@@ -52,7 +55,7 @@ function BoxNav({
         type="button"
         className="camp-nav-btn"
         onClick={() => onCycle(1)}
-        aria-label={`Next ${label}`}
+        aria-label={t('TradeSelectionPanels.next', { label: label })}
       >
         →
       </button>
@@ -76,6 +79,8 @@ export function SaveSelectionPanel({
   reload: number
   onSelect: (slot: { box: number; index: number; pk3: Uint8Array }) => void
 }) {
+  const { t } = useTranslation(['trade', 'common'] as const)
+
   const { adapter, loading: adapterLoading, error: adapterError } = usePkHex()
   const resolver = useSpriteResolver()
   const { provider, ready } = useStorageProvider()
@@ -134,9 +139,7 @@ export function SaveSelectionPanel({
     }
   }, [adapter, gameId, provider, ready, reload, refresh])
 
-  const handleUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file || !adapter) return
@@ -155,17 +158,23 @@ export function SaveSelectionPanel({
       setActionError(
         cause instanceof Error
           ? storageErrorMessage(cause)
-          : 'Unable to open that backup.'
+          : t('TradeSelectionPanels.unableToOpenThatBackup')
       )
     }
   }
 
   if (adapterLoading || loading)
-    return <p className="camp-trade-note">Loading backup…</p>
+    return (
+      <p className="camp-trade-note">
+        {t('TradeSelectionPanels.loadingBackup')}
+      </p>
+    )
   if (adapterError) {
     return (
       <p className="camp-trade-note">
-        PKHeX failed to load: {adapterError.message}
+        {t('TradeSelectionPanels.pkhexFailedToLoad', {
+          message: adapterError.message,
+        })}
       </p>
     )
   }
@@ -174,20 +183,24 @@ export function SaveSelectionPanel({
     return (
       <div className="camp-trade-empty">
         <p className="camp-trade-note">
-          No {GAME_LABEL[gameId]} backup is stored yet.
+          {t('TradeSelectionPanels.noBackupIsStoredYet', {
+            value1: getGameLabel(gameId),
+          })}
         </p>
         <div className="camp-transfer-group">
-          <span className="camp-transfer-group-label">Add a save</span>
+          <span className="camp-transfer-group-label">
+            {t('TradeSelectionPanels.addASave')}
+          </span>
           <button
             type="button"
             className="camp-transfer-btn"
             disabled={gbaReading || offline}
             onClick={() => setGbaReading(true)}
           >
-            From GBA
+            {t('TradeSelectionPanels.fromGba')}
           </button>
           <label className="camp-transfer-btn">
-            From file
+            {t('TradeSelectionPanels.fromFile')}
             <input
               className="camp-file-input--hidden"
               type="file"
@@ -218,9 +231,12 @@ export function SaveSelectionPanel({
   return (
     <div className="camp-trade-picker">
       <BoxNav
-        kicker={`Room ${boxIndex + 1} of ${game.boxes.length}`}
+        kicker={t('TradeSelectionPanels.roomPosition', {
+          current: boxIndex + 1,
+          total: game.boxes.length,
+        })}
         name={box.name}
-        label="Room"
+        label={t('TradeSelectionPanels.room')}
         onCycle={(delta) =>
           setBoxIndex(
             (current) =>
@@ -249,8 +265,8 @@ export function SaveSelectionPanel({
       </div>
       <p className="camp-trade-note">
         {selected
-          ? 'One Pokémon selected.'
-          : 'Select one Pokémon from the boxes.'}
+          ? t('TradeSelectionPanels.onePokeMonSelected')
+          : t('TradeSelectionPanels.selectOnePokeMonFromTheBoxes')}
       </p>
     </div>
   )
@@ -265,6 +281,8 @@ export function CampSelectionPanel({
   reload: number
   onSelect: (slot: { site: number; index: number; pk3: Uint8Array }) => void
 }) {
+  const { t } = useTranslation(['trade', 'common'] as const)
+
   const { adapter, loading: adapterLoading, error: adapterError } = usePkHex()
   const resolver = useSpriteResolver()
   const { provider, ready } = useStorageProvider()
@@ -301,17 +319,27 @@ export function CampSelectionPanel({
   }, [adapter, provider, ready, reload])
 
   if (adapterLoading || loading)
-    return <p className="camp-trade-note">Loading Camp Sites…</p>
+    return (
+      <p className="camp-trade-note">
+        {t('TradeSelectionPanels.loadingCampSites')}
+      </p>
+    )
   if (adapterError) {
     return (
       <p className="camp-trade-note">
-        PKHeX failed to load: {adapterError.message}
+        {t('TradeSelectionPanels.pkhexFailedToLoad', {
+          message: adapterError.message,
+        })}
       </p>
     )
   }
   if (message) return <p className="camp-trade-note">{message}</p>
   if (!adapter || entries.every((entry) => entry === null)) {
-    return <p className="camp-trade-note">No Camping Pokémon are stored.</p>
+    return (
+      <p className="camp-trade-note">
+        {t('TradeSelectionPanels.noCampingPokeMonAreStored')}
+      </p>
+    )
   }
 
   const siteCount = Math.max(1, Math.ceil(entries.length / CAMP_SITE_SIZE))
@@ -323,9 +351,12 @@ export function CampSelectionPanel({
   return (
     <div className="camp-trade-picker">
       <BoxNav
-        kicker={`Camp Site ${siteIndex + 1} of ${siteCount}`}
-        name="Choose one camper"
-        label="Camp Site"
+        kicker={t('TradeSelectionPanels.campSitePosition', {
+          current: siteIndex + 1,
+          total: siteCount,
+        })}
+        name={t('TradeSelectionPanels.chooseOneCamper')}
+        label={t('TradeSelectionPanels.campSite')}
         onCycle={(delta) =>
           setSiteIndex((current) => (current + delta + siteCount) % siteCount)
         }
@@ -350,8 +381,8 @@ export function CampSelectionPanel({
       </div>
       <p className="camp-trade-note">
         {selected
-          ? 'One Pokémon selected.'
-          : 'Select one Pokémon from a Camp Site.'}
+          ? t('TradeSelectionPanels.onePokeMonSelected')
+          : t('TradeSelectionPanels.selectOnePokeMonFromACampSite')}
       </p>
     </div>
   )

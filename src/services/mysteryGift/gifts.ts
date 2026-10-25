@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import type { GiftTarget } from './types'
 
 export interface MysteryGift {
@@ -11,41 +12,42 @@ export interface MysteryGift {
  * The gifts PkCamp offers. Each is a Wonder Card from the GB-Link Team or
  * Project Wonder, built for Emerald, FireRed and LeafGreen.
  */
-export const MYSTERY_GIFTS: readonly MysteryGift[] = [
+export const getMysteryGifts = (): readonly MysteryGift[] => [
   {
     id: 'goppier-altering-cave',
-    label: 'Altering Cave',
-    description:
-      'Changes the wild Pokémon in Altering Cave. Each delivery moves it to the next one.',
+    label: i18n.t('services:gifts.alteringCave'),
+    description: i18n.t(
+      'services:gifts.changesTheWildPokeMonInAlteringCaveEachDelivery'
+    ),
   },
   {
     id: 'custom-speed-4',
-    label: 'Fast Forward ×4',
-    description:
-      'Press R to run the game up to four times as fast, and R again to play normally.',
+    label: i18n.t('services:gifts.fastForward4'),
+    description: i18n.t('services:gifts.pressRToRunTheGameUpToFourTimes'),
   },
   {
     id: 'custom-pokemon-follow',
-    label: 'Pokémon Follow',
-    description:
-      'Your lead Pokémon walks behind you in the overworld, when the game has a sprite for it.',
+    label: i18n.t('services:gifts.pokeMonFollow'),
+    description: i18n.t(
+      'services:gifts.yourLeadPokeMonWalksBehindYouInTheOverworld'
+    ),
   },
   {
     id: 'custom-pc-anywhere',
-    label: 'PC Anywhere',
-    description:
-      'Press R in the field to open the Pokémon Storage System from anywhere.',
+    label: i18n.t('services:gifts.pcAnywhere'),
+    description: i18n.t('services:gifts.pressRInTheFieldToOpenThePokeMon'),
   },
   {
     id: 'custom-reusable-tms',
-    label: 'Reusable TMs',
-    description: 'Teaching a move with a TM no longer uses the TM up.',
+    label: i18n.t('services:gifts.reusableTms'),
+    description: i18n.t('services:gifts.teachingAMoveWithATmNoLongerUsesThe'),
   },
   {
     id: 'custom-trade-evolution',
-    label: 'Trader',
-    description:
-      'Evolves a party Pokémon that normally evolves by trading, such as Kadabra or Machoke.',
+    label: i18n.t('services:gifts.trader'),
+    description: i18n.t(
+      'services:gifts.evolvesAPartyPokeMonThatNormallyEvolvesByTrading'
+    ),
   },
 ]
 

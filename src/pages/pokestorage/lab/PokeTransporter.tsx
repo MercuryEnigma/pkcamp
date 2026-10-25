@@ -1,3 +1,5 @@
+import { useTranslation, Trans } from 'react-i18next'
+import { i18n } from '../../../services/i18n'
 import { useState, type ReactNode } from 'react'
 import { readGbSave } from '../../../services/gbaSaveDump/readGbSave'
 import type { GbaCartInfo } from '../../../services/gbaSaveDump/gbaCartClient'
@@ -12,17 +14,21 @@ import './pokeTransporter.css'
 type Backup = { bytes: Uint8Array; name: string }
 type Side = 'gb' | 'gba'
 
-const STEPS = [
-  'What you need',
-  'Back up (optional)',
-  'Send to GBA',
-  'On the consoles',
-] as const
+const getSteps = () =>
+  [
+    i18n.t('transporter:PokeTransporter.whatYouNeed'),
+    i18n.t('transporter:PokeTransporter.backUpOptional'),
+    i18n.t('transporter:PokeTransporter.sendToGba'),
+    i18n.t('transporter:PokeTransporter.onTheConsoles'),
+  ] as const
 
-const taskError = taskErrorMessage({
-  cancelled: 'Cancelled. Reset the GBA into multiboot mode before retrying.',
-  retry: 'Reset the GBA before retrying.',
-})
+const getTaskerror = () =>
+  taskErrorMessage({
+    cancelled: i18n.t(
+      'transporter:PokeTransporter.cancelledResetTheGbaIntoMultibootModeBeforeRetrying'
+    ),
+    retry: i18n.t('transporter:PokeTransporter.resetTheGbaBeforeRetrying'),
+  })
 
 /**
  * A step-by-step guide that sends Poké Transporter GB to the GBA, which then
@@ -30,6 +36,8 @@ const taskError = taskErrorMessage({
  * first is optional.
  */
 export function PokeTransporter() {
+  const { t } = useTranslation(['transporter', 'common'] as const)
+
   const [step, setStep] = useState(0)
   const [active, setActive] = useState<Side | null>(null)
   const [busy, setBusy] = useState(false)
@@ -40,29 +48,23 @@ export function PokeTransporter() {
 
   const content: ReactNode[] = [
     <>
-      <p>
-        You need two systems, both games, GB-Link, and a Game Boy Color link
-        cable.
-      </p>
+      <p>{t('PokeTransporter.youNeedTwoSystemsBothGamesGbLinkAndA')}</p>
       <details>
-        <summary>Which games work?</summary>
-        <p>
-          v1.2.1 supports English Red, Blue, Yellow, Gold, Silver, and Crystal,
-          and English, Spanish, German, Italian, and French Ruby, Sapphire,
-          Emerald, FireRed, and LeafGreen.
-        </p>
+        <summary>{t('PokeTransporter.whichGamesWork')}</summary>
+        <p>{t('PokeTransporter.v121SupportsEnglishRedBlueYellowGoldSilver')}</p>
       </details>
-      <p>
-        Moved Pokémon leave your old game. Both saves will change. Use original
-        cartridges: bootleg copies can lose Pokémon.
-      </p>
+      <p>{t('PokeTransporter.movedPokeMonLeaveYourOldGameBothSavesWill')}</p>
     </>,
     <>
-      <p>Back up both games first, so nothing is lost.</p>
+      <p>{t('PokeTransporter.backUpBothGamesFirstSoNothingIsLost')}</p>
       <div className="transporter-backups">
         {(['gb', 'gba'] as const).map((side) => (
           <div key={side} className="transporter-backup">
-            <h3>{side === 'gb' ? 'GB / GBC source' : 'GBA destination'}</h3>
+            <h3>
+              {side === 'gb'
+                ? t('PokeTransporter.gbGbcSource')
+                : t('PokeTransporter.gbaDestination')}
+            </h3>
             <button
               type="button"
               className="camp-upload-btn"
@@ -72,7 +74,9 @@ export function PokeTransporter() {
                 setSent(false)
               }}
             >
-              {backups[side] ? 'Back up again' : 'Back up'}
+              {backups[side]
+                ? t('PokeTransporter.backUpAgain')
+                : t('PokeTransporter.backUp')}
             </button>
             {backups[side] && (
               <button
@@ -82,13 +86,13 @@ export function PokeTransporter() {
                   downloadFile(backups[side]!.bytes, backups[side]!.name)
                 }
               >
-                Download again
+                {t('PokeTransporter.downloadAgain')}
               </button>
             )}
             <p>
               {backups[side]
-                ? `Backed up: ${backups[side].name}`
-                : 'Not backed up yet.'}
+                ? t('PokeTransporter.backedUp', { name: backups[side].name })
+                : t('PokeTransporter.notBackedUpYet')}
             </p>
           </div>
         ))}
@@ -96,30 +100,43 @@ export function PokeTransporter() {
       {active && (
         <GbLinkTaskPanel
           key={active}
-          title={`Back up ${active === 'gb' ? 'GB/GBC source' : 'GBA destination'}`}
+          title={t('PokeTransporter.backUp2', {
+            value1:
+              active === 'gb'
+                ? t('transporter:PokeTransporter.gbGbcSource2')
+                : t('transporter:PokeTransporter.gbaDestination'),
+          })}
           onBusyChange={setBusy}
           onClose={() => setActive(null)}
-          progressLabel="Reading the save"
-          describeError={taskError}
+          progressLabel={t('PokeTransporter.readingTheSave')}
+          describeError={getTaskerror()}
           afterStartSteps={
             active === 'gb'
               ? [
-                  'Wait for the GBC screen on the GBA.',
-                  'Insert your GB/GBC game.',
-                  'Press B on the GBA to back up the save.',
+                  t('transporter:PokeTransporter.waitForTheGbcScreenOnTheGba'),
+                  t('transporter:PokeTransporter.insertYourGbGbcGame'),
+                  t(
+                    'transporter:PokeTransporter.pressBOnTheGbaToBackUpTheSave'
+                  ),
                 ]
               : undefined
           }
           steps={
             active === 'gb'
               ? [
-                  'Connect GB-Link to your GBA with a GBC cable.',
-                  'Turn on the GBA with no game inserted.',
+                  t(
+                    'transporter:PokeTransporter.connectGbLinkToYourGbaWithAGbcCable'
+                  ),
+                  t(
+                    'transporter:PokeTransporter.turnOnTheGbaWithNoGameInserted'
+                  ),
                 ]
               : [
-                  'Connect GB-Link to your GBA.',
-                  'Insert your GBA game.',
-                  'Hold START + SELECT as you turn on the GBA.',
+                  t('transporter:PokeTransporter.connectGbLinkToYourGba'),
+                  t('transporter:PokeTransporter.insertYourGbaGame'),
+                  t(
+                    'transporter:PokeTransporter.holdStartSelectAsYouTurnOnTheGba'
+                  ),
                 ]
           }
           run={async (options) => {
@@ -152,50 +169,62 @@ export function PokeTransporter() {
               [active]: { bytes, name },
             }))
             downloadFile(bytes, name)
-            return `Download started: ${name}. Turn off the GBA. Close this backup panel to continue.`
+            return t(
+              'PokeTransporter.downloadStartedTurnOffTheGbaCloseThisBackupPanel',
+              { name: name }
+            )
           }}
         />
       )}
     </>,
     <>
       <GbLinkTaskPanel
-        title="Launch Poké Transporter GB v1.2.1"
+        title={t('PokeTransporter.launchPokeTransporterGbV121')}
         disabled={active !== null}
-        startLabel="Start Poké Transporter GB"
-        progressLabel="Sending Poké Transporter"
+        startLabel={t('PokeTransporter.startPokeTransporterGb')}
+        progressLabel={t('PokeTransporter.sendingPokeTransporter')}
         onBusyChange={setBusy}
-        describeError={taskError}
+        describeError={getTaskerror()}
         steps={[
-          'Turn off the GBA.',
-          'Insert the GBA game that will receive your Pokémon.',
-          'Connect GB-Link with a Game Boy Color link cable.',
-          'Hold START + SELECT as you turn on the GBA.',
+          t('transporter:PokeTransporter.turnOffTheGba'),
+          t(
+            'transporter:PokeTransporter.insertTheGbaGameThatWillReceiveYourPokeMon'
+          ),
+          t(
+            'transporter:PokeTransporter.connectGbLinkWithAGameBoyColorLinkCable'
+          ),
+          t('transporter:PokeTransporter.holdStartSelectAsYouTurnOnTheGba'),
         ]}
         run={async (options) => {
           setSent(false)
           await launchTransporter(options)
           setSent(true)
-          return 'Program sent! Follow the steps below.'
+          return t('PokeTransporter.programSentFollowTheStepsBelow')
         }}
       />
     </>,
     <>
       <ol className="camp-gba-steps">
-        <li>Keep the GBA running Poké Transporter turned on.</li>
-        <li>Unplug GB-Link from that GBA.</li>
-        <li>Put your GB/GBC game in the other system.</li>
-        <li>Join the two systems with a Game Boy Color link cable.</li>
-        <li>Follow the steps on the game screens.</li>
+        <li>{t('PokeTransporter.keepTheGbaRunningPokeTransporterTurnedOn')}</li>
+        <li>{t('PokeTransporter.unplugGbLinkFromThatGba')}</li>
+        <li>{t('PokeTransporter.putYourGbGbcGameInTheOtherSystem')}</li>
+        <li>{t('PokeTransporter.joinTheTwoSystemsWithAGameBoyColorLink')}</li>
+        <li>{t('PokeTransporter.followTheStepsOnTheGameScreens')}</li>
       </ol>
-      <p className="transporter-warning">A GBA link cable will not work.</p>
+      <p className="transporter-warning">
+        {t('PokeTransporter.aGbaLinkCableWillNotWork')}
+      </p>
     </>,
   ]
 
   return (
     <div className="transporter">
       <div className="transporter-main">
-        <ol className="transporter-steps" aria-label="Steps">
-          {STEPS.map((title, index) => (
+        <ol
+          className="transporter-steps"
+          aria-label={t('PokeTransporter.steps')}
+        >
+          {getSteps().map((title, index) => (
             <li key={title}>
               <button
                 type="button"
@@ -213,11 +242,15 @@ export function PokeTransporter() {
           ))}
         </ol>
         <p className="transporter-indicator">
-          Step {step + 1} of {STEPS.length} · {STEPS[step]}
+          {t('PokeTransporter.stepOf', {
+            value1: step + 1,
+            length: getSteps().length,
+            value3: getSteps()[step],
+          })}
         </p>
         <div className="transporter-step">
-          <Panel label={STEPS[step]}>
-            <h2>{STEPS[step]}</h2>
+          <Panel label={getSteps()[step]}>
+            <h2>{getSteps()[step]}</h2>
             {content[step]}
           </Panel>
           <div className="transporter-nav">
@@ -227,38 +260,40 @@ export function PokeTransporter() {
               disabled={busy || step === 0}
               onClick={() => setStep(step - 1)}
             >
-              ◀ Back
+              {t('PokeTransporter.back')}
             </button>
             <button
               type="button"
               className="camp-upload-btn camp-upload-btn--primary"
-              disabled={busy || step === STEPS.length - 1}
+              disabled={busy || step === getSteps().length - 1}
               onClick={() => setStep(step + 1)}
             >
-              Next ▶
+              {t('PokeTransporter.next')}
             </button>
           </div>
         </div>
       </div>
       <p className="transporter-credits">
-        Poké Transporter GB v1.2.1 by Striaton Lab Team · MIT code ·{' '}
-        <a
-          href="https://github.com/Striaton-Lab-Team/Poke_Transporter_GB/releases/tag/1.2.1"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Release and instructions ↗
-        </a>{' '}
-        ·{' '}
-        <a
-          href="https://github.com/Striaton-Lab-Team/Poke_Transporter_GB/blob/1.2.1/docs/EZ_Flash_Omega_DE.md"
-          target="_blank"
-          rel="noreferrer"
-        >
-          EZ-Flash Mode B instructions ↗
-        </a>
-        . Pokémon © Nintendo/Creatures Inc./GAME FREAK Inc. Not endorsed by
-        Nintendo.
+        <Trans
+          ns="transporter"
+          i18nKey="PokeTransporter.pokeTransporterGbV121ByStriatonLabTeam"
+          components={{
+            part1: (
+              <a
+                href="https://github.com/Striaton-Lab-Team/Poke_Transporter_GB/releases/tag/1.2.1"
+                target="_blank"
+                rel="noreferrer"
+              />
+            ),
+            part2: (
+              <a
+                href="https://github.com/Striaton-Lab-Team/Poke_Transporter_GB/blob/1.2.1/docs/EZ_Flash_Omega_DE.md"
+                target="_blank"
+                rel="noreferrer"
+              />
+            ),
+          }}
+        />
       </p>
     </div>
   )

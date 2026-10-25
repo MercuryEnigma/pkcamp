@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { SiteCard } from '../../hub/SiteCard'
 import './researchTools.css'
 
@@ -11,21 +12,26 @@ export function ResearchTools({
   onOpenSaves: () => void
   onOpenDumps: () => void
 }) {
+  const { t } = useTranslation(['lab', 'common'] as const)
+
   return (
-    <nav className="research-tools" aria-label="Research tools">
+    <nav
+      className="research-tools"
+      aria-label={t('ResearchTools.researchTools')}
+    >
       <SiteCard
-        title="Mystery Gifts"
-        description="Send Wonder Cards to a GBA or the Switch."
+        title={t('ResearchTools.mysteryGifts')}
+        description={t('ResearchTools.sendWonderCardsToAGbaOrTheSwitch')}
         onClick={onOpenGifts}
       />
       <SiteCard
-        title="Cartridge Saves"
-        description="Back up and restore GBA cartridge saves."
+        title={t('ResearchTools.cartridgeSaves')}
+        description={t('ResearchTools.backUpAndRestoreGbaCartridgeSaves')}
         onClick={onOpenSaves}
       />
       <SiteCard
-        title="ROM / BIOS Dumps"
-        description="Download cartridge ROMs and the GBA BIOS."
+        title={t('ResearchTools.romBiosDumps')}
+        description={t('ResearchTools.downloadCartridgeRomsAndTheGbaBios')}
         onClick={onOpenDumps}
       />
     </nav>

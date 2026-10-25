@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
 import { activeGame } from '../../services/activeGame'
 import { device } from '../../services/device'
@@ -9,7 +10,7 @@ import { SPRITE_SOURCES } from '../../services/sprites/catalog'
 import { useAppNavigation } from '../context/appNavigation'
 import { useActiveGame } from '../context/useActiveGame'
 import { GbLinkTaskPanel } from '../pokestorage/GbLinkTaskPanel'
-import { GAME_LABEL } from '../pokestorage/gameDisplay'
+import { getGameLabel } from '../pokestorage/gameDisplay'
 import {
   storageErrorMessage,
   useDropboxStatus,
@@ -37,6 +38,8 @@ export function StartMenu({
   onContinueWithoutSave: () => void
   onCancelGame: () => void
 }) {
+  const { t } = useTranslation(['start', 'common'] as const)
+
   const setupDialog = useRef<HTMLDialogElement>(null)
   const romDialog = useRef<HTMLDialogElement>(null)
   const saveInput = useRef<HTMLInputElement>(null)
@@ -182,24 +185,24 @@ export function StartMenu({
               className="hub-inline-back"
               onClick={onCancelGame}
             >
-              ← Choose another game
+              {t('StartMenu.chooseAnotherGame')}
             </button>
             <h1>
               {files?.save
-                ? `Continue ${GAME_LABEL[gameId]}`
-                : `Add a ${GAME_LABEL[gameId]} save`}
+                ? t('StartMenu.continue', { value1: getGameLabel(gameId) })
+                : t('StartMenu.addASave', { value1: getGameLabel(gameId) })}
             </h1>
             <p>
               {files?.save
-                ? 'Your save is ready. You can continue or replace it.'
-                : 'Upload a save file or read it from a cartridge with a GB-Link.'}
+                ? t('StartMenu.yourSaveIsReadyYouCanContinueOrReplaceIt')
+                : t('StartMenu.uploadASaveFileOrReadItFromACartridge')}
             </p>
             {files?.save && (
               <button
                 className="hub-primary-action"
                 onClick={() => onOpenGame(gameId)}
               >
-                Continue to pkCamp
+                {t('StartMenu.continueToPkcamp')}
               </button>
             )}
             <div className="hub-acquire-actions">
@@ -207,7 +210,9 @@ export function StartMenu({
                 onClick={() => saveInput.current?.click()}
                 disabled={busy || active.status !== 'ready'}
               >
-                {files?.save ? 'Replace save file' : 'Upload save file'}
+                {files?.save
+                  ? t('StartMenu.replaceSaveFile')
+                  : t('StartMenu.uploadSaveFile')}
               </button>
               <button
                 onClick={() =>
@@ -215,7 +220,7 @@ export function StartMenu({
                 }
                 disabled={busy || active.status !== 'ready'}
               >
-                Read from GBA
+                {t('StartMenu.readFromGba')}
               </button>
             </div>
             <input
@@ -229,7 +234,9 @@ export function StartMenu({
               }}
             />
             {active.status === 'loading' && (
-              <p role="status">Preparing {GAME_LABEL[gameId]}…</p>
+              <p role="status">
+                {t('StartMenu.preparing', { value1: getGameLabel(gameId) })}
+              </p>
             )}
             {(active.error || error) && (
               <p role="alert" className="camp-error">
@@ -238,17 +245,21 @@ export function StartMenu({
             )}
             {deviceTask === 'save' && (
               <GbLinkTaskPanel
-                title={`Read ${GAME_LABEL[gameId]} save`}
+                title={t('StartMenu.readSave', {
+                  value1: getGameLabel(gameId),
+                })}
                 steps={[
-                  'Connect the GB-Link to this device and to a powered-off GBA.',
-                  `Insert ${GAME_LABEL[gameId]} and power on while holding START + SELECT.`,
+                  t('start:StartMenu.connectTheGbLinkToThisDeviceAndToA'),
+                  t('start:StartMenu.insertAndPowerOnWhileHoldingStartSelect', {
+                    value1: getGameLabel(gameId),
+                  }),
                 ]}
-                progressLabel="Reading the save"
-                startLabel="Continue"
+                progressLabel={t('StartMenu.readingTheSave')}
+                startLabel={t('common:actions.continue')}
                 onClose={() => setDeviceTask(null)}
                 describeError={(cause, cancelled) =>
                   cancelled
-                    ? 'The save read was cancelled.'
+                    ? t('StartMenu.theSaveReadWasCancelled')
                     : cause instanceof Error
                       ? cause.message
                       : String(cause)
@@ -258,7 +269,7 @@ export function StartMenu({
                   await activeGame.replaceSave(bytes)
                   setRefresh((value) => value + 1)
                   onOpenGame(gameId)
-                  return 'Save added.'
+                  return t('StartMenu.saveAdded')
                 }}
               />
             )}
@@ -277,14 +288,16 @@ export function StartMenu({
           </div>
         </header>
         <div className="hub-start-body">
-          <h1>Select a game to visit the campsite</h1>
+          <h1>{t('StartMenu.selectAGameToVisitTheCampsite')}</h1>
           {!startup.ready && !startup.error && (
-            <p role="status">Loading your settings…</p>
+            <p role="status">{t('StartMenu.loadingYourSettings')}</p>
           )}
           {(startup.error || current?.error) && (
             <p role="alert" className="camp-error">
               {startup.error ?? current?.error}{' '}
-              <button onClick={startup.retry}>Retry</button>
+              <button onClick={startup.retry}>
+                {t('common:actions.retry')}
+              </button>
             </p>
           )}
           <div className="hub-start-carts">
@@ -299,17 +312,17 @@ export function StartMenu({
                     onRom={() => openRom(id)}
                     saveStatus={
                       !files
-                        ? 'Checking save…'
+                        ? t('start:StartMenu.checkingSave')
                         : files.save
-                          ? 'Save ready'
-                          : 'New game'
+                          ? t('start:StartMenu.saveReady')
+                          : t('start:StartMenu.newGame')
                     }
                     romStatus={
                       !files
-                        ? 'Checking ROM…'
+                        ? t('start:StartMenu.checkingRom')
                         : files.rom
-                          ? 'ROM ready'
-                          : 'ROM needed'
+                          ? t('start:StartMenu.romReady')
+                          : t('start:StartMenu.romNeeded')
                     }
                     romReady={files?.rom === true}
                   />
@@ -322,23 +335,28 @@ export function StartMenu({
             disabled={!startup.ready}
             onClick={() => afterSetup(onContinueWithoutSave)}
           >
-            Continue to the campsite
+            {t('StartMenu.continueToTheCampsite')}
           </button>
         </div>
       </section>
       <footer className="hub-start-footer">
         <div className="hub-credits">
-          <p>Made possible by these projects and their contributors</p>
           <p>
-            <a href="https://github.com/kwsch/PKHeX">PKHeX</a> ·{' '}
+            {t('StartMenu.madePossibleByTheseProjectsAndTheirContributors')}
+          </p>
+          <p>
+            <a href="https://github.com/kwsch/PKHeX">{t('StartMenu.pkhex')}</a>{' '}
+            ·{' '}
             <a href="https://github.com/EthanThatOneKid/pkhex-wasm">
-              pkhex-wasm
+              {t('StartMenu.pkhexWasm')}
             </a>{' '}
             ·{' '}
-            <a href="https://github.com/GB-Link/GB-Link-Switch-LDN">GB-Link</a>{' '}
+            <a href="https://github.com/GB-Link/GB-Link-Switch-LDN">
+              {t('StartMenu.gbLink')}
+            </a>{' '}
             ·{' '}
             <a href="https://github.com/GB-Link/gb-cart-doctor-web">
-              GB-Link Cart Doctor
+              {t('StartMenu.gbLinkCartDoctor')}
             </a>
           </p>
           <p>
@@ -349,7 +367,7 @@ export function StartMenu({
               </span>
             ))}
           </p>
-          <p>Pokémon © Nintendo / Creatures Inc. / GAME FREAK inc.</p>
+          <p>{t('StartMenu.pokeMonNintendoCreaturesIncGameFreakInc')}</p>
         </div>
         <a
           className="hub-license"
@@ -357,7 +375,7 @@ export function StartMenu({
           target="_blank"
           rel="noopener noreferrer"
         >
-          License
+          {t('StartMenu.license')}
         </a>
       </footer>
 
@@ -366,9 +384,9 @@ export function StartMenu({
         className="hub-dialog"
         onClose={() => setError(null)}
       >
-        <h2>Welcome to pkCamp</h2>
+        <h2>{t('StartMenu.welcomeToPkcamp')}</h2>
         <label className="hub-source-label">
-          Choose your sprite source
+          {t('StartMenu.chooseYourSpriteSource')}
           <select
             value={sourceId}
             onChange={(event) => setSourceId(event.target.value)}
@@ -382,28 +400,25 @@ export function StartMenu({
         </label>
         {status.state !== 'connected' && dropboxAccount.isConfigured() && (
           <>
-            <p>
-              Sign in to Dropbox to use your saves across devices, or continue
-              with browser storage.
-            </p>
+            <p>{t('StartMenu.signInToDropboxToUseYourSavesAcrossDevices')}</p>
             <button
               disabled={busy || status.state === 'connecting'}
               onClick={() => void connect()}
             >
-              Sign in to Dropbox
+              {t('StartMenu.signInToDropbox')}
             </button>
           </>
         )}
         {error && <p role="alert">{error}</p>}
         <div className="hub-dialog-actions">
           <button disabled={busy} onClick={() => setupDialog.current?.close()}>
-            Close
+            {t('common:actions.close')}
           </button>
           <button
             disabled={busy || !startup.ready}
             onClick={() => void saveSetup()}
           >
-            {busy ? 'Saving…' : 'Continue'}
+            {busy ? t('common:actions.saving') : t('common:actions.continue')}
           </button>
         </div>
       </dialog>
@@ -416,17 +431,21 @@ export function StartMenu({
           setError(null)
         }}
       >
-        <h2>{romGameId ? `${GAME_LABEL[romGameId]} ROM` : 'ROM'}</h2>
-        <p>Choose a ROM file or read the cartridge with a GB-Link.</p>
+        <h2>
+          {romGameId
+            ? t('StartMenu.rom', { value1: getGameLabel(romGameId) })
+            : 'ROM'}
+        </h2>
+        <p>{t('StartMenu.chooseARomFileOrReadTheCartridgeWithA')}</p>
         <div className="hub-dialog-actions hub-dialog-actions--start">
           <button onClick={() => romInput.current?.click()} disabled={busy}>
-            Choose ROM file
+            {t('StartMenu.chooseRomFile')}
           </button>
           <button
             onClick={() => setDeviceTask(deviceTask === 'rom' ? null : 'rom')}
             disabled={busy}
           >
-            Read from GBA
+            {t('StartMenu.readFromGba')}
           </button>
         </div>
         <input
@@ -456,17 +475,19 @@ export function StartMenu({
         />
         {deviceTask === 'rom' && romGameId && (
           <GbLinkTaskPanel
-            title={`Read ${GAME_LABEL[romGameId]} ROM`}
+            title={t('StartMenu.readRom', { value1: getGameLabel(romGameId) })}
             steps={[
-              'Connect the GB-Link to this device and to a powered-off GBA.',
-              `Insert ${GAME_LABEL[romGameId]} and power on while holding START + SELECT.`,
+              t('start:StartMenu.connectTheGbLinkToThisDeviceAndToA'),
+              t('start:StartMenu.insertAndPowerOnWhileHoldingStartSelect', {
+                value1: getGameLabel(romGameId),
+              }),
             ]}
-            progressLabel="Reading the ROM"
-            startLabel="Continue"
+            progressLabel={t('StartMenu.readingTheRom')}
+            startLabel={t('common:actions.continue')}
             onClose={() => setDeviceTask(null)}
             describeError={(cause, cancelled) =>
               cancelled
-                ? 'The ROM read was cancelled.'
+                ? t('StartMenu.theRomReadWasCancelled')
                 : cause instanceof Error
                   ? cause.message
                   : String(cause)
@@ -478,7 +499,7 @@ export function StartMenu({
               })
               await storeRom(romGameId, bytes, `${romGameId}.gba`)
               romDialog.current?.close()
-              return 'ROM added.'
+              return t('StartMenu.romAdded')
             }}
           />
         )}
@@ -488,7 +509,9 @@ export function StartMenu({
           </p>
         )}
         <div className="hub-dialog-actions">
-          <button onClick={() => romDialog.current?.close()}>Close</button>
+          <button onClick={() => romDialog.current?.close()}>
+            {t('common:actions.close')}
+          </button>
         </div>
       </dialog>
     </main>

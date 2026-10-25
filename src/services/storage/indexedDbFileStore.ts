@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import {
   childrenOf,
   type FileStore,
@@ -18,7 +19,12 @@ function requestResult<T>(request: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result)
     request.onerror = () =>
-      reject(request.error ?? new Error('Local storage request failed.'))
+      reject(
+        request.error ??
+          new Error(
+            i18n.t('services:indexedDbFileStore.localStorageRequestFailed')
+          )
+      )
   })
 }
 
@@ -26,9 +32,19 @@ function transactionComplete(transaction: IDBTransaction): Promise<void> {
   return new Promise((resolve, reject) => {
     transaction.oncomplete = () => resolve()
     transaction.onerror = () =>
-      reject(transaction.error ?? new Error('Local storage write failed.'))
+      reject(
+        transaction.error ??
+          new Error(
+            i18n.t('services:indexedDbFileStore.localStorageWriteFailed')
+          )
+      )
     transaction.onabort = () =>
-      reject(transaction.error ?? new Error('Local storage write was aborted.'))
+      reject(
+        transaction.error ??
+          new Error(
+            i18n.t('services:indexedDbFileStore.localStorageWriteWasAborted')
+          )
+      )
   })
 }
 
@@ -63,9 +79,20 @@ export class IndexedDbFileStore implements FileStore {
         resolve(database)
       }
       request.onerror = () =>
-        reject(request.error ?? new Error('Unable to open local storage.'))
+        reject(
+          request.error ??
+            new Error(
+              i18n.t('services:indexedDbFileStore.unableToOpenLocalStorage')
+            )
+        )
       request.onblocked = () =>
-        reject(new Error('Local storage is blocked by another tab.'))
+        reject(
+          new Error(
+            i18n.t(
+              'services:indexedDbFileStore.localStorageIsBlockedByAnotherTab'
+            )
+          )
+        )
     }).catch((error: unknown) => {
       this.database = null
       throw error

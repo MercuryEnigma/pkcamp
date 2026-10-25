@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import { GB_LINK_COMMAND, GB_LINK_MODE } from '../tradeDevice/gbLinkProtocol'
 import type { GbLinkTransport } from '../tradeDevice/gbLinkTransport'
 import { delay, GbLinkWords } from './gbLinkWords'
@@ -20,7 +21,7 @@ export async function receiveGbSave(
     options.signal.throwIfAborted()
     if (Date.now() >= deadline)
       throw new Error(
-        'No save dump started. Reset the GBA and try again, then press B in the dumper.'
+        i18n.t('services:readGbSave.noSaveDumpStartedResetTheGbaAndTryAgain')
       )
     if ((await byte()) !== 0xf5) continue
     const type = await byte()
@@ -46,7 +47,9 @@ export async function receiveGbSave(
     }
     if (!accepted)
       throw new Error(
-        'The GB/GBC save checksum repeatedly failed. No download was created; reset and retry.'
+        i18n.t(
+          'services:readGbSave.theGbGbcSaveChecksumRepeatedlyFailedNoDownloadWas'
+        )
       )
     options.onProgress?.((section + 1) * 256, result.length)
   }
@@ -57,7 +60,7 @@ export async function readGbSave(
   transport: GbLinkTransport,
   options: GbaDumperOptions
 ) {
-  options.onStatus?.('Sending the GB/GBC backup tool…')
+  options.onStatus?.(i18n.t('services:readGbSave.sendingTheGbGbcBackupTool'))
   await sendMultiboot(transport, decodeBundledRom(dumperUrl), options.signal)
   const link = new GbLinkWords(transport, options.signal)
   try {
@@ -75,7 +78,7 @@ export async function readGbSave(
     await delay(100, options.signal)
     link.drain()
     options.onStatus?.(
-      'Wait for the GBC screen. Insert your GB/GBC game, then press B to back up its save.'
+      i18n.t('services:readGbSave.waitForTheGbcScreenInsertYourGbGbcGame')
     )
     return await receiveGbSave(link, options)
   } finally {

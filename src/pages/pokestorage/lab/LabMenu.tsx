@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Gen3GameId } from '../../../services/saveLibrary'
 import { SiteCard } from '../../hub/SiteCard'
 import { SitePage } from '../../hub/SitePage'
@@ -22,35 +23,37 @@ export function LabMenu({
   onSelectSettings: () => void
   onSelectNews: () => void
 }) {
+  const { t } = useTranslation(['lab', 'common'] as const)
+
   return (
-    <SitePage page="Lab" gameId={gameId} onBack={onBack}>
-      <nav className="site-tiles lab-menu" aria-label="Lab">
+    <SitePage page={t('LabMenu.lab')} gameId={gameId} onBack={onBack}>
+      <nav className="site-tiles lab-menu" aria-label={t('LabMenu.lab')}>
         <SiteCard
           className="lab-menu-pc"
-          title="PC"
-          description="Pokédex collections and research progress"
+          title={t('LabMenu.pc')}
+          description={t('LabMenu.pokeDexCollectionsAndResearchProgress')}
           onClick={onSelectCollections}
         />
         <SiteCard
           className="lab-menu-transporter"
-          title="Transporter"
-          description="Move Gen 1–2 Pokémon into Gen 3"
+          title={t('LabMenu.transporter')}
+          description={t('LabMenu.moveGen12PokeMonIntoGen3')}
           onClick={onSelectTransporter}
         />
         <SiteCard
           className="lab-menu-tools"
-          title="Research Tools"
-          description="Gifts, cartridge saves and dumps"
+          title={t('LabMenu.researchTools')}
+          description={t('LabMenu.giftsCartridgeSavesAndDumps')}
           onClick={onSelectResearch}
         />
         <SiteCard
           className="lab-menu-settings"
-          title="Settings"
-          description="Backups, appearance, data and hardware"
+          title={t('common:actions.settings')}
+          description={t('LabMenu.backupsAppearanceDataAndHardware')}
           onClick={onSelectSettings}
         />
         <button type="button" className="lab-link" onClick={onSelectNews}>
-          Patch Notes
+          {t('LabMenu.patchNotes')}
         </button>
       </nav>
     </SitePage>

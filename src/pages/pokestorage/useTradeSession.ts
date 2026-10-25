@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useNavigationGuard } from './navigationGuard'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import ribbondolUrl from '../../assets/trade/ribbondol.pk3?url'
@@ -45,6 +46,8 @@ export function useTradeSession({
   initialGameId,
   initialBox,
 }: TradeViewProps) {
+  const { t } = useTranslation(['trade', 'common'] as const)
+
   const [left, setLeft] = useState<TradeSide | null>(
     initialGameId ? { device: 'save-backup', gameId: initialGameId } : null
   )
@@ -52,7 +55,7 @@ export function useTradeSession({
   const [busy, setBusy] = useState(false)
   const confirmLeave = useNavigationGuard(
     busy,
-    'Cancel the active trade and go back?'
+    t('useTradeSession.cancelTheActiveTradeAndGoBack')
   )
   const [message, setMessage] = useState<string | null>(null)
   // Bumped after a completed trade so the selection panels reload their data
@@ -107,7 +110,11 @@ export function useTradeSession({
     const controller = new AbortController()
     abortRef.current = controller
     setBusy(true)
-    setMessage(relay ? 'Starting link…' : 'Starting trade…')
+    setMessage(
+      relay
+        ? t('useTradeSession.startingLink')
+        : t('useTradeSession.startingTrade')
+    )
     setLastTrade(null)
     let usedPlaceholder = false
     try {
@@ -115,13 +122,14 @@ export function useTradeSession({
       const loadPlaceholder = async (): Promise<Uint8Array> => {
         if (!placeholder) {
           const response = await fetch(ribbondolUrl)
-          if (!response.ok) throw new Error('Could not load ribbondol.pk3.')
+          if (!response.ok)
+            throw new Error(t('useTradeSession.couldNotLoadRibbondolPk3'))
           placeholder = new Uint8Array(await response.arrayBuffer())
         }
         return placeholder.slice()
       }
       if (!relay && (left.device === 'gb-link' || right.device === 'gb-link')) {
-        setMessage('Preparing trade…')
+        setMessage(t('useTradeSession.preparingTrade'))
         await loadPlaceholder()
       }
       const writes = await runTrade(left, right, controller.signal, {
@@ -136,14 +144,14 @@ export function useTradeSession({
         },
       })
       if (relay) {
-        setMessage('Link stopped.')
+        setMessage(t('useTradeSession.linkStopped'))
         return
       }
       setLastTrade(writes)
       setMessage(
         usedPlaceholder
-          ? 'Trade complete. The GB-Link cannot return your new Pokémon, so the selected slot now holds the placeholder ribbondol.pk3. If the trade did not happen on the GBA, use Revert trade.'
-          : 'Trade complete.'
+          ? t('useTradeSession.tradeCompleteTheGbLinkCannotReturnYourNewPoke')
+          : t('useTradeSession.tradeComplete')
       )
       // The selected slots changed; start over with fresh grids.
       setLeft(clearSelection)
@@ -168,9 +176,7 @@ export function useTradeSession({
       setRight(clearSelection)
       setReload((value) => value + 1)
       onTraded?.()
-      setMessage(
-        'Trade reverted in PkCamp. Pokémon on a Game Boy Advance or Switch are not changed.'
-      )
+      setMessage(t('useTradeSession.tradeRevertedInPkcampPokeMonOnAGameBoy'))
     } catch (cause) {
       setMessage(describeError(cause))
     } finally {
@@ -182,7 +188,11 @@ export function useTradeSession({
     abortRef.current?.abort()
     esp32TradeDevice.cancelTrade()
     gbLinkTradeDevice.cancelTrade()
-    setMessage(viaSwitch ? 'Stopping link…' : 'Cancelling trade…')
+    setMessage(
+      viaSwitch
+        ? t('useTradeSession.stoppingLink')
+        : t('useTradeSession.cancellingTrade')
+    )
   }
 
   const boxRef = useRef(initialBox)

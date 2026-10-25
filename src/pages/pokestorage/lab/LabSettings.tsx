@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+import { i18n } from '../../../services/i18n'
 import { useState } from 'react'
 import { OptionGroup } from '../../hub/OptionGroup'
 import { Panel } from '../../hub/Panel'
@@ -18,12 +20,15 @@ import './labSettings.css'
 
 export type { SettingsTab }
 
-const TABS: ReadonlyArray<{ id: SettingsTab | 'arcade'; label: string }> = [
-  { id: 'backups', label: 'Backup & Restore' },
-  { id: 'appearance', label: 'Appearance' },
-  { id: 'storage', label: 'Data' },
-  { id: 'hardware', label: 'Hardware' },
-  { id: 'arcade', label: 'Arcade' },
+const getTabs = (): ReadonlyArray<{
+  id: SettingsTab | 'arcade'
+  label: string
+}> => [
+  { id: 'backups', label: i18n.t('settings:LabSettings.backupRestore') },
+  { id: 'appearance', label: i18n.t('settings:LabSettings.appearance') },
+  { id: 'storage', label: i18n.t('settings:LabSettings.data') },
+  { id: 'hardware', label: i18n.t('settings:LabSettings.hardware') },
+  { id: 'arcade', label: i18n.t('settings:LabSettings.arcade') },
 ]
 
 /** Every site setting, in tabs. Settings logic lives in `useSettingsForm`. */
@@ -35,12 +40,14 @@ export function LabSettings({
   tab: SettingsTab
   onTabChange: (tab: SettingsTab) => void
 }) {
+  const { t } = useTranslation(['settings', 'common'] as const)
+
   const confirmLeave = useConfirmNavigation()
   const { gameId } = useActiveGame()
   const form = useSettingsForm({
     initialTab: tab,
     initialCabin: gameId ?? undefined,
-    savedMessage: 'Settings saved.',
+    savedMessage: t('LabSettings.settingsSaved'),
   })
   const { selectedCabin, camps, siteCounts, saving, offline, message } = form
   // The Arcade tab is not yet addressable by URL, so it is local state.
@@ -66,18 +73,18 @@ export function LabSettings({
   return (
     <div className="settings-page">
       <OptionGroup
-        label="Settings"
+        label={t('common:actions.settings')}
         layout="rail"
-        options={TABS.map((item) => [item.id, item.label] as const)}
+        options={getTabs().map((item) => [item.id, item.label] as const)}
         value={active}
         onChange={choose}
       />
-      <Panel label={TABS.find((item) => item.id === active)?.label ?? ''}>
-        <h2>{TABS.find((item) => item.id === active)?.label}</h2>
+      <Panel label={getTabs().find((item) => item.id === active)?.label ?? ''}>
+        <h2>{getTabs().find((item) => item.id === active)?.label}</h2>
 
         {active === 'backups' && (
           <>
-            <p>Manage the save backup for each game.</p>
+            <p>{t('LabSettings.manageTheSaveBackupForEachGame')}</p>
             <CabinPicker form={form} />
             {selectedCabin === 'campsites' ? (
               <CampsitesCard form={form} />
@@ -89,7 +96,7 @@ export function LabSettings({
 
         {active === 'appearance' && (
           <>
-            <p>Choose how Pokémon appear throughout pkCamp.</p>
+            <p>{t('LabSettings.chooseHowPokeMonAppearThroughoutPkcamp')}</p>
             <SpriteSourcePicker form={form} />
           </>
         )}
@@ -97,8 +104,9 @@ export function LabSettings({
         {active === 'storage' && (
           <>
             <p>
-              Where your backups, Camping Pokémon, collections, and settings are
-              kept.
+              {t(
+                'LabSettings.whereYourBackupsCampingPokeMonCollectionsAndSettingsAre'
+              )}
             </p>
             <DataStorageControls form={form} />
             <LabCollectionData offline={offline} />
@@ -110,7 +118,7 @@ export function LabSettings({
 
         {offline && active !== 'hardware' && active !== 'arcade' && (
           <p className="camp-status">
-            Dropbox is unreachable. Your data is read-only until it reconnects.
+            {t('LabSettings.dropboxIsUnreachableYourDataIsReadOnlyUntilIt')}
           </p>
         )}
         {message && <p className="camp-status">{message}</p>}
@@ -121,7 +129,9 @@ export function LabSettings({
             disabled={!camps || !siteCounts || saving || offline}
             onClick={() => void form.handleSave()}
           >
-            {saving ? 'Saving…' : 'Save Settings'}
+            {saving
+              ? t('common:actions.saving')
+              : t('LabSettings.saveSettings')}
           </button>
         )}
       </Panel>

@@ -1,6 +1,7 @@
+import { i18n } from '../../../services/i18n'
 import { ROSTER, type Gen3GameId } from '../../../services/saveLibrary'
 import type { StorageProvider } from '../../../services/storage'
-import { GAME_LABEL } from '../gameDisplay'
+import { getGameLabel } from '../gameDisplay'
 import {
   CAMP_SOURCE,
   type CollectionDefinition,
@@ -20,7 +21,9 @@ export const GEN_3_GAMES = ROSTER[3] as readonly Gen3GameId[]
 export const LAB_SOURCES: readonly LabSourceId[] = [...GEN_3_GAMES, CAMP_SOURCE]
 
 export function sourceLabel(source: LabSourceId): string {
-  return source === CAMP_SOURCE ? 'Camp Sites' : `${GAME_LABEL[source]} Cabin`
+  return source === CAMP_SOURCE
+    ? i18n.t('collections:labStore.campSites')
+    : i18n.t('collections:labStore.cabin', { value1: getGameLabel(source) })
 }
 
 /** Stored source ids, or null when missing or not all recognized. */

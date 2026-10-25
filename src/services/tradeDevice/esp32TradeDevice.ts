@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import { Bridge as UpstreamBridge } from './vendor/gb-link-switch-ldn/bridge.js'
 import { CableSession as UpstreamCableSession } from './vendor/gb-link-switch-ldn/cable/session.js'
 import { EspDevice as UpstreamEspDevice } from './vendor/gb-link-switch-ldn/esp.js'
@@ -145,7 +146,9 @@ function validateRequest(request: TradeRequest): void {
     throw new TradeDeviceError(
       'esp32',
       'invalid-party',
-      'An ESP32 trade needs six party slots, at least two Pokémon, and an occupied selected slot.'
+      i18n.t(
+        'services:esp32TradeDevice.anEsp32TradeNeedsSixPartySlotsAtLeastTwo'
+      )
     )
   }
 }
@@ -189,11 +192,15 @@ export class Esp32TradeDevice implements TradeDevice {
       throw new TradeDeviceError(
         this.id,
         'unsupported',
-        'This browser does not support Web Serial.'
+        i18n.t('services:esp32TradeDevice.thisBrowserDoesNotSupportWebSerial')
       )
     }
     if (this.connecting || this.currentState !== 'disconnected') {
-      throw new TradeDeviceError(this.id, 'busy', 'The ESP32 is busy.')
+      throw new TradeDeviceError(
+        this.id,
+        'busy',
+        i18n.t('services:esp32TradeDevice.theEsp32IsBusy')
+      )
     }
 
     this.currentState = 'connecting'
@@ -263,7 +270,10 @@ export class Esp32TradeDevice implements TradeDevice {
       throw new TradeDeviceError(
         this.id,
         'invalid-keys',
-        `The prod.keys file is missing or has an invalid value for: ${problems.join(', ')}.`
+        i18n.t(
+          'services:esp32TradeDevice.theProdKeysFileIsMissingOrHasAnInvalid',
+          { value1: problems.join(', ') }
+        )
       )
     }
     const rejected = await this.storeKeys(parsed.keys)
@@ -271,7 +281,9 @@ export class Esp32TradeDevice implements TradeDevice {
       throw new TradeDeviceError(
         this.id,
         'invalid-keys',
-        `The ESP32 rejected: ${rejected.join(', ')}.`
+        i18n.t('services:esp32TradeDevice.theEsp32Rejected', {
+          value1: rejected.join(', '),
+        })
       )
     }
   }
@@ -280,7 +292,11 @@ export class Esp32TradeDevice implements TradeDevice {
     validateRequest(request)
     const transport = this.requireTransport()
     if (this.trading) {
-      throw new TradeDeviceError(this.id, 'busy', 'A trade is already running.')
+      throw new TradeDeviceError(
+        this.id,
+        'busy',
+        i18n.t('services:esp32TradeDevice.aTradeIsAlreadyRunning')
+      )
     }
 
     this.trading = true
@@ -373,7 +389,9 @@ export class Esp32TradeDevice implements TradeDevice {
         throw new TradeDeviceError(
           this.id,
           'missing-keys',
-          'The ESP32 needs the required Switch keys before trading.'
+          i18n.t(
+            'services:esp32TradeDevice.theEsp32NeedsTheRequiredSwitchKeysBeforeTrading'
+          )
         )
       }
       await transport.startBridge()
@@ -410,7 +428,11 @@ export class Esp32TradeDevice implements TradeDevice {
   ): Promise<void> {
     const transport = this.requireTransport()
     if (this.trading) {
-      throw new TradeDeviceError(this.id, 'busy', 'A trade is already running.')
+      throw new TradeDeviceError(
+        this.id,
+        'busy',
+        i18n.t('services:esp32TradeDevice.aTradeIsAlreadyRunning')
+      )
     }
 
     this.trading = true
@@ -430,7 +452,9 @@ export class Esp32TradeDevice implements TradeDevice {
         throw new TradeDeviceError(
           this.id,
           'missing-keys',
-          'The ESP32 needs the required Switch keys before trading.'
+          i18n.t(
+            'services:esp32TradeDevice.theEsp32NeedsTheRequiredSwitchKeysBeforeTrading'
+          )
         )
       }
       await transport.startBridge()
@@ -454,13 +478,15 @@ export class Esp32TradeDevice implements TradeDevice {
         let last = ''
         link.addEventListener('change', () => {
           const message = link.switchNotReady
-            ? "The Switch's game can't trade with this GBA yet."
+            ? i18n.t(
+                'services:esp32TradeDevice.theSwitchSGameCanTTradeWithThisGba'
+              )
             : link.tradeReady
-              ? 'Ready to trade.'
+              ? i18n.t('services:esp32TradeDevice.readyToTrade')
               : link.linked
-                ? "Linked to the Switch's room."
+                ? i18n.t('services:esp32TradeDevice.linkedToTheSwitchSRoom')
                 : link.cableOpen
-                  ? 'GBA cable link open.'
+                  ? i18n.t('services:esp32TradeDevice.gbaCableLinkOpen')
                   : ''
           if (message && message !== last) status(message)
           last = message
@@ -468,7 +494,9 @@ export class Esp32TradeDevice implements TradeDevice {
       }
       await Promise.race([link.start(), failed, aborted])
       if (kind === 'wireless')
-        status('Relaying between the GBA and the Switch.')
+        status(
+          i18n.t('services:esp32TradeDevice.relayingBetweenTheGbaAndTheSwitch')
+        )
       await Promise.race([aborted, failed])
     } finally {
       try {
@@ -499,14 +527,28 @@ export class Esp32TradeDevice implements TradeDevice {
     signal?.throwIfAborted()
     const transport = this.requireTransport()
     if (this.trading) {
-      throw new TradeDeviceError(this.id, 'busy', 'The ESP32 is busy.')
+      throw new TradeDeviceError(
+        this.id,
+        'busy',
+        i18n.t('services:esp32TradeDevice.theEsp32IsBusy')
+      )
     }
     const version = transport.info?.version
     if (!version || compareVersions(version, minFirmware) < 0) {
       throw new TradeDeviceError(
         this.id,
         'unsupported',
-        `Mystery Gift needs ESP32 firmware ${minFirmware} or newer${version ? `; this board has ${version}` : ''}.`
+        i18n.t(
+          'services:esp32TradeDevice.mysteryGiftNeedsEsp32FirmwareOrNewer',
+          {
+            minFirmware: minFirmware,
+            value2: version
+              ? i18n.t('services:esp32TradeDevice.thisBoardHas', {
+                  version: version,
+                })
+              : '',
+          }
+        )
       )
     }
     const controller = new AbortController()
@@ -534,7 +576,9 @@ export class Esp32TradeDevice implements TradeDevice {
         throw new TradeDeviceError(
           this.id,
           'missing-keys',
-          'The ESP32 needs your Switch keys. Add prod.keys on the Trade Table first.'
+          i18n.t(
+            'services:esp32TradeDevice.theEsp32NeedsYourSwitchKeysAddProdKeysOn'
+          )
         )
       }
       await transport.startBridge()
@@ -551,7 +595,7 @@ export class Esp32TradeDevice implements TradeDevice {
       throw new TradeDeviceError(
         this.id,
         'not-connected',
-        'No trade is active.'
+        i18n.t('services:esp32TradeDevice.noTradeIsActive')
       )
     }
     this.activeSession.offerSlot(slot)
@@ -562,7 +606,7 @@ export class Esp32TradeDevice implements TradeDevice {
       throw new TradeDeviceError(
         this.id,
         'not-connected',
-        'No trade is active.'
+        i18n.t('services:esp32TradeDevice.noTradeIsActive')
       )
     }
     this.activeSession.declineTrade()
@@ -577,7 +621,7 @@ export class Esp32TradeDevice implements TradeDevice {
       throw new TradeDeviceError(
         this.id,
         'not-connected',
-        'Connect the ESP32 before trading.'
+        i18n.t('services:esp32TradeDevice.connectTheEsp32BeforeTrading')
       )
     }
     return this.transport

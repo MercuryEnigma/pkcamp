@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next'
 import { useRef, useState } from 'react'
 import { dropboxAccount } from '../../services/storage/dropbox'
 import { DropboxBadge } from '../pokestorage/DropboxBadge'
 import { SourceLink } from './SourceLink'
+import { LanguageMenu } from './LanguageMenu'
 import { useDropboxStatus } from '../pokestorage/useStorage'
 
 /**
@@ -14,6 +16,8 @@ export function DropboxMenu({
 }: {
   onOpenSettings?: () => void
 } = {}) {
+  const { t } = useTranslation(['hub', 'common'] as const)
+
   const dialog = useRef<HTMLDialogElement>(null)
   const status = useDropboxStatus()
   const [busy, setBusy] = useState(false)
@@ -34,6 +38,7 @@ export function DropboxMenu({
   return (
     <>
       <SourceLink />
+      <LanguageMenu />
       <DropboxBadge
         onOpen={onOpenSettings ?? (() => dialog.current?.showModal())}
       />
@@ -42,22 +47,21 @@ export function DropboxMenu({
         className="hub-dialog"
         onClose={() => setError(null)}
       >
-        <h2>Dropbox</h2>
+        <h2>{t('DropboxMenu.dropbox')}</h2>
         {status.state === 'connected' ? (
           <p>
-            Dropbox connected. Your saves, settings, and collections are synced.
+            {t(
+              'DropboxMenu.dropboxConnectedYourSavesSettingsAndCollectionsAreSynced'
+            )}
           </p>
         ) : (
           <>
-            <p>
-              Sign in to Dropbox to use your saves, settings, and collections
-              across devices, or continue with browser storage.
-            </p>
+            <p>{t('DropboxMenu.signInToDropboxToUseYourSavesSettingsAnd')}</p>
             <button
               disabled={busy || status.state === 'connecting'}
               onClick={() => void connect()}
             >
-              Sign in to Dropbox
+              {t('DropboxMenu.signInToDropbox')}
             </button>
           </>
         )}
@@ -65,7 +69,7 @@ export function DropboxMenu({
         {error && <p role="alert">{error}</p>}
         <div className="hub-dialog-actions">
           <button disabled={busy} onClick={() => dialog.current?.close()}>
-            Close
+            {t('common:actions.close')}
           </button>
         </div>
       </dialog>

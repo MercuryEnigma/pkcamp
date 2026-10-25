@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  SPECIES_OPTIONS,
+  getSpeciesOptions,
   draftProblems,
   emptyDraft,
   entryIdFor,
@@ -11,7 +11,7 @@ import {
 } from './builderDraft'
 
 const option = (label: string) =>
-  SPECIES_OPTIONS.find((item) => item.label === label)!
+  getSpeciesOptions().find((item) => item.label === label)!
 
 function entry(label: string, change: Partial<DraftEntry> = {}): DraftEntry {
   const species = option(label)
@@ -56,7 +56,7 @@ describe('SPECIES_OPTIONS', () => {
       form: 27,
       slug: 'unown-question',
     })
-    expect(SPECIES_OPTIONS).toHaveLength(386 + 28)
+    expect(getSpeciesOptions()).toHaveLength(386 + 28)
   })
 })
 

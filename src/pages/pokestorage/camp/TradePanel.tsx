@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Gen3GameId } from '../../../services/saveLibrary'
 import { Panel } from '../../hub/Panel'
 import { TradeSidePanel } from '../TradeSidePanel'
@@ -15,6 +16,8 @@ export function TradePanel({
   /** Called after a trade or revert changed what is stored. */
   onTraded: () => void
 }) {
+  const { t } = useTranslation(['trade', 'common'] as const)
+
   const {
     viaSwitch,
     gbaSide,
@@ -31,28 +34,32 @@ export function TradePanel({
   } = useTradeSession({ initialGameId: gameId ?? undefined, onTraded })
 
   return (
-    <Panel label="Trade" className="trade-panel">
+    <Panel label={t('TradePanel.trade')} className="trade-panel">
       <div className="trade-sides">
-        <TradeSidePanel key="left" name="Your side" {...sideProps('left')} />
-        <TradeSidePanel key="right" name="Other side" {...sideProps('right')} />
+        <TradeSidePanel
+          key="left"
+          name={t('TradePanel.yourSide')}
+          {...sideProps('left')}
+        />
+        <TradeSidePanel
+          key="right"
+          name={t('TradePanel.otherSide')}
+          {...sideProps('right')}
+        />
       </div>
 
       {viaSwitch && (
         <div>
-          <p>
-            On the Switch, lead a Trade Center group upstairs in a Pokémon
-            Center.
-          </p>
+          <p>{t('TradePanel.onTheSwitchLeadATradeCenterGroupUpstairsIn')}</p>
           <p>
             {gbaSide?.device === 'gb-link' && gbaSide.gbaGame === 'wireless'
-              ? 'On the GBA, join the group.'
+              ? t('TradePanel.onTheGbaJoinTheGroup')
               : gbaSide?.device === 'gb-link' && gbaSide.gbaGame === 'cable'
-                ? 'On the GBA, talk to the middle counter upstairs in a Pokémon Center.'
-                : 'Choose the game on the GBA.'}
+                ? t('TradePanel.onTheGbaTalkToTheMiddleCounterUpstairsIn')
+                : t('TradePanel.chooseTheGameOnTheGba')}
           </p>
           <p>
-            Both players choose their Pokémon on their own console. pkCamp
-            doesn't store anything from this trade.
+            {t('TradePanel.bothPlayersChooseTheirPokeMonOnTheirOwnConsole')}
           </p>
         </div>
       )}
@@ -68,11 +75,11 @@ export function TradePanel({
         >
           {viaSwitch
             ? busy
-              ? 'Stop link'
-              : 'Start link'
+              ? t('TradePanel.stopLink')
+              : t('TradePanel.startLink')
             : busy
-              ? 'Trading…'
-              : 'Start trade'}
+              ? t('TradePanel.trading')
+              : t('TradePanel.startTrade')}
         </button>
         {busy && !viaSwitch && (
           <button
@@ -80,7 +87,7 @@ export function TradePanel({
             className="camp-upload-btn"
             onClick={cancelTrade}
           >
-            Cancel trade
+            {t('TradePanel.cancelTrade')}
           </button>
         )}
         {!busy && lastTrade && (
@@ -90,15 +97,16 @@ export function TradePanel({
             disabled={offline}
             onClick={() => void undoTrade()}
           >
-            Revert trade
+            {t('TradePanel.revertTrade')}
           </button>
         )}
       </div>
 
       {offline && writesStorage && (
         <p>
-          Dropbox is unreachable. Trades that change pkCamp storage are paused
-          until it reconnects.
+          {t(
+            'TradePanel.dropboxIsUnreachableTradesThatChangePkcampStorageArePaused'
+          )}
         </p>
       )}
       {message && <p aria-live="polite">{message}</p>}

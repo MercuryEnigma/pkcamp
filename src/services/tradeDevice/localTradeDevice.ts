@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import type { PokemonSaveAdapter, SaveGame } from '../pkhex'
 import type { Gen3GameId } from '../saveLibrary'
 import { storage } from '../storage'
@@ -65,7 +66,9 @@ abstract class LocalTradeDevice implements TradeDevice {
       new TradeDeviceError(
         this.id,
         'invalid-party',
-        `${this.label} trades run through runTrade.`
+        i18n.t('services:localTradeDevice.tradesRunThroughRuntrade', {
+          label: this.label,
+        })
       )
     )
   }
@@ -79,7 +82,7 @@ abstract class LocalTradeDevice implements TradeDevice {
 
 export class SaveBackupTradeDevice extends LocalTradeDevice {
   readonly id = 'save-backup'
-  readonly label = 'Save backup'
+  readonly label = i18n.t('services:localTradeDevice.saveBackup')
 
   /**
    * Re-reads the persisted save and checks the slot still holds `expected`,
@@ -92,13 +95,23 @@ export class SaveBackupTradeDevice extends LocalTradeDevice {
     access: (game: SaveGame) => T
   ): Promise<T> {
     const bytes = (await storage.getSave(slot.gameId))?.bytes
-    if (!bytes) throw new Error('The selected backup is no longer stored.')
+    if (!bytes)
+      throw new Error(
+        i18n.t('services:localTradeDevice.theSelectedBackupIsNoLongerStored')
+      )
     const game = adapter.load(bytes)
     try {
       const current = game.boxes[slot.box]?.slots[slot.index]
-      if (!current) throw new Error('The selected backup slot is now empty.')
+      if (!current)
+        throw new Error(
+          i18n.t('services:localTradeDevice.theSelectedBackupSlotIsNowEmpty')
+        )
       if (!bytesEqual(adapter.exportPokemonFile(current), expected)) {
-        throw new Error('The selected backup slot changed before the trade.')
+        throw new Error(
+          i18n.t(
+            'services:localTradeDevice.theSelectedBackupSlotChangedBeforeTheTrade'
+          )
+        )
       }
       return access(game)
     } finally {
@@ -143,16 +156,24 @@ export class SaveBackupTradeDevice extends LocalTradeDevice {
 
 export class CampSiteTradeDevice extends LocalTradeDevice {
   readonly id = 'camp-site'
-  readonly label = 'Camp Sites'
+  readonly label = i18n.t('services:localTradeDevice.campSites')
 
   private async findSlot(slot: CampSlot, expected: Uint8Array) {
     const camp = await storage.getCamp(GENERATION)
     const current = camp.sites[slot.site]?.[slot.index]
     if (!current) {
-      throw new Error('The selected Camp Site position is now empty.')
+      throw new Error(
+        i18n.t(
+          'services:localTradeDevice.theSelectedCampSitePositionIsNowEmpty'
+        )
+      )
     }
     if (!bytesEqual(current.bytes, expected)) {
-      throw new Error('The selected Camp Site slot changed before the trade.')
+      throw new Error(
+        i18n.t(
+          'services:localTradeDevice.theSelectedCampSiteSlotChangedBeforeTheTrade'
+        )
+      )
     }
     return { camp, current }
   }

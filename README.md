@@ -74,3 +74,8 @@ If you are developing a production application, we recommend enabling type-aware
 ```
 
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+
+UI copy lives in `src/services/i18n/{page}/en.json`. Run `npm run check:i18n`
+to check JSX text and presentation attributes. See the
+[i18n architecture](src/services/i18n/ARCHITECTURE.md) for namespaces, key conventions,
+and adding translations.

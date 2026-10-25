@@ -1,3 +1,4 @@
+import { i18n } from '../../../services/i18n'
 import type { CollectionDefinition } from './collectionTypes'
 import gen3InGameTrades from './collections/gen3-in-game-trades.json'
 import gen3LivingDex from './collections/gen3-living-dex.json'
@@ -10,7 +11,10 @@ function load(name: string, json: unknown): CollectionDefinition {
   // Throwing at module load makes a broken built-in fail every test and build.
   if (!result.ok) {
     throw new Error(
-      `Built-in collection ${name} is invalid:\n${result.errors.join('\n')}`
+      i18n.t('collections:builtInCollections.builtInCollectionIsInvalid', {
+        name: name,
+        value2: result.errors.join('\n'),
+      })
     )
   }
   return result.definition

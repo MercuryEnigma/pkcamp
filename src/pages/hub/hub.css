@@ -188,7 +188,8 @@ button {
 }
 .hub-continue-without {
   flex: none;
-  width: 100%;
+  align-self: center;
+  width: 60%;
   margin-top: clamp(0.75rem, 2.5svh, 1.25rem);
   padding-block: clamp(0.5rem, 1.6svh, 0.8rem);
   font-weight: 700;

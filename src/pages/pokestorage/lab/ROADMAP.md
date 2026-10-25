@@ -3,6 +3,8 @@
 ## Hub and shared workflow
 
 - [x] Open four responsive workspaces from Celio's Lab: Cartridge Saves, ROM & BIOS Dumps, Mystery Gifts, and Poké Transporter GB.
+- [x] Promote Poké Transporter GB to the Lab menu and group the other three under Research Tools, each addressable by `mode=`.
+- [x] Rebuild the tool pages on the shared page frame (`SitePage`, `PageHeader`, `Panel`, `Dialog`).
 - [x] Match Camp's header/Back placement, stack cards on small screens, and leave room for hover effects.
 - [x] Keep tools browsable without hardware; request access on Start and reuse GB-Link between sequential tasks.
 - [x] Protect active operations with navigation/page-exit guards and exclusive device leases.

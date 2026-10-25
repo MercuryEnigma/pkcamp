@@ -1,3 +1,4 @@
+import { i18n } from '../../../services/i18n'
 import type { Gen3GameId } from '../../../services/saveLibrary'
 import type {
   StorageProvider,
@@ -135,13 +136,21 @@ export function toStoredResult(
 export type StaleReason =
   'version' | 'sources' | 'unscanned-cabin' | 'newer-save' | 'camp'
 
-export const STALE_REASON_LABEL: Record<StaleReason, string> = {
-  version: 'The collection changed since the last scan.',
-  sources: 'The selected Cabins changed since the last scan.',
-  'unscanned-cabin': 'A selected Cabin has a save that was not scanned yet.',
-  'newer-save': 'A Cabin save changed since the last scan.',
-  camp: 'Camp Sites changed since the last scan.',
-}
+export const getStaleReasonLabel = (): Record<StaleReason, string> => ({
+  version: i18n.t('collections:collectionResults.collectionChanged'),
+  sources: i18n.t(
+    'collections:collectionResults.theSelectedCabinsChangedSinceTheLastScan'
+  ),
+  'unscanned-cabin': i18n.t(
+    'collections:collectionResults.aSelectedCabinHasASaveThatWasNotScanned'
+  ),
+  'newer-save': i18n.t(
+    'collections:collectionResults.aCabinSaveChangedSinceTheLastScan'
+  ),
+  camp: i18n.t(
+    'collections:collectionResults.campSitesChangedSinceTheLastScan'
+  ),
+})
 
 /**
  * Why a stored result needs a rescan, or null when it is fresh.

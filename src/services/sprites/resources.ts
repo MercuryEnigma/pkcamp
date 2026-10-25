@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import { SPRITE_SOURCES, DEFAULT_SPRITE_SOURCE_ID } from './catalog'
 import { initializeSpriteResolver, type SpriteResolver } from './resolver'
 
@@ -14,7 +15,9 @@ export class SpritePreloader {
     this.load = load
     this.concurrency = concurrency
     if (!Number.isInteger(concurrency) || concurrency < 1)
-      throw new Error('Sprite concurrency must be a positive integer.')
+      throw new Error(
+        i18n.t('services:resources.spriteConcurrencyMustBeAPositiveInteger')
+      )
   }
 
   preload(paths: readonly string[]) {
@@ -51,7 +54,12 @@ const preloader = new SpritePreloader(
     new Promise<void>((resolve, reject) => {
       const image = new Image()
       image.onload = () => resolve()
-      image.onerror = () => reject(new Error(`Could not load sprite: ${path}`))
+      image.onerror = () =>
+        reject(
+          new Error(
+            i18n.t('services:resources.couldNotLoadSprite', { path: path })
+          )
+        )
       image.src = path
     })
 )

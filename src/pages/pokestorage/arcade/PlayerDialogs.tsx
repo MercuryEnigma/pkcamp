@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { RefObject } from 'react'
 import type { ExitDecision } from './arcadeSync'
 
@@ -26,6 +27,8 @@ export function PlayerDialogs({
   navigateAway,
   restartNow,
 }: PlayerDialogsProps) {
+  const { t } = useTranslation(['arcade', 'common'] as const)
+
   return (
     <>
       <dialog
@@ -36,7 +39,9 @@ export function PlayerDialogs({
       >
         <header className="arcade-menu-header">
           <h2 id="arcade-exit-title">
-            {decision.kind === 'ask' ? decision.title : 'Leave the Arcade?'}
+            {decision.kind === 'ask'
+              ? decision.title
+              : t('PlayerDialogs.leaveTheArcade')}
           </h2>
         </header>
         <div className="arcade-menu-body">
@@ -49,18 +54,18 @@ export function PlayerDialogs({
           >
             {decision.kind === 'ask'
               ? decision.message
-              : 'Your game save is in Camp.'}
+              : t('PlayerDialogs.yourGameSaveIsInCamp')}
           </p>
           {decision.kind === 'ask' && (decision.retry || decision.download) && (
             <div className="arcade-menu-row">
               {decision.retry && (
                 <button type="button" onClick={retrySave}>
-                  Try again
+                  {t('PlayerDialogs.tryAgain')}
                 </button>
               )}
               {decision.download && (
                 <button type="button" onClick={downloadSave}>
-                  Download SAV
+                  {t('PlayerDialogs.downloadSav')}
                 </button>
               )}
             </div>
@@ -71,14 +76,16 @@ export function PlayerDialogs({
               className="arcade-menu-item arcade-menu-item--primary"
               onClick={() => exitRef.current?.close()}
             >
-              {running ? '▶ Keep playing' : 'Stay here'}
+              {running
+                ? t('PlayerDialogs.keepPlaying')
+                : t('PlayerDialogs.stayHere')}
             </button>
             <button
               type="button"
               className="arcade-menu-item"
               onClick={navigateAway}
             >
-              Exit Arcade
+              {t('PlayerDialogs.exitArcade')}
             </button>
           </div>
         </div>
@@ -91,11 +98,11 @@ export function PlayerDialogs({
         onClose={restartClosed}
       >
         <header className="arcade-menu-header">
-          <h2 id="arcade-restart-title">Restart the game?</h2>
+          <h2 id="arcade-restart-title">{t('PlayerDialogs.restartTheGame')}</h2>
         </header>
         <div className="arcade-menu-body">
           <p className="arcade-menu-save">
-            Anything since your last save inside the game will be lost.
+            {t('PlayerDialogs.anythingSinceYourLastSaveInsideTheGameWillBe')}
           </p>
           <div className="arcade-menu-list">
             <button
@@ -103,7 +110,7 @@ export function PlayerDialogs({
               className="arcade-menu-item arcade-menu-item--primary"
               onClick={() => restartRef.current?.close()}
             >
-              ▶ Keep playing
+              {t('PlayerDialogs.keepPlaying')}
             </button>
             <button
               type="button"
@@ -113,7 +120,7 @@ export function PlayerDialogs({
                 restartRef.current?.close()
               }}
             >
-              ↻ Restart
+              {t('PlayerDialogs.restart')}
             </button>
           </div>
         </div>

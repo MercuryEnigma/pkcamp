@@ -1,22 +1,24 @@
+import { useTranslation } from 'react-i18next'
+import { i18n } from '../../../services/i18n'
 import { useState, type CSSProperties } from 'react'
 import {
-  FILTER_FIELDS,
+  getFilterFields,
   type EntryFilterField,
   type EntryFilters,
 } from './entryFilter'
 import { PcCombobox } from './PcCombobox'
 import { TYPE_COLORS, TYPE_NAMES } from './gen3Data'
 
-const PLACEHOLDER: Record<EntryFilterField, string> = {
-  name: 'Select a Pokémon…',
+const getPlaceholder = (): Record<EntryFilterField, string> => ({
+  name: i18n.t('collections:PcFilterScreen.selectAPokeMon'),
   type: '',
-  move: 'Select a move…',
-  ability: 'Select an ability…',
-  nature: 'Select a nature…',
-  item: 'Select an item…',
-  ribbon: 'Select a ribbon…',
-  ot: 'Select a trainer…',
-}
+  move: i18n.t('collections:PcFilterScreen.selectAMove'),
+  ability: i18n.t('collections:PcFilterScreen.selectAnAbility'),
+  nature: i18n.t('collections:PcFilterScreen.selectANature'),
+  item: i18n.t('collections:PcFilterScreen.selectAnItem'),
+  ribbon: i18n.t('collections:PcFilterScreen.selectARibbon'),
+  ot: i18n.t('collections:PcFilterScreen.selectATrainer'),
+})
 
 /** Screen 4: every filter at once, applied together to the grid. */
 export function PcFilterScreen({
@@ -29,6 +31,8 @@ export function PcFilterScreen({
   options: Record<Exclude<EntryFilterField, 'type'>, readonly string[]>
   onApply: (filters: EntryFilters) => void
 }) {
+  const { t } = useTranslation(['collections', 'common'] as const)
+
   const [draft, setDraft] = useState<EntryFilters>(filters)
   const set = (field: EntryFilterField, text: string) =>
     setDraft((current) => ({ ...current, [field]: text }))
@@ -42,11 +46,15 @@ export function PcFilterScreen({
       }}
     >
       <div className="pc-filter-fields">
-        {FILTER_FIELDS.map(([field, label], index) => (
+        {getFilterFields().map(([field, label], index) => (
           <fieldset key={field} className="pc-filter-field">
             <legend className="pc-label">{label}</legend>
             {field === 'type' ? (
-              <div className="pc-type-chips" role="group" aria-label="Type">
+              <div
+                className="pc-type-chips"
+                role="group"
+                aria-label={t('PcFilterScreen.type')}
+              >
                 {['', ...TYPE_NAMES].map((type) => (
                   <button
                     key={type || 'all'}
@@ -62,14 +70,14 @@ export function PcFilterScreen({
                     }
                     onClick={() => set('type', type)}
                   >
-                    {type || 'All'}
+                    {type || t('PcFilterScreen.all')}
                   </button>
                 ))}
               </div>
             ) : (
               <PcCombobox
                 label={label}
-                placeholder={PLACEHOLDER[field]}
+                placeholder={getPlaceholder()[field]}
                 value={draft[field] ?? ''}
                 options={options[field]}
                 onChange={(text) => set(field, text)}
@@ -81,10 +89,10 @@ export function PcFilterScreen({
       </div>
       <footer className="pc-filter-actions">
         <button type="button" className="pc-reset" onClick={() => setDraft({})}>
-          Reset filters
+          {t('PcFilterScreen.resetFilters')}
         </button>
         <button type="submit" className="pc-apply">
-          Apply filters
+          {t('PcFilterScreen.applyFilters')}
         </button>
       </footer>
     </form>

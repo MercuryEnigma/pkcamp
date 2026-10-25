@@ -1,3 +1,4 @@
+import { i18n } from '../../i18n'
 import {
   childrenOf,
   isWithin,
@@ -140,7 +141,9 @@ export class DropboxFileStore implements FileStore {
         })
       } catch {
         throw unavailable(
-          'Could not reach Dropbox. Check your connection and try again.'
+          i18n.t(
+            'services:dropboxFileStore.couldNotReachDropboxCheckYourConnectionAndTryAgain'
+          )
         )
       }
 
@@ -150,12 +153,18 @@ export class DropboxFileStore implements FileStore {
           continue
         }
         throw unavailable(
-          'Dropbox rejected the sign-in. Sign in to Dropbox again.'
+          i18n.t(
+            'services:dropboxFileStore.dropboxRejectedTheSignInSignInToDropboxAgain'
+          )
         )
       }
       if (response.status === 429) {
         if (rateLimited >= MAX_RATE_LIMIT_RETRIES) {
-          throw unavailable('Dropbox is busy right now. Try again shortly.')
+          throw unavailable(
+            i18n.t(
+              'services:dropboxFileStore.dropboxIsBusyRightNowTryAgainShortly'
+            )
+          )
         }
         rateLimited++
         const seconds = Number(response.headers.get('Retry-After'))
@@ -165,11 +174,17 @@ export class DropboxFileStore implements FileStore {
         continue
       }
       if (response.status >= 500) {
-        throw unavailable('Dropbox is having problems. Try again shortly.')
+        throw unavailable(
+          i18n.t(
+            'services:dropboxFileStore.dropboxIsHavingProblemsTryAgainShortly'
+          )
+        )
       }
       if (response.status === 403) {
         throw unavailable(
-          'Dropbox denied access to PkCamp data. Sign in to Dropbox again.'
+          i18n.t(
+            'services:dropboxFileStore.dropboxDeniedAccessToPkcampDataSignInToDropbox'
+          )
         )
       }
       return response
@@ -179,7 +194,11 @@ export class DropboxFileStore implements FileStore {
   private async failure(response: Response, what: string): Promise<Error> {
     const summary = await errorSummary(response)
     return new Error(
-      `Dropbox could not ${what} (${response.status} ${summary}).`
+      i18n.t('services:dropboxFileStore.dropboxCouldNot', {
+        what: what,
+        status: response.status,
+        summary: summary,
+      })
     )
   }
 
@@ -197,7 +216,12 @@ export class DropboxFileStore implements FileStore {
     if (notFound && response.status === 409) {
       const summary = await errorSummary(response)
       if (summary.includes('not_found')) return null
-      throw new Error(`Dropbox could not ${what} (409 ${summary}).`)
+      throw new Error(
+        i18n.t('services:dropboxFileStore.dropboxCouldNot409', {
+          what: what,
+          summary: summary,
+        })
+      )
     }
     throw await this.failure(response, what)
   }
@@ -236,7 +260,7 @@ export class DropboxFileStore implements FileStore {
     await this.json(
       'delete_v2',
       { path: dropboxPath(path) },
-      `delete ${path}`,
+      i18n.t('services:dropboxFileStore.delete', { path: path }),
       'ok'
     )
     for (const key of [...this.files.keys()]) {
@@ -307,9 +331,18 @@ export class DropboxFileStore implements FileStore {
     if (response.status === 409) {
       const summary = await errorSummary(response)
       if (summary.includes('not_found')) return null
-      throw new Error(`Dropbox could not read ${path} (409 ${summary}).`)
+      throw new Error(
+        i18n.t('services:dropboxFileStore.dropboxCouldNotRead409', {
+          path: path,
+          summary: summary,
+        })
+      )
     }
-    if (!response.ok) throw await this.failure(response, `read ${path}`)
+    if (!response.ok)
+      throw await this.failure(
+        response,
+        i18n.t('services:dropboxFileStore.read', { path: path })
+      )
 
     let modified = new Date()
     try {
@@ -324,7 +357,9 @@ export class DropboxFileStore implements FileStore {
     try {
       bytes = new Uint8Array(await response.arrayBuffer())
     } catch {
-      throw unavailable('Dropbox stopped responding. Try again.')
+      throw unavailable(
+        i18n.t('services:dropboxFileStore.dropboxStoppedRespondingTryAgain')
+      )
     }
     return { bytes, modified }
   }
@@ -350,10 +385,18 @@ export class DropboxFileStore implements FileStore {
     if (!response.ok) {
       const summary = await errorSummary(response)
       if (summary.includes('insufficient_space')) {
-        throw unavailable('Your Dropbox is full, so PkCamp could not save.')
+        throw unavailable(
+          i18n.t(
+            'services:dropboxFileStore.yourDropboxIsFullSoPkcampCouldNotSave'
+          )
+        )
       }
       throw new Error(
-        `Dropbox could not save ${path} (${response.status} ${summary}).`
+        i18n.t('services:dropboxFileStore.dropboxCouldNotSave', {
+          path: path,
+          status: response.status,
+          summary: summary,
+        })
       )
     }
   }
@@ -363,7 +406,9 @@ export class DropboxFileStore implements FileStore {
     folder: string,
     recursive: boolean
   ): Promise<ListedEntry[]> {
-    const what = `list ${folder || 'the app folder'}`
+    const what = i18n.t('services:dropboxFileStore.list', {
+      value1: folder || i18n.t('services:dropboxFileStore.theAppFolder'),
+    })
     const entries: ListedEntry[] = []
     let page = await this.json<ListPage>(
       'list_folder',

@@ -10,6 +10,9 @@
 .settings-page > .site-panel {
   flex: 3;
 }
+.settings-page > .site-panel > h2 {
+  color: #000;
+}
 .settings-bindings {
   display: flex;
   flex-wrap: wrap;

@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+import { i18n } from '../../services/i18n'
 import type { Gen3GameId } from '../../services/saveLibrary'
 import type { SpriteRequest } from '../../services/sprites'
 import { CAMP_SITE_SIZE } from '../../services/storage'
@@ -5,7 +7,7 @@ import { dropboxAccount } from '../../services/storage/dropbox'
 import { DEFAULT_CAMP_SITE_COUNT, MAX_CAMP_SITE_COUNT } from './campPositions'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from './spriteDisplay'
 import { SPRITE_SOURCES } from '../../services/sprites/catalog'
-import { GAME_LABEL } from './gameDisplay'
+import { getGameLabel } from './gameDisplay'
 import { GbaSavePanel } from './GbaSavePanel'
 import {
   formatBackupDate,
@@ -27,37 +29,52 @@ import {
  * back to one shared sprite for both), and an alternate form (Deoxys's
  * Attack forme. Unsupported combinations honestly fall back to base art.
  */
-const SPRITE_SHOWCASE: ReadonlyArray<{
+const getSpriteShowcase = (): ReadonlyArray<{
   key: string
   label: string
   request: SpriteRequest
-}> = [
+}> => [
   {
     key: 'bulbasaur',
-    label: 'Bulbasaur',
-    request: { nationalDex: 1, displayName: 'Bulbasaur' },
+    label: i18n.t('settings:SettingsSections.bulbasaur'),
+    request: {
+      nationalDex: 1,
+      displayName: i18n.t('settings:SettingsSections.bulbasaur'),
+    },
   },
   {
     key: 'bulbasaur-shiny',
-    label: 'Bulbasaur (Shiny)',
-    request: { nationalDex: 1, displayName: 'Bulbasaur', shiny: true },
+    label: i18n.t('settings:SettingsSections.bulbasaurShiny'),
+    request: {
+      nationalDex: 1,
+      displayName: i18n.t('settings:SettingsSections.bulbasaur'),
+      shiny: true,
+    },
   },
   {
     key: 'venusaur-f',
-    label: 'Venusaur ♀',
-    request: { nationalDex: 3, displayName: 'Venusaur', gender: 'female' },
+    label: i18n.t('settings:SettingsSections.venusaur'),
+    request: {
+      nationalDex: 3,
+      displayName: i18n.t('settings:SettingsSections.venusaur2'),
+      gender: 'female',
+    },
   },
   {
     key: 'venusaur-m',
-    label: 'Venusaur ♂',
-    request: { nationalDex: 3, displayName: 'Venusaur', gender: 'male' },
+    label: i18n.t('settings:SettingsSections.venusaur3'),
+    request: {
+      nationalDex: 3,
+      displayName: i18n.t('settings:SettingsSections.venusaur2'),
+      gender: 'male',
+    },
   },
   {
     key: 'deoxys-defense',
-    label: 'Deoxys (Defense)',
+    label: i18n.t('settings:SettingsSections.deoxysDefense'),
     request: {
       nationalDex: 386,
-      displayName: 'Deoxys',
+      displayName: i18n.t('settings:SettingsSections.deoxys'),
       formId: 'deoxys-defense',
     },
   },
@@ -65,10 +82,12 @@ const SPRITE_SHOWCASE: ReadonlyArray<{
 
 /** Picks which GBA Lodge Cabin, or the Campsites, the Backup tab shows. */
 export function CabinPicker({ form }: { form: SettingsForm }) {
+  const { t } = useTranslation(['settings', 'common'] as const)
+
   const { selectedCabin, selectCabin } = form
   return (
     <label className="camp-settings-field">
-      <span>Cabin</span>
+      <span>{t('SettingsSections.cabin')}</span>
       <select
         className="camp-select"
         value={selectedCabin}
@@ -78,10 +97,10 @@ export function CabinPicker({ form }: { form: SettingsForm }) {
       >
         {GEN_3_GAMES.map((gameId) => (
           <option key={gameId} value={gameId}>
-            {GAME_LABEL[gameId]} Cabin
+            {t('SettingsSections.cabin2', { value1: getGameLabel(gameId) })}
           </option>
         ))}
-        <option value="campsites">Campsites</option>
+        <option value="campsites">{t('SettingsSections.campsites')}</option>
       </select>
     </label>
   )
@@ -95,6 +114,8 @@ export function CabinBackupCard({
   form: SettingsForm
   gameId: Gen3GameId
 }) {
+  const { t } = useTranslation(['settings', 'common'] as const)
+
   const {
     adapter,
     offline,
@@ -120,12 +141,12 @@ export function CabinBackupCard({
         if (confirmReplaceBackup(gameId)) setGbaAction({ gameId, mode: 'read' })
       }}
     >
-      From GBA
+      {t('SettingsSections.fromGba')}
     </button>
   )
   const fromFileBtn = (
     <label className="camp-transfer-btn">
-      From file
+      {t('SettingsSections.fromFile')}
       <input
         className="camp-file-input--hidden"
         type="file"
@@ -138,33 +159,37 @@ export function CabinBackupCard({
   return (
     <div className="camp-cabin-card">
       <div className="camp-cabin-head">
-        <strong className="camp-cabin-name">{GAME_LABEL[gameId]} Cabin</strong>
+        <strong className="camp-cabin-name">
+          {t('SettingsSections.cabin2', { value1: getGameLabel(gameId) })}
+        </strong>
         {hasSave && status?.updatedAt && (
           <span className="camp-cabin-date">
-            Updated {formatBackupDate(status.updatedAt)}
+            {t('SettingsSections.updated', {
+              value1: formatBackupDate(status.updatedAt),
+            })}
           </span>
         )}
       </div>
       <p className="camp-cabin-status">
         {backups === null
-          ? 'Checking…'
+          ? t('SettingsSections.checking')
           : hasSave
-            ? 'Backup on file'
-            : 'No backup on file'}
+            ? t('SettingsSections.backupOnFile')
+            : t('SettingsSections.noBackupOnFile')}
       </p>
 
       {hasSave ? (
         <div className="camp-transfer-groups">
           <div className="camp-transfer-group">
             <span className="camp-transfer-group-label">
-              Bring a save into camp
+              {t('SettingsSections.bringASaveIntoCamp')}
             </span>
             {fromGbaBtn}
             {fromFileBtn}
           </div>
           <div className="camp-transfer-group">
             <span className="camp-transfer-group-label">
-              Take this save out
+              {t('SettingsSections.takeThisSaveOut')}
             </span>
             <button
               type="button"
@@ -172,21 +197,23 @@ export function CabinBackupCard({
               disabled={gbaAction !== null}
               onClick={() => void handleBackupWrite(gameId)}
             >
-              To GBA
+              {t('SettingsSections.toGba')}
             </button>
             <button
               type="button"
               className="camp-transfer-btn"
               onClick={() => void handleBackupExport(gameId)}
             >
-              Download file
+              {t('SettingsSections.downloadFile')}
             </button>
           </div>
         </div>
       ) : (
         <div className="camp-transfer-groups">
           <div className="camp-transfer-group">
-            <span className="camp-transfer-group-label">Add a save</span>
+            <span className="camp-transfer-group-label">
+              {t('SettingsSections.addASave')}
+            </span>
             {fromGbaBtn}
             {fromFileBtn}
           </div>
@@ -201,7 +228,7 @@ export function CabinBackupCard({
             disabled={offline}
             onClick={() => void handleBackupRemove(gameId)}
           >
-            Remove backup
+            {t('SettingsSections.removeBackup')}
           </button>
         </div>
       )}
@@ -221,7 +248,11 @@ export function CabinBackupCard({
             save={gbaAction.save}
             onWritten={() => {
               setGbaAction(null)
-              setMessage(`${GAME_LABEL[gameId]} Cabin was restored to the GBA.`)
+              setMessage(
+                t('SettingsSections.cabinWasRestoredToTheGba', {
+                  value1: getGameLabel(gameId),
+                })
+              )
             }}
             onClose={() => setGbaAction(null)}
           />
@@ -232,6 +263,8 @@ export function CabinBackupCard({
 
 /** The GBA Lodge Camp Site count and campsite download. */
 export function CampsitesCard({ form }: { form: SettingsForm }) {
+  const { t } = useTranslation(['settings', 'common'] as const)
+
   const {
     siteCounts,
     setSiteCounts,
@@ -252,15 +285,18 @@ export function CampsitesCard({ form }: { form: SettingsForm }) {
   return (
     <div className="camp-cabin-card">
       <div className="camp-cabin-head">
-        <strong className="camp-cabin-name">Campsites</strong>
+        <strong className="camp-cabin-name">
+          {t('SettingsSections.campsites')}
+        </strong>
       </div>
       <p className="camp-cabin-status">
-        Each Camp Site adds {CAMP_SITE_SIZE} Camping Pokémon spaces to the GBA
-        Lodge.
+        {t('SettingsSections.eachCampSiteAddsCampingPokeMonSpacesToThe', {
+          CAMP_SITE_SIZE: CAMP_SITE_SIZE,
+        })}
       </p>
 
       <label className="camp-settings-field">
-        <span>Number of Camp Sites</span>
+        <span>{t('SettingsSections.numberOfCampSites')}</span>
         <input
           className="camp-number-input"
           type="number"
@@ -282,24 +318,21 @@ export function CampsitesCard({ form }: { form: SettingsForm }) {
           }}
         />
         <small>
-          Need at least {campsiteMinimum} Camp Site
-          {campsiteMinimum === 1 ? '' : 's'}: Pokémon keep their positions, so
-          the last Camp Site with a camper stays. Save settings to apply a new
-          count.
+          {t('SettingsSections.minimumCampSites', { count: campsiteMinimum })}
         </small>
       </label>
 
       <div className="camp-transfer-groups">
         <div className="camp-transfer-group">
           <span className="camp-transfer-group-label">
-            Take the campsite out
+            {t('SettingsSections.takeTheCampsiteOut')}
           </span>
           <button
             type="button"
             className="camp-transfer-btn"
             onClick={() => void handleDownloadCampsite()}
           >
-            Download campsite (.zip)
+            {t('SettingsSections.downloadCampsiteZip')}
           </button>
         </div>
       </div>
@@ -312,7 +345,7 @@ export function CampsitesCard({ form }: { form: SettingsForm }) {
             disabled={offline || saving}
             onClick={() => void handleCampsiteRemove()}
           >
-            Delete campsite
+            {t('SettingsSections.deleteCampsite')}
           </button>
         </div>
       )}
@@ -322,6 +355,8 @@ export function CampsitesCard({ form }: { form: SettingsForm }) {
 
 /** Sprite source picker with a live preview. */
 export function SpriteSourcePicker({ form }: { form: SettingsForm }) {
+  const { t } = useTranslation(['settings', 'common'] as const)
+
   const {
     spriteSourceId,
     setSpriteSourceId,
@@ -331,7 +366,7 @@ export function SpriteSourcePicker({ form }: { form: SettingsForm }) {
   return (
     <>
       <label className="camp-settings-field">
-        <span>Sprite resource</span>
+        <span>{t('SettingsSections.spriteResource')}</span>
         <select
           className="camp-select"
           value={spriteSourceId}
@@ -345,7 +380,7 @@ export function SpriteSourcePicker({ form }: { form: SettingsForm }) {
         </select>
       </label>
       <div className="camp-sprite-preview-row">
-        {SPRITE_SHOWCASE.map(({ key, label, request }) => {
+        {getSpriteShowcase().map(({ key, label, request }) => {
           const display = resolveSpriteDisplay(spriteResolver, request)
           return (
             <div className="camp-sprite-preview-item" key={key}>
@@ -366,7 +401,9 @@ export function SpriteSourcePicker({ form }: { form: SettingsForm }) {
         target="_blank"
         rel="noreferrer"
       >
-        View {selectedSpriteSource.label.split(' — ')[0]} resource ↗
+        {t('SettingsSections.viewResource', {
+          value1: selectedSpriteSource.label.split(' — ')[0],
+        })}
       </a>
     </>
   )
@@ -374,6 +411,8 @@ export function SpriteSourcePicker({ form }: { form: SettingsForm }) {
 
 /** Active storage and the Dropbox connection. */
 export function DataStorageControls({ form }: { form: SettingsForm }) {
+  const { t } = useTranslation(['settings', 'common'] as const)
+
   const { provider, offline, dropboxStatus, handleDropbox } = form
   const inDropbox = provider.id === 'dropbox'
   return (
@@ -381,29 +420,39 @@ export function DataStorageControls({ form }: { form: SettingsForm }) {
       <div className="camp-cabin-card camp-storage-location">
         <div className="camp-cabin-head">
           <strong className="camp-cabin-name">
-            {inDropbox ? 'Stored on Dropbox' : 'Stored locally in this browser'}
+            {inDropbox
+              ? t('SettingsSections.storedOnDropbox')
+              : t('SettingsSections.storedLocallyInThisBrowser')}
           </strong>
         </div>
         <p className="camp-cabin-status">
           {inDropbox
             ? offline
-              ? "Your data is in your Dropbox account, which can't be reached right now. It's read-only until Dropbox reconnects."
-              : 'Your data is saved to your Dropbox account and follows you to any browser where you connect it.'
-            : "Your data is saved only in this browser on this device. It isn't backed up or synced, and clearing this site's data deletes it."}
+              ? t('SettingsSections.yourDataIsInYourDropboxAccountWhichCanT')
+              : t(
+                  'SettingsSections.yourDataIsSavedToYourDropboxAccountAndFollows'
+                )
+            : t('SettingsSections.yourDataIsSavedOnlyInThisBrowserOnThis')}
         </p>
       </div>
       {dropboxAccount.isConfigured() ? (
         <>
           <p className="camp-status">
-            Dropbox:{' '}
-            {dropboxStatus.state === 'connected'
-              ? 'connected'
-              : dropboxStatus.state === 'connecting'
-                ? 'connecting…'
-                : dropboxStatus.state === 'error'
-                  ? 'unreachable'
-                  : 'not connected'}
-            {dropboxStatus.message ? ` · ${dropboxStatus.message}` : ''}
+            {t('SettingsSections.dropbox', {
+              value1:
+                dropboxStatus.state === 'connected'
+                  ? 'connected'
+                  : dropboxStatus.state === 'connecting'
+                    ? 'connecting…'
+                    : dropboxStatus.state === 'error'
+                      ? 'unreachable'
+                      : t('settings:SettingsSections.notConnected'),
+              value2: dropboxStatus.message
+                ? t('settings:SettingsSections.statusDetail', {
+                    message: dropboxStatus.message,
+                  })
+                : '',
+            })}
           </p>
           <div className="camp-local-actions">
             {provider.id === 'dropbox' ? (
@@ -412,7 +461,7 @@ export function DataStorageControls({ form }: { form: SettingsForm }) {
                 className="camp-upload-btn camp-danger-btn"
                 onClick={() => void handleDropbox(false)}
               >
-                Disconnect Dropbox
+                {t('SettingsSections.disconnectDropbox')}
               </button>
             ) : (
               <button
@@ -421,19 +470,19 @@ export function DataStorageControls({ form }: { form: SettingsForm }) {
                 disabled={dropboxStatus.state === 'connecting'}
                 onClick={() => void handleDropbox(true)}
               >
-                Connect Dropbox
+                {t('SettingsSections.connectDropbox')}
               </button>
             )}
           </div>
           <small>
-            Connecting copies this browser's data to Dropbox. The copy in this
-            browser is kept, and disconnecting returns to it.
+            {t(
+              'SettingsSections.connectingCopiesThisBrowserSDataToDropboxTheCopy'
+            )}
           </small>
         </>
       ) : (
         <p className="camp-status">
-          Dropbox isn't configured for this build, so your data stays in this
-          browser.
+          {t('SettingsSections.dropboxIsnTConfiguredForThisBuildSoYourData')}
         </p>
       )}
     </>

@@ -1,5 +1,6 @@
+import { i18n } from '../../../services/i18n'
 import type { StoredCollectionMatch } from '../../../services/storage'
-import type { EntryConstraints } from './collectionTypes'
+import type { EntryConstraints, ConstraintField } from './collectionTypes'
 import { requirementFields, speciesName } from './entryDisplay'
 import { GEN3_RIBBONS, NATURES, speciesTypes } from './gen3Data'
 
@@ -12,25 +13,30 @@ export interface EntryFilter {
   text: string
 }
 
-export const FILTER_FIELDS: readonly (readonly [EntryFilterField, string])[] = [
-  ['name', 'Name'],
-  ['type', 'Type'],
-  ['move', 'Move'],
-  ['ability', 'Ability'],
-  ['nature', 'Nature'],
-  ['item', 'Held item'],
-  ['ribbon', 'Ribbon'],
-  ['ot', 'Trainer (OT)'],
+export const getFilterFields = (): readonly (readonly [
+  EntryFilterField,
+  string,
+])[] => [
+  ['name', i18n.t('collections:entryFilter.name')],
+  ['type', i18n.t('collections:entryFilter.type')],
+  ['move', i18n.t('collections:entryFilter.move')],
+  ['ability', i18n.t('collections:entryFilter.ability')],
+  ['nature', i18n.t('collections:entryFilter.nature')],
+  ['item', i18n.t('collections:entryFilter.heldItem')],
+  ['ribbon', i18n.t('collections:entryFilter.ribbon')],
+  ['ot', i18n.t('collections:entryFilter.trainerOt')],
 ]
 
-/** The requirement labels that mirror each field, for entry-level matching. */
-const REQUIREMENT_LABELS: Partial<Record<EntryFilterField, string[]>> = {
-  move: ['Move', 'All moves'],
-  ability: ['Ability'],
-  nature: ['Nature'],
-  item: ['Held item'],
-  ribbon: ['Ribbon', 'All ribbons'],
-  ot: ['Original trainer'],
+/** Schema fields used for matching, independent of translated labels. */
+const REQUIREMENT_FIELDS: Partial<
+  Record<EntryFilterField, readonly ConstraintField[]>
+> = {
+  move: ['moves', 'all_moves'],
+  ability: ['ability'],
+  nature: ['nature'],
+  item: ['item'],
+  ribbon: ['ribbons', 'all_ribbons'],
+  ot: ['ot'],
 }
 
 function matchValues(
@@ -82,11 +88,15 @@ export function entryMatchesFilter(
     )
   if (filter.field === 'type')
     return entry.species !== null && has(speciesTypes(entry.species))
-  const labels = REQUIREMENT_LABELS[filter.field] ?? []
+  const fields = REQUIREMENT_FIELDS[filter.field] ?? []
+  const constraints: EntryConstraints = Object.fromEntries(
+    fields
+      .filter((field) => entry.constraints[field] !== undefined)
+      .map((field) => [field, entry.constraints[field]])
+  )
   return (
-    requirementFields(entry.constraints).some(
-      (field) => labels.includes(field.label) && has(field.values)
-    ) || entry.matches.some((match) => has(matchValues(filter.field, match)))
+    requirementFields(constraints).some((field) => has(field.values)) ||
+    entry.matches.some((match) => has(matchValues(filter.field, match)))
   )
 }
 
@@ -94,7 +104,7 @@ export function entryMatchesFilter(
 export type EntryFilters = Partial<Record<EntryFilterField, string>>
 
 export function activeFilters(filters: EntryFilters): EntryFilter[] {
-  return FILTER_FIELDS.flatMap(([field]) => {
+  return getFilterFields().flatMap(([field]) => {
     const text = filters[field]?.trim()
     return text ? [{ field, text }] : []
   })

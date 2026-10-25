@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { normalizeDeltaSkin } from './normalizeDeltaSkin'
 import { rasterizeSkinPdfs } from './rasterizePdfs'
@@ -25,6 +26,8 @@ async function archiveOf(bytes: Uint8Array): Promise<DeltaSkinArchive> {
  * the Lab's settings, which edit the same stored library.
  */
 export function useSkinLibrary() {
+  const { t } = useTranslation(['arcade', 'common'] as const)
+
   const library = useMemo(() => createSkinLibrary(), [])
   const [skins, setSkins] = useState<SavedSkin[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -75,7 +78,7 @@ export function useSkinLibrary() {
         const name =
           imported.info.name?.trim() ||
           file.name.replace(/\.(deltaskin|zip)$/i, '') ||
-          'Delta skin'
+          t('arcade:useSkinLibrary.deltaSkin')
         const saved = await library.save(name, bytes)
         setSkins((current) => [...current, saved])
         setError(null)
@@ -84,11 +87,11 @@ export function useSkinLibrary() {
         setError(
           caught instanceof DeltaSkinError
             ? caught.message
-            : 'The skin could not be saved or read.'
+            : t('useSkinLibrary.theSkinCouldNotBeSavedOrRead')
         )
       }
     },
-    [library, choose]
+    [library, choose, t]
   )
 
   const deleteSkin = useCallback(
@@ -99,10 +102,10 @@ export function useSkinLibrary() {
         if (id === selectedId) await choose(null)
         setError(null)
       } catch {
-        setError('The skin could not be deleted.')
+        setError(t('useSkinLibrary.theSkinCouldNotBeDeleted'))
       }
     },
-    [library, selectedId, choose]
+    [library, selectedId, choose, t]
   )
 
   return {

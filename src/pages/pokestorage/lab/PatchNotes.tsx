@@ -1,3 +1,5 @@
+import { useTranslation, Trans } from 'react-i18next'
+import { i18n } from '../../../services/i18n'
 import type { ReactNode } from 'react'
 import './patchNotes.css'
 
@@ -10,89 +12,82 @@ interface Update {
   link?: { href: string; label: string }
 }
 
-const UPDATES: readonly Update[] = [
+const getUpdates = (): readonly Update[] => [
   {
     date: '2026-08-25',
-    title: 'Mystery Gift live at Pokémon Worlds / XP!',
+    title: i18n.t('news:PatchNotes.mysteryGiftLiveAtPokeMonWorldsXp'),
     body: (
       <>
         <p>
-          Coming to San Francisco for Pokemon Worlds / XP? Come find the
-          first-of-its-kind mystery gift distribution for Switch
-          FireRed/LeafGreen! Receive a rare egg that unlocks a LEGENDARY
-          experience!
+          {i18n.t(
+            'news:PatchNotes.comingToSanFranciscoForPokemonWorldsXpComeFind'
+          )}
         </p>
         <p>
-          Make sure you unlock Mystery Gift first. Go to any PokeMart and
-          interact with the questionnaire on the counter and put in: LINK
-          TOGETHER WITH ALL
+          {i18n.t('news:PatchNotes.makeSureYouUnlockMysteryGiftFirstGoToAny')}
         </p>
-        <p>
-          NOTE: This is a fan-made project. I'm taking huge care to test and
-          make sure it is as proper and bug-free as possible. But as with all
-          non-official methods, there is always a small chance for unintended
-          behavior, so use at your own risk.
-        </p>
+        <p>{i18n.t('news:PatchNotes.noteThisIsAFanMadeProjectIMTaking')}</p>
       </>
     ),
     video: {
       id: 'QaGGz4NHxs0',
-      title: 'Discover this fan-made Mystery Gift at Pokemon Worlds in SF',
+      title: i18n.t(
+        'news:PatchNotes.discoverThisFanMadeMysteryGiftAtPokemonWorldsIn'
+      ),
     },
   },
   {
     date: '2026-08-19',
-    title: 'Working Mystery Gift prototype',
+    title: i18n.t('news:PatchNotes.workingMysteryGiftPrototype'),
     body: (
       <>
         <p>
-          We have a working prototype of Mystery Event for an unmodded Switch or
-          Switch 2 FireRed / LeafGreen game. Come to Pokémon Worlds / XP in San
-          Francisco to get an exclusive look!
+          {i18n.t('news:PatchNotes.weHaveAWorkingPrototypeOfMysteryEventForAn')}
         </p>
         <p>
-          This was achieved by building off of{' '}
-          <a href="https://github.com/tornadus/frlg-ldn-trade">
-            tornadus's FRLG LDN trade project
-          </a>
-          . By extending this project to support hosting trades and wireless
-          adapter interactions, we can now send custom mystery gift events to
-          stock, unmodded Switch 1 and Switch 2 FireRed / LeafGreen games with a
-          simple Linux and Wi-Fi USB adapter!
+          <Trans
+            ns="news"
+            i18nKey="PatchNotes.thisWasAchievedByBuildingOffOfPart1TornadusS"
+            components={{
+              part1: <a href="https://github.com/tornadus/frlg-ldn-trade" />,
+            }}
+          />
         </p>
-        <p>
-          More details will come up as the team works on streamlining it so it
-          is easy for anyone to try!
-        </p>
+        <p>{i18n.t('news:PatchNotes.moreDetailsWillComeUpAsTheTeamWorksOn')}</p>
       </>
     ),
     video: {
       id: 'lUWbs-ozJnE',
-      title: 'Mystery Event on Switch FireRed / LeafGreen — prototype demo',
+      title: i18n.t(
+        'news:PatchNotes.mysteryEventOnSwitchFireredLeafgreenPrototypeDemo'
+      ),
     },
   },
   {
     date: '2026-08-14',
-    title: 'Ribbon Helper is live',
+    title: i18n.t('news:PatchNotes.ribbonHelperIsLive'),
     body: (
       <p>
-        For those looking to ribbon master their cherished Pokémon before
-        Pokemon Bank closes down, I created a tool to help look up battle and
-        contest info to make it as accessible as possible. There is also a full
-        set of guides for all ribbons, resources for figuring out which games
-        Pokemon can go to, and a tool to create a single HOME screenshot.
+        {i18n.t(
+          'news:PatchNotes.forThoseLookingToRibbonMasterTheirCherishedPokeMon'
+        )}
       </p>
     ),
-    link: { href: 'https://ribbon-helper.guide/', label: 'Open Ribbon Helper' },
+    link: {
+      href: 'https://ribbon-helper.guide/',
+      label: i18n.t('news:PatchNotes.openRibbonHelper'),
+    },
   },
 ]
 
 /** A read-only list of updates, newest first, in one centered column. */
 export function PatchNotes() {
+  const { t } = useTranslation(['news', 'common'] as const)
+
   return (
     <div className="patch-notes">
       <div className="patch-notes-column">
-        {UPDATES.map((update) => (
+        {getUpdates().map((update) => (
           <article key={update.date} className="site-panel">
             <time dateTime={update.date}>{update.date}</time>
             <h2>{update.title}</h2>
@@ -111,7 +106,7 @@ export function PatchNotes() {
             {update.video && (
               <p>
                 <a href={`https://www.youtube.com/watch?v=${update.video.id}`}>
-                  Watch on YouTube →
+                  {t('PatchNotes.watchOnYoutube')}
                 </a>
               </p>
             )}
@@ -123,8 +118,7 @@ export function PatchNotes() {
           </article>
         ))}
         <p className="patch-notes-footer">
-          Pokémon is © Nintendo / Creatures Inc. / GAME FREAK inc. This is an
-          unofficial fan site with no affiliation.
+          {t('PatchNotes.pokeMonIsNintendoCreaturesIncGameFreakIncThis')}
         </p>
       </div>
     </div>

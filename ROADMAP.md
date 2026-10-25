@@ -6,11 +6,13 @@
 - [x] Restore Dropbox and settings before enabling Start.
 - [x] Ask first-time players to select a sprite source; offer optional Dropbox sign-in.
 - [x] Show Dropbox controls on both menus when configured and project credits on Start.
-- [x] Open Camp and Lab, show Arcade as coming soon, and hide the deferred Battle/Safari/Pelago cards.
+- [x] Open Camp, Lab, and Arcade (disabled until a game is selected), and hide the deferred Battle/Safari/Pelago cards.
 - [x] Place a subdued Start-menu link below the map's zone cards.
 - [x] Start shared storage prefetch and bounded sprite preloading in the background.
 - [ ] Replace the zone-card menu with the explorable map.
-- [ ] Add stable URL navigation, keyboard/pointer interaction, and accessible map labels.
+- [x] Pick the game on Start from cartridge cards, or choose "Continue without save".
+- [x] Add stable URL navigation with validated routes, History API back/forward, redirects, and setup gating.
+- [ ] Add map keyboard/pointer interaction and accessible map labels.
 
 ## Camp Zone
 
@@ -31,9 +33,12 @@
 
 ## Lab Zone
 
-- [x] Add Celio's Lab, collection sheets, Trade Table, Settings, and Patch Notes.
+- [x] Add Celio's Lab, collection sheets, Settings, and Patch Notes.
 - [x] Validate built-in/uploaded collections and scan committed Gen 3 saves and Camp Sites.
 - [x] Store rebuildable collection results, source choices, uploads, and history.
+- [x] Move PC scanning into a shared `collections` service that rescans only the selected save plus Camp Sites and keeps other-game matches.
+- [x] Show enabled-collection tabs with recency and overflow, plus a registered/total tracker across enabled collections.
+- [x] Add the Collection Builder and searchable entry filters.
 - [x] Migrate legacy browser-only Lab settings and uploads into active storage.
 - [x] Open source Cabin boxes/Camp Sites and return to the same Lab entry.
 - [x] Share the trading/settings logic and navigation guards with Camp.
@@ -71,13 +76,14 @@
 
 ## Arcade Zone
 
-Detailed sequencing and acceptance evidence are tracked in the
-[Arcade checklist](docs/ARCADE_ZONE_ROADMAP.md).
+Evidence for verified items is in [Arcade runtime evidence](docs/ARCADE_RUNTIME.md).
 
 - [ ] Verify mGBA WASM formats, browsers, performance, input, audio, and asset/worker loading.
 - [ ] Build a player-provided ROM spike that works from the deployed base path.
 - [x] Define shared emulator lifecycle, save I/O, controls, audio, errors, and capabilities.
 - [x] Add play/pause/reset, fullscreen, mappings, and clear recovery states.
+- [x] Import Delta controller skins, manage them in a skin library, and ship a default skin.
+- [x] Remove the Arcade cartridge chooser; Hub opens the selected game's player directly.
 - [ ] Prove explicit save import/export and Dropbox backup/restore across reloads.
 - [ ] Verify repeated mount/unmount cleanup and recovery with multiple supplied games.
 - [ ] Publish the supported-browser matrix and decide ROM-persistence policy.
@@ -105,5 +111,6 @@ Detailed sequencing and acceptance evidence are tracked in the
 - [x] Remove unused Options/Splash/wrappers, dirty-state callbacks, template assets/styles, and obsolete previews.
 - [x] Remove the unused router wrapper/dependency; preserve component-state navigation.
 - [x] Keep i18n and relocate initialization/catalogs into `services/i18n/` with a shared instance export.
-- [ ] Adopt translation keys in screens and add language selection separately.
+- [x] Adopt typed translation keys across screens, helpers, services, and authored content using page-based English catalogs.
+- [x] Add Spanish (Spain) catalogs alongside English and a saved language selector in the header badges.
 - [ ] Expand automated storage-mode, accessibility, transaction, and emulator-lifecycle coverage.

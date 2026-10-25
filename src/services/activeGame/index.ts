@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import type {
   BoxLocation,
   PokemonMove,
@@ -115,7 +116,10 @@ function assertSaveMatchesGame(
     !(exact === 'RubySapphire' && rubyOrSapphire)
   ) {
     throw new Error(
-      `This is a ${save.version.aggregated} save, not a ${GAME_LABEL[gameId]} save.`
+      i18n.t('services:activeGame.thisIsASaveNotASave', {
+        aggregated: save.version.aggregated,
+        value2: GAME_LABEL[gameId],
+      })
     )
   }
 }
@@ -129,7 +133,9 @@ function assertCampPosition(camp: Camp, position: CampPosition): void {
     position.index < 0 ||
     position.index >= CAMP_SITE_SIZE
   ) {
-    throw new RangeError('The Camp position is out of bounds.')
+    throw new RangeError(
+      i18n.t('services:activeGame.theCampPositionIsOutOfBounds')
+    )
   }
 }
 
@@ -268,19 +274,24 @@ export class ActiveGameService {
 
   importPokemon(bytes: Uint8Array): PokemonNode {
     this.requireReady()
-    if (!this.adapter) throw new Error('The save adapter is unavailable.')
+    if (!this.adapter)
+      throw new Error(i18n.t('services:activeGame.theSaveAdapterIsUnavailable'))
     return this.adapter.importPokemonFile(bytes)
   }
 
   exportPokemon(pokemon: PokemonNode): Uint8Array {
     this.requireReady()
-    if (!this.adapter) throw new Error('The save adapter is unavailable.')
+    if (!this.adapter)
+      throw new Error(i18n.t('services:activeGame.theSaveAdapterIsUnavailable'))
     return this.adapter.exportPokemonFile(pokemon)
   }
 
   editSave(mutator: (save: SaveGame) => void): void {
     const { save } = this.requireReady()
-    if (!save) throw new Error('The active game has no save to edit.')
+    if (!save)
+      throw new Error(
+        i18n.t('services:activeGame.theActiveGameHasNoSaveToEdit')
+      )
     mutator(save)
     this.saveEditVersion += 1
     this.publishDirty({ saveDirty: true })
@@ -288,7 +299,8 @@ export class ActiveGameService {
 
   editCamp(mutator: (camp: Camp) => void): void {
     const { camp } = this.requireReady()
-    if (!camp) throw new Error('The active Camp is unavailable.')
+    if (!camp)
+      throw new Error(i18n.t('services:activeGame.theActiveCampIsUnavailable'))
     mutator(camp)
     this.campEditVersion += 1
     this.publishDirty({ campDirty: true })
@@ -320,7 +332,10 @@ export class ActiveGameService {
       assertCampPosition(camp, to)
       if (from.site === to.site && from.index === to.index) return
       const source = camp.sites[from.site][from.index]
-      if (!source) throw new Error('Cannot move an empty Camp position.')
+      if (!source)
+        throw new Error(
+          i18n.t('services:activeGame.cannotMoveAnEmptyCampPosition')
+        )
       const destination = camp.sites[to.site][to.index]
       camp.sites[to.site][to.index] = source
       camp.sites[from.site][from.index] = destination
@@ -353,10 +368,13 @@ export class ActiveGameService {
   moveSavePokemonToCamp(from: BoxLocation, to: CampPosition): void {
     const current = this.requireReady()
     if (!current.save || !current.camp || !this.adapter)
-      throw new Error('A selected save and Camp are required.')
+      throw new Error(
+        i18n.t('services:activeGame.aSelectedSaveAndCampAreRequired')
+      )
     assertCampPosition(current.camp, to)
     const source = current.save.boxes[from.box]?.slots[from.slot]
-    if (!source) throw new Error('Cannot move an empty box slot.')
+    if (!source)
+      throw new Error(i18n.t('services:activeGame.cannotMoveAnEmptyBoxSlot'))
     const destinationFile = current.camp.sites[to.site][to.index]
     const destination = destinationFile
       ? this.adapter.importPokemonFile(destinationFile.bytes)
@@ -376,10 +394,15 @@ export class ActiveGameService {
   moveCampPokemonToSave(from: CampPosition, to: BoxLocation): void {
     const current = this.requireReady()
     if (!current.save || !current.camp || !this.adapter)
-      throw new Error('A selected save and Camp are required.')
+      throw new Error(
+        i18n.t('services:activeGame.aSelectedSaveAndCampAreRequired')
+      )
     assertCampPosition(current.camp, from)
     const sourceFile = current.camp.sites[from.site][from.index]
-    if (!sourceFile) throw new Error('Cannot move an empty Camp position.')
+    if (!sourceFile)
+      throw new Error(
+        i18n.t('services:activeGame.cannotMoveAnEmptyCampPosition')
+      )
     const source = this.adapter.importPokemonFile(sourceFile.bytes)
     const destination = current.save.boxes[to.box]?.slots[to.slot]
     const destinationFile: CampPokemon | null = destination
@@ -400,7 +423,10 @@ export class ActiveGameService {
     const current = this.requireReady()
     let save = current.save
     if (current.saveDirty) {
-      if (!this.adapter) throw new Error('The save adapter is unavailable.')
+      if (!this.adapter)
+        throw new Error(
+          i18n.t('services:activeGame.theSaveAdapterIsUnavailable')
+        )
       const replacement = current.saveBytes
         ? this.adapter.load(current.saveBytes)
         : null
@@ -450,7 +476,9 @@ export class ActiveGameService {
   async save(): Promise<void> {
     const current = this.requireReady()
     if (!current.gameId || !current.save)
-      throw new Error('The active game has no save to write.')
+      throw new Error(
+        i18n.t('services:activeGame.theActiveGameHasNoSaveToWrite')
+      )
     if (!current.saveDirty) {
       this.saveEditVersion += 1
       this.publishDirty({ saveDirty: true })
@@ -463,7 +491,9 @@ export class ActiveGameService {
   async replaceSave(bytes: Uint8Array): Promise<void> {
     const current = this.requireReady()
     if (!current.gameId || !this.adapter)
-      throw new Error('Select a game before replacing its save.')
+      throw new Error(
+        i18n.t('services:activeGame.selectAGameBeforeReplacingItsSave')
+      )
     const replacement = this.adapter.load(bytes)
     try {
       assertSaveMatchesGame(current.gameId, replacement)
@@ -498,7 +528,8 @@ export class ActiveGameService {
 
   async discardSave(): Promise<void> {
     const current = this.requireReady()
-    if (!current.gameId) throw new Error('No active save is selected.')
+    if (!current.gameId)
+      throw new Error(i18n.t('services:activeGame.noActiveSaveIsSelected'))
     const version = this.loadVersion
     await current.provider.discardSave(current.gameId)
     if (version !== this.loadVersion) return
@@ -545,7 +576,9 @@ export class ActiveGameService {
   readCommitted<T>(reader: (view: CommittedActiveGameView) => T): T {
     const current = this.requireReady()
     if (!this.adapter || !this.committedCamp)
-      throw new Error('The committed active game is unavailable.')
+      throw new Error(
+        i18n.t('services:activeGame.theCommittedActiveGameIsUnavailable')
+      )
     const save = current.saveBytes ? this.adapter.load(current.saveBytes) : null
     try {
       return reader({
@@ -565,7 +598,8 @@ export class ActiveGameService {
     bytes: Uint8Array
   ): Promise<void> {
     const current = this.requireReady()
-    if (!this.adapter) throw new Error('The save adapter is unavailable.')
+    if (!this.adapter)
+      throw new Error(i18n.t('services:activeGame.theSaveAdapterIsUnavailable'))
     const parsed = this.adapter.load(bytes)
     try {
       assertSaveMatchesGame(gameId, parsed)
@@ -612,7 +646,9 @@ export class ActiveGameService {
     if (!current.gameId || !bytes)
       return {
         status: 'failed',
-        error: new Error('The active game has no save to write.'),
+        error: new Error(
+          i18n.t('services:activeGame.theActiveGameHasNoSaveToWrite')
+        ),
       }
     try {
       await current.provider.putSave(current.gameId, bytes)
@@ -644,7 +680,10 @@ export class ActiveGameService {
   ): Promise<CommitPart> {
     if (!current.campDirty) return { status: 'unchanged' }
     if (!camp)
-      return { status: 'failed', error: new Error('The Camp is unavailable.') }
+      return {
+        status: 'failed',
+        error: new Error(i18n.t('services:activeGame.theCampIsUnavailable')),
+      }
     try {
       await current.provider.saveCamp(3, camp)
       if (selectionVersion !== this.loadVersion) return { status: 'saved' }
@@ -668,7 +707,7 @@ export class ActiveGameService {
 
   private requireReady(): ActiveGameSnapshot & { provider: StorageProvider } {
     if (this.snapshot.status !== 'ready' || !this.snapshot.provider) {
-      throw new Error('The active game is not ready.')
+      throw new Error(i18n.t('services:activeGame.theActiveGameIsNotReady'))
     }
     return this.snapshot as ActiveGameSnapshot & { provider: StorageProvider }
   }

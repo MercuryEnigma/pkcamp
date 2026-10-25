@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+import { i18n } from '../../../services/i18n'
 import { useEffect, useMemo, useState } from 'react'
 import type { PokemonNode, SaveSlot } from '../../../services/pkhex'
 import { activeGame } from '../../../services/activeGame'
@@ -8,14 +10,14 @@ import { useActiveGame } from '../../context/useActiveGame'
 import { Panel } from '../../hub/Panel'
 import { SitePage } from '../../hub/SitePage'
 import { resolveRoute, routeHref } from '../../routing'
-import { GAME_LABEL } from '../gameDisplay'
+import { getGameLabel } from '../gameDisplay'
 import { useNavigationGuard } from '../navigationGuard'
 import { PokemonDetails, PokemonDetailsHeader } from '../PokemonDetails'
 import type { CampDestination } from '../PokeStorageMain'
 import { useStorageOffline, useSpriteResolver } from '../useStorage'
 import {
   DETAILS_VIEWS,
-  DETAILS_VIEW_LABEL,
+  getDetailsViewLabel,
   type DetailsView,
 } from '../pokemonDetailsPages'
 import { GRID_SIZE, groupCells, planGroupMove } from './groupMove'
@@ -32,11 +34,11 @@ type Side = 'left' | 'right'
 
 const nodeCache = new WeakMap<CampPokemon, PokemonNode | null>()
 
-const MESSAGE: Record<StorageTool, string> = {
-  view: 'Choose a camper to view their details.',
-  moveOne: 'Select a Pokémon, then choose its destination.',
-  groupMove: 'Select two corners of a group, then its top-left destination.',
-}
+const getMessage = (): Record<StorageTool, string> => ({
+  view: i18n.t('camp:CampPage.chooseACamperToViewTheirDetails'),
+  moveOne: i18n.t('camp:CampPage.selectAPokeMonThenChooseItsDestination'),
+  groupMove: i18n.t('camp:CampPage.selectTwoCornersOfAGroupThenItsTopLeft'),
+})
 
 function samePlace(a: Place, b: Place): boolean {
   return a.kind === 'save'
@@ -58,6 +60,8 @@ export function CampPage({
   /** The box or Camp Site a PC entry opened Camp on. */
   destination?: CampDestination
 }) {
+  const { t } = useTranslation(['camp', 'common'] as const)
+
   const state = useActiveGame()
   const { adapter } = usePkHex()
   const resolver = useSpriteResolver()
@@ -92,12 +96,12 @@ export function CampPage({
     first: number
     second?: number
   } | null>(null)
-  const [message, setMessage] = useState(MESSAGE.view)
+  const [message, setMessage] = useState(getMessage().view)
   const [saving, setSaving] = useState(false)
 
   useNavigationGuard(
     state.dirty,
-    'You have unsaved changes. Leave without saving them?'
+    t('CampPage.youHaveUnsavedChangesLeaveWithoutSavingThem')
   )
 
   // Leaving Camp drops any changes the player chose not to save.
@@ -166,8 +170,8 @@ export function CampPage({
   const titleOf = (side: Side): string => {
     const kind = side === 'left' ? leftKind : rightKind
     const index = side === 'left' ? leftIndex : rightIndex
-    if (kind === 'camp') return `Campsite ${index + 1}`
-    return index < boxCount ? save!.boxes[index].name : 'Party'
+    if (kind === 'camp') return t('CampPage.campsite', { value1: index + 1 })
+    return index < boxCount ? save!.boxes[index].name : t('CampPage.party')
   }
   const step = (side: Side, delta: number) => {
     const kind = side === 'left' ? leftKind : rightKind
@@ -187,7 +191,7 @@ export function CampPage({
   }
   const chooseTool = (next: StorageTool) => {
     setTool(next)
-    cancel(MESSAGE[next])
+    cancel(getMessage()[next])
   }
   const stepDetailsView = (delta: number) => {
     const index = DETAILS_VIEWS.indexOf(detailsView)
@@ -199,7 +203,9 @@ export function CampPage({
   }
 
   const fail = (cause: unknown) =>
-    setMessage(cause instanceof Error ? cause.message : 'That move failed.')
+    setMessage(
+      cause instanceof Error ? cause.message : t('CampPage.thatMoveFailed')
+    )
 
   const move = (from: Place, to: Place) => {
     if (from.kind === 'save' && to.kind === 'save')
@@ -226,16 +232,18 @@ export function CampPage({
 
   const clickMoveOne = (side: Side, slot: number) => {
     const place = placeOf(side, slot)
-    if (isParty(place)) return setMessage('Party Pokémon are view-only.')
+    if (isParty(place)) return setMessage(t('CampPage.partyPokeMonAreViewOnly'))
     if (!source) {
-      if (!nodeAt(place)) return setMessage('Choose an occupied slot first.')
+      if (!nodeAt(place))
+        return setMessage(t('CampPage.chooseAnOccupiedSlotFirst'))
       setSource({ side, place })
-      return setMessage('Choose the destination. Occupied slots swap.')
+      return setMessage(t('CampPage.chooseTheDestinationOccupiedSlotsSwap'))
     }
-    if (samePlace(source.place, place)) return cancel('Move cancelled.')
+    if (samePlace(source.place, place))
+      return cancel(t('CampPage.moveCancelled'))
     try {
       move(source.place, place)
-      cancel('Moved. Save when you are finished.')
+      cancel(t('CampPage.movedSaveWhenYouAreFinished'))
     } catch (cause) {
       fail(cause)
     }
@@ -243,16 +251,16 @@ export function CampPage({
 
   const clickGroup = (side: Side, slot: number) => {
     const place = placeOf(side, slot)
-    if (isParty(place)) return setMessage('Party Pokémon are view-only.')
+    if (isParty(place)) return setMessage(t('CampPage.partyPokeMonAreViewOnly'))
     if (!corners) {
       setCorners({ side, first: slot })
-      return setMessage('Select the opposite corner of the group.')
+      return setMessage(t('CampPage.selectTheOppositeCornerOfTheGroup'))
     }
     if (corners.second === undefined) {
       if (corners.side !== side)
-        return setMessage('Both corners must be in the same panel.')
+        return setMessage(t('CampPage.bothCornersMustBeInTheSamePanel'))
       setCorners({ ...corners, second: slot })
-      return setMessage('Select the group’s top-left destination.')
+      return setMessage(t('CampPage.selectTheGroupSTopLeftDestination'))
     }
     const cells = groupCells(corners.first, corners.second)
     const plan = planGroupMove(cells, slot)
@@ -263,10 +271,10 @@ export function CampPage({
       corners.side === side ? plan.pairs.map((pair) => pair.from) : []
     )
     if (!plan.pairs.some((pair) => nodeAt(from(pair.from))))
-      return setMessage('Cannot move a group of empty slots.')
+      return setMessage(t('CampPage.cannotMoveAGroupOfEmptySlots'))
     for (const pair of plan.pairs) {
       if (nodeAt(to(pair.to)) && !sourceCells.has(pair.to))
-        return setMessage('The destination group must be empty.')
+        return setMessage(t('CampPage.theDestinationGroupMustBeEmpty'))
     }
     try {
       const a = from(0)
@@ -301,7 +309,7 @@ export function CampPage({
           if (nodeAt(from(pair.from))) move(from(pair.from), to(pair.to))
         }
       }
-      cancel('Group moved. Save when you are finished.')
+      cancel(t('CampPage.groupMovedSaveWhenYouAreFinished'))
     } catch (cause) {
       fail(cause)
     }
@@ -311,7 +319,7 @@ export function CampPage({
     if (tool === 'view') {
       const node = nodeAt(placeOf(side, slot))
       setSelected(node)
-      return setMessage(MESSAGE.view)
+      return setMessage(getMessage().view)
     }
     if (tool === 'moveOne') return clickMoveOne(side, slot)
     return clickGroup(side, slot)
@@ -347,8 +355,10 @@ export function CampPage({
       )
       setMessage(
         failed
-          ? `Some changes were not saved: ${failed.error?.message ?? 'unknown error'}`
-          : 'Saved.'
+          ? t('CampPage.someChangesWereNotSaved', {
+              value1: failed.error?.message ?? t('camp:CampPage.unknownError'),
+            })
+          : t('CampPage.saved')
       )
     } finally {
       setSaving(false)
@@ -372,22 +382,22 @@ export function CampPage({
 
   if (state.status === 'loading' || state.status === 'idle')
     return (
-      <SitePage page="Camp" gameId={gameId} onBack={onBack}>
-        <p role="status">Loading…</p>
+      <SitePage page={t('CampPage.camp')} gameId={gameId} onBack={onBack}>
+        <p role="status">{t('common:actions.loading')}</p>
       </SitePage>
     )
   if (state.status === 'error')
     return (
-      <SitePage page="Camp" gameId={gameId} onBack={onBack}>
+      <SitePage page={t('CampPage.camp')} gameId={gameId} onBack={onBack}>
         <p role="alert">
-          {state.error?.message ?? 'The save could not be loaded.'}
+          {state.error?.message ?? t('CampPage.theSaveCouldNotBeLoaded')}
         </p>
       </SitePage>
     )
 
   return (
     <SitePage
-      page="Camp"
+      page={t('CampPage.camp')}
       gameId={gameId}
       onBack={onBack}
       bodyClassName="camp-site-body"
@@ -399,7 +409,9 @@ export function CampPage({
           <div className="camp-stage">
             <div className="camp-side camp-left">
               <StorageGrid
-                label={hasGame ? 'Save' : 'Camp Site'}
+                label={
+                  hasGame ? t('common:actions.save') : t('CampPage.campSite')
+                }
                 title={titleOf('left')}
                 source={leftKind}
                 gameId={gameId}
@@ -417,12 +429,12 @@ export function CampPage({
                   disabled={!hasGame || state.dirty}
                   title={
                     state.dirty
-                      ? 'Save your changes before trading.'
+                      ? t('CampPage.saveYourChangesBeforeTrading')
                       : undefined
                   }
                   onClick={() => goMode('trade')}
                 >
-                  Trade
+                  {t('CampPage.trade')}
                 </button>
                 {state.dirty && (
                   <button
@@ -431,7 +443,9 @@ export function CampPage({
                     disabled={saving || offline}
                     onClick={() => void saveChanges()}
                   >
-                    {saving ? 'Saving…' : 'Save'}
+                    {saving
+                      ? t('common:actions.saving')
+                      : t('common:actions.save')}
                   </button>
                 )}
               </div>
@@ -445,7 +459,7 @@ export function CampPage({
               className={`camp-side camp-right${tool === 'view' ? ' camp-right--view' : ''}`}
             >
               {tool === 'view' ? (
-                <Panel label="Pokémon" className="camp-details">
+                <Panel label={t('CampPage.pokeMon')} className="camp-details">
                   <PokemonDetailsHeader pokemon={selected} />
                   {selected ? (
                     <PokemonDetails
@@ -455,13 +469,17 @@ export function CampPage({
                     />
                   ) : (
                     <div className="camp-details-empty">
-                      <p>Select a Pokémon to view its details.</p>
+                      <p>{t('CampPage.selectAPokeMonToViewItsDetails')}</p>
                     </div>
                   )}
                 </Panel>
               ) : (
                 <StorageGrid
-                  label={rightKind === 'save' ? 'Save' : 'Camp Site'}
+                  label={
+                    rightKind === 'save'
+                      ? t('common:actions.save')
+                      : t('CampPage.campSite')
+                  }
                   title={titleOf('right')}
                   source={rightKind}
                   gameId={gameId}
@@ -477,21 +495,21 @@ export function CampPage({
                 <div
                   className="camp-mode-nav camp-view-nav"
                   role="group"
-                  aria-label="Pokémon page"
+                  aria-label={t('CampPage.pokeMonPage')}
                 >
                   <button
                     type="button"
-                    aria-label="Previous Pokémon page"
+                    aria-label={t('CampPage.previousPokeMonPage')}
                     onClick={() => stepDetailsView(-1)}
                   >
                     <span aria-hidden="true">◀</span>
                   </button>
                   <p className="camp-mode-pill">
-                    {DETAILS_VIEW_LABEL[detailsView]}
+                    {getDetailsViewLabel()[detailsView]}
                   </p>
                   <button
                     type="button"
-                    aria-label="Next Pokémon page"
+                    aria-label={t('CampPage.nextPokeMonPage')}
                     onClick={() => stepDetailsView(1)}
                   >
                     <span aria-hidden="true">▶</span>
@@ -501,11 +519,11 @@ export function CampPage({
                 <div
                   className="camp-mode-nav"
                   role="group"
-                  aria-label="Right side"
+                  aria-label={t('CampPage.rightSide')}
                 >
                   <button
                     type="button"
-                    aria-label="Previous right side"
+                    aria-label={t('CampPage.previousRightSide')}
                     onClick={() =>
                       goMode(mode === 'campsite' ? 'move' : 'campsite')
                     }
@@ -514,12 +532,12 @@ export function CampPage({
                   </button>
                   <p className="camp-mode-pill">
                     {mode === 'campsite'
-                      ? 'Campsite'
-                      : `${GAME_LABEL[gameId!]} Boxes`}
+                      ? t('CampPage.campsite2')
+                      : t('CampPage.boxes', { value1: getGameLabel(gameId!) })}
                   </p>
                   <button
                     type="button"
-                    aria-label="Next right side"
+                    aria-label={t('CampPage.nextRightSide')}
                     onClick={() =>
                       goMode(mode === 'campsite' ? 'move' : 'campsite')
                     }
@@ -541,7 +559,7 @@ export function CampPage({
               className="camp-upload-btn camp-bar-center"
               onClick={() => goMode('move')}
             >
-              End trade
+              {t('CampPage.endTrade')}
             </button>
           ) : (
             <p className="camp-bar-message" role="status">

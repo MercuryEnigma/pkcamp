@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import {
   readGbaBios,
   readGbaRom,
@@ -88,7 +89,7 @@ function validateRequest(request: TradeRequest): void {
     throw new TradeDeviceError(
       'gb-link',
       'invalid-party',
-      'A GB-Link trade needs six party slots and an occupied selected slot.'
+      i18n.t('services:gbLinkTradeDevice.aGbLinkTradeNeedsSixPartySlotsAndAn')
     )
   }
 }
@@ -116,10 +117,20 @@ function waitForStatus(
     const onAbort = (): void =>
       finish(
         signal.reason ??
-          new DOMException('The trade was cancelled.', 'AbortError')
+          new DOMException(
+            i18n.t('services:gbLinkTradeDevice.theTradeWasCancelled'),
+            'AbortError'
+          )
       )
     const timer = setTimeout(
-      () => finish(new Error('Timed out waiting for the GB-Link adapter.')),
+      () =>
+        finish(
+          new Error(
+            i18n.t(
+              'services:gbLinkTradeDevice.timedOutWaitingForTheGbLinkAdapter'
+            )
+          )
+        ),
       timeoutMs
     )
 
@@ -178,11 +189,17 @@ export class GbLinkTradeDevice implements TradeDevice {
       throw new TradeDeviceError(
         this.id,
         'unsupported',
-        'This browser supports neither WebUSB nor Web Serial.'
+        i18n.t(
+          'services:gbLinkTradeDevice.thisBrowserSupportsNeitherWebusbNorWebSerial'
+        )
       )
     }
     if (this.connecting || this.currentState !== 'disconnected') {
-      throw new TradeDeviceError(this.id, 'busy', 'The GB-Link is busy.')
+      throw new TradeDeviceError(
+        this.id,
+        'busy',
+        i18n.t('services:gbLinkTradeDevice.theGbLinkIsBusy')
+      )
     }
 
     this.currentState = 'connecting'
@@ -295,7 +312,7 @@ export class GbLinkTradeDevice implements TradeDevice {
       throw new TradeDeviceError(
         this.id,
         'busy',
-        'A GB-Link trade is already running.'
+        i18n.t('services:gbLinkTradeDevice.aGbLinkTradeIsAlreadyRunning')
       )
     }
 
@@ -321,7 +338,10 @@ export class GbLinkTradeDevice implements TradeDevice {
     })
 
     try {
-      notify({ type: 'status', message: 'Preparing the GB-Link adapter.' })
+      notify({
+        type: 'status',
+        message: i18n.t('services:gbLinkTradeDevice.preparingTheGbLinkAdapter'),
+      })
       const ready = waitForStatus(
         transport,
         GB_LINK_STATUS.deviceReady,
@@ -346,7 +366,9 @@ export class GbLinkTradeDevice implements TradeDevice {
       const selected = request.party[request.selectedSlot]!
       const wireBytes = this.dependencies.encodePokemon(selected)
       if (wireBytes.length !== 100) {
-        throw new Error('GB-Link Pokémon data must be 100 bytes.')
+        throw new Error(
+          i18n.t('services:gbLinkTradeDevice.gbLinkPokeMonDataMustBe100Bytes')
+        )
       }
       for (let copy = 0; copy < 6; copy++) {
         await transport.sendData(wireBytes.slice(0, 50))
@@ -355,7 +377,9 @@ export class GbLinkTradeDevice implements TradeDevice {
 
       notify({
         type: 'status',
-        message: 'Choose the Pokémon on the connected Game Boy Advance.',
+        message: i18n.t(
+          'services:gbLinkTradeDevice.chooseThePokeMonOnTheConnectedGameBoyAdvance'
+        ),
       })
       await finished
 
@@ -513,7 +537,11 @@ export class GbLinkTradeDevice implements TradeDevice {
   } {
     const transport = this.requireTransport()
     if (this.activeAbort) {
-      throw new TradeDeviceError(this.id, 'busy', 'The GB-Link is busy.')
+      throw new TradeDeviceError(
+        this.id,
+        'busy',
+        i18n.t('services:gbLinkTradeDevice.theGbLinkIsBusy')
+      )
     }
     const controller = new AbortController()
     this.activeAbort = controller
@@ -556,7 +584,7 @@ export class GbLinkTradeDevice implements TradeDevice {
       throw new TradeDeviceError(
         this.id,
         'not-connected',
-        'Connect the GB-Link before trading.'
+        i18n.t('services:gbLinkTradeDevice.connectTheGbLinkBeforeTrading')
       )
     }
     return this.transport

@@ -1,3 +1,4 @@
+import { i18n } from '../../i18n'
 import { StorageUnavailableError } from '../types'
 
 export const AUTHORIZE_URL = 'https://www.dropbox.com/oauth2/authorize'
@@ -9,7 +10,12 @@ export const SCOPES =
 /** The refresh token no longer works; the player must sign in again. */
 export class DropboxSessionExpiredError extends StorageUnavailableError {
   constructor() {
-    super('dropbox', 'Your Dropbox sign-in expired. Sign in to Dropbox again.')
+    super(
+      'dropbox',
+      i18n.t(
+        'services:dropboxAuth.yourDropboxSignInExpiredSignInToDropboxAgain'
+      )
+    )
     this.name = 'DropboxSessionExpiredError'
   }
 }
@@ -86,7 +92,9 @@ async function postToken(
   } catch {
     throw new StorageUnavailableError(
       'dropbox',
-      'Could not reach Dropbox. Check your connection and try again.'
+      i18n.t(
+        'services:dropboxAuth.couldNotReachDropboxCheckYourConnectionAndTryAgain'
+      )
     )
   }
   if (response.status === 400 || response.status === 401) {
@@ -97,13 +105,15 @@ async function postToken(
       throw new DropboxSessionExpiredError()
     }
     throw new Error(
-      `Dropbox sign-in failed (${detail.error ?? 'bad request'}).`
+      i18n.t('services:dropboxAuth.dropboxSignInFailed', {
+        value1: detail.error ?? i18n.t('services:dropboxAuth.badRequest'),
+      })
     )
   }
   if (!response.ok) {
     throw new StorageUnavailableError(
       'dropbox',
-      'Dropbox is having problems. Try again shortly.'
+      i18n.t('services:dropboxAuth.dropboxIsHavingProblemsTryAgainShortly')
     )
   }
   const data = (await response.json()) as {

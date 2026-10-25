@@ -1,3 +1,4 @@
+import { i18n } from '../../../../../services/i18n'
 import { rasterName, type DeltaSkinArchive } from './parseDeltaSkin'
 
 /** Wide enough to stay sharp on a large window without a huge bitmap. */
@@ -20,7 +21,8 @@ async function rasterize(pdf: Uint8Array): Promise<Uint8Array> {
     canvas.width = Math.ceil(viewport.width)
     canvas.height = Math.ceil(viewport.height)
     const context = canvas.getContext('2d')
-    if (!context) throw new Error('No canvas to draw the PDF on.')
+    if (!context)
+      throw new Error(i18n.t('arcade:rasterizePdfs.noCanvasToDrawThePdfOn'))
     // Artwork is often see-through (a controller over the game); keep it so.
     await page.render({
       canvas,
@@ -31,7 +33,8 @@ async function rasterize(pdf: Uint8Array): Promise<Uint8Array> {
     const blob = await new Promise<Blob | null>((resolve) =>
       canvas.toBlob(resolve, 'image/png')
     )
-    if (!blob) throw new Error('The PDF could not be drawn.')
+    if (!blob)
+      throw new Error(i18n.t('arcade:rasterizePdfs.thePdfCouldNotBeDrawn'))
     return new Uint8Array(await blob.arrayBuffer())
   } finally {
     void task.destroy()

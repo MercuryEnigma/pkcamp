@@ -4,10 +4,12 @@ import { NavigationProvider } from '../../src/pages/context/NavigationProvider'
 import { PkHexContext } from '../../src/pages/context/PkHexContext'
 import {
   useNavigationGuard,
+  useConfirmNavigation,
   NavigationScopeProvider,
 } from '../../src/pages/pokestorage/navigationGuard'
+import { CampPage } from '../../src/pages/pokestorage/camp/CampPage'
+import { activeGame } from '../../src/services/activeGame'
 import { DropboxBadge } from '../../src/pages/pokestorage/DropboxBadge'
-import { SaveViewer } from '../../src/pages/pokestorage/SaveViewer'
 import { useSpriteResolver } from '../../src/pages/pokestorage/useStorage'
 import { storage } from '../../src/services/storage'
 import { dropboxAccount } from '../../src/services/storage/dropbox'
@@ -40,6 +42,14 @@ export function SpriteConsumer({ id }: { id: string }) {
 export function Harness() {
   const [mode, setMode] = useState('idle')
   const [opened, setOpened] = useState(0)
+  const [saveReady, setSaveReady] = useState(false)
+  const confirmLeave = useConfirmNavigation()
+  const uploadDraft = async (file: File) => {
+    await activeGame.select('emerald', storage, adapter)
+    await activeGame.replaceSave(new Uint8Array(await file.arrayBuffer()))
+    activeGame.movePokemon({ box: 0, slot: 0 }, { box: 0, slot: 1 })
+    setSaveReady(true)
+  }
   return (
     <>
       <button onClick={() => setMode('dirty')}>Dirty editor</button>
@@ -64,12 +74,23 @@ export function Harness() {
         Change shared sprites
       </button>
       {mode === 'save' && (
-        <SaveViewer
-          gameId="emerald"
-          onBack={() => setMode('idle')}
-          onTrade={() => setMode('idle')}
-          onManageBackup={() => setMode('idle')}
-        />
+        <section data-testid="draft-camp">
+          <input
+            type="file"
+            accept=".sav"
+            onChange={(event) => {
+              const file = event.target.files?.[0]
+              if (file) void uploadDraft(file)
+            }}
+          />
+          {saveReady && (
+            <CampPage
+              onBack={() => {
+                if (confirmLeave()) setMode('idle')
+              }}
+            />
+          )}
+        </section>
       )}
     </>
   )

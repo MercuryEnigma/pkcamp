@@ -1,4 +1,4 @@
-/* Shared Camp palette for the Arcade chooser and player.
+/* Shared Camp palette for the Arcade player.
  * Per-game version colors accent cartridge edges and titles. */
 
 body:has(.arcade-zone) {

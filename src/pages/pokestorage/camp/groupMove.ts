@@ -1,3 +1,4 @@
+import { i18n } from '../../../services/i18n'
 export const COLUMNS = 6
 export const ROWS = 5
 export const GRID_SIZE = COLUMNS * ROWS
@@ -44,7 +45,11 @@ export function planGroupMove(
     const row = destinationTop + Math.floor(slot / COLUMNS) - sourceTop
     const column = destinationLeft + (slot % COLUMNS) - sourceLeft
     if (column >= COLUMNS || row >= ROWS)
-      return { error: 'That group would extend beyond the destination.' }
+      return {
+        error: i18n.t(
+          'camp:groupMove.thatGroupWouldExtendBeyondTheDestination'
+        ),
+      }
     pairs.push({ from: slot, to: row * COLUMNS + column })
   }
   return { pairs }

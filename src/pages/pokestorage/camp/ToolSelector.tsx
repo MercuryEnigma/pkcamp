@@ -1,18 +1,24 @@
+import { useTranslation } from 'react-i18next'
+import { i18n } from '../../../services/i18n'
 export type StorageTool = 'view' | 'moveOne' | 'groupMove'
 
-const TOOLS: readonly { id: StorageTool; label: string; icon?: string }[] = [
+const getTools = (): readonly {
+  id: StorageTool
+  label: string
+  icon?: string
+}[] => [
   {
     id: 'view',
-    label: 'View',
+    label: i18n.t('camp:ToolSelector.view'),
   },
   {
     id: 'moveOne',
-    label: 'Move one',
+    label: i18n.t('camp:ToolSelector.moveOne'),
     icon: 'M3 8h17m0 0-4-4m4 4-4 4M21 16H4m0 0 4-4m-4 4 4 4',
   },
   {
     id: 'groupMove',
-    label: 'Move a group',
+    label: i18n.t('camp:ToolSelector.moveAGroup'),
     icon: 'M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z',
   },
 ]
@@ -28,9 +34,15 @@ export function ToolSelector({
   /** Tools that cannot be used right now, e.g. while the party is open. */
   disabled?: readonly StorageTool[]
 }) {
+  const { t } = useTranslation(['camp', 'common'] as const)
+
   return (
-    <div className="tool-selector" role="group" aria-label="Storage tool">
-      {TOOLS.map((tool) => (
+    <div
+      className="tool-selector"
+      role="group"
+      aria-label={t('ToolSelector.storageTool')}
+    >
+      {getTools().map((tool) => (
         <button
           key={tool.id}
           type="button"

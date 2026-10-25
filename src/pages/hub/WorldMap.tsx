@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Gen3GameId } from '../../services/saveLibrary'
 import { SiteCard } from './SiteCard'
 import { SitePage } from './SitePage'
@@ -15,31 +16,40 @@ export function WorldMap({
   onArcade?: () => void
   onBack: () => void
 }) {
+  const { t } = useTranslation(['hub', 'common'] as const)
+
   return (
-    <SitePage page="pkCamp" gameId={gameId} onBack={onBack}>
-      <nav className="site-tiles hub-map" aria-label="pkCamp areas">
+    <SitePage page={t('WorldMap.pkcamp')} gameId={gameId} onBack={onBack}>
+      <nav
+        className="site-tiles hub-map"
+        aria-label={t('WorldMap.pkcampAreas')}
+      >
         <SiteCard
           className="hub-map-arcade"
-          title="Arcade"
-          description={onArcade ? 'Play your adventure' : 'Select a game first'}
+          title={t('WorldMap.arcade')}
+          description={
+            onArcade
+              ? t('WorldMap.playYourAdventure')
+              : t('WorldMap.selectAGameFirst')
+          }
           onClick={onArcade}
           disabled={!onArcade}
         />
         <SiteCard
           className="hub-map-camp"
-          title="Camp"
-          description="Move and trade Pokémon"
+          title={t('WorldMap.camp')}
+          description={t('WorldMap.moveAndTradePokeMon')}
           onClick={onCamp}
         />
         <SiteCard
           className="hub-map-lab"
-          title="Lab"
-          description="Collections and research"
+          title={t('WorldMap.lab')}
+          description={t('WorldMap.collectionsAndResearch')}
           onClick={onLab}
         />
         <button type="button" className="hub-map-change" onClick={onBack}>
           <span aria-hidden="true">←</span>
-          Change game
+          {t('WorldMap.changeGame')}
         </button>
       </nav>
     </SitePage>

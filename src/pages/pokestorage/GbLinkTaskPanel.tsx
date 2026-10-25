@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { GbaCartInfo } from '../../services/gbaSaveDump/gbaCartClient'
 import { device } from '../../services/device'
@@ -36,6 +37,8 @@ type GbLinkTaskPanelProps = {
  * reconnects to it, without the chooser where the browser allows.
  */
 export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
+  const { t } = useTranslation(['camp', 'common'] as const)
+
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   const [progress, setProgress] = useState<number | null>(null)
@@ -43,7 +46,7 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
   const mounted = useRef(false)
   useNavigationGuard(
     busy,
-    'A cartridge transfer is active. Cancel it and leave?'
+    t('GbLinkTaskPanel.aCartridgeTransferIsActiveCancelItAndLeave')
   )
 
   useEffect(() => {
@@ -72,8 +75,8 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
     setProgress(null)
     setStatus(
       device.state === 'connected'
-        ? 'Starting…'
-        : 'Connecting… Choose your GB-Link if the browser asks.'
+        ? t('GbLinkTaskPanel.starting')
+        : t('GbLinkTaskPanel.connectingChooseYourGbLinkIfTheBrowserAsks')
     )
     try {
       await device.connect({ signal: controller.signal })
@@ -84,10 +87,20 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
         onProgress: (done, total) => {
           if (mounted.current && !controller.signal.aborted)
             setProgress(done / total)
-          report(`${props.progressLabel}… ${Math.floor((done / total) * 100)}%`)
+          report(
+            t('GbLinkTaskPanel.transferProgress', {
+              progressLabel: props.progressLabel,
+              value2: Math.floor((done / total) * 100),
+            })
+          )
         },
         onCartridge: (info) =>
-          report(`Detected ${info.title || info.code} (${info.code}).`),
+          report(
+            t('GbLinkTaskPanel.detected', {
+              value1: info.title || info.code,
+              code: info.code,
+            })
+          ),
       })
       controller.signal.throwIfAborted()
       if (result) report(result)
@@ -102,7 +115,7 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
     }
   }
 
-  const startLabel = props.startLabel ?? 'Start'
+  const startLabel = props.startLabel ?? t('common:actions.start')
 
   return (
     <div className="camp-gba-task">
@@ -112,9 +125,11 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
           <li key={index}>{step}</li>
         ))}
         <li>
-          Press {startLabel === 'Start' ? 'Start' : 'the start button'} below.
+          {props.startLabel
+            ? t('GbLinkTaskPanel.pressStartButtonBelow')
+            : t('GbLinkTaskPanel.pressStartBelow')}
         </li>
-        <li>If the browser asks, choose your GB-Link.</li>
+        <li>{t('GbLinkTaskPanel.ifTheBrowserAsksChooseYourGbLink')}</li>
         {props.afterStartSteps?.map((step, index) => (
           <li key={`after-${index}`}>{step}</li>
         ))}
@@ -137,18 +152,20 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
               if (busy) {
                 abortRef.current?.abort()
                 setStatus(
-                  'Cancelling… Close the device chooser if it is still open.'
+                  t(
+                    'GbLinkTaskPanel.cancellingCloseTheDeviceChooserIfItIsStillOpen'
+                  )
                 )
               } else props.onClose?.()
             }}
           >
-            Cancel
+            {t('common:actions.cancel')}
           </button>
         )}
       </div>
       {!device.supported && (
         <p className="camp-status">
-          This browser does not support connecting to the GB-Link.
+          {t('GbLinkTaskPanel.thisBrowserDoesNotSupportConnectingToTheGbLink')}
         </p>
       )}
       {busy && progress !== null && (

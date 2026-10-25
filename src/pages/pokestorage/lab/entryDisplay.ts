@@ -1,7 +1,13 @@
+import {
+  formatDate as localizedDate,
+  formatList,
+  formatRelativeTime,
+} from '../../../services/i18n/format'
+import { i18n } from '../../../services/i18n'
 import type { SpriteRequest } from '../../../services/sprites'
 import type { Gen3GameId, GameId } from '../../../services/saveLibrary'
 import { DEX_NAME } from '../dexNames'
-import { GAME_LABEL } from '../gameDisplay'
+import { getGameLabel } from '../gameDisplay'
 import {
   type Constraint,
   type CollectionDefinition,
@@ -41,7 +47,7 @@ function formLabel(species: number | null, form: Scalar): string {
   if (species === UNOWN_SPECIES && typeof form === 'number') {
     return UNOWN_FORMS[form] ?? String(form)
   }
-  return form === 0 ? 'Default' : String(form)
+  return form === 0 ? i18n.t('common:actions.default') : String(form)
 }
 
 /** The cell label: the species name, plus the letter for Unown. */
@@ -54,7 +60,10 @@ export function entryLabel(
   const name = speciesName(species)
   const [form] = toList(constraints.form)
   if (species === UNOWN_SPECIES && form !== undefined) {
-    return `${name} ${formLabel(species, form)}`
+    return i18n.t('collections:entryDisplay.speciesFormLabel', {
+      name: name,
+      value2: formLabel(species, form),
+    })
   }
   return name
 }
@@ -70,7 +79,12 @@ export function collectionEntryLabel(
   const duplicate = Object.entries(definition.pokemon).some(
     ([id, candidate]) => id !== entryId && entryLabel(id, candidate) === label
   )
-  return duplicate ? `${label} · ${entryId}` : label
+  return duplicate
+    ? i18n.t('collections:entryDisplay.distinctEntryLabel', {
+        label: label,
+        entryId: entryId,
+      })
+    : label
 }
 
 /** National dex number for display and search, when the entry has one. */
@@ -102,7 +116,7 @@ export function entrySpriteRequest(
 }
 
 function joinOr(values: string[]): string {
-  return values.join(' or ')
+  return formatList(values, 'disjunction')
 }
 
 const DESCRIBERS: Record<
@@ -110,31 +124,92 @@ const DESCRIBERS: Record<
   (constraint: Constraint, constraints: EntryConstraints) => string
 > = {
   species: (c) =>
-    `Species: ${joinOr(
-      toList(c).map((v) =>
-        typeof v === 'number' ? `#${v} ${speciesName(v)}` : String(v)
-      )
-    )}`,
+    i18n.t('collections:entryDisplay.species', {
+      value1: joinOr(
+        toList(c).map((v) =>
+          typeof v === 'number'
+            ? i18n.t('collections:entryDisplay.speciesNumberAndName', {
+                v: v,
+                value2: speciesName(v),
+              })
+            : String(v)
+        )
+      ),
+    }),
   form: (c, all) =>
-    `Form: ${joinOr(toList(c).map((v) => formLabel(singleSpecies(all), v)))}`,
-  gender: (c) => `Gender: ${joinOr(toList(c).map(String))}`,
+    i18n.t('collections:entryDisplay.form', {
+      value1: joinOr(toList(c).map((v) => formLabel(singleSpecies(all), v))),
+    }),
+  gender: (c) =>
+    i18n.t('collections:entryDisplay.gender', {
+      value1: joinOr(toList(c).map(String)),
+    }),
   shiny: (c) =>
-    `Shiny: ${joinOr(toList(c).map((v) => (v === true ? 'Yes' : 'No')))}`,
+    i18n.t('collections:entryDisplay.shiny', {
+      value1: joinOr(
+        toList(c).map((v) =>
+          v === true
+            ? i18n.t('common:actions.yes')
+            : i18n.t('common:actions.no')
+        )
+      ),
+    }),
   isEgg: (c) =>
-    `Egg: ${joinOr(toList(c).map((v) => (v === true ? 'Yes' : 'No')))}`,
-  level: (c) => `Level: ${joinOr(toList(c).map(String))}`,
-  nickname: (c) => `Nickname: ${joinOr(toList(c).map(String))}`,
-  ot: (c) => `Original trainer: ${joinOr(toList(c).map(String))}`,
-  id: (c) => `Trainer ID: ${joinOr(toList(c).map(String))}`,
-  item: (c) => `Held item: ${joinOr(toList(c).map(String))}`,
-  ability: (c) => `Ability: ${joinOr(toList(c).map(String))}`,
-  nature: (c) => `Nature: ${joinOr(toList(c).map(String))}`,
+    i18n.t('collections:entryDisplay.egg', {
+      value1: joinOr(
+        toList(c).map((v) =>
+          v === true
+            ? i18n.t('common:actions.yes')
+            : i18n.t('common:actions.no')
+        )
+      ),
+    }),
+  level: (c) =>
+    i18n.t('collections:entryDisplay.level', {
+      value1: joinOr(toList(c).map(String)),
+    }),
+  nickname: (c) =>
+    i18n.t('collections:entryDisplay.nickname', {
+      value1: joinOr(toList(c).map(String)),
+    }),
+  ot: (c) =>
+    i18n.t('collections:entryDisplay.originalTrainer', {
+      value1: joinOr(toList(c).map(String)),
+    }),
+  id: (c) =>
+    i18n.t('collections:entryDisplay.trainerIdRequirement', {
+      values: joinOr(toList(c).map(String)),
+    }),
+  item: (c) =>
+    i18n.t('collections:entryDisplay.heldItem', {
+      value1: joinOr(toList(c).map(String)),
+    }),
+  ability: (c) =>
+    i18n.t('collections:entryDisplay.ability', {
+      value1: joinOr(toList(c).map(String)),
+    }),
+  nature: (c) =>
+    i18n.t('collections:entryDisplay.nature', {
+      value1: joinOr(toList(c).map(String)),
+    }),
   moves: (c) =>
-    `Knows ${toList(c).length > 1 ? 'any of' : 'the move'}: ${toList(c).join(', ')}`,
+    i18n.t('collections:entryDisplay.knowsMove', {
+      count: toList(c).length,
+      moves: formatList(toList(c).map(String), 'unit'),
+    }),
   ribbons: (c) =>
-    `Has ${toList(c).length > 1 ? 'any of the ribbons' : 'the ribbon'}: ${toList(c).join(', ')}`,
-  all_moves: (c) => `Knows all of: ${toList(c).join(', ')}`,
-  all_ribbons: (c) => `Has all of the ribbons: ${toList(c).join(', ')}`,
+    i18n.t('collections:entryDisplay.hasRibbon', {
+      count: toList(c).length,
+      ribbons: formatList(toList(c).map(String), 'unit'),
+    }),
+  all_moves: (c) =>
+    i18n.t('collections:entryDisplay.knowsAllOf', {
+      value1: formatList(toList(c).map(String), 'unit'),
+    }),
+  all_ribbons: (c) =>
+    i18n.t('collections:entryDisplay.hasAllOfTheRibbons', {
+      value1: formatList(toList(c).map(String), 'unit'),
+    }),
 }
 
 /** Every requirement of an entry, in readable form. */
@@ -148,20 +223,28 @@ export function describeRequirements(constraints: EntryConstraints): string[] {
 }
 
 const yesNo = (c: Constraint) =>
-  joinOr(toList(c).map((v) => (v === true ? 'Yes' : 'No')))
+  joinOr(
+    toList(c).map((v) =>
+      v === true ? i18n.t('common:actions.yes') : i18n.t('common:actions.no')
+    )
+  )
 const anyOf = (c: Constraint) => {
   const values = toList(c).map(String)
-  return values.length > 1 ? `Any of ${values.join(', ')}` : values.join('')
+  return values.length > 1
+    ? i18n.t('collections:entryDisplay.anyOf', {
+        value1: formatList(values, 'unit'),
+      })
+    : values.join('')
 }
-const allOf = (c: Constraint) => toList(c).map(String).join(', ')
+const allOf = (c: Constraint) => formatList(toList(c).map(String), 'unit')
 
 /** Label and value for each field, for a key/value requirement record. */
-const FIELDS: Record<
+const getFields = (): Record<
   ConstraintField,
   [string, (constraint: Constraint, constraints: EntryConstraints) => string]
-> = {
+> => ({
   species: [
-    'Species',
+    i18n.t('collections:entryDisplay.species2'),
     (c) =>
       joinOr(
         toList(c).map((v) =>
@@ -170,24 +253,48 @@ const FIELDS: Record<
       ),
   ],
   form: [
-    'Form',
+    i18n.t('collections:entryDisplay.form2'),
     (c, all) => joinOr(toList(c).map((v) => formLabel(singleSpecies(all), v))),
   ],
-  gender: ['Gender', (c) => joinOr(toList(c).map(String))],
-  shiny: ['Shiny', yesNo],
-  isEgg: ['Egg', yesNo],
-  level: ['Level', (c) => joinOr(toList(c).map(String))],
-  nickname: ['Nickname', (c) => joinOr(toList(c).map(String))],
-  ot: ['Original trainer', (c) => joinOr(toList(c).map(String))],
-  id: ['Trainer ID', (c) => joinOr(toList(c).map(String))],
-  item: ['Held item', (c) => joinOr(toList(c).map(String))],
-  ability: ['Ability', (c) => joinOr(toList(c).map(String))],
-  nature: ['Nature', (c) => joinOr(toList(c).map(String))],
-  moves: ['Move', anyOf],
-  ribbons: ['Ribbon', anyOf],
-  all_moves: ['All moves', allOf],
-  all_ribbons: ['All ribbons', allOf],
-}
+  gender: [
+    i18n.t('collections:entryDisplay.gender2'),
+    (c) => joinOr(toList(c).map(String)),
+  ],
+  shiny: [i18n.t('collections:entryDisplay.shiny2'), yesNo],
+  isEgg: [i18n.t('collections:entryDisplay.egg2'), yesNo],
+  level: [
+    i18n.t('collections:entryDisplay.level2'),
+    (c) => joinOr(toList(c).map(String)),
+  ],
+  nickname: [
+    i18n.t('collections:entryDisplay.nickname2'),
+    (c) => joinOr(toList(c).map(String)),
+  ],
+  ot: [
+    i18n.t('collections:entryDisplay.originalTrainer2'),
+    (c) => joinOr(toList(c).map(String)),
+  ],
+  id: [
+    i18n.t('collections:entryDisplay.trainerId'),
+    (c) => joinOr(toList(c).map(String)),
+  ],
+  item: [
+    i18n.t('collections:entryDisplay.heldItem2'),
+    (c) => joinOr(toList(c).map(String)),
+  ],
+  ability: [
+    i18n.t('collections:entryDisplay.ability2'),
+    (c) => joinOr(toList(c).map(String)),
+  ],
+  nature: [
+    i18n.t('collections:entryDisplay.nature2'),
+    (c) => joinOr(toList(c).map(String)),
+  ],
+  moves: [i18n.t('collections:entryDisplay.move'), anyOf],
+  ribbons: [i18n.t('collections:entryDisplay.ribbon'), anyOf],
+  all_moves: [i18n.t('collections:entryDisplay.allMoves'), allOf],
+  all_ribbons: [i18n.t('collections:entryDisplay.allRibbons'), allOf],
+})
 
 /** Only the fields the entry actually constrains, in definition order. */
 export function requirementFields(
@@ -195,7 +302,7 @@ export function requirementFields(
 ): { label: string; value: string; values: string[] }[] {
   return (Object.keys(constraints) as ConstraintField[]).flatMap((field) => {
     const constraint = constraints[field]
-    const describer = FIELDS[field]
+    const describer = getFields()[field]
     if (constraint === undefined || !describer) return []
     const [label, describe] = describer
     return [
@@ -215,26 +322,25 @@ export function describeSource(source: {
   location: PokemonLocation
   boxName?: string
 }): string {
-  const game = GAME_LABEL[source.gameId as Gen3GameId] ?? source.gameId
-  if (source.location === 'party') return `${game} · Party`
-  const box = source.boxName || `Box ${source.location.box + 1}`
-  return `${game} · ${box} slot ${source.location.slot + 1}`
+  const game = getGameLabel(source.gameId as Gen3GameId) ?? source.gameId
+  if (source.location === 'party')
+    return i18n.t('collections:entryDisplay.party', { game: game })
+  const box =
+    source.boxName ||
+    i18n.t('collections:entryDisplay.box', { value1: source.location.box + 1 })
+  return i18n.t('collections:entryDisplay.slot', {
+    game: game,
+    box: box,
+    value3: source.location.slot + 1,
+  })
 }
-
-const dateFormat = new Intl.DateTimeFormat(undefined, {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-})
 
 export function formatDate(iso: string): string {
   const date = new Date(iso)
-  return Number.isNaN(date.getTime()) ? iso : dateFormat.format(date)
+  return Number.isNaN(date.getTime())
+    ? iso
+    : localizedDate(date, { year: 'numeric', month: 'short', day: 'numeric' })
 }
-
-const relativeFormat = new Intl.RelativeTimeFormat(undefined, {
-  numeric: 'auto',
-})
 
 export function formatRelative(iso: string, now = Date.now()): string {
   const seconds = (Date.parse(iso) - now) / 1000
@@ -246,17 +352,20 @@ export function formatRelative(iso: string, now = Date.now()): string {
   ]
   for (const [unit, size] of units) {
     if (Math.abs(seconds) >= size) {
-      return relativeFormat.format(Math.round(seconds / size), unit)
+      return formatRelativeTime(Math.round(seconds / size), unit)
     }
   }
-  return 'just now'
+  return i18n.t('collections:entryDisplay.justNow')
 }
 
 export type StatusFilter = 'all' | 'registered' | 'missing' | 'visiting'
 
-export const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'registered', label: 'Registered' },
-  { value: 'missing', label: 'Missing' },
-  { value: 'visiting', label: 'Visiting' },
+export const getStatusFilters = (): {
+  value: StatusFilter
+  label: string
+}[] => [
+  { value: 'all', label: i18n.t('collections:entryDisplay.all') },
+  { value: 'registered', label: i18n.t('collections:entryDisplay.registered') },
+  { value: 'missing', label: i18n.t('collections:entryDisplay.missing') },
+  { value: 'visiting', label: i18n.t('collections:entryDisplay.visiting') },
 ]

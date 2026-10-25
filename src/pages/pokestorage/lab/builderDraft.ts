@@ -1,3 +1,4 @@
+import { i18n } from '../../../services/i18n'
 import { DEX_NAME } from '../dexNames'
 import type { CollectionDefinition, EntryConstraints } from './collectionTypes'
 import { speciesName } from './entryDisplay'
@@ -16,29 +17,37 @@ export interface SpeciesOption {
 const UNOWN = 201
 const UNOWN_FORMS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!?'
 
-export const SPECIES_OPTIONS: readonly SpeciesOption[] = Array.from(
-  { length: 386 },
-  (_, index) => index + 1
-).flatMap((species): SpeciesOption[] => {
-  const slug = DEX_NAME[species] ?? String(species)
-  const name = speciesName(species)
-  if (species !== UNOWN) return [{ label: name, species, form: null, slug }]
-  return [
-    { label: `${name} (any)`, species, form: null, slug: `${slug}-any` },
-    ...[...UNOWN_FORMS].map((letter, form) => ({
-      label: `${name} ${letter}`,
-      species,
-      form,
-      slug: `${slug}-${
-        letter === '!'
-          ? 'exclamation'
-          : letter === '?'
-            ? 'question'
-            : letter.toLowerCase()
-      }`,
-    })),
-  ]
-})
+export const getSpeciesOptions = (): readonly SpeciesOption[] =>
+  Array.from({ length: 386 }, (_, index) => index + 1).flatMap(
+    (species): SpeciesOption[] => {
+      const slug = DEX_NAME[species] ?? String(species)
+      const name = speciesName(species)
+      if (species !== UNOWN) return [{ label: name, species, form: null, slug }]
+      return [
+        {
+          label: i18n.t('collections:builderDraft.any', { name: name }),
+          species,
+          form: null,
+          slug: `${slug}-any`,
+        },
+        ...[...UNOWN_FORMS].map((letter, form) => ({
+          label: i18n.t('collections:builderDraft.unownFormLabel', {
+            name: name,
+            letter: letter,
+          }),
+          species,
+          form,
+          slug: `${slug}-${
+            letter === '!'
+              ? 'exclamation'
+              : letter === '?'
+                ? 'question'
+                : letter.toLowerCase()
+          }`,
+        })),
+      ]
+    }
+  )
 
 export type ShinyRule = 'any' | 'yes' | 'no'
 
@@ -165,10 +174,14 @@ export function toDefinition(draft: CollectionDraft): CollectionDefinition {
 /** What stops the draft from becoming a collection, if anything. */
 export function draftProblems(draft: CollectionDraft): string[] {
   const problems: string[] = []
-  if (draft.name.trim() === '') problems.push('Give the collection a name.')
+  if (draft.name.trim() === '')
+    problems.push(i18n.t('collections:builderDraft.giveTheCollectionAName'))
   else if (slugify(draft.name) === '')
-    problems.push('The name needs at least one letter or digit.')
-  if (draft.entries.length === 0) problems.push('Add at least one Pokémon.')
+    problems.push(
+      i18n.t('collections:builderDraft.theNameNeedsAtLeastOneLetterOrDigit')
+    )
+  if (draft.entries.length === 0)
+    problems.push(i18n.t('collections:builderDraft.addAtLeastOnePokeMon'))
   if (problems.length > 0) return problems
   const result = validateCollection(toDefinition(draft))
   return result.ok ? [] : result.errors
@@ -177,13 +190,23 @@ export function draftProblems(draft: CollectionDraft): string[] {
 /** "Shiny · Nature Adamant · OT Chase", for the entries list. */
 export function summarizeEntry(entry: DraftEntry): string {
   return [
-    entry.shiny === 'yes' ? 'Shiny' : entry.shiny === 'no' ? 'Not shiny' : '',
-    ...entry.ribbons.map((ribbon) => `${ribbon} Ribbon`),
-    entry.nature && `Nature ${entry.nature}`,
-    entry.ability && `Ability ${entry.ability}`,
-    entry.move && `Knows ${entry.move}`,
-    entry.ot && `OT ${entry.ot}`,
-    entry.trainerId && `ID ${entry.trainerId}`,
+    entry.shiny === 'yes'
+      ? i18n.t('collections:builderDraft.shiny')
+      : entry.shiny === 'no'
+        ? i18n.t('collections:builderDraft.notShiny')
+        : '',
+    ...entry.ribbons.map((ribbon) =>
+      i18n.t('collections:builderDraft.ribbon', { ribbon: ribbon })
+    ),
+    entry.nature &&
+      i18n.t('collections:builderDraft.nature', { nature: entry.nature }),
+    entry.ability &&
+      i18n.t('collections:builderDraft.ability', { ability: entry.ability }),
+    entry.move &&
+      i18n.t('collections:builderDraft.knows', { move: entry.move }),
+    entry.ot && i18n.t('collections:builderDraft.ot', { ot: entry.ot }),
+    entry.trainerId &&
+      i18n.t('collections:builderDraft.id', { trainerId: entry.trainerId }),
   ]
     .filter(Boolean)
     .join(' · ')

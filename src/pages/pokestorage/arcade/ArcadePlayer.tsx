@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { i18n } from '../../../services/i18n'
+import { useTranslation } from 'react-i18next'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   GbaInputTracker,
   type GbaButton,
@@ -14,7 +16,7 @@ import {
 import { ROSTER, type Gen3GameId } from '../../../services/saveLibrary'
 import type { StorageProvider } from '../../../services/storage'
 import { PageHeader } from '../../hub/PageHeader'
-import { GAME_LABEL } from '../gameDisplay'
+import { GAME_LABEL, getGameLabel } from '../gameDisplay'
 import { storageErrorMessage, useStorageProvider } from '../useStorage'
 import {
   bootSaveFor,
@@ -83,9 +85,15 @@ const PHONE_QUERY =
   '(pointer: coarse) and (max-width: 37.5rem), (pointer: coarse) and (max-height: 37.5rem)'
 
 export function ArcadePlayer() {
+  const { t } = useTranslation(['arcade', 'common'] as const)
+
   const gameId = selectedGame()
-  const gameName = gameId ? `Pokémon ${GAME_LABEL[gameId]}` : 'Arcade'
-  const fileBase = gameId ? `Pokemon ${GAME_LABEL[gameId]}` : 'Arcade'
+  const gameName = gameId
+    ? t('ArcadePlayer.pokeMon', { value1: getGameLabel(gameId) })
+    : t('ArcadePlayer.arcade')
+  const fileBase = gameId
+    ? t('ArcadePlayer.pokemon', { value1: GAME_LABEL[gameId] })
+    : t('ArcadePlayer.arcade')
   const { provider, ready } = useStorageProvider()
   /** The screen alone; fullscreen shows just the game. */
   const screenRef = useRef<HTMLDivElement>(null)
@@ -168,7 +176,10 @@ export function ArcadePlayer() {
   }, [decision.kind])
   const notice =
     destination && provider !== destination && (running || unsynced)
-      ? `You switched to ${provider.label}. This game keeps saving to ${destination.label}.`
+      ? t('ArcadePlayer.youSwitchedToThisGameKeepsSavingTo', {
+          label: provider.label,
+          label2: destination.label,
+        })
       : null
   const effectiveVolume = muted ? 0 : volume / 100
   // Speed and volume can change while mGBA starts; apply the latest ones.
@@ -183,7 +194,12 @@ export function ArcadePlayer() {
   /** Asks before an action that would lose progress; true to proceed. */
   const confirmDiscard = (action: string): boolean =>
     decision.kind === 'leave' ||
-    window.confirm(`${decision.message}\n\n${action}`)
+    window.confirm(
+      t('ArcadePlayer.confirmDiscard', {
+        message: decision.message,
+        action: action,
+      })
+    )
 
   // One sync driver per mounted player. Writes go only to the storage the
   // game started with, through the shared wrapper (cache + change events).
@@ -192,14 +208,24 @@ export function ArcadePlayer() {
       initial: initialSync(null),
       write: async (session, baseline) => {
         const target = destinationRef.current
-        if (!gameId || !target) throw new Error('No storage for this game.')
+        if (!gameId || !target)
+          throw new Error(t('ArcadePlayer.noStorageForThisGame'))
         const current = await target.getSave(gameId)
         if (!equalBytes(current?.bytes ?? null, baseline)) {
-          appendLog(`save index ${session.saveIndex}: Camp changed elsewhere`)
+          appendLog(
+            t('ArcadePlayer.saveIndexCampChangedElsewhere', {
+              saveIndex: session.saveIndex,
+            })
+          )
           return 'conflict'
         }
         await target.putSave(gameId, session.bytes)
-        appendLog(`saved index ${session.saveIndex} to ${target.label}`)
+        appendLog(
+          t('ArcadePlayer.savedIndexTo', {
+            saveIndex: session.saveIndex,
+            label: target.label,
+          })
+        )
         return 'saved'
       },
       onChange: setSync,
@@ -211,7 +237,7 @@ export function ArcadePlayer() {
       if (syncRef.current === driver) syncRef.current = null
     }
     // `appendLog` only writes to the console; `gameId` is fixed per page.
-  }, [gameId])
+  }, [gameId, t])
 
   useEffect(() => {
     if (!gameId || !ready || holdFiles) return
@@ -232,7 +258,16 @@ export function ArcadePlayer() {
         destinationRef.current = null
         setDestination(null)
         appendLog(
-          `${provider.label}: ROM ${storedRom ? 'loaded' : 'missing'}, save ${stored ? `${stored.length} bytes (${boot.kind})` : 'missing'}`
+          t('ArcadePlayer.romSave', {
+            label: provider.label,
+            value2: storedRom ? 'loaded' : 'missing',
+            value3: stored
+              ? t('arcade:ArcadePlayer.bytes', {
+                  length: stored.length,
+                  kind: boot.kind,
+                })
+              : 'missing',
+          })
         )
       })
       .catch((cause) => {
@@ -244,16 +279,16 @@ export function ArcadePlayer() {
     return () => {
       cancelled = true
     }
-  }, [gameId, provider, ready, holdFiles])
+  }, [gameId, provider, ready, holdFiles, t])
 
-  const pause = (reason: string) => {
+  const pause = useCallback((reason: string) => {
     if (!sessionRef.current || pausedRef.current) return
     sessionRef.current.pause()
     inputRef.current?.releaseAll()
     pausedRef.current = true
     setPaused(true)
-    appendLog(`paused: ${reason}`)
-  }
+    appendLog(i18n.t('arcade:ArcadePlayer.paused', { reason: reason }))
+  }, [])
 
   const resume = () => {
     if (!sessionRef.current) return
@@ -265,9 +300,10 @@ export function ArcadePlayer() {
 
   // A provider switch pauses play; it never redirects this session's saves.
   useEffect(() => {
-    if (destination && provider !== destination) pause('storage changed')
+    if (destination && provider !== destination)
+      pause(t('ArcadePlayer.storageChanged'))
     // `pause` reads only refs and state setters, so it is not a dependency.
-  }, [provider, destination])
+  }, [provider, destination, pause, t])
 
   useEffect(() => {
     const visibility = () => {
@@ -297,8 +333,8 @@ export function ArcadePlayer() {
       sessionRef.current = null
       inputRef.current = null
     }
-    // Listeners are installed once; `pause` reads only refs and setters.
-  }, [])
+    // The stable callback reads only refs and state setters.
+  }, [pause])
 
   // Each menu page starts at its first control.
   useEffect(() => {
@@ -320,8 +356,8 @@ export function ArcadePlayer() {
     const snapshot = readSnapshot()
     appendLog(
       snapshot
-        ? `complete save index ${snapshot.saveIndex}`
-        : 'save snapshot incomplete; keeping the previous save'
+        ? t('ArcadePlayer.completeSaveIndex', { saveIndex: snapshot.saveIndex })
+        : t('ArcadePlayer.saveSnapshotIncompleteKeepingThePreviousSave')
     )
     if (snapshot)
       syncRef.current?.dispatch({ type: 'game-saved', save: snapshot })
@@ -345,7 +381,7 @@ export function ArcadePlayer() {
     pausedRef.current = false
     pausedByRef.current = null
     setPaused(false)
-    appendLog('mGBA stopped')
+    appendLog(t('ArcadePlayer.mgbaStopped'))
   }
 
   const importRom = async (input: HTMLInputElement) => {
@@ -360,7 +396,7 @@ export function ArcadePlayer() {
       if (startingRef.current) return
       const identity = identifyArcadeRom(bytes)
       if (!identity) {
-        setError('That file is not a supported Pokémon Gen 3 GBA ROM.')
+        setError(t('ArcadePlayer.thatFileIsNotASupportedPokeMonGen3'))
         return
       }
       if (gameId) {
@@ -372,11 +408,14 @@ export function ArcadePlayer() {
         }
         if (running) {
           // Replacing the cartridge stops the game, so ask like leaving.
-          if (!confirmDiscard('Replace the ROM? The game will stop.')) return
+          if (!confirmDiscard(t('ArcadePlayer.replaceTheRomTheGameWillStop')))
+            return
           endSession()
         } else if (
           rom &&
-          !window.confirm(`Replace the stored ${gameName} ROM?`)
+          !window.confirm(
+            t('ArcadePlayer.replaceTheStoredRom', { gameName: gameName })
+          )
         ) {
           return
         }
@@ -388,7 +427,12 @@ export function ArcadePlayer() {
         }
       }
       setRom(bytes)
-      appendLog(`ROM ${identity.gameCode}, ${bytes.length} bytes`)
+      appendLog(
+        t('ArcadePlayer.romBytes', {
+          gameCode: identity.gameCode,
+          length: bytes.length,
+        })
+      )
     } catch (cause) {
       setError(storageErrorMessage(cause))
     } finally {
@@ -410,7 +454,7 @@ export function ArcadePlayer() {
     fileTaskRef.current = true
     setFileBusy(true)
     try {
-      if (!confirmDiscard('Replace it with this SAV file?')) return
+      if (!confirmDiscard(t('ArcadePlayer.replaceItWithThisSavFile'))) return
       const bytes = new Uint8Array(await file.arrayBuffer())
       if (startingRef.current) return
       const boot = bootSaveFor(bytes)
@@ -428,8 +472,11 @@ export function ArcadePlayer() {
       setDestination(null)
       appendLog(
         boot.kind === 'save'
-          ? `SAV selected, ${bytes.length} bytes, index ${boot.saveIndex}`
-          : 'Blank SAV selected; starting a new game'
+          ? t('ArcadePlayer.savSelectedBytesIndex', {
+              length: bytes.length,
+              saveIndex: boot.saveIndex,
+            })
+          : t('ArcadePlayer.blankSavSelectedStartingANewGame')
       )
     } catch (cause) {
       setError(storageErrorMessage(cause))
@@ -471,7 +518,8 @@ export function ArcadePlayer() {
           }, SAVE_SETTLE_MS)
         },
         onCrash: () => {
-          if (sessionRef.current === session) setError('The emulator crashed.')
+          if (sessionRef.current === session)
+            setError(t('ArcadePlayer.theEmulatorCrashed'))
         },
       })
       if (controller.signal.aborted) {
@@ -492,7 +540,7 @@ export function ArcadePlayer() {
       setRunning(true)
       pausedRef.current = false
       setPaused(false)
-      appendLog('mGBA started')
+      appendLog(t('ArcadePlayer.mgbaStarted'))
     } catch (cause) {
       if (!controller.signal.aborted) {
         setError(cause instanceof Error ? cause.message : String(cause))
@@ -523,7 +571,7 @@ export function ArcadePlayer() {
     }
     // Hold the game still while the question is up.
     if (!pausedRef.current) {
-      pause('restart question')
+      pause(t('ArcadePlayer.restartQuestion'))
       pausedByRef.current = 'restart'
     }
     restartRef.current?.showModal()
@@ -634,16 +682,20 @@ export function ArcadePlayer() {
         return
       case 'mute':
         toggleMute()
-        showFlash(muted ? 'Sound on' : 'Sound off')
+        showFlash(
+          muted
+            ? t('arcade:ArcadePlayer.soundOn')
+            : t('arcade:ArcadePlayer.soundOff')
+        )
         return
       case 'speed': {
         const next = SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length]
         changeSpeed(next)
-        showFlash(`Speed ×${next}`)
+        showFlash(t('arcade:ArcadePlayer.speed', { next: next }))
         return
       }
       case 'guide':
-        showFlash('Game guides are coming soon')
+        showFlash(t('arcade:ArcadePlayer.gameGuidesAreComingSoon'))
         return
       case 'restart':
         restart()
@@ -677,23 +729,23 @@ export function ArcadePlayer() {
   const downloadSave = () => {
     const bytes = (running ? readSnapshot()?.bytes : null) ?? bootBytes
     if (bytes) download(bytes, `${fileBase} (Arcade).sav`)
-    else setError('There is no save yet. Save inside the game first.')
+    else setError(t('ArcadePlayer.thereIsNoSaveYetSaveInsideTheGameFirst'))
   }
   const canDownload = running || bootBytes !== null
 
   const status = !crossOriginIsolated
-    ? 'Unavailable in this browser'
+    ? t('arcade:ArcadePlayer.unavailableInThisBrowser')
     : loadingFiles
-      ? 'Loading…'
+      ? t('common:actions.loading')
       : busy
-        ? 'Starting…'
+        ? t('arcade:ArcadePlayer.starting')
         : gameId && !rom
-          ? 'ROM needed'
+          ? t('arcade:ArcadePlayer.romNeeded')
           : running
             ? paused
-              ? 'Paused'
-              : 'Playing'
-            : 'Ready to play'
+              ? t('arcade:ArcadePlayer.paused2')
+              : t('arcade:ArcadePlayer.playing')
+            : t('arcade:ArcadePlayer.readyToPlay')
 
   const canPlay =
     !!rom &&
@@ -707,7 +759,7 @@ export function ArcadePlayer() {
   const header = (statusText: string) => (
     <>
       <PageHeader
-        page="Arcade"
+        page={t('ArcadePlayer.arcade')}
         gameId={gameId}
         onBack={() => leave()}
         // The Dropbox badge reaches storage settings through the same exit
@@ -728,13 +780,14 @@ export function ArcadePlayer() {
       <div className="camp-zone arcade-zone arcade-player">
         <main className="camp-root">
           <div className="camp-content arcade-cabinet">
-            {header('No game chosen')}
+            {header(t('ArcadePlayer.noGameChosen'))}
             <div className="arcade-messages">
               <p className="arcade-message">
-                Choose Ruby, Sapphire, Emerald, FireRed, or LeafGreen in the
-                Arcade Zone.{' '}
+                {t(
+                  'ArcadePlayer.chooseRubySapphireEmeraldFireredOrLeafgreenInTheArcade'
+                )}{' '}
                 <button type="button" onClick={() => leave()}>
-                  Choose a game
+                  {t('ArcadePlayer.chooseAGame')}
                 </button>
               </p>
             </div>
@@ -746,16 +799,16 @@ export function ArcadePlayer() {
 
   const saveChip =
     sync.status === 'saving' ? (
-      'Saving…'
+      t('common:actions.saving')
     ) : sync.status === 'saved' ? (
-      'Saved!'
+      t('ArcadePlayer.saved')
     ) : sync.status === 'failed' ? (
       <button type="button" onClick={retrySave}>
-        Could not save — Try again
+        {t('ArcadePlayer.couldNotSaveTryAgain')}
       </button>
     ) : sync.status === 'conflict' ? (
       <button type="button" onClick={() => openMenu('advanced')}>
-        Could not save — See menu
+        {t('ArcadePlayer.couldNotSaveSeeMenu')}
       </button>
     ) : null
 
@@ -768,19 +821,21 @@ export function ArcadePlayer() {
           <div className="arcade-messages">
             {!crossOriginIsolated && (
               <p className="arcade-message">
-                This browser could not enable the isolation the emulator needs.
+                {t(
+                  'ArcadePlayer.thisBrowserCouldNotEnableTheIsolationTheEmulatorNeeds'
+                )}
               </p>
             )}
             {notice && <p className="arcade-message">{notice}</p>}
             {!loadingFiles && !rom && (
               <p className="arcade-message">
-                No {gameName} ROM in Camp yet.{' '}
+                {t('ArcadePlayer.noRomInCamp', { game: gameName })}{' '}
                 <button
                   type="button"
                   disabled={filesLocked}
                   onClick={() => romInputRef.current?.click()}
                 >
-                  Insert ROM
+                  {t('ArcadePlayer.insertRom')}
                 </button>
               </p>
             )}
@@ -809,12 +864,12 @@ export function ArcadePlayer() {
                         onClick={() => (running ? resume() : void start())}
                       >
                         {running
-                          ? '▶ Resume'
+                          ? t('ArcadePlayer.resume')
                           : busy
-                            ? 'Starting…'
+                            ? t('ArcadePlayer.starting')
                             : bootBytes !== save
-                              ? '▶ Continue'
-                              : '▶ Play'}
+                              ? t('ArcadePlayer.continue')
+                              : t('ArcadePlayer.play')}
                       </button>
                     )}
                   </div>

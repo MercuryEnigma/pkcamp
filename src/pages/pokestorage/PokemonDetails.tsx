@@ -1,3 +1,6 @@
+import { useTranslation } from 'react-i18next'
+import { natureName } from '../../services/i18n/pokemonTerms'
+import { i18n } from '../../services/i18n'
 import {
   natureStatEffect,
   type PokemonNode,
@@ -38,13 +41,17 @@ export function PokemonDetailsHeader({
 }: {
   pokemon: PokemonNode | null
 }) {
+  const { t } = useTranslation(['pokemon-details', 'common'] as const)
+
   return (
     <div className="camp-details-view-header">
       <span className="camp-details-view-end" aria-hidden="true" />
       <span
         className="camp-details-view-shiny"
-        title={pokemon?.shiny ? 'Shiny' : undefined}
-        aria-label={pokemon?.shiny ? 'Shiny Pokémon' : undefined}
+        title={pokemon?.shiny ? t('PokemonDetails.shiny') : undefined}
+        aria-label={
+          pokemon?.shiny ? t('PokemonDetails.shinyPokeMon') : undefined
+        }
       >
         {pokemon?.shiny && (
           <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
@@ -53,18 +60,20 @@ export function PokemonDetailsHeader({
         )}
       </span>
       <h2 className="camp-details-view-name">
-        {pokemon ? pokemon.nickname || speciesName(pokemon.species) : 'Pokémon'}
+        {pokemon
+          ? pokemon.nickname || speciesName(pokemon.species)
+          : t('PokemonDetails.pokeMon')}
       </h2>
       <span className="camp-details-view-level">
         {pokemon && (
           <>
-            <span>Lv. {pokemon.level}</span>
+            <span>{t('PokemonDetails.lv', { level: pokemon.level })}</span>
             <span
               className="camp-details-view-gender"
               data-gender={pokemon.gender}
               aria-label={
                 pokemon.gender === 'Genderless'
-                  ? 'Genderless or unknown'
+                  ? t('PokemonDetails.genderlessOrUnknown')
                   : pokemon.gender
               }
             >
@@ -122,23 +131,29 @@ function IdentityBlock({
 }
 
 function Overview({ pokemon }: { pokemon: PokemonNode }) {
+  const { t } = useTranslation(['pokemon-details', 'common'] as const)
+
   return (
     <>
       <div className="camp-details-pair camp-details-pair--three">
         <div className="camp-details-field">
-          <span className="camp-details-label">Original Trainer</span>
+          <span className="camp-details-label">
+            {t('PokemonDetails.originalTrainer')}
+          </span>
           <span className="camp-details-value">
             {pokemon.originalTrainerName || NOT_YET_AVAILABLE}
           </span>
         </div>
         <div className="camp-details-field">
-          <span className="camp-details-label">Trainer ID</span>
+          <span className="camp-details-label">
+            {t('PokemonDetails.trainerId')}
+          </span>
           <span className="camp-details-value">
             {pokemon.originalTrainerId}
           </span>
         </div>
         <div className="camp-details-field">
-          <span className="camp-details-label">SID</span>
+          <span className="camp-details-label">{t('PokemonDetails.sid')}</span>
           <span className="camp-details-value">
             {pokemon.originalTrainerSecretId}
           </span>
@@ -147,9 +162,13 @@ function Overview({ pokemon }: { pokemon: PokemonNode }) {
 
       <div className="camp-details-section camp-details-ribbons">
         <div className="camp-details-field">
-          <span className="camp-details-label">Ribbons</span>
+          <span className="camp-details-label">
+            {t('PokemonDetails.ribbons')}
+          </span>
           {pokemon.ribbons.length === 0 ? (
-            <span className="camp-details-value">No ribbons</span>
+            <span className="camp-details-value">
+              {t('PokemonDetails.noRibbons')}
+            </span>
           ) : (
             <ul className="camp-details-ribbon-list">
               {pokemon.ribbons.map((ribbon) => (
@@ -174,39 +193,51 @@ function Overview({ pokemon }: { pokemon: PokemonNode }) {
 }
 
 function MovesAndTraits({ pokemon }: { pokemon: PokemonNode }) {
+  const { t } = useTranslation(['pokemon-details', 'common'] as const)
+
   return (
     <>
       <div className="camp-details-pair camp-details-pair--three">
         <div className="camp-details-field">
-          <span className="camp-details-label">Ability</span>
+          <span className="camp-details-label">
+            {t('PokemonDetails.ability')}
+          </span>
           <span className="camp-details-value">
             {pokemon.ability?.name ?? NOT_YET_AVAILABLE}
           </span>
         </div>
         <div className="camp-details-field">
-          <span className="camp-details-label">Held Item</span>
+          <span className="camp-details-label">
+            {t('PokemonDetails.heldItem')}
+          </span>
           <span className="camp-details-value">
-            {pokemon.heldItemName || 'No held item'}
+            {pokemon.heldItemName || t('PokemonDetails.noHeldItem')}
           </span>
         </div>
         <div className="camp-details-field">
-          <span className="camp-details-label">Nature</span>
+          <span className="camp-details-label">
+            {t('PokemonDetails.nature')}
+          </span>
           <span className="camp-details-value">
-            {pokemon.nature?.name ?? NOT_YET_AVAILABLE}
+            {natureName(pokemon.nature) ?? NOT_YET_AVAILABLE}
           </span>
         </div>
       </div>
       <div className="camp-details-section camp-details-moves">
-        <p className="camp-details-section-title">Moves</p>
+        <p className="camp-details-section-title">
+          {t('PokemonDetails.moves')}
+        </p>
         {pokemon.moves.every((move) => move === null) ? (
-          <span>No moves</span>
+          <span>{t('PokemonDetails.noMoves')}</span>
         ) : (
           <ul className="camp-details-move-list">
             {pokemon.moves.map((move, index) =>
               move ? (
                 <li key={index}>
                   <span className="camp-details-move-name">{move.name}</span>
-                  <span className="camp-details-move-pp">PP {move.pp}</span>
+                  <span className="camp-details-move-pp">
+                    {t('PokemonDetails.pp', { pp: move.pp })}
+                  </span>
                 </li>
               ) : (
                 <li key={index} className="camp-card-sub">
@@ -244,27 +275,38 @@ function StatRow({
   )
 }
 
-const STATS: ReadonlyArray<{ label: string; statKey: StatKey }> = [
-  { label: 'HP', statKey: 'hp' },
-  { label: 'Attack', statKey: 'attack' },
-  { label: 'Defense', statKey: 'defense' },
-  { label: 'Sp. Atk', statKey: 'specialAttack' },
-  { label: 'Sp. Def', statKey: 'specialDefense' },
-  { label: 'Speed', statKey: 'speed' },
+const getStats = (): ReadonlyArray<{ label: string; statKey: StatKey }> => [
+  { label: i18n.t('pokemon-details:PokemonDetails.hp'), statKey: 'hp' },
+  { label: i18n.t('pokemon-details:PokemonDetails.attack'), statKey: 'attack' },
+  {
+    label: i18n.t('pokemon-details:PokemonDetails.defense'),
+    statKey: 'defense',
+  },
+  {
+    label: i18n.t('pokemon-details:PokemonDetails.spAtk'),
+    statKey: 'specialAttack',
+  },
+  {
+    label: i18n.t('pokemon-details:PokemonDetails.spDef'),
+    statKey: 'specialDefense',
+  },
+  { label: i18n.t('pokemon-details:PokemonDetails.speed'), statKey: 'speed' },
 ]
 
 function StatsAndTraining({ pokemon }: { pokemon: PokemonNode }) {
+  const { t } = useTranslation(['pokemon-details', 'common'] as const)
+
   return (
     <div className="camp-details-section camp-details-stats-section">
-      <p className="camp-details-section-title">Stats</p>
+      <p className="camp-details-section-title">{t('PokemonDetails.stats')}</p>
       <div className="camp-details-stats">
         <div className="camp-details-stats-header">
           <span />
-          <span>Stat</span>
-          <span>IV</span>
-          <span>EV</span>
+          <span>{t('PokemonDetails.stat')}</span>
+          <span>{t('PokemonDetails.iv')}</span>
+          <span>{t('PokemonDetails.ev')}</span>
         </div>
-        {STATS.map(({ label, statKey }) => (
+        {getStats().map(({ label, statKey }) => (
           <StatRow
             key={statKey}
             label={label}

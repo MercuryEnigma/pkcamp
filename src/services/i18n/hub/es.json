@@ -1,0 +1,28 @@
+{
+  "DropboxMenu": {
+    "dropbox": "Dropbox",
+    "dropboxConnectedYourSavesSettingsAndCollectionsAreSynced": "Dropbox conectado. Tus partidas, ajustes y colecciones están sincronizados.",
+    "signInToDropboxToUseYourSavesSettingsAnd": "Inicia sesión en Dropbox para usar tus partidas, ajustes y colecciones en varios dispositivos o continúa con el almacenamiento del navegador.",
+    "signInToDropbox": "Iniciar sesión en Dropbox"
+  },
+  "SourceLink": {
+    "pkcampSourceCodeOnGithubOpensInANewTab": "Código fuente de pkCamp en GitHub (se abre en una pestaña nueva)",
+    "sourceCodeOnGithub": "Código fuente en GitHub"
+  },
+  "WorldMap": {
+    "pkcamp": "pkCamp",
+    "pkcampAreas": "Zonas de pkCamp",
+    "arcade": "Arcade",
+    "playYourAdventure": "Juega tu aventura",
+    "selectAGameFirst": "Selecciona un juego primero",
+    "camp": "Campamento",
+    "moveAndTradePokeMon": "Mueve e intercambia Pokémon",
+    "lab": "Laboratorio",
+    "collectionsAndResearch": "Colecciones e investigación",
+    "changeGame": "Cambiar de juego"
+  },
+  "LanguageMenu": {
+    "language": "Idioma",
+    "displayLanguage": "Idioma de la interfaz"
+  }
+}

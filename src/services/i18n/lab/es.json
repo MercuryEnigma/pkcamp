@@ -1,0 +1,70 @@
+{
+  "LabMain": {
+    "transporter": "Transportador",
+    "researchTools": "Herramientas de investigación",
+    "mysteryGifts": "Regalos misteriosos",
+    "cartridgeSaves": "Partidas de cartuchos",
+    "romBiosDumps": "Extracción de ROM / BIOS",
+    "patchNotes": "Notas de actualización"
+  },
+  "LabMenu": {
+    "lab": "Laboratorio",
+    "pc": "PC",
+    "pokeDexCollectionsAndResearchProgress": "Colecciones de la Pokédex y progreso de investigación",
+    "transporter": "Transportador",
+    "moveGen12PokeMonIntoGen3": "Transfiere Pokémon de las generaciones 1 y 2 a la generación 3",
+    "researchTools": "Herramientas de investigación",
+    "giftsCartridgeSavesAndDumps": "Regalos, partidas de cartuchos y extracción de datos",
+    "backupsAppearanceDataAndHardware": "Copias de seguridad, apariencia, datos y dispositivos",
+    "patchNotes": "Notas de actualización"
+  },
+  "PokemonView": {
+    "species": "Especie",
+    "form": "Forma",
+    "gender": "Género",
+    "shiny": "Variocolor",
+    "egg": "Huevo",
+    "level": "Nivel",
+    "pokeMon": "Pokémon",
+    "registered": "Registrado",
+    "requirements": "Requisitos",
+    "collectionRequirement": "Requisito de la colección",
+    "movesTraits": "Movimientos y rasgos",
+    "yourMatches": "Tus coincidencias",
+    "currentlyFound": "Encontrados actualmente ({{length}})",
+    "youDonTHaveThisPokeMonYet": "Aún no tienes este Pokémon.",
+    "lv": " Nv. {{level}}",
+    "campSiteSlot": "Parcela {{value1}} · Espacio {{value2}}",
+    "ot": "EO {{originalTrainerName}} · {{originalTrainerId}}",
+    "thisMatchBelongsToAnotherGame": "Esta coincidencia pertenece a otro juego.",
+    "openSite": "Abrir parcela",
+    "openCabin": "Abrir cabaña",
+    "dexNumber": "#{{value1}} "
+  },
+  "ResearchTools": {
+    "researchTools": "Herramientas de investigación",
+    "mysteryGifts": "Regalos misteriosos",
+    "sendWonderCardsToAGbaOrTheSwitch": "Envía tarjetas misteriosas a una GBA o a la Switch.",
+    "cartridgeSaves": "Partidas de cartuchos",
+    "backUpAndRestoreGbaCartridgeSaves": "Crea copias de seguridad y restaura partidas de cartuchos de GBA.",
+    "romBiosDumps": "Extracción de ROM / BIOS",
+    "downloadCartridgeRomsAndTheGbaBios": "Descarga las ROM de los cartuchos y la BIOS de la GBA."
+  },
+  "ToolPage": {
+    "choices": "Opciones",
+    "task": "Tarea"
+  },
+  "useLabData": {
+    "isNotValidJson": "{{name}} no es un archivo JSON válido: {{reason}}",
+    "idIsABuiltInCollectionAndCannotBeReplaced": "id: «{{id}}» es una colección integrada y no se puede reemplazar",
+    "replaceTheUploadedCollection": "¿Reemplazar la colección subida «{{id}}»?",
+    "wasNotSaved": "No se ha guardado {{name}}: {{value2}}",
+    "removeAndItsSavedHistoryThisCannotBeUndone": "¿Eliminar «{{name}}» y su historial guardado? Esta acción no se puede deshacer.",
+    "notRemoved": "No se ha eliminado: {{value1}}",
+    "clearTheSavedHistoryOfEntriesNoLongerInA": "¿Borrar el historial guardado de «{{name}}»? Las entradas que ya no estén en una cabaña o parcela volverán a figurar como «Sin registrar».",
+    "notCleared": "No se ha borrado: {{value1}}",
+    "deleteAllUploadedCollectionsAndClearTheSavedHistoryOf": "¿Eliminar todas las colecciones subidas y borrar el historial guardado de todas las colecciones? Esta acción no se puede deshacer.",
+    "notDeleted": "No se ha eliminado: {{f}}",
+    "collectionFailure": "{{name}}: {{value2}}"
+  }
+}

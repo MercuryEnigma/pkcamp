@@ -1,5 +1,6 @@
+import { useTranslation } from 'react-i18next'
 import type { Gen3GameId } from '../../services/saveLibrary'
-import { GAME_LABEL } from '../pokestorage/gameDisplay'
+import { getGameLabel } from '../pokestorage/gameDisplay'
 import cartridgeOutline from '../../assets/gba-cartridge.png'
 import './gameCartridge.css'
 
@@ -18,6 +19,8 @@ export function GameCartridge({
   onSelect: () => void
   onRom?: () => void
 }) {
+  const { t } = useTranslation(['start', 'common'] as const)
+
   const RomControl = onRom ? 'button' : 'span'
   return (
     <article className="game-cartridge" data-version={gameId}>
@@ -27,9 +30,12 @@ export function GameCartridge({
           type="button"
           className="game-cartridge-main"
           onClick={onSelect}
-          aria-label={`${GAME_LABEL[gameId]}: ${saveStatus}`}
+          aria-label={t('GameCartridge.saveStatusLabel', {
+            value1: getGameLabel(gameId),
+            saveStatus: saveStatus,
+          })}
         >
-          <span className="game-cartridge-name">{GAME_LABEL[gameId]}</span>
+          <span className="game-cartridge-name">{getGameLabel(gameId)}</span>
           <span className="game-cartridge-save">{saveStatus}</span>
         </button>
         <RomControl
@@ -38,7 +44,10 @@ export function GameCartridge({
           data-ready={romReady}
           aria-label={
             onRom
-              ? `${GAME_LABEL[gameId]}: ${romStatus}. Manage ROM.`
+              ? t('GameCartridge.manageRom', {
+                  value1: getGameLabel(gameId),
+                  romStatus: romStatus,
+                })
               : undefined
           }
         >

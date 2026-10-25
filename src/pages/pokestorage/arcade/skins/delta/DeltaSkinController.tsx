@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import {
   useEffect,
   useLayoutEffect,
@@ -57,6 +58,8 @@ export function DeltaSkinController({
   onButtonUp,
   onAction,
 }: DeltaSkinControllerProps) {
+  const { t } = useTranslation(['arcade', 'common'] as const)
+
   const areaRef = useRef<HTMLDivElement>(null)
   const boxRef = useRef<HTMLDivElement>(null)
   const [transform, setTransform] = useState<SkinTransform | null>(null)
@@ -204,7 +207,7 @@ export function DeltaSkinController({
       ref={areaRef}
       className="delta-skin"
       role="group"
-      aria-label="GBA controls"
+      aria-label={t('DeltaSkinController.gbaControls')}
     >
       {box && (
         <div

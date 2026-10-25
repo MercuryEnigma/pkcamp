@@ -3,8 +3,9 @@
 ## Lodges and save inspection
 
 - [x] Model fixed game identifiers through Gen 9; open the Gen 3 GBA Lodge only.
-- [x] Open GBA directly from Camp Lodges and return to Camp activities; retain the lodge chooser.
+- [x] Select the game once on Start and open Camp focused on it (`?game=`); remove the lodge, generation, and activity pickers.
 - [x] Restore the selected game's committed browser/Dropbox save.
+- [x] Load the selected save once into the shared `activeGame` service; zones read its in-memory copy instead of refetching.
 - [x] Show positional party/box grids, details, and sprite fallbacks.
 - [x] Stage manual save uploads until explicit Save Game.
 - [x] Catch invalid files and reject mismatched Cabin versions.
@@ -16,6 +17,8 @@
 ## Working copies and Camp Sites
 
 - [x] Add View, Move, and Group with read-only parties.
+- [x] Split Camp into `move`, `campsite`, and `trade` route modes, including no-game Camp Site moves.
+- [x] Run Camp edits on `activeGame` drafts.
 - [x] Support positional box/Camp moves, swaps, and rectangular groups.
 - [x] Preserve empty positions and reject occupied group destinations.
 - [x] Configure 30-slot Camp Sites without shrinking past occupied positions.
@@ -46,6 +49,8 @@
 - [x] Revert recorded PkCamp writes independently of physical-device state.
 - [x] Support GBA cartridge read/write with matching-game validation and pre-write backup.
 - [x] Protect active trades/transfers with the application navigation registry.
+- [x] Move trading into Camp `mode=trade` and remove the Lab Trade Table.
+- [ ] Route trades through `activeGame` and the shared `device` facade instead of direct storage writes.
 - [x] Share cartridge task instructions, error/restore messages, and cartridge metadata capture across Camp and Lab.
 - [x] Track the production GB-Link placeholder outside personal fixtures.
 - [x] Verify GB-Link, ESP32, cartridge backup, and GBA ↔ Switch relay on real hardware from the dev server.
@@ -68,17 +73,20 @@
 - [x] Open a source Cabin box/Camp Site and return to the same Lab entry.
 - [x] Reuse trade/settings behavior in both zones and suspend hidden Lab guards.
 - [ ] Define emulator save identity, lifecycle, and handoff contracts.
-- [ ] Send a selected save to Arcade/Safari/Pelago and stage returned data explicitly.
+- [x] Open the selected game in Arcade and sync complete in-game saves back through the shared provider.
+- [ ] Send a selected save to Safari/Pelago and stage returned data explicitly.
 - [ ] Show storage/device provenance alongside source locations.
 
 ## Verification and organization
 
 - [x] Prepare pinned-source WASM dependencies before installation in deployment configuration.
 - [x] Verify the updated workflow from a clean GitHub Actions checkout.
-- [ ] Separate Camp/Lab pages and extract shared features, UI, hooks, and styles.
+- [x] Serve Hub, Camp, and Lab as separate static entries with validated URL routes and redirects.
+- [ ] Extract shared features, UI, hooks, and styles.
 - [x] Remove unused Camp splash/wrapper, callback plumbing, and stale styles.
-- [ ] Consolidate settings/trade layouts.
+- [x] Merge Camp Settings into the site-wide Lab Settings and build Camp on the shared page frame.
 - [x] Preserve i18n in the site-wide `services/i18n/` service.
-- [ ] Adopt translation keys in screens separately.
+- [x] Adopt translation keys in screens with per-area catalogs.
+- [x] Add English and Spanish (Spain) catalogs with language selection.
 - [x] Credit sprite/portrait sources and artists beside displayed artwork.
 - [ ] Finish privacy and browser/device compatibility reviews.

@@ -1,3 +1,4 @@
+import { i18n } from '../../../services/i18n'
 import type { Gen3GameId } from '../../../services/saveLibrary'
 import type { PokemonNode } from '../../../services/pkhex'
 import type { CampPosition } from '../../../services/storage'
@@ -93,11 +94,11 @@ export function registeredCount(result: { owned: number; seen: number }) {
   return result.owned + result.seen
 }
 
-export const STATUS_LABEL: Record<EntryStatus, string> = {
-  owned: 'Owned',
-  seen: 'Seen',
-  unseen: 'Unseen',
-}
+export const getStatusLabel = (): Record<EntryStatus, string> => ({
+  owned: i18n.t('collections:collectionTypes.owned'),
+  seen: i18n.t('collections:collectionTypes.seen'),
+  unseen: i18n.t('collections:collectionTypes.unseen'),
+})
 
 /** The Gen 3 Camp Sites' scan, with a digest of where each Pokémon sits. */
 export type CampScanStatus =

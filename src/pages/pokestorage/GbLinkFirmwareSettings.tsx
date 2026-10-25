@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
 import { gbLinkTradeDevice } from '../../services/tradeDevice'
 import {
@@ -9,6 +10,8 @@ import {
 import { useNavigationGuard } from './navigationGuard'
 
 export function GbLinkFirmwareSettings() {
+  const { t } = useTranslation(['settings', 'common'] as const)
+
   const [current, setCurrent] = useState<string | null>(
     gbLinkTradeDevice.knownFirmwareVersion
   )
@@ -16,7 +19,7 @@ export function GbLinkFirmwareSettings() {
   const [busy, setBusy] = useState(false)
   const [next, setNext] = useState<'check' | 'select' | 'verify'>('check')
   const [message, setMessage] = useState(
-    'Plug in GB-Link, then press Check & update.'
+    t('GbLinkFirmwareSettings.plugInGbLinkThenPressCheckUpdate')
   )
   const updater = useRef<GbLinkFirmwareUpdater | null>(null)
   const mounted = useRef(false)
@@ -26,7 +29,7 @@ export function GbLinkFirmwareSettings() {
   const usbSupported = Boolean(browserUpdateUsb())
   useNavigationGuard(
     busy || next !== 'check',
-    'GB-Link is updating. Keep this page open and the adapter plugged in. Leave?'
+    t('GbLinkFirmwareSettings.gbLinkIsUpdatingKeepThisPageOpenAndThe')
   )
 
   useEffect(() => {
@@ -39,7 +42,9 @@ export function GbLinkFirmwareSettings() {
       .catch(() => {
         if (mounted.current && !touched.current)
           setMessage(
-            'Could not check the latest version. Press Check & update to try again.'
+            t(
+              'GbLinkFirmwareSettings.couldNotCheckTheLatestVersionPressCheckUpdateTo'
+            )
           )
       })
     return () => {
@@ -50,7 +55,7 @@ export function GbLinkFirmwareSettings() {
       // a connection opened by another tool after we leave.
       if (touched.current) void gbLinkTradeDevice.disconnect().catch(() => {})
     }
-  }, [])
+  }, [t])
 
   async function update() {
     if (running.current || gbLinkTradeDevice.state === 'trading') return
@@ -79,7 +84,9 @@ export function GbLinkFirmwareSettings() {
         setMessage(
           cause instanceof Error
             ? cause.message
-            : 'Update failed. Keep GB-Link connected and try again.'
+            : t(
+                'GbLinkFirmwareSettings.updateFailedKeepGbLinkConnectedAndTryAgain'
+              )
         )
     } finally {
       running.current = false
@@ -93,15 +100,20 @@ export function GbLinkFirmwareSettings() {
 
   return (
     <section className="camp-settings-section">
-      <h2>GB-Link firmware</h2>
+      <h2>{t('GbLinkFirmwareSettings.gbLinkFirmware')}</h2>
       <p>
-        <strong>Current version:</strong> {current ?? 'Connect to check'}
+        <strong>{t('GbLinkFirmwareSettings.currentVersion')}</strong>{' '}
+        {current ?? t('GbLinkFirmwareSettings.connectToCheck')}
       </p>
       <p>
-        <strong>Latest available:</strong>{' '}
+        <strong>{t('GbLinkFirmwareSettings.latestAvailable')}</strong>{' '}
         {latest
-          ? `${latest.version}${latest.beta ? ' (beta)' : ''}`
-          : 'Not checked'}
+          ? latest.beta
+            ? t('GbLinkFirmwareSettings.betaVersion', {
+                version: latest.version,
+              })
+            : latest.version
+          : t('GbLinkFirmwareSettings.notChecked')}
       </p>
       <button
         type="button"
@@ -112,16 +124,18 @@ export function GbLinkFirmwareSettings() {
         onClick={() => void update()}
       >
         {busy
-          ? 'Please wait…'
+          ? t('GbLinkFirmwareSettings.pleaseWait')
           : next === 'select'
-            ? 'Select GB-Link to finish update'
+            ? t('GbLinkFirmwareSettings.selectGbLinkToFinishUpdate')
             : next === 'verify'
-              ? 'Reconnect to finish'
-              : 'Check & update'}
+              ? t('GbLinkFirmwareSettings.reconnectToFinish')
+              : t('GbLinkFirmwareSettings.checkUpdate')}
       </button>
       {!usbSupported && (
         <p className="camp-status">
-          Open this page in Chrome or Edge to update automatically.
+          {t(
+            'GbLinkFirmwareSettings.openThisPageInChromeOrEdgeToUpdateAutomatically'
+          )}
         </p>
       )}
       <p className="camp-status" role="status">

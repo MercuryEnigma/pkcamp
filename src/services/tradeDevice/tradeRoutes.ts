@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import type { PokemonSaveAdapter } from '../pkhex'
 import type { Gen3GameId } from '../saveLibrary'
 import type { Esp32TradeDevice } from './esp32TradeDevice.ts'
@@ -95,7 +96,9 @@ export async function runTrade(
 ): Promise<TradeWrite[]> {
   const availability = tradeAvailability(left, right)
   if (availability === 'blocked') {
-    throw new Error('Those two sources cannot trade with each other.')
+    throw new Error(
+      i18n.t('services:tradeRoutes.thoseTwoSourcesCannotTradeWithEachOther')
+    )
   }
   signal.throwIfAborted()
   const devices = options.devices ?? defaultDevices()
@@ -134,7 +137,9 @@ export async function runTrade(
     // Switch rooms need two Pokémon; the companion is never offered.
     const companion = await companionOf(devices, options.adapter, local, pk3)
     if (!companion) {
-      throw new Error('Two Pokémon are required to enter a Switch trade.')
+      throw new Error(
+        i18n.t('services:tradeRoutes.twoPokeMonAreRequiredToEnterASwitchTrade')
+      )
     }
     const result = await devices.esp32.trade({
       party: [pk3, companion, null, null, null, null],
@@ -146,7 +151,9 @@ export async function runTrade(
       (trade) => trade.slot === 0
     )?.received
     if (!received)
-      throw new Error('The room closed without completing a trade.')
+      throw new Error(
+        i18n.t('services:tradeRoutes.theRoomClosedWithoutCompletingATrade')
+      )
     return write(received)
   }
 
@@ -169,7 +176,7 @@ async function runLink(
 ): Promise<TradeWrite[]> {
   const gba = left.device === 'gb-link' ? left : right
   if (gba.device !== 'gb-link' || !gba.gbaGame) {
-    throw new Error('Choose the game on the GBA.')
+    throw new Error(i18n.t('services:tradeRoutes.chooseTheGameOnTheGba'))
   }
   const version = await devices.gbLink.firmwareVersion()
   if (
@@ -179,7 +186,9 @@ async function runLink(
     throw new TradeDeviceError(
       'gb-link',
       'unsupported',
-      `GBA ↔ Switch needs GB-Link firmware ${MIN_GBA_SWITCH_FIRMWARE} or newer.`
+      i18n.t('services:tradeRoutes.gbaSwitchNeedsGbLinkFirmwareOrNewer', {
+        MIN_GBA_SWITCH_FIRMWARE: MIN_GBA_SWITCH_FIRMWARE,
+      })
     )
   }
   const lease = await devices.gbLink.linkAdapter(signal)
@@ -215,7 +224,8 @@ function defaultDevices(): TradeDevices {
 }
 
 function selectedPk3(side: LocalSide): Uint8Array {
-  if (!side.slot) throw new Error('Select one Pokémon first.')
+  if (!side.slot)
+    throw new Error(i18n.t('services:tradeRoutes.selectOnePokeMonFirst'))
   return side.slot.pk3.slice()
 }
 

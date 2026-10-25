@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import { OptionGroup } from '../../hub/OptionGroup'
 import { Panel } from '../../hub/Panel'
@@ -25,6 +26,8 @@ export function ToolPage<T extends string>({
   choices: ReactNode
   task: ReactNode
 }) {
+  const { t } = useTranslation(['lab', 'common'] as const)
+
   return (
     <div className="tool-page">
       <OptionGroup
@@ -35,8 +38,8 @@ export function ToolPage<T extends string>({
         disabled={disabled}
       />
       <div className="tool-columns">
-        <Panel label="Choices">{choices}</Panel>
-        <Panel label="Task">{task}</Panel>
+        <Panel label={t('ToolPage.choices')}>{choices}</Panel>
+        <Panel label={t('ToolPage.task')}>{task}</Panel>
       </div>
     </div>
   )

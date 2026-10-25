@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import { delay, LinkTimeoutError, type GbLinkWords } from './gbLinkWords.ts'
 
 // Port of GB-Link Cart Doctor's web/multiboot.js (GPL-3.0); see
@@ -48,7 +49,8 @@ export async function multiboot(
   signal: AbortSignal,
   onProgress?: (done: number, total: number) => void
 ): Promise<void> {
-  if (rom.length > MAX_ROM_BYTES) throw new Error('Multiboot ROM is too large.')
+  if (rom.length > MAX_ROM_BYTES)
+    throw new Error(i18n.t('services:multiboot.multibootRomIsTooLarge'))
   const size = (rom.length + 0x0f) & ~0x0f
   const data = new Uint8Array(size + 0x10)
   data.set(rom)
@@ -65,7 +67,9 @@ export async function multiboot(
     }
     if (reply >>> 16 === 0x7202) break
     if (Date.now() > deadline) {
-      throw new Error('The GBA did not start multiboot. Try again.')
+      throw new Error(
+        i18n.t('services:multiboot.theGbaDidNotStartMultibootTryAgain')
+      )
     }
     await delay(10, signal)
   }
@@ -79,7 +83,7 @@ export async function multiboot(
   await link.exchange([0x6200, 0x6202, 0x63d1])
   const token = await link.exchangeOne(0x63d1)
   if (token >>> 24 !== 0x73)
-    throw new Error('The GBA multiboot handshake failed.')
+    throw new Error(i18n.t('services:multiboot.theGbaMultibootHandshakeFailed'))
 
   let crcA = (token >>> 16) & 0xff
   let seed = (0xffff00d1 | (crcA << 8)) >>> 0
@@ -103,7 +107,9 @@ export async function multiboot(
     replies.forEach((reply, index) => {
       const at = offset + index * 4
       if (reply >>> 16 !== (at & 0xffff)) {
-        throw new Error('The multiboot transfer was corrupted. Try again.')
+        throw new Error(
+          i18n.t('services:multiboot.theMultibootTransferWasCorruptedTryAgain')
+        )
       }
     })
     offset += count * 4
@@ -115,7 +121,9 @@ export async function multiboot(
   const ackDeadline = Date.now() + 10_000
   while ((await link.exchangeOne(0x0065)) >>> 16 !== 0x0075) {
     if (Date.now() > ackDeadline) {
-      throw new Error('The GBA did not confirm the multiboot transfer.')
+      throw new Error(
+        i18n.t('services:multiboot.theGbaDidNotConfirmTheMultibootTransfer')
+      )
     }
     await delay(10, signal)
   }

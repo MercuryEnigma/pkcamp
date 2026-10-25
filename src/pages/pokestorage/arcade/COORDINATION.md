@@ -10,7 +10,7 @@ remains in `arcadeSync.ts`.
 
 Current requirements and outstanding device/deployment checks are tracked in
 [the plan](../../../../docs/ARCADE_ZONE_PLAN.md),
-[the roadmap](../../../../docs/ARCADE_ZONE_ROADMAP.md), and
+[the site roadmap](../../../../ROADMAP.md#arcade-zone), and
 [runtime evidence](../../../../docs/ARCADE_RUNTIME.md).
 
 Do not commit private ROMs, saves, or browser-generated output.

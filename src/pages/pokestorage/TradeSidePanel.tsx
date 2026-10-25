@@ -1,3 +1,5 @@
+import { useTranslation, Trans } from 'react-i18next'
+import { i18n } from '../../services/i18n'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigationGuard } from './navigationGuard'
 import type { Gen3GameId } from '../../services/saveLibrary'
@@ -10,7 +12,7 @@ import {
   tradeSideKey,
   type TradeSide,
 } from '../../services/tradeDevice'
-import { GAME_LABEL } from './gameDisplay'
+import { getGameLabel } from './gameDisplay'
 import {
   describeError,
   firmwareTooOld,
@@ -37,14 +39,25 @@ const SAVE_IDS: readonly Gen3GameId[] = [
 ]
 
 /** Selectable sources. Selections are added once a Pokémon is picked. */
-const SOURCE_OPTIONS: readonly { label: string; side: TradeSide }[] = [
+const getSourceOptions = (): readonly { label: string; side: TradeSide }[] => [
   ...SAVE_IDS.map((gameId) => ({
-    label: `${GAME_LABEL[gameId]} backup`,
+    label: i18n.t('trade:TradeSidePanel.backup', {
+      value1: getGameLabel(gameId),
+    }),
     side: { device: 'save-backup', gameId } as TradeSide,
   })),
-  { label: 'Camp Sites', side: { device: 'camp-site' } },
-  { label: 'Game Boy Advance via GB-Link', side: { device: 'gb-link' } },
-  { label: 'Switch via ESP32', side: { device: 'esp32' } },
+  {
+    label: i18n.t('trade:TradeSidePanel.campSites'),
+    side: { device: 'camp-site' },
+  },
+  {
+    label: i18n.t('trade:TradeSidePanel.gameBoyAdvanceViaGbLink'),
+    side: { device: 'gb-link' },
+  },
+  {
+    label: i18n.t('trade:TradeSidePanel.switchViaEsp32'),
+    side: { device: 'esp32' },
+  },
 ]
 
 /** Connection and setup status for a hardware side. No Pokémon is chosen here. */
@@ -70,12 +83,17 @@ function DevicePanel({
   onChange: () => void
   onMessage: (message: string) => void
 }) {
+  const { t } = useTranslation(['trade', 'common'] as const)
+
   const isGba = kind === 'gb-link'
   const device = isGba ? gbLinkTradeDevice : esp32TradeDevice
   const setKeysReady = onKeysReady
   const [working, setWorking] = useState(false)
   const lifetime = useRef<AbortController | null>(null)
-  useNavigationGuard(working, 'Hardware setup is active. Cancel it and leave?')
+  useNavigationGuard(
+    working,
+    t('TradeSidePanel.hardwareSetupIsActiveCancelItAndLeave')
+  )
   useEffect(() => {
     const controller = new AbortController()
     lifetime.current = controller
@@ -151,22 +169,22 @@ function DevicePanel({
     if (!file) return
     void run(async () => {
       if (file.size > MAX_KEYS_SIZE) {
-        throw new Error('That file is too large to be prod.keys.')
+        throw new Error(t('TradeSidePanel.thatFileIsTooLargeToBeProdKeys'))
       }
-      onMessage('Storing the required keys on the ESP32…')
+      onMessage(t('TradeSidePanel.storingTheRequiredKeysOnTheEsp32'))
       await esp32TradeDevice.storeProdKeys(await file.text())
       setKeysReady(true)
-      onMessage('Keys stored.')
+      onMessage(t('TradeSidePanel.keysStored'))
     })
   }
 
   const stateLabel = !device.supported
-    ? 'Not supported in this browser'
+    ? t('TradeSidePanel.notSupportedInThisBrowser')
     : device.state === 'disconnected'
-      ? 'Not connected'
+      ? t('TradeSidePanel.notConnected')
       : device.state === 'trading'
-        ? 'Trading'
-        : 'Connected'
+        ? t('TradeSidePanel.trading')
+        : t('TradeSidePanel.connected')
 
   // Firmware and key setup steps, shown below either layout.
   const setup = (
@@ -174,21 +192,24 @@ function DevicePanel({
       {outdated && (
         <div className="camp-trade-setup">
           <strong>
-            GB-Link firmware{' '}
-            {gbLinkTradeDevice.knownFirmwareVersion ?? 'unknown'} — GBA ↔ Switch
-            needs {release?.version ?? MIN_GBA_SWITCH_FIRMWARE} or newer.
+            {t('TradeSidePanel.gbLinkFirmwareGbaSwitchNeedsOrNewer', {
+              value1: gbLinkTradeDevice.knownFirmwareVersion ?? 'unknown',
+              value2: release?.version ?? MIN_GBA_SWITCH_FIRMWARE,
+            })}
           </strong>
           <p>
             {release && (
-              <>
-                <a href={release.url} target="_blank" rel="noreferrer">
-                  Download the firmware
-                </a>
-                .{' '}
-              </>
+              <Trans
+                ns="trade"
+                i18nKey="TradeSidePanel.downloadFirmwareLink"
+                components={{
+                  firmwareLink: (
+                    <a href={release.url} target="_blank" rel="noreferrer" />
+                  ),
+                }}
+              />
             )}
-            Download the .uf2 file, press Enter update mode, then copy the file
-            to the RPI-RP2 drive that appears. Reconnect afterwards.
+            {t('TradeSidePanel.manualFirmwareSteps')}
           </p>
           <button
             type="button"
@@ -196,19 +217,22 @@ function DevicePanel({
             disabled={disabled || working}
             onClick={() => void enterUpdateMode()}
           >
-            Enter update mode
+            {t('TradeSidePanel.enterUpdateMode')}
           </button>
         </div>
       )}
       {!isGba && connected && keysReady === false && (
         <div className="camp-trade-setup">
-          <strong>Switch keys required</strong>
+          <strong>{t('TradeSidePanel.switchKeysRequired')}</strong>
           <p>
-            Choose <code>prod.keys</code> from your own Switch. The keys are
-            sent only to the connected ESP32.
+            <Trans
+              ns="trade"
+              i18nKey="TradeSidePanel.choosePart1ProdKeysPart1FromYourOwnSwitchThe"
+              components={{ part1: <code /> }}
+            />
           </p>
           <label className="camp-upload-btn camp-upload-btn--primary">
-            Choose prod.keys
+            {t('TradeSidePanel.chooseProdKeys')}
             <input
               className="camp-file-input--hidden"
               type="file"
@@ -226,15 +250,19 @@ function DevicePanel({
     return (
       <div className="camp-trade-hardware camp-trade-hardware--compact">
         <span className="camp-trade-device-name">
-          {isGba ? 'GB-Link' : 'Switch via ESP32'}
+          {isGba ? 'GB-Link' : t('TradeSidePanel.switchViaEsp32')}
         </span>
         <strong className="camp-trade-device-state">{stateLabel}</strong>
         <p>
           {!device.supported
-            ? 'Use a Chromium-based browser such as Chrome or Edge to connect.'
+            ? t('TradeSidePanel.useAChromiumBasedBrowserSuchAsChromeOrEdge')
             : connected
-              ? `Choose a Pokémon on your ${isGba ? 'Game Boy Advance' : 'Switch'} during the trade.`
-              : `Connect your ${isGba ? 'Game Boy Advance' : 'ESP32'} to choose a Pokémon during the trade.`}
+              ? t('TradeSidePanel.chooseAPokeMonOnYourDuringTheTrade', {
+                  value1: isGba ? 'Game Boy Advance' : 'Switch',
+                })
+              : t('TradeSidePanel.connectYourToChooseAPokeMonDuringTheTrade', {
+                  value1: isGba ? 'Game Boy Advance' : 'ESP32',
+                })}
         </p>
         {device.supported && (
           <button
@@ -243,7 +271,9 @@ function DevicePanel({
             disabled={disabled || working || device.state === 'trading'}
             onClick={() => void (connected ? disconnect() : connect())}
           >
-            {connected ? 'Disconnect' : 'Connect'}
+            {connected
+              ? t('common:actions.disconnect')
+              : t('common:actions.connect')}
           </button>
         )}
         {setup}
@@ -253,19 +283,24 @@ function DevicePanel({
 
   return (
     <div className="camp-trade-hardware">
-      <strong>{isGba ? 'GB-Link' : 'ESP32'} connection</strong>
+      <strong>
+        {t('TradeSidePanel.connection', {
+          value1: isGba ? 'GB-Link' : 'ESP32',
+        })}
+      </strong>
       <p>
-        Choose the Pokémon on your {isGba ? 'Game Boy Advance' : 'Switch'}{' '}
-        during the trade.
+        {t('TradeSidePanel.chooseThePokeMonOnYourDuringTheTrade', {
+          value1: isGba ? 'Game Boy Advance' : 'Switch',
+        })}
       </p>
       {device.supported ? (
         <>
           <span className="camp-trade-device-status">
             {device.state === 'disconnected'
-              ? 'Not connected'
+              ? t('TradeSidePanel.notConnected')
               : device.state === 'trading'
-                ? 'Trading'
-                : 'Connected'}
+                ? t('TradeSidePanel.trading')
+                : t('TradeSidePanel.connected')}
           </span>
           <div className="camp-local-actions">
             <button
@@ -274,19 +309,23 @@ function DevicePanel({
               disabled={disabled || working || device.state === 'trading'}
               onClick={() => void (connected ? disconnect() : connect())}
             >
-              {connected ? 'Disconnect' : 'Connect'}
+              {connected
+                ? t('common:actions.disconnect')
+                : t('common:actions.connect')}
             </button>
           </div>
         </>
       ) : (
         <span className="camp-trade-device-status camp-trade-device-status--warning">
-          This browser does not support the required device connection
+          {t(
+            'TradeSidePanel.thisBrowserDoesNotSupportTheRequiredDeviceConnection'
+          )}
         </span>
       )}
       <p className="camp-trade-note">
         {isGba
-          ? 'Connect the GB-Link to this computer and the link cable to the GBA.'
-          : 'Connect the ESP32 by USB.'}
+          ? t('TradeSidePanel.connectTheGbLinkToThisComputerAndTheLink')
+          : t('TradeSidePanel.connectTheEsp32ByUsb')}
       </p>
       {setup}
     </div>
@@ -329,6 +368,8 @@ export function TradeSidePanel({
   onDeviceChange,
   onMessage,
 }: TradeSidePanelProps) {
+  const { t } = useTranslation(['trade', 'common'] as const)
+
   return (
     <section className="camp-panel camp-trade-side">
       <label className="camp-trade-source-label">
@@ -339,14 +380,14 @@ export function TradeSidePanel({
           disabled={disabled}
           onChange={(event) =>
             onSource(
-              SOURCE_OPTIONS.find(
+              getSourceOptions().find(
                 (option) => tradeSideKey(option.side) === event.target.value
               )?.side ?? null
             )
           }
         >
-          <option value="">Choose a source…</option>
-          {SOURCE_OPTIONS.map(({ label, side }) => {
+          <option value="">{t('TradeSidePanel.chooseASource')}</option>
+          {getSourceOptions().map(({ label, side }) => {
             const availability = other ? tradeAvailability(side, other) : 'ok'
             return (
               <option
@@ -362,7 +403,7 @@ export function TradeSidePanel({
       </label>
       {!value && (
         <p className="camp-trade-note">
-          Choose the game or storage source for this side.
+          {t('TradeSidePanel.chooseTheGameOrStorageSourceForThisSide')}
         </p>
       )}
       {value?.device === 'save-backup' && (
@@ -380,7 +421,7 @@ export function TradeSidePanel({
       )}
       {value?.device === 'gb-link' && gbaSwitchPair(value, other) && (
         <label className="camp-trade-source-label">
-          <span>Game on the GBA</span>
+          <span>{t('TradeSidePanel.gameOnTheGba')}</span>
           <select
             className="camp-select"
             value={value.gbaGame ?? ''}
@@ -389,9 +430,11 @@ export function TradeSidePanel({
               onGbaGame((event.target.value as GbaGame) || undefined)
             }
           >
-            <option value="">Choose the game…</option>
-            <option value="wireless">FireRed, LeafGreen or Emerald</option>
-            <option value="cable">Ruby or Sapphire</option>
+            <option value="">{t('TradeSidePanel.chooseTheGame')}</option>
+            <option value="wireless">
+              {t('TradeSidePanel.fireredLeafgreenOrEmerald')}
+            </option>
+            <option value="cable">{t('TradeSidePanel.rubyOrSapphire')}</option>
           </select>
         </label>
       )}

@@ -1,0 +1,46 @@
+{
+  "actions": {
+    "close": "Cerrar",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "retry": "Reintentar",
+    "saving": "Guardando…",
+    "start": "START",
+    "cancel": "Cancelar",
+    "disconnect": "Desconectar",
+    "connect": "Conectar",
+    "none": "Ninguno",
+    "loading": "Cargando…",
+    "save": "Guardar",
+    "remove": "Quitar",
+    "delete": "Eliminar",
+    "settings": "Ajustes",
+    "stop": "Detener",
+    "download": "Descargar",
+    "default": "Predeterminado",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "areas": {
+    "pokemon": "Pokémon",
+    "pokedex": "Pokédex",
+    "shop": "Tienda",
+    "safari": "Zona Safari",
+    "pelago": "Zona Pelago",
+    "options": "Opciones"
+  },
+  "document": {
+    "mainTitle": "pkCamp",
+    "arcadeTitle": "pkCamp Arcade"
+  },
+  "format": {
+    "progress": "{{completed}} / {{total}}"
+  },
+  "games": {
+    "ruby": "Rubí",
+    "sapphire": "Zafiro",
+    "emerald": "Esmeralda",
+    "firered": "Rojo Fuego",
+    "leafgreen": "Verde Hoja"
+  }
+}

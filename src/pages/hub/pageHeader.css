@@ -1,5 +1,5 @@
 /* The shared page header: Back and the game on the light side, then a diagonal
-   edge into the page name and the GitHub and Dropbox badges. */
+   edge into the page name and the GitHub, language and Dropbox buttons. */
 .site-page-actions {
   display: flex;
   gap: 0.65rem;

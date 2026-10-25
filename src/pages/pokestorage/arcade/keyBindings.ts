@@ -1,3 +1,4 @@
+import { i18n } from '../../../services/i18n'
 import type { GbaButton } from '../../../services/emulator/input'
 
 /** Player shortcuts: open the menu, mute, cycle speed, guide, restart. */
@@ -47,39 +48,43 @@ export const BINDING_ORDER: readonly Bindable[] = [
 
 const BINDABLE = BINDING_ORDER
 
-export const BINDING_NAME: Readonly<Record<Bindable, string>> = {
-  up: 'Up',
-  down: 'Down',
-  left: 'Left',
-  right: 'Right',
+export const getBindingName = (): Readonly<Record<Bindable, string>> => ({
+  up: i18n.t('arcade:keyBindings.up'),
+  down: i18n.t('arcade:keyBindings.down'),
+  left: i18n.t('arcade:keyBindings.left'),
+  right: i18n.t('arcade:keyBindings.right'),
   a: 'A',
   b: 'B',
   l: 'L',
   r: 'R',
-  start: 'Start',
-  select: 'Select',
-  menu: 'Menu',
-  mute: 'Mute sound',
-  speed: 'Speed toggle',
-  guide: 'Guide',
-  restart: 'Restart',
-}
+  start: i18n.t('common:actions.start'),
+  select: i18n.t('arcade:keyBindings.select'),
+  menu: i18n.t('arcade:keyBindings.menu'),
+  mute: i18n.t('arcade:keyBindings.muteSound'),
+  speed: i18n.t('arcade:keyBindings.speedToggle'),
+  guide: i18n.t('arcade:keyBindings.guide'),
+  restart: i18n.t('arcade:keyBindings.restart'),
+})
 
 /** The Controls page's sections, like a game's key-binding settings. */
-export const BINDING_GROUPS: readonly {
+export const getBindingGroups = (): readonly {
   id: string
   title: string
   items: readonly Bindable[]
-}[] = [
-  { id: 'dpad', title: 'D-pad', items: ['up', 'down', 'left', 'right'] },
+}[] => [
+  {
+    id: 'dpad',
+    title: i18n.t('arcade:keyBindings.dPad'),
+    items: ['up', 'down', 'left', 'right'],
+  },
   {
     id: 'buttons',
-    title: 'Buttons',
+    title: i18n.t('arcade:keyBindings.buttons'),
     items: ['a', 'b', 'start', 'select', 'l', 'r'],
   },
   {
     id: 'shortcuts',
-    title: 'Shortcuts',
+    title: i18n.t('arcade:keyBindings.shortcuts'),
     items: ['menu', 'mute', 'speed', 'guide', 'restart'],
   },
 ]
@@ -150,28 +155,29 @@ export function actionForCode(
 
 /** Readable name for a `KeyboardEvent.code`, e.g. `KeyX` → `X`. */
 export function keyLabel(code: string | null): string {
-  if (!code) return 'None'
+  if (!code) return i18n.t('common:actions.none')
   const named: Record<string, string> = {
     ArrowUp: '↑',
     ArrowDown: '↓',
     ArrowLeft: '←',
     ArrowRight: '→',
-    ShiftLeft: 'Left Shift',
-    ShiftRight: 'Right Shift',
-    ControlLeft: 'Left Ctrl',
-    ControlRight: 'Right Ctrl',
-    AltLeft: 'Left Alt',
-    AltRight: 'Right Alt',
-    MetaLeft: 'Left ⌘',
-    MetaRight: 'Right ⌘',
-    Space: 'Space',
-    Enter: 'Enter',
-    Backspace: 'Backspace',
+    ShiftLeft: i18n.t('arcade:keyBindings.leftShift'),
+    ShiftRight: i18n.t('arcade:keyBindings.rightShift'),
+    ControlLeft: i18n.t('arcade:keyBindings.leftCtrl'),
+    ControlRight: i18n.t('arcade:keyBindings.rightCtrl'),
+    AltLeft: i18n.t('arcade:keyBindings.leftAlt'),
+    AltRight: i18n.t('arcade:keyBindings.rightAlt'),
+    MetaLeft: i18n.t('arcade:keyBindings.left2'),
+    MetaRight: i18n.t('arcade:keyBindings.right2'),
+    Space: i18n.t('arcade:keyBindings.space'),
+    Enter: i18n.t('arcade:keyBindings.enter'),
+    Backspace: i18n.t('arcade:keyBindings.backspace'),
   }
   if (named[code]) return named[code]
   const match = /^(?:Key|Digit)(.)$/.exec(code)
   if (match) return match[1]
-  if (code.startsWith('Numpad')) return `Num ${code.slice(6)}`
+  if (code.startsWith('Numpad'))
+    return i18n.t('arcade:keyBindings.num', { value1: code.slice(6) })
   return code
 }
 

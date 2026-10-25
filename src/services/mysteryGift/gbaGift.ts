@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import {
   compareFirmwareVersions,
   GB_LINK_COMMAND,
@@ -27,7 +28,8 @@ async function loadSender() {
   ]
   const find = (id: string): GiftEvent => {
     const event = events.find((candidate) => candidate.id === id)
-    if (!event) throw new Error(`Unknown Mystery Gift: ${id}`)
+    if (!event)
+      throw new Error(i18n.t('services:gbaGift.unknownMysteryGift', { id: id }))
     return event
   }
   return { ...wonder, ...rfu1, ...ticker, find }
@@ -55,7 +57,15 @@ export async function openGbaGift(
     compareFirmwareVersions(firmware, MIN_GBA_SWITCH_FIRMWARE) < 0
   ) {
     throw new Error(
-      `Mystery Gift needs GB-Link firmware ${MIN_GBA_SWITCH_FIRMWARE} or newer${firmware ? `; this GB-Link has ${firmware}` : ''}. Open Settings → Hardware to update it.`
+      i18n.t(
+        'services:gbaGift.mysteryGiftNeedsGbLinkFirmwareOrNewerOpenSettings',
+        {
+          MIN_GBA_SWITCH_FIRMWARE: MIN_GBA_SWITCH_FIRMWARE,
+          value2: firmware
+            ? i18n.t('services:gbaGift.thisGbLinkHas', { firmware: firmware })
+            : '',
+        }
+      )
     )
   }
 
@@ -99,7 +109,9 @@ export async function openGbaGift(
         .catch(() => {})
         .then(() =>
           handlers.onFailed(
-            new Error('The GB-Link left Wireless Adapter mode.')
+            new Error(
+              i18n.t('services:gbaGift.theGbLinkLeftWirelessAdapterMode')
+            )
           )
         )
     }
@@ -133,7 +145,9 @@ export async function openGbaGift(
       .catch(() => {})
       .then(() => {
         if (!options?.signal?.aborted)
-          handlers.onFailed(new Error('The GB-Link disconnected.'))
+          handlers.onFailed(
+            new Error(i18n.t('services:gbaGift.theGbLinkDisconnected'))
+          )
       })
   }
   signal.addEventListener('abort', onAbort, { once: true })
@@ -143,10 +157,12 @@ export async function openGbaGift(
     await transport.sendCommand(GB_LINK_COMMAND.cancel)
     await delay(300)
     signal.throwIfAborted()
-    if (stopped) throw new Error('The Mystery Gift group stopped.')
+    if (stopped)
+      throw new Error(i18n.t('services:gbaGift.theMysteryGiftGroupStopped'))
     await transport.sendCommand(GB_LINK_COMMAND.setVoltage3V3)
     signal.throwIfAborted()
-    if (stopped) throw new Error('The Mystery Gift group stopped.')
+    if (stopped)
+      throw new Error(i18n.t('services:gbaGift.theMysteryGiftGroupStopped'))
     const ready = new Promise<boolean>((resolve) => {
       const timer = setTimeout(() => done(false), 3000)
       const remove = transport.onStatus((status) => {
@@ -166,11 +182,12 @@ export async function openGbaGift(
     )
     if (!(await ready)) {
       throw new Error(
-        "The GB-Link didn't start Wireless Adapter mode. Unplug it, plug it back in, and try again."
+        i18n.t('services:gbaGift.theGbLinkDidnTStartWirelessAdapterModeUnplug')
       )
     }
     signal.throwIfAborted()
-    if (stopped) throw new Error('The Mystery Gift group stopped.')
+    if (stopped)
+      throw new Error(i18n.t('services:gbaGift.theMysteryGiftGroupStopped'))
     session.start()
     stopTicker = sender.startTicker(() => session.tick())
   } catch (error) {

@@ -1,0 +1,20 @@
+{
+  "RomBiosDumps": {
+    "romDump": "ROM dump",
+    "biosDump": "BIOS dump",
+    "theDumpFailedTryAgain": "The dump failed. Try again.",
+    "savedAsTheRom": "Saved as the {{value1}} ROM.",
+    "chooseATask": "Choose a task",
+    "downloadTheRomOfAnyGbaCartridgeTheGameIs": "Download the ROM of any GBA cartridge. The game is detected from the cartridge. Large games take several minutes.",
+    "dumped": "Dumped {{name}}.",
+    "backUpToStorageForTheArcade": "Back up to storage for the Arcade",
+    "downloadThe16KbBiosFromYourGba": "Download the 16 KB BIOS from your GBA.",
+    "downloadsStayOnYourComputerAndAreNeverSynced": "Downloads stay on your computer and are never synced.",
+    "downloadedGbaBiosBin": "Downloaded gba_bios.bin.",
+    "dumpRom": "Dump a cartridge ROM",
+    "dumpBios": "Dump the GBA BIOS",
+    "biosBootStep": "Power on the GBA while holding START + SELECT. A cartridge isn’t needed.",
+    "readingRom": "Reading the ROM",
+    "readingBios": "Reading the BIOS"
+  }
+}

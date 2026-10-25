@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+import { i18n } from '../../../services/i18n'
 import { useEffect, useState } from 'react'
 import { gbLinkTradeDevice } from '../../../services/tradeDevice'
 import { useAppNavigation } from '../../context/appNavigation'
@@ -24,16 +26,16 @@ import { RomBiosDumps } from './RomBiosDumps'
 
 type LabRoute = Extract<AppRoute, { page: 'lab' }>
 
-const TITLE: Record<LabMode, string> = {
+const getTitle = (): Record<LabMode, string> => ({
   collection: 'PC',
-  transporter: 'Transporter',
-  tools: 'Research Tools',
-  gifts: 'Mystery Gifts',
-  saves: 'Cartridge Saves',
-  dumps: 'ROM / BIOS Dumps',
-  settings: 'Settings',
-  news: 'Patch Notes',
-}
+  transporter: i18n.t('lab:LabMain.transporter'),
+  tools: i18n.t('lab:LabMain.researchTools'),
+  gifts: i18n.t('lab:LabMain.mysteryGifts'),
+  saves: i18n.t('lab:LabMain.cartridgeSaves'),
+  dumps: i18n.t('lab:LabMain.romBiosDumps'),
+  settings: i18n.t('common:actions.settings'),
+  news: i18n.t('lab:LabMain.patchNotes'),
+})
 /** Each mode's Back target; the three tools return to Research Tools. */
 const PARENT: Record<LabMode, LabMode | null> = {
   collection: null,
@@ -73,6 +75,8 @@ export function LabMain({
   campReturns: number
   hidden?: boolean
 }) {
+  useTranslation(['lab', 'common'] as const)
+
   const { location, navigate } = useAppNavigation()
   const { provider } = useStorageProvider()
   const resolved = resolveRoute(location)
@@ -119,7 +123,7 @@ export function LabMain({
           />
         ) : (
           <SitePage
-            page={TITLE[mode]}
+            page={getTitle()[mode]}
             gameId={gameId}
             onBack={() => go(PARENT[mode])}
           >

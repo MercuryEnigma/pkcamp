@@ -1,6 +1,8 @@
+import { useTranslation } from 'react-i18next'
+import { i18n } from '../../../services/i18n'
 import { useState, type ReactNode } from 'react'
 import {
-  SPECIES_OPTIONS,
+  getSpeciesOptions,
   draftProblems,
   entryIdFor,
   summarizeEntry,
@@ -12,11 +14,11 @@ import {
 import { GEN3_RIBBONS, NATURES } from './gen3Data'
 import { PcCombobox } from './PcCombobox'
 
-const SPECIES_LABELS = SPECIES_OPTIONS.map((option) => option.label)
-const SHINY: readonly [ShinyRule, string][] = [
-  ['any', 'Any'],
-  ['yes', 'Shiny'],
-  ['no', 'Not shiny'],
+const getSpeciesLabels = () => getSpeciesOptions().map((option) => option.label)
+const getShiny = (): readonly [ShinyRule, string][] => [
+  ['any', i18n.t('collections:CollectionBuilder.any')],
+  ['yes', i18n.t('collections:CollectionBuilder.shiny')],
+  ['no', i18n.t('collections:CollectionBuilder.notShiny')],
 ]
 
 /** The Pokémon form, as typed; species is resolved when it names an option. */
@@ -43,7 +45,7 @@ const EMPTY_FORM: EntryForm = {
 }
 
 const findSpecies = (text: string) =>
-  SPECIES_OPTIONS.find(
+  getSpeciesOptions().find(
     (option) => option.label.toLowerCase() === text.trim().toLowerCase()
   )
 
@@ -72,29 +74,34 @@ function DetailsColumn({
   draft: CollectionDraft
   onChange: (draft: CollectionDraft) => void
 }) {
+  const { t } = useTranslation(['collections', 'common'] as const)
+
   const text = (key: keyof Omit<CollectionDraft, 'entries'>) => ({
     value: draft[key],
     onChange: (event: { target: { value: string } }) =>
       onChange({ ...draft, [key]: event.target.value }),
   })
   return (
-    <section className="pc-builder-col pc-form" aria-label="Collection details">
-      <Field label="Name *" className="pc-span-2">
+    <section
+      className="pc-builder-col pc-form"
+      aria-label={t('CollectionBuilder.collectionDetails')}
+    >
+      <Field label={t('CollectionBuilder.name')} className="pc-span-2">
         <input {...text('name')} />
       </Field>
-      <Field label="Description" className="pc-span-2">
+      <Field label={t('CollectionBuilder.description')} className="pc-span-2">
         <textarea rows={3} {...text('description')} />
       </Field>
-      <Field label="Author">
+      <Field label={t('CollectionBuilder.author')}>
         <input {...text('author')} />
       </Field>
-      <Field label="Source">
+      <Field label={t('CollectionBuilder.source')}>
         <input {...text('source')} />
       </Field>
-      <Field label="Details">
+      <Field label={t('CollectionBuilder.details')}>
         <textarea rows={2} {...text('details')} />
       </Field>
-      <Field label="Updated">
+      <Field label={t('CollectionBuilder.updated')}>
         <input type="date" {...text('updated')} />
       </Field>
     </section>
@@ -109,25 +116,31 @@ function EntryFields({
   form: EntryForm
   onChange: (form: EntryForm) => void
 }) {
+  const { t } = useTranslation(['collections', 'common'] as const)
+
   // Ribbon text being typed; a full name moves into the chosen ribbons.
   const [ribbon, setRibbon] = useState('')
   const set = (change: Partial<EntryForm>) => onChange({ ...form, ...change })
 
   return (
     <div className="pc-entry-form">
-      <Field label="Species *" className="pc-span-6">
+      <Field label={t('CollectionBuilder.species')} className="pc-span-6">
         <PcCombobox
-          label="Species"
-          placeholder="Select a Pokémon…"
+          label={t('CollectionBuilder.species2')}
+          placeholder={t('CollectionBuilder.selectAPokeMon')}
           value={form.species}
-          options={SPECIES_LABELS}
+          options={getSpeciesLabels()}
           onChange={(value) => set({ species: value })}
         />
       </Field>
       <div className="pc-field pc-span-3">
-        <span className="pc-label">Shiny</span>
-        <div className="pc-segment" role="group" aria-label="Shiny">
-          {SHINY.map(([value, label]) => (
+        <span className="pc-label">{t('CollectionBuilder.shiny')}</span>
+        <div
+          className="pc-segment"
+          role="group"
+          aria-label={t('CollectionBuilder.shiny')}
+        >
+          {getShiny().map(([value, label]) => (
             <button
               key={value}
               type="button"
@@ -140,10 +153,12 @@ function EntryFields({
         </div>
       </div>
       <div className="pc-field pc-span-3">
-        <span className="pc-label">Ribbons (all required)</span>
+        <span className="pc-label">
+          {t('CollectionBuilder.ribbonsAllRequired')}
+        </span>
         <PcCombobox
-          label="Ribbons"
-          placeholder="Add a ribbon…"
+          label={t('CollectionBuilder.ribbons')}
+          placeholder={t('CollectionBuilder.addARibbon')}
           value={ribbon}
           options={GEN3_RIBBONS.filter((name) => !form.ribbons.includes(name))}
           onChange={(value) => {
@@ -164,7 +179,7 @@ function EntryFields({
                 key={name}
                 type="button"
                 className="pc-chip"
-                aria-label={`Remove ${name}`}
+                aria-label={t('CollectionBuilder.remove', { name: name })}
                 onClick={() =>
                   set({ ribbons: form.ribbons.filter((r) => r !== name) })
                 }
@@ -175,40 +190,40 @@ function EntryFields({
           </div>
         )}
       </div>
-      <Field label="Nature" className="pc-span-2">
+      <Field label={t('CollectionBuilder.nature')} className="pc-span-2">
         <PcCombobox
-          label="Nature"
-          placeholder="Any"
+          label={t('CollectionBuilder.nature')}
+          placeholder={t('CollectionBuilder.any')}
           value={form.nature}
           options={NATURES}
           onChange={(value) => set({ nature: value })}
         />
       </Field>
-      <Field label="Ability" className="pc-span-2">
+      <Field label={t('CollectionBuilder.ability')} className="pc-span-2">
         <input
-          placeholder="Any"
+          placeholder={t('CollectionBuilder.any')}
           value={form.ability}
           onChange={(event) => set({ ability: event.target.value })}
         />
       </Field>
-      <Field label="Move" className="pc-span-2">
+      <Field label={t('CollectionBuilder.move')} className="pc-span-2">
         <input
-          placeholder="Any"
+          placeholder={t('CollectionBuilder.any')}
           value={form.move}
           onChange={(event) => set({ move: event.target.value })}
         />
       </Field>
-      <Field label="OT" className="pc-span-3">
+      <Field label={t('CollectionBuilder.ot')} className="pc-span-3">
         <input
-          placeholder="Any"
+          placeholder={t('CollectionBuilder.any')}
           value={form.ot}
           onChange={(event) => set({ ot: event.target.value })}
         />
       </Field>
-      <Field label="ID" className="pc-span-3">
+      <Field label={t('CollectionBuilder.id')} className="pc-span-3">
         <input
           inputMode="numeric"
-          placeholder="Any"
+          placeholder={t('CollectionBuilder.any')}
           value={form.trainerId}
           onChange={(event) => set({ trainerId: event.target.value })}
         />
@@ -233,11 +248,18 @@ function PokemonColumn({
   onOpen: (entry: DraftEntry | null) => void
   onRemove: (entry: DraftEntry) => void
 }) {
+  const { t } = useTranslation(['collections', 'common'] as const)
+
   return (
-    <section className="pc-builder-col" aria-label="Pokémon">
+    <section
+      className="pc-builder-col"
+      aria-label={t('CollectionBuilder.pokeMon')}
+    >
       <header className="pc-builder-head">
-        <h3 className="pc-label">Pokémon</h3>
-        <span className="pc-count-badge">{entries.length} added</span>
+        <h3 className="pc-label">{t('CollectionBuilder.pokeMon')}</h3>
+        <span className="pc-count-badge">
+          {t('CollectionBuilder.added', { length: entries.length })}
+        </span>
       </header>
       {!form && (
         <button
@@ -245,7 +267,7 @@ function PokemonColumn({
           className="pc-secondary pc-add-pokemon"
           onClick={() => onOpen(null)}
         >
-          + Add Pokémon
+          {t('CollectionBuilder.addPokeMon')}
         </button>
       )}
       {form && <EntryFields form={form} onChange={onFormChange} />}
@@ -260,7 +282,9 @@ function PokemonColumn({
                 </td>
                 <td className="pc-table-wide">
                   {summarizeEntry(entry) || (
-                    <span className="pc-muted">Any</span>
+                    <span className="pc-muted">
+                      {t('CollectionBuilder.any')}
+                    </span>
                   )}
                 </td>
                 <td className="pc-table-actions">
@@ -269,14 +293,14 @@ function PokemonColumn({
                     className="pc-link-btn"
                     onClick={() => onOpen(entry)}
                   >
-                    Edit
+                    {t('CollectionBuilder.edit')}
                   </button>
                   <button
                     type="button"
                     className="pc-link-btn"
                     onClick={() => onRemove(entry)}
                   >
-                    Remove
+                    {t('common:actions.remove')}
                   </button>
                 </td>
               </tr>
@@ -304,6 +328,8 @@ export function CollectionBuilder({
   onCreate: (file: File) => Promise<boolean>
   onCancel: () => void
 }) {
+  const { t } = useTranslation(['collections', 'common'] as const)
+
   const [form, setForm] = useState<EntryForm | null>(null)
   // The id of the entry being edited, or null when adding.
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -368,13 +394,17 @@ export function CollectionBuilder({
           {shown.slice(0, 3).map((problem) => (
             <li key={problem}>{problem}</li>
           ))}
-          {shown.length > 3 && <li>…and {shown.length - 3} more.</li>}
+          {shown.length > 3 && (
+            <li>
+              {t('CollectionBuilder.andMore', { value1: shown.length - 3 })}
+            </li>
+          )}
         </ul>
       )}
       {form ? (
         <footer className="pc-builder-actions">
           <button type="button" className="pc-reset" onClick={closeForm}>
-            Cancel
+            {t('common:actions.cancel')}
           </button>
           <button
             type="button"
@@ -382,17 +412,19 @@ export function CollectionBuilder({
             disabled={!species}
             onClick={saveEntry}
           >
-            {editingId ? 'Save Pokémon' : 'Add Pokémon'}
+            {editingId
+              ? t('CollectionBuilder.savePokeMon')
+              : t('CollectionBuilder.addPokeMon2')}
           </button>
         </footer>
       ) : (
         <footer className="pc-builder-actions">
           <button type="button" className="pc-reset" onClick={onCancel}>
-            Cancel
+            {t('common:actions.cancel')}
           </button>
           <span className="pc-builder-secondary">
             <button type="button" className="pc-secondary" disabled>
-              Import from spreadsheet · Coming later
+              {t('CollectionBuilder.importFromSpreadsheetComingLater')}
             </button>
             <button
               type="button"
@@ -409,7 +441,7 @@ export function CollectionBuilder({
                 )
               }}
             >
-              Create collection
+              {t('CollectionBuilder.createCollection')}
             </button>
           </span>
         </footer>

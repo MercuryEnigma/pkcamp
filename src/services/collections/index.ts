@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import type { PokemonNode } from '../pkhex'
 import type { Gen3GameId } from '../saveLibrary'
 import type {
@@ -309,7 +310,9 @@ export class CollectionsService {
 
   openCollection(collectionId: string): void {
     if (!this.snapshot.enabledIds.includes(collectionId))
-      throw new Error('Enable the collection before opening it.')
+      throw new Error(
+        i18n.t('services:collections.enableTheCollectionBeforeOpeningIt')
+      )
     const recentIds = [
       collectionId,
       ...this.snapshot.recentIds.filter((id) => id !== collectionId),
@@ -327,7 +330,9 @@ export class CollectionsService {
       available.has(id)
     )
     if (enabledIds.length === 0)
-      throw new Error('At least one collection must remain enabled.')
+      throw new Error(
+        i18n.t('services:collections.atLeastOneCollectionMustRemainEnabled')
+      )
     let recentIds = this.snapshot.recentIds.filter((id) =>
       enabledIds.includes(id)
     )

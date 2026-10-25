@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import { gen3GameIdFromCode, type Gen3GameId } from '../saveLibrary'
 import { GB_LINK_COMMAND, GB_LINK_MODE } from '../tradeDevice/gbLinkProtocol.ts'
 import type { GbLinkTransport } from '../tradeDevice/gbLinkTransport.ts'
@@ -71,13 +72,15 @@ async function withDumper<T>(
     link.drain()
 
     // The GBA is already waiting: it was turned on holding START + SELECT.
-    onStatus?.('Sending the cartridge tool to the GBA…')
+    onStatus?.(i18n.t('services:readGbaSave.sendingTheCartridgeToolToTheGba'))
     await multiboot(link, dumper, signal)
 
     const cart = new GbaCartClient(link, signal)
     await delay(800, signal)
     if (!(await cart.ping())) {
-      throw new Error('The GBA cartridge tool did not start. Try again.')
+      throw new Error(
+        i18n.t('services:readGbaSave.theGbaCartridgeToolDidNotStartTryAgain')
+      )
     }
     return await operation(cart)
   } finally {
@@ -97,16 +100,20 @@ function withCartridge<T>(
   operation: (cart: GbaCartClient, game: Gen3GameId | null) => Promise<T>
 ): Promise<T> {
   return withDumper(transport, options, async (cart) => {
-    options.onStatus?.('Checking the cartridge…')
+    options.onStatus?.(i18n.t('services:readGbaSave.checkingTheCartridge'))
     const info = await cart.readInfo()
-    if (!info) throw new Error('No GBA cartridge was detected.')
+    if (!info)
+      throw new Error(i18n.t('services:readGbaSave.noGbaCartridgeWasDetected'))
     options.onCartridge?.(info)
     const game = gen3GameIdFromCode(info.code)
     const { gameId } = options
     const expected = typeof gameId === 'string' ? [gameId] : gameId
     if (expected && !(game && expected.includes(game))) {
       throw new Error(
-        `This cartridge is ${info.title || info.code}, which doesn't match the expected game.`
+        i18n.t(
+          'services:readGbaSave.thisCartridgeIsWhichDoesnTMatchTheExpectedGame',
+          { value1: info.title || info.code }
+        )
       )
     }
     return operation(cart, game)
@@ -119,7 +126,7 @@ export function readGbaSave(
   options: GbaSaveOptions
 ): Promise<Uint8Array> {
   return withCartridge(transport, options, (cart) => {
-    options.onStatus?.('Reading the save…')
+    options.onStatus?.(i18n.t('services:readGbaSave.readingTheSave'))
     return cart.dumpSave(options.onProgress)
   })
 }
@@ -131,20 +138,29 @@ export function writeGbaSave(
 ): Promise<void> {
   return withCartridge(transport, options, async (cart, game) => {
     // withCartridge has refused any cartridge outside the required `gameId`.
-    if (!game) throw new Error('This cartridge is not a supported game.')
-    options.onStatus?.('Backing up the cartridge save first…')
+    if (!game)
+      throw new Error(
+        i18n.t('services:readGbaSave.thisCartridgeIsNotASupportedGame')
+      )
+    options.onStatus?.(
+      i18n.t('services:readGbaSave.backingUpTheCartridgeSaveFirst')
+    )
     const cartridgeSave = await cart.dumpSave((done, total) =>
       options.onStatus?.(
-        `Backing up the cartridge save first… ${Math.floor((done / total) * 100)}%`
+        i18n.t('services:readGbaSave.backingUpTheCartridgeSaveFirst2', {
+          value1: Math.floor((done / total) * 100),
+        })
       )
     )
     await options.backUpCartridgeSave(cartridgeSave, game)
-    options.onStatus?.('Sending the backup…')
+    options.onStatus?.(i18n.t('services:readGbaSave.sendingTheBackup'))
     await cart.restoreSave(options.save, (done, total) => {
       options.onProgress?.(done, total)
       if (done === total) {
         options.onStatus?.(
-          'Writing to the cartridge. Keep the GBA on until this finishes.'
+          i18n.t(
+            'services:readGbaSave.writingToTheCartridgeKeepTheGbaOnUntilThis'
+          )
         )
       }
     })
@@ -157,7 +173,7 @@ export function readGbaRom(
   options: GbaSaveOptions
 ): Promise<Uint8Array> {
   return withCartridge(transport, options, (cart) => {
-    options.onStatus?.('Reading the ROM…')
+    options.onStatus?.(i18n.t('services:readGbaSave.readingTheRom'))
     return cart.dumpRom(options.onProgress)
   })
 }
@@ -168,7 +184,7 @@ export function readGbaBios(
   options: GbaDumperOptions
 ): Promise<Uint8Array> {
   return withDumper(transport, options, (cart) => {
-    options.onStatus?.('Reading the BIOS…')
+    options.onStatus?.(i18n.t('services:readGbaSave.readingTheBios'))
     return cart.dumpBios(options.onProgress)
   })
 }

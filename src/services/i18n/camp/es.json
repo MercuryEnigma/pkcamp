@@ -1,0 +1,93 @@
+{
+  "appNavigation": {
+    "useappnavigationRequiresNavigationprovider": "useAppNavigation requiere NavigationProvider"
+  },
+  "DropboxBadge": {
+    "dropboxConnected": "Dropbox conectado",
+    "connectingToDropbox": "Conectando con Dropbox…",
+    "dropboxUnreachableSavingIsPaused": "No se puede acceder a Dropbox. El guardado está en pausa.",
+    "notConnectedToDropboxSavingInThisBrowser": "Sin conexión a Dropbox. Las partidas se guardan en este navegador.",
+    "openStorageSettings": "{{label}} Abrir ajustes de almacenamiento.",
+    "connectionDetails": "{{label}}\n{{message}}"
+  },
+  "GbLinkTaskPanel": {
+    "aCartridgeTransferIsActiveCancelItAndLeave": "Hay una transferencia de cartucho en curso. ¿Cancelarla y salir?",
+    "starting": "Iniciando…",
+    "connectingChooseYourGbLinkIfTheBrowserAsks": "Conectando… Selecciona tu GB-Link si el navegador lo solicita.",
+    "detected": "Se ha detectado {{value1}} ({{code}}).",
+    "ifTheBrowserAsksChooseYourGbLink": "Si el navegador lo solicita, selecciona tu GB-Link.",
+    "cancellingCloseTheDeviceChooserIfItIsStillOpen": "Cancelando… Cierra el selector de dispositivos si sigue abierto.",
+    "thisBrowserDoesNotSupportConnectingToTheGbLink": "Este navegador no permite conectarse a GB-Link.",
+    "pressStartButtonBelow": "Pulsa el botón que aparece abajo para empezar.",
+    "pressStartBelow": "Pulsa Iniciar abajo.",
+    "transferProgress": "{{progressLabel}}… {{value2}}%"
+  },
+  "SpriteCredit": {
+    "imageCreditOpensSourceInANewTab": "Crédito de la imagen: {{name}} (abre la fuente en una pestaña nueva)"
+  },
+  "gbLinkTask": {
+    "connectTheGbLinkToThisComputerAndYourGba": "Conecta GB-Link a este ordenador y a tu GBA.",
+    "insertTheCartridgeAndPowerOnWhileHoldingStartSelect": "Inserta el cartucho y enciende la consola mientras mantienes pulsados START + SELECT.",
+    "theOperationFailed": "La operación ha fallado.",
+    "noDeviceWasChosen": "No se ha seleccionado ningún dispositivo.",
+    "cancelled": "Cancelado.",
+    "theRestoreWasInterrupted": "La restauración se ha interrumpido.",
+    "theCartridgeMayHaveBeenChangedCheckTheCartridgeBefore": "{{reason}} Es posible que se haya modificado el cartucho. {{backupNote}} Comprueba el cartucho antes de volver a intentarlo.",
+    "errorWithRetry": "{{message}} {{retry}}"
+  },
+  "saveVersion": {
+    "thisIsASaveNotASave": "Esta es una partida de {{aggregated}}, no de {{value2}}."
+  },
+  "CampPage": {
+    "chooseACamperToViewTheirDetails": "Elige un Pokémon del campamento para ver sus datos.",
+    "selectAPokeMonThenChooseItsDestination": "Selecciona un Pokémon y después elige su destino.",
+    "selectTwoCornersOfAGroupThenItsTopLeft": "Selecciona dos esquinas de un grupo y después la esquina superior izquierda de su destino.",
+    "youHaveUnsavedChangesLeaveWithoutSavingThem": "Tienes cambios sin guardar. ¿Salir sin guardarlos?",
+    "campsite": "Parcela {{value1}}",
+    "party": "Equipo",
+    "thatMoveFailed": "No se ha podido mover el Pokémon.",
+    "partyPokeMonAreViewOnly": "Los Pokémon del equipo solo se pueden consultar.",
+    "chooseAnOccupiedSlotFirst": "Elige primero un espacio ocupado.",
+    "chooseTheDestinationOccupiedSlotsSwap": "Elige el destino. Si está ocupado, los Pokémon intercambiarán sus posiciones.",
+    "moveCancelled": "Movimiento cancelado.",
+    "movedSaveWhenYouAreFinished": "Pokémon movido. Guarda cuando hayas terminado.",
+    "selectTheOppositeCornerOfTheGroup": "Selecciona la esquina opuesta del grupo.",
+    "bothCornersMustBeInTheSamePanel": "Las dos esquinas deben estar en el mismo panel.",
+    "selectTheGroupSTopLeftDestination": "Selecciona la esquina superior izquierda del destino del grupo.",
+    "cannotMoveAGroupOfEmptySlots": "No se puede mover un grupo de espacios vacíos.",
+    "theDestinationGroupMustBeEmpty": "El grupo de destino debe estar vacío.",
+    "groupMovedSaveWhenYouAreFinished": "Grupo movido. Guarda cuando hayas terminado.",
+    "someChangesWereNotSaved": "Algunos cambios no se guardaron: {{value1}}",
+    "saved": "Guardado.",
+    "camp": "Campamento",
+    "theSaveCouldNotBeLoaded": "No se ha podido cargar la partida.",
+    "campSite": "Parcela",
+    "trade": "Intercambiar",
+    "saveYourChangesBeforeTrading": "Guarda los cambios antes de intercambiar.",
+    "pokeMon": "Pokémon",
+    "selectAPokeMonToViewItsDetails": "Selecciona un Pokémon para ver sus datos.",
+    "pokeMonPage": "Página de Pokémon",
+    "previousPokeMonPage": "Página anterior de Pokémon",
+    "nextPokeMonPage": "Página siguiente de Pokémon",
+    "rightSide": "Lado derecho",
+    "previousRightSide": "Página anterior del lado derecho",
+    "campsite2": "Parcela",
+    "boxes": "Cajas de {{value1}}",
+    "nextRightSide": "Página siguiente del lado derecho",
+    "endTrade": "Terminar intercambio",
+    "unknownError": "error desconocido"
+  },
+  "StorageGrid": {
+    "previous": "{{label}}: anterior",
+    "next": "{{label}}: siguiente"
+  },
+  "ToolSelector": {
+    "view": "Ver",
+    "moveOne": "Mover uno",
+    "moveAGroup": "Mover un grupo",
+    "storageTool": "Herramienta de almacenamiento"
+  },
+  "groupMove": {
+    "thatGroupWouldExtendBeyondTheDestination": "El grupo no cabe en el destino."
+  }
+}

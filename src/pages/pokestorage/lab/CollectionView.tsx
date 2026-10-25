@@ -1,3 +1,5 @@
+import { collectionDisplay } from './collectionDisplay'
+import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { collections } from '../../../services/collections'
 import type { StoredCollectionMatch } from '../../../services/storage'
@@ -18,7 +20,7 @@ import {
   type StatusFilter,
 } from './entryDisplay'
 import {
-  FILTER_FIELDS,
+  getFilterFields,
   activeFilters,
   entryMatchesFilters,
   filterOptions,
@@ -64,6 +66,8 @@ export function CollectionView({
   /** Bumped each time the player comes back from Camp. */
   campReturns: number
 }) {
+  const { t } = useTranslation(['collections', 'common'] as const)
+
   const state = useCollections()
   const { gameId } = useActiveGame()
   const { uploads, errors: uploadErrors, upload } = useLabData()
@@ -111,7 +115,9 @@ export function CollectionView({
       constraints: definition.pokemon[id],
       matches: result?.entries[id]?.matches ?? [],
     }),
-    [definition, result]
+    // Helpers below use the shared i18n instance; invalidate their labels on language changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [definition, result, t]
   )
   const rows = useMemo(() => {
     const needle = query.trim().toLowerCase()
@@ -138,7 +144,19 @@ export function CollectionView({
         (dex !== null && String(dex).includes(needle))
       )
     })
-  }, [definition, filterSubject, filters, filter, gameId, ids, query, result])
+    // collectionEntryLabel resolves its translated labels through the shared instance.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    definition,
+    filterSubject,
+    filters,
+    filter,
+    gameId,
+    ids,
+    query,
+    result,
+    t,
+  ])
   const statuses = useMemo(
     () =>
       Object.fromEntries(
@@ -216,17 +234,17 @@ export function CollectionView({
 
   return (
     <div className="pc">
-      <nav className="pc-nav" aria-label="Pokédex screens">
+      <nav className="pc-nav" aria-label={t('CollectionView.pokeDexScreens')}>
         <button
           type="button"
           aria-pressed={active === 'home'}
           onClick={() => setScreen('home')}
         >
-          Collections
+          {t('CollectionView.collections')}
         </button>
         {active === 'builder' && (
           <button type="button" aria-pressed>
-            Add New Collection
+            {t('CollectionView.addNewCollection')}
           </button>
         )}
         <button
@@ -234,14 +252,22 @@ export function CollectionView({
           aria-pressed={active === 'grid' || active === 'entry'}
           onClick={() => setScreen('grid')}
         >
-          {opened ? definition.name : 'Pokédex'}
+          {opened
+            ? collectionDisplay(definition).name
+            : t('CollectionView.pokeDex')}
         </button>
         <button
           type="button"
           aria-pressed={active === 'filters'}
           onClick={() => setScreen('filters')}
         >
-          Filter{filters.length > 0 && ` (${filters.length})`}
+          {t('CollectionView.filter', {
+            value1:
+              filters.length > 0 &&
+              t('collections:CollectionView.filterCount', {
+                length: filters.length,
+              }),
+          })}
         </button>
       </nav>
       <div className="pc-screen">
@@ -312,7 +338,10 @@ export function CollectionView({
             }}
             filters={filters.map(({ field, text }) => ({
               field,
-              label: `${FILTER_FIELDS.find(([name]) => name === field)?.[1]}: ${text}`,
+              label: t('CollectionView.activeFilter', {
+                value1: getFilterFields().find(([name]) => name === field)?.[1],
+                text: text,
+              }),
             }))}
             onClearFilter={(field) =>
               setEntryFilters((current) => ({ ...current, [field]: '' }))
@@ -335,8 +364,10 @@ export function CollectionView({
       </div>
       <footer className="pc-footer">
         <span className="pc-footer-strip" aria-hidden="true" />
-        <span>pkcamp</span>
-        <span className="pc-label">Pokédex research system</span>
+        <span>{'pkcamp'}</span>
+        <span className="pc-label">
+          {t('CollectionView.pokeDexResearchSystem')}
+        </span>
       </footer>
     </div>
   )

@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import {
   Esp32TradeDevice,
   type Esp32TradeDeviceDependencies,
@@ -19,7 +20,10 @@ export class TradeDeviceService {
   constructor(devices: readonly TradeDevice[]) {
     this.devices = new Map(devices.map((device) => [device.id, device]))
     for (const id of TRADE_DEVICE_IDS) {
-      if (!this.devices.has(id)) throw new Error(`Missing trade device: ${id}`)
+      if (!this.devices.has(id))
+        throw new Error(
+          i18n.t('services:service.missingTradeDevice', { id: id })
+        )
     }
   }
 
@@ -29,7 +33,8 @@ export class TradeDeviceService {
 
   get(id: TradeDeviceId): TradeDevice {
     const device = this.devices.get(id)
-    if (!device) throw new Error(`Unknown trade device: ${id}`)
+    if (!device)
+      throw new Error(i18n.t('services:service.unknownTradeDevice', { id: id }))
     return device
   }
 }

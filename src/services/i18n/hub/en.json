@@ -1,0 +1,28 @@
+{
+  "DropboxMenu": {
+    "dropbox": "Dropbox",
+    "dropboxConnectedYourSavesSettingsAndCollectionsAreSynced": "Dropbox connected. Your saves, settings, and collections are synced.",
+    "signInToDropboxToUseYourSavesSettingsAnd": "Sign in to Dropbox to use your saves, settings, and collections across devices, or continue with browser storage.",
+    "signInToDropbox": "Sign in to Dropbox"
+  },
+  "SourceLink": {
+    "pkcampSourceCodeOnGithubOpensInANewTab": "pkCamp source code on GitHub (opens in a new tab)",
+    "sourceCodeOnGithub": "Source code on GitHub"
+  },
+  "WorldMap": {
+    "pkcamp": "pkCamp",
+    "pkcampAreas": "pkCamp areas",
+    "arcade": "Arcade",
+    "playYourAdventure": "Play your adventure",
+    "selectAGameFirst": "Select a game first",
+    "camp": "Camp",
+    "moveAndTradePokeMon": "Move and trade Pokémon",
+    "lab": "Lab",
+    "collectionsAndResearch": "Collections and research",
+    "changeGame": "Change game"
+  },
+  "LanguageMenu": {
+    "language": "Language",
+    "displayLanguage": "Display language"
+  }
+}

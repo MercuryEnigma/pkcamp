@@ -1,3 +1,4 @@
+import { i18n } from '../../../../../services/i18n'
 import { unzipSync } from 'fflate'
 import { DELTA_GBA_IDENTIFIER, type DeltaInfo } from './deltaTypes'
 
@@ -58,7 +59,7 @@ export async function readDeltaSkinArchive(
   } catch {
     throw new DeltaSkinError(
       'not-an-archive',
-      'This is not a valid .deltaskin file.'
+      i18n.t('arcade:parseDeltaSkin.thisIsNotAValidDeltaskinFile')
     )
   }
 
@@ -71,7 +72,10 @@ export async function readDeltaSkinArchive(
     names.find((name) => name === 'info.json') ??
     names.find((name) => /^[^/]+\/info\.json$/.test(name))
   if (!infoPath) {
-    throw new DeltaSkinError('missing-info', 'The skin has no info.json.')
+    throw new DeltaSkinError(
+      'missing-info',
+      i18n.t('arcade:parseDeltaSkin.theSkinHasNoInfoJson')
+    )
   }
   const prefix = infoPath.slice(0, infoPath.length - 'info.json'.length)
 
@@ -79,7 +83,10 @@ export async function readDeltaSkinArchive(
   try {
     raw = JSON.parse(new TextDecoder().decode(entries[infoPath]))
   } catch {
-    throw new DeltaSkinError('invalid-info', 'The skin’s info.json is broken.')
+    throw new DeltaSkinError(
+      'invalid-info',
+      i18n.t('arcade:parseDeltaSkin.theSkinSInfoJsonIsBroken')
+    )
   }
   const info = validateInfo(raw)
 
@@ -99,20 +106,20 @@ function validateInfo(raw: unknown): DeltaInfo {
   ) {
     throw new DeltaSkinError(
       'invalid-info',
-      'The skin’s info.json does not say which system it is for.'
+      i18n.t('arcade:parseDeltaSkin.theSkinSInfoJsonDoesNotSayWhichSystem')
     )
   }
   const info = raw as DeltaInfo
   if (info.gameTypeIdentifier !== DELTA_GBA_IDENTIFIER) {
     throw new DeltaSkinError(
       'unsupported-system',
-      'This skin is not for Game Boy Advance.'
+      i18n.t('arcade:parseDeltaSkin.thisSkinIsNotForGameBoyAdvance')
     )
   }
   if (!info.representations || typeof info.representations !== 'object') {
     throw new DeltaSkinError(
       'invalid-info',
-      'The skin’s info.json has no layouts.'
+      i18n.t('arcade:parseDeltaSkin.theSkinSInfoJsonHasNoLayouts')
     )
   }
   return info

@@ -1,3 +1,5 @@
+import { locale } from '../../services/i18n/format'
+import { useTranslation } from 'react-i18next'
 import { useNavigationGuard } from './navigationGuard'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { zipSync } from 'fflate'
@@ -14,7 +16,7 @@ import {
   DEFAULT_SPRITE_SOURCE_ID,
   SPRITE_SOURCES,
 } from '../../services/sprites/catalog'
-import { GAME_LABEL } from './gameDisplay'
+import { getGameLabel } from './gameDisplay'
 import { assertSaveMatchesCabin } from './saveVersion'
 import {
   storageErrorMessage,
@@ -55,7 +57,7 @@ async function loadBackupStatuses(
 }
 
 export function formatBackupDate(date: Date): string {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat(locale(), {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -81,6 +83,8 @@ export function useSettingsForm({
   /** Shown once Save Settings succeeds. */
   savedMessage: string
 }) {
+  const { t } = useTranslation(['settings', 'common'] as const)
+
   const { adapter } = usePkHex()
   const { provider, ready } = useStorageProvider()
   const { settings: savedSettings } = useStorageSettings()
@@ -181,11 +185,13 @@ export function useSettingsForm({
   const confirmReplaceBackup = (gameId: Gen3GameId): boolean => {
     const status = backups?.[gameId]
     if (!status?.hasSave) return true
-    const when = status.updatedAt
-      ? ` updated ${formatBackupDate(status.updatedAt)}`
-      : ''
     return window.confirm(
-      `Replace ${GAME_LABEL[gameId]} Cabin's backup? This replaces the backup${when} with the save you're bringing in.`
+      status.updatedAt
+        ? t('useSettingsForm.replaceDatedBackup', {
+            game: getGameLabel(gameId),
+            date: formatBackupDate(status.updatedAt),
+          })
+        : t('useSettingsForm.replaceBackup', { game: getGameLabel(gameId) })
     )
   }
 
@@ -208,12 +214,14 @@ export function useSettingsForm({
       }
       await provider.putSave(gameId, bytes)
       await refreshBackups()
-      setMessage(`${GAME_LABEL[gameId]} Cabin backup saved.`)
+      setMessage(
+        t('useSettingsForm.cabinBackupSaved', { value1: getGameLabel(gameId) })
+      )
     } catch (cause) {
       setMessage(
         cause instanceof Error
           ? storageErrorMessage(cause)
-          : 'Unable to open that backup.'
+          : t('useSettingsForm.unableToOpenThatBackup')
       )
     }
   }
@@ -221,7 +229,11 @@ export function useSettingsForm({
   /** The panel has already stored the save; refresh what the list shows. */
   const handleBackupRead = async (gameId: Gen3GameId) => {
     setGbaAction(null)
-    setMessage(`${GAME_LABEL[gameId]} Cabin backup saved from GBA.`)
+    setMessage(
+      t('useSettingsForm.cabinBackupSavedFromGba', {
+        value1: getGameLabel(gameId),
+      })
+    )
     await refreshBackups()
   }
 
@@ -274,7 +286,7 @@ export function useSettingsForm({
         }
       }
       if (Object.keys(files).length === 0) {
-        setMessage('The GBA Lodge campsite is empty.')
+        setMessage(t('useSettingsForm.theGbaLodgeCampsiteIsEmpty'))
         return
       }
       const zipped = zipSync(files)
@@ -293,14 +305,20 @@ export function useSettingsForm({
   const handleBackupRemove = async (gameId: Gen3GameId) => {
     if (
       !window.confirm(
-        `Remove the saved backup for ${GAME_LABEL[gameId]} Cabin? This cannot be undone.`
+        t('useSettingsForm.removeTheSavedBackupForCabinThisCannotBeUndone', {
+          value1: getGameLabel(gameId),
+        })
       )
     )
       return
     try {
       await provider.discardSave(gameId)
       await refreshBackups()
-      setMessage(`${GAME_LABEL[gameId]} Cabin backup removed.`)
+      setMessage(
+        t('useSettingsForm.cabinBackupRemoved', {
+          value1: getGameLabel(gameId),
+        })
+      )
     } catch (cause) {
       setMessage(storageErrorMessage(cause))
     }
@@ -312,7 +330,7 @@ export function useSettingsForm({
     if (!camps || !camp) return
     if (
       !window.confirm(
-        'Delete every Camping Pokémon at the GBA Lodge Camp Sites? Download the campsite first to keep a copy. This cannot be undone.'
+        t('useSettingsForm.deleteEveryCampingPokeMonAtTheGbaLodgeCamp')
       )
     )
       return
@@ -322,7 +340,7 @@ export function useSettingsForm({
       }
       await provider.saveCamp(GBA_GENERATION, emptied)
       setCamps(new Map(camps).set(GBA_GENERATION, emptied))
-      setMessage('GBA Lodge campsite deleted.')
+      setMessage(t('useSettingsForm.gbaLodgeCampsiteDeleted'))
     } catch (cause) {
       setMessage(storageErrorMessage(cause))
     }
@@ -352,8 +370,8 @@ export function useSettingsForm({
   const confirmLeave = useNavigationGuard(
     hasChanges || saving,
     saving
-      ? 'Settings are being saved. Leave this screen?'
-      : 'You have unsaved settings. Leave without saving them?'
+      ? t('useSettingsForm.settingsAreBeingSavedLeaveThisScreen')
+      : t('useSettingsForm.youHaveUnsavedSettingsLeaveWithoutSavingThem')
   )
 
   const handleSave = async () => {

@@ -1,3 +1,4 @@
+import { i18n } from '../../../services/i18n'
 import { checkGen3Save } from '../../../services/emulator/gen3SaveSlots'
 
 /** A complete in-game save taken from the running emulator. */
@@ -37,13 +38,16 @@ export function bootSaveFor(bytes: Uint8Array | null): BootSave {
     case 'incomplete':
       return {
         kind: 'invalid',
-        message:
-          'The newest save in this file is incomplete or damaged, so it cannot be played safely.',
+        message: i18n.t(
+          'arcade:arcadeSession.theNewestSaveInThisFileIsIncompleteOrDamaged'
+        ),
       }
     case 'unsupported-size':
       return {
         kind: 'invalid',
-        message: `This is not a Gen 3 battery save (${bytes.length} bytes).`,
+        message: i18n.t('arcade:arcadeSession.thisIsNotAGen3BatterySaveBytes', {
+          length: bytes.length,
+        }),
       }
   }
 }

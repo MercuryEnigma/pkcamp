@@ -1,0 +1,286 @@
+{
+  "gbaRom": {
+    "thisIsNotASupportedPokeMonRubySapphireEmerald": "Esta ROM de GBA no corresponde a una versión compatible de Pokémon Ruby, Sapphire, Emerald, FireRed o LeafGreen.",
+    "thisRomBelongsToNot": "Esta ROM corresponde a {{gameId}}, no a {{expected}}."
+  },
+  "mgbaRuntime": {
+    "mgbaIsAlreadyBoundToAnotherScreenReloadThePlayer": "mGBA ya está vinculado a otra pantalla. Recarga el reproductor.",
+    "mgbaCouldNotLoadThisRom": "mGBA no ha podido cargar esta ROM."
+  },
+  "gbLinkWords": {
+    "theGbLinkStoppedAnsweringIsTheLinkCableConnected": "GB-Link ha dejado de responder. ¿Está conectado el cable Game Link?"
+  },
+  "gbaCartClient": {
+    "noGbaCartridgeWasDetected": "No se ha detectado ningún cartucho de GBA.",
+    "thisCartridgeHasNoSaveMemory": "Este cartucho no tiene memoria de guardado.",
+    "theBackupIsBytesButTheCartridgeSaveIsBytes": "La copia de seguridad ocupa {{length}} bytes, pero la partida del cartucho ocupa {{saveSize}} bytes.",
+    "theGbaSaveReaderIsNotResponding": "El lector de partidas de GBA no responde.",
+    "theGbaSaveReaderDidNotAcceptTheCommand": "El lector de partidas de GBA no ha aceptado la orden.",
+    "theGbaSaveReaderStoppedMidOperation": "El lector de partidas de GBA se ha detenido durante la operación.",
+    "timedOutWaitingForTheGba": "Se ha agotado el tiempo de espera de la GBA.",
+    "theGbaSaveWriterLostSyncTryAgain": "El proceso de escritura de la partida de GBA ha perdido la sincronización. Vuelve a intentarlo.",
+    "theBackupKeptArrivingCorruptedCheckTheLinkCable": "La copia de seguridad ha llegado dañada repetidamente. Comprueba el cable Game Link.",
+    "theDataKeptArrivingCorruptedCheckTheLinkCable": "Los datos han llegado dañados repetidamente. Comprueba el cable Game Link."
+  },
+  "multiboot": {
+    "multibootRomIsTooLarge": "La ROM multiboot es demasiado grande.",
+    "theGbaDidNotStartMultibootTryAgain": "La GBA no ha iniciado el modo multiboot. Vuelve a intentarlo.",
+    "theGbaMultibootHandshakeFailed": "Ha fallado la comunicación inicial del modo multiboot de la GBA.",
+    "theMultibootTransferWasCorruptedTryAgain": "La transferencia multiboot ha llegado dañada. Vuelve a intentarlo.",
+    "theGbaDidNotConfirmTheMultibootTransfer": "La GBA no ha confirmado la transferencia multiboot."
+  },
+  "readGbSave": {
+    "noSaveDumpStartedResetTheGbaAndTryAgain": "No se ha iniciado la extracción de la partida. Reinicia la GBA, vuelve a intentarlo y pulsa B en la herramienta de extracción.",
+    "theGbGbcSaveChecksumRepeatedlyFailedNoDownloadWas": "La verificación de integridad de la partida de GB/GBC ha fallado repetidamente. No se ha generado ninguna descarga; reinicia y vuelve a intentarlo.",
+    "sendingTheGbGbcBackupTool": "Enviando la herramienta de copia de seguridad de GB/GBC…",
+    "waitForTheGbcScreenInsertYourGbGbcGame": "Espera a que aparezca la pantalla de GBC. Inserta el juego de GB/GBC y pulsa B para crear una copia de seguridad de la partida."
+  },
+  "readGbaSave": {
+    "sendingTheCartridgeToolToTheGba": "Enviando la herramienta de cartuchos a la GBA…",
+    "theGbaCartridgeToolDidNotStartTryAgain": "La herramienta de cartuchos de GBA no se ha iniciado. Vuelve a intentarlo.",
+    "checkingTheCartridge": "Comprobando el cartucho…",
+    "noGbaCartridgeWasDetected": "No se ha detectado ningún cartucho de GBA.",
+    "thisCartridgeIsWhichDoesnTMatchTheExpectedGame": "Este cartucho es {{value1}}, que no corresponde al juego esperado.",
+    "readingTheSave": "Leyendo la partida…",
+    "thisCartridgeIsNotASupportedGame": "El juego de este cartucho no es compatible.",
+    "backingUpTheCartridgeSaveFirst": "Creando primero una copia de seguridad de la partida del cartucho…",
+    "backingUpTheCartridgeSaveFirst2": "Creando primero una copia de seguridad de la partida del cartucho… {{value1}}%",
+    "sendingTheBackup": "Enviando la copia de seguridad…",
+    "writingToTheCartridgeKeepTheGbaOnUntilThis": "Escribiendo en el cartucho. Mantén la GBA encendida hasta que termine.",
+    "readingTheRom": "Leyendo la ROM…",
+    "readingTheBios": "Leyendo la BIOS…"
+  },
+  "gbaGift": {
+    "unknownMysteryGift": "Regalo misterioso desconocido: {{id}}",
+    "mysteryGiftNeedsGbLinkFirmwareOrNewerOpenSettings": "Regalo Misterioso necesita el firmware {{MIN_GBA_SWITCH_FIRMWARE}} de GB-Link o una versión posterior{{value2}}. Abre Ajustes → Dispositivos para actualizarlo.",
+    "theGbLinkLeftWirelessAdapterMode": "GB-Link ha salido del modo de adaptador inalámbrico.",
+    "theGbLinkDisconnected": "GB-Link se ha desconectado.",
+    "theMysteryGiftGroupStopped": "El grupo de Regalo Misterioso se ha detenido.",
+    "theGbLinkDidnTStartWirelessAdapterModeUnplug": "GB-Link no ha iniciado el modo de adaptador inalámbrico. Desconéctalo, vuelve a conectarlo e inténtalo de nuevo.",
+    "thisGbLinkHas": "; este GB-Link tiene la versión {{firmware}}"
+  },
+  "gifts": {
+    "alteringCave": "Altering Cave",
+    "changesTheWildPokeMonInAlteringCaveEachDelivery": "Cambia los Pokémon salvajes de Altering Cave. Cada entrega avanza al siguiente.",
+    "fastForward4": "Velocidad ×4",
+    "pressRToRunTheGameUpToFourTimes": "Pulsa R para ejecutar el juego hasta cuatro veces más rápido y vuelve a pulsar R para jugar a velocidad normal.",
+    "pokeMonFollow": "Pokémon acompañante",
+    "yourLeadPokeMonWalksBehindYouInTheOverworld": "Tu primer Pokémon te sigue por el mapa cuando el juego dispone de un sprite para él.",
+    "pcAnywhere": "PC en cualquier lugar",
+    "pressRInTheFieldToOpenThePokeMon": "Pulsa R mientras estás en el mapa para abrir el sistema de almacenamiento de Pokémon desde cualquier lugar.",
+    "reusableTms": "MT reutilizables",
+    "teachingAMoveWithATmNoLongerUsesThe": "Enseñar un movimiento mediante una MT ya no consume la MT.",
+    "trader": "Evolución por intercambio",
+    "evolvesAPartyPokeMonThatNormallyEvolvesByTrading": "Evoluciona un Pokémon del equipo que normalmente evoluciona por intercambio, como Kadabra o Machoke."
+  },
+  "switchGift": {
+    "unknownMysteryGift": "Regalo misterioso desconocido: {{id}}",
+    "theEsp32Disconnected": "El ESP32 se ha desconectado.",
+    "theMysteryGiftGroupStopped": "El grupo de Regalo Misterioso se ha detenido."
+  },
+  "adapter": {
+    "indexIsOutOfBounds0": "El índice {{index}} de {{label}} está fuera de los límites (0..{{value3}})",
+    "cannotUseADisposedSave": "No se puede usar una partida que ya se ha liberado",
+    "cannotMoveAnEmptyBoxSlot": "No se puede mover un espacio vacío de una caja",
+    "aGroupMoveMustContainAtLeastOneSlot": "Un movimiento de grupo debe incluir al menos un espacio",
+    "duplicateGroupMoveSource": "Origen duplicado en el movimiento de grupo: {{fromKey}}",
+    "duplicateGroupMoveDestination": "Destino duplicado en el movimiento de grupo: {{toKey}}",
+    "cannotMoveAGroupContainingOnlyEmptySlots": "No se puede mover un grupo formado únicamente por espacios vacíos",
+    "groupMoveDestinationOverlapsAPokeMonOutsideTheSelected": "El destino del grupo se superpone con un Pokémon que no pertenece al grupo seleccionado",
+    "box": "Caja",
+    "boxSlot": "Espacio de la caja",
+    "partySlot": "Espacio del equipo"
+  },
+  "pkhexWasmBackend": {
+    "genApproximate": "Generación {{generation}} (aproximada)",
+    "pkhexWasmBackendCannotEditADisposedSave": "Motor de pkhex-wasm: no se puede editar una partida que ya se ha liberado",
+    "pkhexWasmBackendCannotPlaceAPokemonnodeThisBackendDid": "Motor de pkhex-wasm: no se puede colocar un PokemonNode que no haya creado este motor",
+    "pkhexWasmBackendCannotSerializeADisposedSave": "Motor de pkhex-wasm: no se puede serializar una partida que ya se ha liberado",
+    "cannotExportForeignPokemon": "Motor de pkhex-wasm: no se puede exportar un PokemonNode que no haya creado este motor. PokemonNode no contiene PID, experiencia ni datos de encuentro, por lo que no se pueden reconstruir bytes .pkm válidos a partir de él. Exporta nodos obtenidos de loadSave() o loadPokemonFile()."
+  },
+  "launch": {
+    "pokeTransporterRomHasAnUnexpectedSize": "La ROM de Poké Transporter tiene un tamaño inesperado.",
+    "pokeTransporterRomVerificationFailedReloadPkcampBeforeRetrying": "Ha fallado la verificación de la ROM de Poké Transporter. Recarga PkCamp antes de volver a intentarlo.",
+    "verifyingPokeTransporterGbV121": "Verificando Poké Transporter GB v1.2.1…",
+    "waitingForTheGbaInMultibootMode": "Esperando a la GBA en modo multiboot…"
+  },
+  "resolver": {
+    "shiny": "Variocolor",
+    "egg": "Huevo"
+  },
+  "resources": {
+    "spriteConcurrencyMustBeAPositiveInteger": "El número de sprites que se cargan simultáneamente debe ser un entero positivo.",
+    "couldNotLoadSprite": "No se ha podido cargar el sprite: {{path}}"
+  },
+  "fileStoreProvider": {
+    "invalidCollectionId": "ID de colección no válido: {{collectionId}}.",
+    "aCampNeedsAtLeastOneCampSite": "Un campamento necesita al menos una parcela.",
+    "eachCampSiteHoldsExactlyPokeMon": "Cada parcela tiene exactamente {{CAMP_SITE_SIZE}} espacios para Pokémon.",
+    "invalidCampPokeMonId": "ID de Pokémon del campamento no válido: {{id}}.",
+    "duplicateCampPokeMonId": "ID de Pokémon del campamento duplicado: {{id}}.",
+    "invalidRomFileExtension": "Extensión de archivo ROM no válida: «{{extension}}».",
+    "campSitesWereSavedByANewerVersionOfPkcamp": "Las parcelas se guardaron con una versión más reciente de PkCamp (formato {{version}}).",
+    "theCampSitesFileIsDamagedAndCannotBeRead": "El archivo de las parcelas está dañado y no se puede leer.",
+    "missingPokemonFile": "Falta el archivo del Pokémon del campamento {{id}}."
+  },
+  "indexedDbFileStore": {
+    "localStorageRequestFailed": "La solicitud al almacenamiento local ha fallado.",
+    "localStorageWriteFailed": "La escritura en el almacenamiento local ha fallado.",
+    "localStorageWriteWasAborted": "Se ha cancelado la escritura en el almacenamiento local.",
+    "unableToOpenLocalStorage": "No se ha podido abrir el almacenamiento local.",
+    "localStorageIsBlockedByAnotherTab": "Otra pestaña está bloqueando el almacenamiento local."
+  },
+  "esp32TradeDevice": {
+    "anEsp32TradeNeedsSixPartySlotsAtLeastTwo": "Un intercambio con ESP32 necesita seis espacios de equipo, al menos dos Pokémon y un espacio seleccionado que esté ocupado.",
+    "thisBrowserDoesNotSupportWebSerial": "Este navegador no admite Web Serial.",
+    "theEsp32IsBusy": "El ESP32 está ocupado.",
+    "theProdKeysFileIsMissingOrHasAnInvalid": "Falta el archivo prod.keys o contiene un valor no válido para: {{value1}}.",
+    "theEsp32Rejected": "El ESP32 ha rechazado: {{value1}}.",
+    "aTradeIsAlreadyRunning": "Ya hay un intercambio en curso.",
+    "theEsp32NeedsTheRequiredSwitchKeysBeforeTrading": "El ESP32 necesita las claves de Switch correspondientes antes de intercambiar.",
+    "theSwitchSGameCanTTradeWithThisGba": "El juego de la Switch aún no puede intercambiar con esta GBA.",
+    "readyToTrade": "Listo para intercambiar.",
+    "linkedToTheSwitchSRoom": "Conectado a la sala de la Switch.",
+    "gbaCableLinkOpen": "Conexión por cable de GBA abierta.",
+    "mysteryGiftNeedsEsp32FirmwareOrNewer": "Regalo Misterioso necesita el firmware {{minFirmware}} de ESP32 o una versión posterior{{value2}}.",
+    "theEsp32NeedsYourSwitchKeysAddProdKeysOn": "El ESP32 necesita las claves de tu Switch. Añade primero prod.keys en la mesa de intercambio.",
+    "noTradeIsActive": "No hay ningún intercambio en curso.",
+    "connectTheEsp32BeforeTrading": "Conecta el ESP32 antes de intercambiar.",
+    "relayingBetweenTheGbaAndTheSwitch": "Transmitiendo datos entre la GBA y la Switch.",
+    "thisBoardHas": "; esta placa tiene la versión {{version}}"
+  },
+  "gbLinkFirmwareUpdate": {
+    "couldNotCheckTheLatestFirmwareTryAgain": "No se ha podido comprobar el firmware más reciente. Vuelve a intentarlo.",
+    "theFirmwareCatalogIsUnavailable": "El catálogo de firmware no está disponible.",
+    "noCompatibleGbLinkFirmwareWasFound": "No se ha encontrado ningún firmware compatible con GB-Link.",
+    "theFirmwareDownloadIsIncomplete": "La descarga del firmware está incompleta.",
+    "theFirmwareIsNotACompleteGbLinkRp2040Image": "El firmware no es una imagen completa de GB-Link RP2040. No se ha iniciado ninguna actualización.",
+    "gbLinkIsBusyFinishTheCurrentTaskFirst": "GB-Link está ocupado. Termina primero la tarea actual.",
+    "useChromeOrEdgeForAutomaticFirmwareUpdates": "Usa Chrome o Edge para las actualizaciones automáticas de firmware.",
+    "selectYourGbLinkToFinishCheckingTheUpdate": "Selecciona tu GB-Link para terminar de comprobar la actualización.",
+    "chooseYourGbLink": "Selecciona tu GB-Link.",
+    "couldNotReadTheInstalledVersionReconnectGbLinkAnd": "No se ha podido leer la versión instalada. Vuelve a conectar GB-Link e inténtalo de nuevo.",
+    "checkingTheLatestFirmware": "Comprobando el firmware más reciente…",
+    "yourGbLinkIsUpToDate": "Tu GB-Link está actualizado.",
+    "preparingFirmware": "Preparando el firmware {{version}}…",
+    "couldNotDownloadFirmwareYourGbLinkHasNotBeen": "No se ha podido descargar el firmware. Tu GB-Link no se ha modificado.",
+    "restartingGbLinkIntoUpdateMode": "Reiniciando GB-Link en modo de actualización…",
+    "unplugGbLinkHoldBootselWhilePluggingItBackIn": "Desconecta GB-Link. Mantén pulsado BOOTSEL mientras lo vuelves a conectar y pulsa el botón de abajo.",
+    "unplugGbLinkHoldBootselWhilePluggingItBackIn2": "Desconecta GB-Link. Mantén pulsado BOOTSEL mientras lo vuelves a conectar y selecciona RP2 Boot abajo.",
+    "pressTheButtonBelowAndSelectRp2BootToFinish": "Pulsa el botón de abajo y selecciona RP2 Boot para terminar la actualización.",
+    "selectTheGbLinkRp2BootDevice": "Selecciona el dispositivo RP2 Boot de GB-Link.",
+    "updatingGbLinkKeepItPluggedIn": "Actualizando GB-Link… Mantenlo conectado.",
+    "couldNotOpenGbLinkInUpdateMode": "No se ha podido abrir GB-Link en modo de actualización.",
+    "checkingTheWrittenFirmwareKeepItPluggedIn": "Comprobando el firmware escrito… Mantén el dispositivo conectado.",
+    "firmwareVerificationFailedKeepGbLinkConnectedAndRetryThe": "Ha fallado la verificación del firmware. Mantén GB-Link conectado y vuelve a intentar la actualización.",
+    "reconnectingGbLink": "Volviendo a conectar GB-Link…",
+    "firmwareWrittenAndCheckedPressTheButtonBelowToReconnect": "Firmware escrito y verificado. Pulsa el botón de abajo para volver a conectar GB-Link.",
+    "couldNotConfirmTheNewFirmwareVersionReconnectAndTry": "No se ha podido confirmar la nueva versión del firmware. Vuelve a conectar el dispositivo e inténtalo de nuevo.",
+    "gbLinkIsUpToDate": "GB-Link está actualizado: {{current}}."
+  },
+  "gbLinkProtocol": {
+    "aGbLinkSerialPayloadCannotExceed64Bytes": "Un paquete de datos de GB-Link por puerto serie no puede superar los 64 bytes."
+  },
+  "gbLinkTradeDevice": {
+    "aGbLinkTradeNeedsSixPartySlotsAndAn": "Un intercambio con GB-Link necesita seis espacios de equipo y un espacio seleccionado que esté ocupado.",
+    "theTradeWasCancelled": "El intercambio se ha cancelado.",
+    "timedOutWaitingForTheGbLinkAdapter": "Se ha agotado el tiempo de espera del adaptador GB-Link.",
+    "thisBrowserSupportsNeitherWebusbNorWebSerial": "Este navegador no admite WebUSB ni Web Serial.",
+    "theGbLinkIsBusy": "GB-Link está ocupado.",
+    "aGbLinkTradeIsAlreadyRunning": "Ya hay un intercambio con GB-Link en curso.",
+    "preparingTheGbLinkAdapter": "Preparando el adaptador GB-Link.",
+    "gbLinkPokeMonDataMustBe100Bytes": "Los datos de un Pokémon de GB-Link deben ocupar 100 bytes.",
+    "chooseThePokeMonOnTheConnectedGameBoyAdvance": "Elige el Pokémon en la Game Boy Advance conectada.",
+    "connectTheGbLinkBeforeTrading": "Conecta GB-Link antes de intercambiar."
+  },
+  "gbLinkTransport": {
+    "thisBrowserHasNoUsbDeviceApis": "Este navegador no dispone de API para dispositivos USB.",
+    "selectYourGbLinkToReconnect": "Selecciona tu GB-Link para volver a conectarlo.",
+    "thisBrowserSupportsNeitherWebusbNorWebSerial": "Este navegador no admite WebUSB ni Web Serial.",
+    "aGbLinkDataPayloadCannotExceed64Bytes": "Un paquete de datos de GB-Link no puede superar los 64 bytes.",
+    "theGbLinkSerialPortDidNotExposeReadableAnd": "El puerto serie de GB-Link no proporcionó flujos de lectura y escritura.",
+    "theGbLinkIsNotConnected": "GB-Link no está conectado.",
+    "theGbLinkSerialWriterIsUnavailable": "No está disponible la escritura en el puerto serie de GB-Link.",
+    "theGbLinkUsbDeviceIsUnavailable": "El dispositivo USB de GB-Link no está disponible.",
+    "gbLinkUsbWriteFailed": "Ha fallado la escritura USB de GB-Link: {{status}}."
+  },
+  "localTradeDevice": {
+    "tradesRunThroughRuntrade": "Los intercambios de {{label}} se realizan mediante runTrade.",
+    "saveBackup": "Copia de seguridad de la partida",
+    "theSelectedBackupIsNoLongerStored": "La copia de seguridad seleccionada ya no está guardada.",
+    "theSelectedBackupSlotIsNowEmpty": "El espacio seleccionado de la copia de seguridad está vacío.",
+    "theSelectedBackupSlotChangedBeforeTheTrade": "El espacio seleccionado de la copia de seguridad ha cambiado antes del intercambio.",
+    "campSites": "Parcelas",
+    "theSelectedCampSitePositionIsNowEmpty": "La posición seleccionada de la parcela está vacía.",
+    "theSelectedCampSiteSlotChangedBeforeTheTrade": "El espacio seleccionado de la parcela ha cambiado antes del intercambio."
+  },
+  "service": {
+    "missingTradeDevice": "Falta el dispositivo de intercambio: {{id}}",
+    "unknownTradeDevice": "Dispositivo de intercambio desconocido: {{id}}"
+  },
+  "tradeRoutes": {
+    "thoseTwoSourcesCannotTradeWithEachOther": "Esos dos orígenes no pueden intercambiar entre sí.",
+    "twoPokeMonAreRequiredToEnterASwitchTrade": "Se necesitan dos Pokémon para entrar en un intercambio de Switch.",
+    "theRoomClosedWithoutCompletingATrade": "La sala se ha cerrado sin completar ningún intercambio.",
+    "chooseTheGameOnTheGba": "Elige el juego de la GBA.",
+    "gbaSwitchNeedsGbLinkFirmwareOrNewer": "Para GBA ↔ Switch se necesita el firmware {{MIN_GBA_SWITCH_FIRMWARE}} de GB-Link o una versión posterior.",
+    "selectOnePokeMonFirst": "Selecciona primero un Pokémon."
+  },
+  "dropboxAccount": {
+    "somethingWentWrong": "Se ha producido un error.",
+    "dropboxIsNotConfigured": "Dropbox no está configurado.",
+    "theDropboxSignInCouldNotBeVerifiedTryAgain": "No se ha podido verificar el inicio de sesión de Dropbox. Vuelve a intentarlo.",
+    "dropboxSignInWasCancelled": "Se ha cancelado el inicio de sesión de Dropbox.",
+    "dropboxDidNotAllowPkcampToStaySignedIn": "Dropbox no ha permitido que PkCamp mantenga la sesión iniciada.",
+    "youAreSignedOutOfDropboxSignInToDropbox": "Tu sesión de Dropbox está cerrada. Vuelve a iniciar sesión en Dropbox.",
+    "dropbox": "Dropbox",
+    "signedInToDropboxButCopyingThisBrowserSData": "Se ha iniciado sesión en Dropbox, pero no se han podido copiar los datos de este navegador: {{value1}}"
+  },
+  "dropboxAuth": {
+    "yourDropboxSignInExpiredSignInToDropboxAgain": "Tu sesión de Dropbox ha caducado. Vuelve a iniciar sesión en Dropbox.",
+    "couldNotReachDropboxCheckYourConnectionAndTryAgain": "No se ha podido acceder a Dropbox. Comprueba la conexión y vuelve a intentarlo.",
+    "dropboxSignInFailed": "El inicio de sesión de Dropbox ha fallado ({{value1}}).",
+    "dropboxIsHavingProblemsTryAgainShortly": "Dropbox está teniendo problemas. Vuelve a intentarlo dentro de poco.",
+    "badRequest": "solicitud incorrecta"
+  },
+  "dropboxFileStore": {
+    "couldNotReachDropboxCheckYourConnectionAndTryAgain": "No se ha podido acceder a Dropbox. Comprueba la conexión y vuelve a intentarlo.",
+    "dropboxRejectedTheSignInSignInToDropboxAgain": "Dropbox ha rechazado el inicio de sesión. Vuelve a iniciar sesión en Dropbox.",
+    "dropboxIsBusyRightNowTryAgainShortly": "Dropbox está ocupado ahora mismo. Vuelve a intentarlo dentro de poco.",
+    "dropboxIsHavingProblemsTryAgainShortly": "Dropbox está teniendo problemas. Vuelve a intentarlo dentro de poco.",
+    "dropboxDeniedAccessToPkcampDataSignInToDropbox": "Dropbox ha denegado el acceso a los datos de PkCamp. Vuelve a iniciar sesión en Dropbox.",
+    "dropboxCouldNot": "Dropbox no ha podido {{what}} ({{status}} {{summary}}).",
+    "dropboxCouldNot409": "Dropbox no ha podido {{what}} (409 {{summary}}).",
+    "delete": "eliminar {{path}}",
+    "dropboxCouldNotRead409": "Dropbox no ha podido leer {{path}} (409 {{summary}}).",
+    "read": "leer {{path}}",
+    "dropboxStoppedRespondingTryAgain": "Dropbox ha dejado de responder. Vuelve a intentarlo.",
+    "yourDropboxIsFullSoPkcampCouldNotSave": "Tu Dropbox está lleno, por lo que PkCamp no ha podido guardar los datos.",
+    "dropboxCouldNotSave": "Dropbox no ha podido guardar {{path}} ({{status}} {{summary}}).",
+    "list": "listar {{value1}}",
+    "theAppFolder": "la carpeta de la aplicación"
+  },
+  "storage": {
+    "thisBrowser": "Este navegador"
+  },
+  "activeGame": {
+    "thisIsASaveNotASave": "Esta es una partida de {{aggregated}}, no de {{value2}}.",
+    "theCampPositionIsOutOfBounds": "La posición del campamento está fuera de los límites.",
+    "theSaveAdapterIsUnavailable": "El adaptador de partidas no está disponible.",
+    "theActiveGameHasNoSaveToEdit": "El juego activo no tiene ninguna partida que editar.",
+    "theActiveCampIsUnavailable": "El campamento activo no está disponible.",
+    "cannotMoveAnEmptyCampPosition": "No se puede mover una posición vacía del campamento.",
+    "aSelectedSaveAndCampAreRequired": "Es necesario seleccionar una partida y un campamento.",
+    "cannotMoveAnEmptyBoxSlot": "No se puede mover un espacio vacío de una caja.",
+    "theActiveGameHasNoSaveToWrite": "El juego activo no tiene ninguna partida que escribir.",
+    "selectAGameBeforeReplacingItsSave": "Selecciona un juego antes de reemplazar su partida.",
+    "noActiveSaveIsSelected": "No se ha seleccionado ninguna partida activa.",
+    "theCommittedActiveGameIsUnavailable": "La versión guardada del juego activo no está disponible.",
+    "theCampIsUnavailable": "El campamento no está disponible.",
+    "theActiveGameIsNotReady": "El juego activo no está listo."
+  },
+  "collections": {
+    "enableTheCollectionBeforeOpeningIt": "Activa la colección antes de abrirla.",
+    "atLeastOneCollectionMustRemainEnabled": "Debe quedar al menos una colección activa."
+  }
+}

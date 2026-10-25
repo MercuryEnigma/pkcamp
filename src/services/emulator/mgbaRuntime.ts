@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 import type { GbaButton } from './input'
 
 export interface MgbaModule {
@@ -109,7 +110,11 @@ export function createMgbaRuntime(
   const getModule = (canvas: HTMLCanvasElement): Promise<MgbaModule> => {
     if (moduleCanvas && moduleCanvas !== canvas) {
       return Promise.reject(
-        new Error('mGBA is already bound to another screen. Reload the player.')
+        new Error(
+          i18n.t(
+            'services:mgbaRuntime.mgbaIsAlreadyBoundToAnotherScreenReloadThePlayer'
+          )
+        )
       )
     }
     if (!modulePromise) {
@@ -161,7 +166,7 @@ export function createMgbaRuntime(
       session.stopped = true
       active = null
       module.quitGame()
-      throw new Error('mGBA could not load this ROM.')
+      throw new Error(i18n.t('services:mgbaRuntime.mgbaCouldNotLoadThisRom'))
     }
     // Each loadGame creates a new core, and mGBA ignores callbacks registered
     // without one, so they are attached after every load. The JS wrapper

@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 /** GB-Link firmware host protocol values used by PkCamp. */
 export const GB_LINK_COMMAND = {
   setMode: 0x00,
@@ -65,7 +66,9 @@ export function encodeGbLinkSerialFrame(
   payload: Uint8Array
 ): Uint8Array {
   if (payload.length > GB_LINK_MAX_PAYLOAD) {
-    throw new RangeError('A GB-Link serial payload cannot exceed 64 bytes.')
+    throw new RangeError(
+      i18n.t('services:gbLinkProtocol.aGbLinkSerialPayloadCannotExceed64Bytes')
+    )
   }
 
   const frame = new Uint8Array(5 + payload.length)

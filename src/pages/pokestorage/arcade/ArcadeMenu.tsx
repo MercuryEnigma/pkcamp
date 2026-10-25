@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next'
+import { i18n } from '../../../services/i18n'
 import type { SyncState } from './arcadeSync'
 import {
-  BINDING_GROUPS,
-  BINDING_NAME as BUTTON_NAME,
+  getBindingGroups,
+  getBindingName as BUTTON_NAME,
   keyLabel,
   type Bindable,
   type KeyBindings,
@@ -17,11 +19,13 @@ import './arcadeMenu.css'
  */
 export type MenuView = 'main' | 'buttons' | 'skins' | 'advanced'
 
-const VIEW_TITLE: Readonly<Record<Exclude<MenuView, 'main'>, string>> = {
-  buttons: 'Controls',
-  skins: 'Skins',
-  advanced: 'Advanced',
-}
+const getViewTitle = (): Readonly<
+  Record<Exclude<MenuView, 'main'>, string>
+> => ({
+  buttons: i18n.t('arcade:ArcadeMenu.controls'),
+  skins: i18n.t('arcade:ArcadeMenu.skins'),
+  advanced: i18n.t('arcade:ArcadeMenu.advanced'),
+})
 
 interface ArcadeMenuProps {
   menuView: MenuView
@@ -86,6 +90,8 @@ export function ArcadeMenu({
   chooseRom,
   skinLibrary,
 }: ArcadeMenuProps) {
+  const { t } = useTranslation(['arcade', 'common'] as const)
+
   const subView = (view: Exclude<MenuView, 'main'>) => (
     <header className="arcade-menu-header">
       <button
@@ -93,24 +99,26 @@ export function ArcadeMenu({
         className="arcade-menu-back"
         onClick={() => setMenuView('main')}
       >
-        ‹ Menu
+        {t('ArcadeMenu.menu')}
       </button>
-      <h2 id={`arcade-menu-title-${view}`}>{VIEW_TITLE[view]}</h2>
+      <h2 id={`arcade-menu-title-${view}`}>{getViewTitle()[view]}</h2>
     </header>
   )
   return (
     <>
       <div className="arcade-menu-view" hidden={menuView !== 'main'}>
         <header className="arcade-menu-header">
-          <h2 id="arcade-menu-title-main">{running ? 'Paused' : 'Menu'}</h2>
+          <h2 id="arcade-menu-title-main">
+            {running ? t('ArcadeMenu.paused') : t('ArcadeMenu.menu2')}
+          </h2>
         </header>
         {(running || sync.status === 'saving' || sync.status === 'saved') && (
           <p className="arcade-menu-save" data-status={sync.status}>
             {sync.status === 'saving'
-              ? 'Saving your game…'
+              ? t('ArcadeMenu.savingYourGame')
               : sync.status === 'saved'
-                ? 'Your game is saved.'
-                : 'Save inside the game before you leave.'}
+                ? t('ArcadeMenu.yourGameIsSaved')
+                : t('ArcadeMenu.saveInsideTheGameBeforeYouLeave')}
           </p>
         )}
         <div className="arcade-menu-list">
@@ -119,18 +127,18 @@ export function ArcadeMenu({
             className="arcade-menu-item arcade-menu-item--primary"
             onClick={() => close()}
           >
-            {running ? '▶ Keep playing' : 'Close menu'}
+            {running ? t('ArcadeMenu.keepPlaying') : t('ArcadeMenu.closeMenu')}
           </button>
           <div
             className="arcade-menu-setting"
             role="group"
             aria-labelledby="arcade-menu-sound"
           >
-            <span id="arcade-menu-sound">Sound</span>
+            <span id="arcade-menu-sound">{t('ArcadeMenu.sound')}</span>
             <div className="arcade-menu-sound">
               <label className="arcade-menu-check">
                 <input type="checkbox" checked={muted} onChange={toggleMute} />
-                Mute
+                {t('ArcadeMenu.mute')}
               </label>
               <input
                 type="range"
@@ -138,7 +146,7 @@ export function ArcadeMenu({
                 max="100"
                 step="1"
                 value={volume}
-                aria-label="Volume"
+                aria-label={t('ArcadeMenu.volume')}
                 onChange={(event) => changeVolume(Number(event.target.value))}
               />
             </div>
@@ -153,7 +161,9 @@ export function ArcadeMenu({
                 toggleFullscreen()
               }}
             >
-              {fullscreen ? '⛶ Leave full screen' : '⛶ Full screen'}
+              {fullscreen
+                ? t('ArcadeMenu.leaveFullScreen')
+                : t('ArcadeMenu.fullScreen')}
             </button>
           )}
           <div
@@ -161,7 +171,7 @@ export function ArcadeMenu({
             role="group"
             aria-labelledby="arcade-menu-speed"
           >
-            <span id="arcade-menu-speed">Speed</span>
+            <span id="arcade-menu-speed">{t('ArcadeMenu.speed')}</span>
             {
               <SpeedPicker
                 labelId="arcade-menu-speed"
@@ -175,21 +185,21 @@ export function ArcadeMenu({
             className="arcade-menu-item arcade-menu-item--next"
             onClick={() => setMenuView('buttons')}
           >
-            Controls
+            {t('ArcadeMenu.controls')}
           </button>
           <button
             type="button"
             className="arcade-menu-item arcade-menu-item--next"
             onClick={() => setMenuView('skins')}
           >
-            Skins
+            {t('ArcadeMenu.skins')}
           </button>
           <button
             type="button"
             className="arcade-menu-item"
             onClick={exitFromMenu}
           >
-            Exit Arcade
+            {t('ArcadeMenu.exitArcade')}
           </button>
         </div>
         <button
@@ -197,7 +207,7 @@ export function ArcadeMenu({
           className="arcade-menu-advanced"
           onClick={() => setMenuView('advanced')}
         >
-          Advanced options
+          {t('ArcadeMenu.advancedOptions')}
         </button>
       </div>
 
@@ -205,10 +215,10 @@ export function ArcadeMenu({
         {subView('buttons')}
         <div className="arcade-menu-body">
           <p className="arcade-menu-note">
-            Select an action, then press its new key. Esc cancels.
+            {t('ArcadeMenu.selectAnActionThenPressItsNewKeyEscCancels')}
           </p>
           <div className="arcade-bindings">
-            {BINDING_GROUPS.map((group) => (
+            {getBindingGroups().map((group) => (
               <section
                 key={group.id}
                 className={`arcade-binding-group arcade-binding-group--${group.id}`}
@@ -228,17 +238,20 @@ export function ArcadeMenu({
                       <button
                         type="button"
                         className="arcade-binding"
-                        aria-label={`${BUTTON_NAME[button]} key: ${keyLabel(bindings[button])}. Change`}
+                        aria-label={t('ArcadeMenu.keyChange', {
+                          value1: BUTTON_NAME()[button],
+                          value2: keyLabel(bindings[button]),
+                        })}
                         aria-pressed={capturing === button}
                         onClick={() => captureKey(button)}
                       >
-                        <span>{BUTTON_NAME[button]}</span>
+                        <span>{BUTTON_NAME()[button]}</span>
                         <kbd
                           className="arcade-keycap"
                           data-empty={bindings[button] ? undefined : ''}
                         >
                           {capturing === button
-                            ? 'Press a key…'
+                            ? t('ArcadeMenu.pressAKey')
                             : keyLabel(bindings[button])}
                         </kbd>
                       </button>
@@ -251,7 +264,7 @@ export function ArcadeMenu({
                               changeConfirmRestart(event.target.checked)
                             }
                           />
-                          Confirm before restarting
+                          {t('ArcadeMenu.confirmBeforeRestarting')}
                         </label>
                       )}
                     </li>
@@ -265,7 +278,7 @@ export function ArcadeMenu({
             className="arcade-menu-link"
             onClick={restoreDefaultKeys}
           >
-            Restore default keys
+            {t('ArcadeMenu.restoreDefaultKeys')}
           </button>
         </div>
       </div>
@@ -282,21 +295,21 @@ export function ArcadeMenu({
         <div className="arcade-menu-body">
           {sync.status === 'failed' && (
             <p className="arcade-menu-alert">
-              Your last game save could not reach Camp ({sync.message}). Use Try
-              again under the screen, or Download SAV.
+              {t('ArcadeMenu.yourLastGameSaveCouldNotReachCampUseTry', {
+                message: sync.message,
+              })}
             </p>
           )}
           {sync.status === 'conflict' && (
             <p className="arcade-menu-alert">
-              The save in Camp changed somewhere else, so this game’s save was
-              not copied over it. Download SAV to keep it.
+              {t('ArcadeMenu.theSaveInCampChangedSomewhereElseSoThisGame')}
             </p>
           )}
           <section
             className="arcade-advanced-section"
             aria-labelledby="arcade-save-tools"
           >
-            <h3 id="arcade-save-tools">Save files</h3>
+            <h3 id="arcade-save-tools">{t('ArcadeMenu.saveFiles')}</h3>
             <div className="arcade-menu-files">
               <button
                 type="button"
@@ -306,7 +319,7 @@ export function ArcadeMenu({
                 }
                 onClick={downloadSave}
               >
-                Download SAV
+                {t('ArcadeMenu.downloadSav')}
               </button>
               <button
                 type="button"
@@ -314,16 +327,15 @@ export function ArcadeMenu({
                 aria-describedby="arcade-upload-note"
                 onClick={() => chooseSave()}
               >
-                Upload new SAV
+                {t('ArcadeMenu.uploadNewSav')}
               </button>
             </div>
             <p id="arcade-upload-note" className="arcade-menu-note">
-              An uploaded SAV starts a new session and reaches Camp once you
-              save inside the game.
+              {t('ArcadeMenu.anUploadedSavStartsANewSessionAndReachesCamp')}
             </p>
             {!canDownload && (
               <p id="arcade-no-save-note" className="arcade-menu-note">
-                There is no SAV to download until you save inside the game.
+                {t('ArcadeMenu.thereIsNoSavToDownloadUntilYouSaveInside')}
               </p>
             )}
           </section>
@@ -331,7 +343,7 @@ export function ArcadeMenu({
             className="arcade-advanced-section"
             aria-labelledby="arcade-cartridge-tools"
           >
-            <h3 id="arcade-cartridge-tools">Game cartridge</h3>
+            <h3 id="arcade-cartridge-tools">{t('ArcadeMenu.gameCartridge')}</h3>
             <div className="arcade-menu-files">
               <button
                 type="button"
@@ -339,19 +351,19 @@ export function ArcadeMenu({
                 aria-describedby={rom ? undefined : 'arcade-no-rom-note'}
                 onClick={() => downloadRom()}
               >
-                Download ROM
+                {t('ArcadeMenu.downloadRom')}
               </button>
               <button
                 type="button"
                 disabled={filesLocked}
                 onClick={() => chooseRom()}
               >
-                {rom ? 'Replace ROM' : 'Insert ROM'}
+                {rom ? t('ArcadeMenu.replaceRom') : t('ArcadeMenu.insertRom')}
               </button>
             </div>
             {!rom && (
               <p id="arcade-no-rom-note" className="arcade-menu-note">
-                Insert a ROM to download it later.
+                {t('ArcadeMenu.insertARomToDownloadItLater')}
               </p>
             )}
           </section>

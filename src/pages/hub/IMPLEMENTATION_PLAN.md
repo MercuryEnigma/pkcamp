@@ -10,7 +10,7 @@ Implemented so far:
 
 - Pages from [RESTRUCTURE_DESIGN.md](./RESTRUCTURE_DESIGN.md): Start, Hub, Lab menu, PC, Transporter, Research Tools and its three tool pages, Settings (with an Arcade tab), Patch Notes, Camp (`move`, `campsite`, `trade`) and the Arcade player's header are built on the shared frame (`SitePage`, `PageHeader`, `SiteCard`, `Panel`, `OptionGroup`, `Dialog`). Camp runs on `activeGame` drafts. See [ARCHITECTURE.md](./ARCHITECTURE.md).
 
-Still transitional: Trade mode uses `useTradeSession`, which writes storage directly (Camp reloads `activeGame` afterwards), so Phase 6's `device` facade and `activeGame`-routed trades are not complete. The Settings Arcade tab is not addressable by `&tab=arcade` (routing is read-only for AI). The Arcade key bindings still live in `localStorage` rather than `storage`. `ArcadeMain.tsx` and `scripts/verify-arcade-chooser.mjs` are dead code awaiting Phase 9.
+Still transitional: Trade mode uses `useTradeSession`, which writes storage directly (Camp reloads `activeGame` afterwards), so Phase 6's `device` facade and `activeGame`-routed trades are not complete. The Settings Arcade tab is not addressable by `&tab=arcade` (routing is read-only for AI). The Arcade key bindings still live in `localStorage` rather than `storage`. `ArcadeMain.tsx` is removed; `scripts/verify-game-choose.mjs` (formerly `verify-arcade-chooser.mjs`) checks Start selection and direct Arcade entry.
 
 ## Outcome and boundaries
 

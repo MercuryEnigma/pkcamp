@@ -1,3 +1,4 @@
+import { i18n } from '../i18n'
 /**
  * Real {@link PokemonSaveBackend} over the vendored `pkhex-wasm` build
  * (`vendor/pkhex-wasm`), which wraps PKHeX.Core compiled to WebAssembly.
@@ -171,14 +172,21 @@ function versionIdentity(game: Game): GameVersionIdentity {
     return {
       exact: 'Unknown',
       approximateGeneration: generation,
-      aggregated: `Gen ${generation} (approximate)`,
+      aggregated: i18n.t('services:pkhexWasmBackend.genApproximate', {
+        generation: generation,
+      }),
     }
   }
   const exact = EXACT_VERSION[game.saveVersion] ?? 'Unknown'
   return {
     exact,
     approximateGeneration: generation,
-    aggregated: exact === 'Unknown' ? `Gen ${generation} (approximate)` : exact,
+    aggregated:
+      exact === 'Unknown'
+        ? i18n.t('services:pkhexWasmBackend.genApproximate', {
+            generation: generation,
+          })
+        : exact,
   }
 }
 
@@ -313,9 +321,7 @@ export async function createPkhexWasmBackend(
       const bytes = originBytes.get(pokemon)
       if (!bytes) {
         throw new Error(
-          'pkhex-wasm backend: cannot export a PokemonNode this backend did not produce — ' +
-            'PokemonNode carries no PID/experience/met data, so valid .pkm bytes cannot be ' +
-            'reconstructed from it. Export nodes obtained from loadSave() or loadPokemonFile().'
+          i18n.t('services:pkhexWasmBackend.cannotExportForeignPokemon')
         )
       }
       // Fresh copy per call: callers must not be able to mutate our record.
@@ -325,7 +331,11 @@ export async function createPkhexWasmBackend(
     setBoxSlot(data, location, pokemon): void {
       const game = games.get(data)
       if (!game)
-        throw new Error('pkhex-wasm backend: cannot edit a disposed save')
+        throw new Error(
+          i18n.t(
+            'services:pkhexWasmBackend.pkhexWasmBackendCannotEditADisposedSave'
+          )
+        )
       if (pokemon === null) {
         game.setBoxSlot(location.box, location.slot, null)
         return
@@ -333,7 +343,9 @@ export async function createPkhexWasmBackend(
       const bytes = originBytes.get(pokemon)
       if (!bytes) {
         throw new Error(
-          'pkhex-wasm backend: cannot place a PokemonNode this backend did not produce'
+          i18n.t(
+            'services:pkhexWasmBackend.pkhexWasmBackendCannotPlaceAPokemonnodeThisBackendDid'
+          )
         )
       }
       const mon = pkhex.parsePkm(bytes)
@@ -347,7 +359,11 @@ export async function createPkhexWasmBackend(
     saveBytes(data: BackendSaveData): Uint8Array {
       const game = games.get(data)
       if (!game)
-        throw new Error('pkhex-wasm backend: cannot serialize a disposed save')
+        throw new Error(
+          i18n.t(
+            'services:pkhexWasmBackend.pkhexWasmBackendCannotSerializeADisposedSave'
+          )
+        )
       return pkhex.saveBytes(game).slice()
     },
 

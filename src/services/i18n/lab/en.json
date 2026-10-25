@@ -1,0 +1,70 @@
+{
+  "LabMain": {
+    "transporter": "Transporter",
+    "researchTools": "Research Tools",
+    "mysteryGifts": "Mystery Gifts",
+    "cartridgeSaves": "Cartridge Saves",
+    "romBiosDumps": "ROM / BIOS Dumps",
+    "patchNotes": "Patch Notes"
+  },
+  "LabMenu": {
+    "lab": "Lab",
+    "pc": "PC",
+    "pokeDexCollectionsAndResearchProgress": "Pokédex collections and research progress",
+    "transporter": "Transporter",
+    "moveGen12PokeMonIntoGen3": "Move Gen 1–2 Pokémon into Gen 3",
+    "researchTools": "Research Tools",
+    "giftsCartridgeSavesAndDumps": "Gifts, cartridge saves and dumps",
+    "backupsAppearanceDataAndHardware": "Backups, appearance, data and hardware",
+    "patchNotes": "Patch Notes"
+  },
+  "PokemonView": {
+    "species": "Species",
+    "form": "Form",
+    "gender": "Gender",
+    "shiny": "Shiny",
+    "egg": "Egg",
+    "level": "Level",
+    "pokeMon": "Pokémon",
+    "registered": "Registered",
+    "requirements": "Requirements",
+    "collectionRequirement": "Collection requirement",
+    "movesTraits": "Moves & traits",
+    "yourMatches": "Your matches",
+    "currentlyFound": "Currently found ({{length}})",
+    "youDonTHaveThisPokeMonYet": "You don't have this Pokémon yet.",
+    "lv": " Lv. {{level}}",
+    "campSiteSlot": "Camp Site {{value1}} · Slot {{value2}}",
+    "ot": "OT {{originalTrainerName}} · {{originalTrainerId}}",
+    "thisMatchBelongsToAnotherGame": "This match belongs to another game.",
+    "openSite": "Open Site",
+    "openCabin": "Open Cabin",
+    "dexNumber": "#{{value1}} "
+  },
+  "ResearchTools": {
+    "researchTools": "Research tools",
+    "mysteryGifts": "Mystery Gifts",
+    "sendWonderCardsToAGbaOrTheSwitch": "Send Wonder Cards to a GBA or the Switch.",
+    "cartridgeSaves": "Cartridge Saves",
+    "backUpAndRestoreGbaCartridgeSaves": "Back up and restore GBA cartridge saves.",
+    "romBiosDumps": "ROM / BIOS Dumps",
+    "downloadCartridgeRomsAndTheGbaBios": "Download cartridge ROMs and the GBA BIOS."
+  },
+  "ToolPage": {
+    "choices": "Choices",
+    "task": "Task"
+  },
+  "useLabData": {
+    "isNotValidJson": "{{name}} is not valid JSON: {{reason}}",
+    "idIsABuiltInCollectionAndCannotBeReplaced": "id: \"{{id}}\" is a built-in collection and cannot be replaced",
+    "replaceTheUploadedCollection": "Replace the uploaded collection \"{{id}}\"?",
+    "wasNotSaved": "{{name}} was not saved: {{value2}}",
+    "removeAndItsSavedHistoryThisCannotBeUndone": "Remove \"{{name}}\" and its saved history? This cannot be undone.",
+    "notRemoved": "Not removed: {{value1}}",
+    "clearTheSavedHistoryOfEntriesNoLongerInA": "Clear the saved history of \"{{name}}\"? Entries no longer in a Cabin or Camp Site will go back to Missing.",
+    "notCleared": "Not cleared: {{value1}}",
+    "deleteAllUploadedCollectionsAndClearTheSavedHistoryOf": "Delete all uploaded collections and clear the saved history of every collection? This cannot be undone.",
+    "notDeleted": "Not deleted: {{f}}",
+    "collectionFailure": "{{name}}: {{value2}}"
+  }
+}

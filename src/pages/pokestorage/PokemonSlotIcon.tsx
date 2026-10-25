@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { SaveSlot } from '../../services/pkhex'
 import type { SpriteResolver } from '../../services/sprites'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from './spriteDisplay'
@@ -48,14 +49,16 @@ export function PokemonSlotIcon({
   selected?: SlotSelection
   onClick?: () => void
 }) {
+  const { t } = useTranslation(['pokemon-details', 'common'] as const)
+
   if (slot === null) {
     if (onClick) {
       return (
         <button
           type="button"
           className={`camp-slot camp-slot--empty camp-slot--interactive${selectionClass(selected)}`}
-          title="Empty slot"
-          aria-label="Empty slot"
+          title={t('PokemonSlotIcon.emptySlot')}
+          aria-label={t('PokemonSlotIcon.emptySlot')}
           onClick={onClick}
           style={{ width: size, height: size }}
         />
@@ -64,7 +67,7 @@ export function PokemonSlotIcon({
     return (
       <div
         className="camp-slot camp-slot--empty"
-        title="Empty slot"
+        title={t('PokemonSlotIcon.emptySlot')}
         style={{ width: size, height: size }}
       />
     )
@@ -81,8 +84,10 @@ export function PokemonSlotIcon({
 
   const title = [
     slot.nickname || display.label,
-    slot.isEgg ? 'Egg' : `Lv. ${slot.level}`,
-    slot.shiny ? 'Shiny' : null,
+    slot.isEgg
+      ? t('PokemonSlotIcon.egg')
+      : t('PokemonSlotIcon.lv', { level: slot.level }),
+    slot.shiny ? t('PokemonSlotIcon.shiny') : null,
   ]
     .filter(Boolean)
     .join(' · ')

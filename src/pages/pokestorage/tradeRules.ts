@@ -1,3 +1,4 @@
+import { i18n } from '../../services/i18n'
 import {
   compareFirmwareVersions,
   esp32TradeDevice,
@@ -38,7 +39,7 @@ export function firmwareTooOld(version: string | null): boolean {
 
 export function describeError(cause: unknown): string {
   if (cause instanceof DOMException && cause.name === 'AbortError') {
-    return 'Trade cancelled.'
+    return i18n.t('trade:tradeRules.tradeCancelled')
   }
   return cause instanceof Error ? cause.message : String(cause)
 }
@@ -48,25 +49,31 @@ export function statusForEvent(event: TradeDeviceEvent): string | null {
     case 'status':
       return event.message
     case 'device':
-      return `ESP32 connected${event.firmware ? ` · firmware ${event.firmware}` : ''}.`
+      return event.firmware
+        ? i18n.t('trade:tradeRules.esp32ConnectedFirmware', {
+            firmware: event.firmware,
+          })
+        : i18n.t('trade:tradeRules.esp32Connected')
     case 'opponent-party':
-      return `Connected to ${event.name}.`
+      return i18n.t('trade:tradeRules.connectedTo', { name: event.name })
     case 'menu-open':
-      return 'Trade menu open. Offering your selected Pokémon…'
+      return i18n.t('trade:tradeRules.tradeMenuOpenOfferingYourSelectedPokeMon')
     case 'offer':
       return event.accepted
-        ? 'Offer sent. Choose a Pokémon on the Switch.'
-        : 'The selected Pokémon could not be offered.'
+        ? i18n.t('trade:tradeRules.offerSentChooseAPokeMonOnTheSwitch')
+        : i18n.t('trade:tradeRules.theSelectedPokeMonCouldNotBeOffered')
     case 'trade-started':
-      return 'Trade in progress…'
+      return i18n.t('trade:tradeRules.tradeInProgress')
     case 'trade-completed':
-      return 'Trade complete. Leave the room on the Switch to finish.'
+      return i18n.t(
+        'trade:tradeRules.tradeCompleteLeaveTheRoomOnTheSwitchToFinish'
+      )
     case 'room':
       return event.trades > 0
-        ? 'Back in the trade room. Leave the room on the Switch to finish.'
+        ? i18n.t('trade:tradeRules.backInTheTradeRoomLeaveTheRoomOnThe')
         : null
     case 'hardware-trade-finished':
-      return 'The Game Boy Advance finished the trade. Saving…'
+      return i18n.t('trade:tradeRules.theGameBoyAdvanceFinishedTheTradeSaving')
     default:
       return null
   }

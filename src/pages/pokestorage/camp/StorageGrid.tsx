@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { SaveSlot } from '../../../services/pkhex'
 import type { Gen3GameId } from '../../../services/saveLibrary'
 import type { SpriteResolver } from '../../../services/sprites'
@@ -35,12 +36,14 @@ export function StorageGrid({
   onNext: () => void
   onSlot: (slot: number) => void
 }) {
+  const { t } = useTranslation(['camp', 'common'] as const)
+
   return (
     <Panel label={label} className="storage-grid">
       <div className="storage-grid-nav">
         <button
           type="button"
-          aria-label={`Previous ${label}`}
+          aria-label={t('StorageGrid.previous', { label: label })}
           onClick={onPrevious}
         >
           <span aria-hidden="true">◀</span>
@@ -58,7 +61,11 @@ export function StorageGrid({
         </span>
         <h2 className="storage-grid-pill">{title}</h2>
         <span className="storage-grid-counterweight" aria-hidden="true" />
-        <button type="button" aria-label={`Next ${label}`} onClick={onNext}>
+        <button
+          type="button"
+          aria-label={t('StorageGrid.next', { label: label })}
+          onClick={onNext}
+        >
           <span aria-hidden="true">▶</span>
         </button>
       </div>

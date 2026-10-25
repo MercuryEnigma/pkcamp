@@ -1,3 +1,4 @@
+import { i18n } from '../../../services/i18n'
 import { equalBytes, type SessionSave } from './arcadeSession'
 
 /**
@@ -159,8 +160,8 @@ export type ExitDecision =
 
 export function exitDecision(state: SyncState, running: boolean): ExitDecision {
   const title = running
-    ? 'Did you save inside the game?'
-    : 'Your save is not in Camp'
+    ? i18n.t('arcade:arcadeSync.didYouSaveInsideTheGame')
+    : i18n.t('arcade:arcadeSync.yourSaveIsNotInCamp')
   const warn = (message: string, retry = false, download = true) =>
     ({
       kind: 'ask',
@@ -172,23 +173,23 @@ export function exitDecision(state: SyncState, running: boolean): ExitDecision {
     }) as const
   if (state.status === 'conflict' && state.pending) {
     return warn(
-      'The save in Camp was changed somewhere else, so this game’s save was not copied over it. Download SAV to keep this game’s save, or it will be lost.'
+      i18n.t('arcade:arcadeSync.theSaveInCampWasChangedSomewhereElseSoThis')
     )
   }
   if (state.status === 'failed' && state.pending) {
     return warn(
-      'Your latest game save could not be saved to Camp. Try again or Download SAV, or it will be lost.',
+      i18n.t('arcade:arcadeSync.yourLatestGameSaveCouldNotBeSavedToCamp'),
       true
     )
   }
   if (unsyncedSave(state)) {
     return warn(
-      'Your latest game save is still being saved to Camp. Wait for “Saved!” before leaving, or it may be lost.'
+      i18n.t('arcade:arcadeSync.yourLatestGameSaveIsStillBeingSavedToCamp')
     )
   }
   if (state.imported) {
     return warn(
-      'The SAV file you loaded is not in Camp. Save inside the game to keep your progress there.',
+      i18n.t('arcade:arcadeSync.theSavFileYouLoadedIsNotInCampSave'),
       false,
       false
     )
@@ -200,8 +201,10 @@ export function exitDecision(state: SyncState, running: boolean): ExitDecision {
     title,
     message:
       state.lastSyncedAt === null
-        ? 'You have not saved inside the game since you started. Anything since your last save will be lost.'
-        : 'Your last game save is in Camp. Anything since then will be lost.',
+        ? i18n.t(
+            'arcade:arcadeSync.youHaveNotSavedInsideTheGameSinceYouStarted'
+          )
+        : i18n.t('arcade:arcadeSync.yourLastGameSaveIsInCampAnythingSinceThen'),
     retry: false,
     download: false,
   }

@@ -1,3 +1,4 @@
+import { i18n } from '../../i18n'
 import { storage, localFileStore } from '../index'
 import type { FileStore } from '../fileStore'
 import { FileStoreProvider } from '../fileStoreProvider'
@@ -46,7 +47,9 @@ export interface DropboxAccountDeps {
 }
 
 function message(error: unknown): string {
-  return error instanceof Error ? error.message : 'Something went wrong.'
+  return error instanceof Error
+    ? error.message
+    : i18n.t('services:dropboxAccount.somethingWentWrong')
 }
 
 /** The Dropbox sign-in lifecycle; see `dropboxAccount` for the app's copy. */
@@ -86,7 +89,8 @@ export class DropboxAccount {
   /** Sends the player to Dropbox to approve PkCamp. */
   async signIn(): Promise<void> {
     const appKey = this.deps.appKey
-    if (!appKey) throw new Error('Dropbox is not configured.')
+    if (!appKey)
+      throw new Error(i18n.t('services:dropboxAccount.dropboxIsNotConfigured'))
     const verifier = generateCodeVerifier()
     const state = generateState()
     const codeChallenge = await codeChallengeS256(verifier)
@@ -152,14 +156,16 @@ export class DropboxAccount {
     if (!expectedState || state !== expectedState || !verifier) {
       this.setStatus({
         state: 'error',
-        message: 'The Dropbox sign-in could not be verified. Try again.',
+        message: i18n.t(
+          'services:dropboxAccount.theDropboxSignInCouldNotBeVerifiedTryAgain'
+        ),
       })
       return
     }
     if (error || !code) {
       this.setStatus({
         state: 'signed-out',
-        message: 'Dropbox sign-in was cancelled.',
+        message: i18n.t('services:dropboxAccount.dropboxSignInWasCancelled'),
       })
       return
     }
@@ -171,7 +177,9 @@ export class DropboxAccount {
       codeVerifier: verifier,
     })
     if (!tokens.refreshToken) {
-      throw new Error('Dropbox did not allow PkCamp to stay signed in.')
+      throw new Error(
+        i18n.t('services:dropboxAccount.dropboxDidNotAllowPkcampToStaySignedIn')
+      )
     }
     this.refreshToken = tokens.refreshToken
     this.accessToken = tokens.accessToken
@@ -220,7 +228,9 @@ export class DropboxAccount {
       if (!refreshToken) {
         throw new StorageUnavailableError(
           'dropbox',
-          'You are signed out of Dropbox. Sign in to Dropbox again.'
+          i18n.t(
+            'services:dropboxAccount.youAreSignedOutOfDropboxSignInToDropbox'
+          )
         )
       }
       const run = (async () => {
@@ -260,7 +270,7 @@ export class DropboxAccount {
     })
     const provider = new FileStoreProvider(store, {
       id: 'dropbox',
-      label: 'Dropbox',
+      label: i18n.t('services:dropboxAccount.dropbox'),
     })
     return { provider, store }
   }
@@ -291,7 +301,10 @@ export class DropboxAccount {
       copyError
         ? {
             state: 'error',
-            message: `Signed in to Dropbox, but copying this browser's data failed: ${message(copyError)}`,
+            message: i18n.t(
+              'services:dropboxAccount.signedInToDropboxButCopyingThisBrowserSData',
+              { value1: message(copyError) }
+            ),
           }
         : { state: 'connected' }
     )
