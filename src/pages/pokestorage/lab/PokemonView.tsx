@@ -1,6 +1,5 @@
 import type { SpriteResolver } from '../../../services/sprites'
 import type { StoredCollectionMatch } from '../../../services/storage'
-import { Panel } from '../../hub/Panel'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from '../spriteDisplay'
 import { SpriteCredit } from '../SpriteCredit'
 import type { CollectionDefinition } from './collectionTypes'
@@ -13,143 +12,146 @@ import {
   speciesName,
 } from './entryDisplay'
 
-/** The selected entry: its sprite and constraints, the Pokémon matching it, and a link to Camp. */
+/** Requirements that identify the entry; the rest are moves and traits. */
+const IDENTITY_FIELDS = new Set([
+  'Species',
+  'Form',
+  'Gender',
+  'Shiny',
+  'Egg',
+  'Level',
+])
+
+/**
+ * Screen 3: the selected entry's sprite, what the collection requires of it,
+ * and every Pokémon currently matching it, each with a link to Camp.
+ */
 export function PokemonView({
   definition,
   entryId,
+  registered,
   matches,
-  matchIndex,
-  onMatchChange,
   resolver,
   canOpen,
   onOpenInCamp,
+  onBack,
 }: {
   definition: CollectionDefinition
-  entryId: string | null
+  entryId: string
+  registered: boolean
   matches: readonly StoredCollectionMatch[]
-  matchIndex: number
-  onMatchChange: (index: number) => void
   resolver: SpriteResolver
   /** Whether a match can be opened in Camp (not for another game's save). */
   canOpen: (match: StoredCollectionMatch) => boolean
   onOpenInCamp: (match: StoredCollectionMatch) => void
+  onBack: () => void
 }) {
-  const constraints = entryId ? definition.pokemon[entryId] : undefined
-  if (!entryId || !constraints)
-    return (
-      <Panel label="Pokémon" className="pc-view">
-        <div className="pc-view-empty">
-          <span className="pc-view-empty-mark" aria-hidden="true" />
-          <h2>Choose a Pokémon</h2>
-          <p>
-            Select an entry from the collection to view its research details.
-          </p>
-        </div>
-      </Panel>
-    )
-
+  const constraints = definition.pokemon[entryId]
   const display = resolveSpriteDisplay(
     resolver,
     entrySpriteRequest(entryId, constraints)
   )
   const dex = entryDexNumber(constraints)
-  const extra = requirementFields(constraints).filter(
-    (field) => field.label !== 'Species'
-  )
-  const match = matches[matchIndex] ?? null
+  const fields = requirementFields(constraints)
+  const identity = fields.filter((field) => IDENTITY_FIELDS.has(field.label))
+  const traits = fields.filter((field) => !IDENTITY_FIELDS.has(field.label))
+  const name = collectionEntryLabel(definition, entryId)
 
   return (
-    <Panel label="Pokémon" className="pc-view">
-      <div className="pc-view-header">
-        <img
-          className="pc-view-sprite"
-          src={spriteDisplayImageSrc(display)}
-          alt=""
-        />
-        <div>
+    <div className="pc-screen-body">
+      <button type="button" className="pc-back" onClick={onBack}>
+        ‹ {definition.name}
+      </button>
+      <div className="pc-entry-view">
+        <section className="pc-entry-hero" aria-label="Pokémon">
+          <span className="pc-entry-sprite">
+            <img src={spriteDisplayImageSrc(display)} alt="" />
+          </span>
           <h2>
-            {dex !== null && `#${dex} `}
-            {collectionEntryLabel(definition, entryId)}
+            {dex !== null && `#${String(dex).padStart(3, '0')} `}
+            {name.toUpperCase()}
           </h2>
-          {extra.length > 0 && (
+          {registered && <span className="pc-stamp">Registered</span>}
+          <SpriteCredit display={display} />
+        </section>
+
+        <section className="pc-entry-section" aria-label="Requirements">
+          <h3 className="pc-label">Collection requirement</h3>
+          <dl>
+            {identity.map((field) => (
+              <div key={field.label}>
+                <dt>{field.label}</dt>
+                <dd>{field.value}</dd>
+              </div>
+            ))}
+          </dl>
+          {traits.length > 0 && (
             <>
-              <p>Constraints:</p>
-              <ul>
-                {extra.map((field) => (
-                  <li key={field.label}>
-                    {field.label}: {field.value}
-                  </li>
+              <h3 className="pc-label">Moves &amp; traits</h3>
+              <dl>
+                {traits.map((field) => (
+                  <div key={field.label}>
+                    <dt>{field.label}</dt>
+                    <dd>{field.value}</dd>
+                  </div>
                 ))}
-              </ul>
+              </dl>
             </>
           )}
-          <SpriteCredit display={display} />
-        </div>
-      </div>
+        </section>
 
-      <div className="pc-view-matches">
-        {match ? (
-          <>
-            {matches.length > 1 && (
-              <div className="pc-view-stepper">
-                <button
-                  type="button"
-                  aria-label="Previous match"
-                  disabled={matchIndex === 0}
-                  onClick={() => onMatchChange(matchIndex - 1)}
-                >
-                  ◀
-                </button>
-                <span>
-                  Match {matchIndex + 1} of {matches.length}
-                </span>
-                <button
-                  type="button"
-                  aria-label="Next match"
-                  disabled={matchIndex === matches.length - 1}
-                  onClick={() => onMatchChange(matchIndex + 1)}
-                >
-                  ▶
-                </button>
-              </div>
-            )}
-            <dl>
-              <dt>Nickname</dt>
-              <dd>{match.nickname || '—'}</dd>
-              <dt>OT / ID</dt>
-              <dd>
-                {match.originalTrainerName} / {match.originalTrainerId}
-              </dd>
-              <dt>Level</dt>
-              <dd>{match.level}</dd>
-              <dt>Species</dt>
-              <dd>{speciesName(match.species)}</dd>
-              <dt>Found in</dt>
-              <dd>
-                {'camp' in match
-                  ? `Camp Site ${match.location.site + 1} · Space ${match.location.index + 1}`
-                  : describeSource(match)}
-              </dd>
-            </dl>
-          </>
-        ) : (
-          <p>You don't have this Pokémon yet.</p>
-        )}
+        <section className="pc-entry-section" aria-label="Your matches">
+          <h3 className="pc-label">Currently found ({matches.length})</h3>
+          {matches.length === 0 && (
+            <p className="pc-muted">You don't have this Pokémon yet.</p>
+          )}
+          <ul className="pc-found">
+            {matches.map((match, index) => {
+              const matchDisplay = resolveSpriteDisplay(resolver, {
+                nationalDex: match.species,
+                displayName: speciesName(match.species),
+                formId: match.form !== 0 ? match.form : undefined,
+                shiny: match.shiny ? true : undefined,
+              })
+              const openable = canOpen(match)
+              return (
+                <li key={index} className="pc-found-card">
+                  <img src={spriteDisplayImageSrc(matchDisplay)} alt="" />
+                  <div>
+                    <strong>
+                      {(
+                        match.nickname || speciesName(match.species)
+                      ).toUpperCase()}
+                    </strong>
+                    <span> Lv. {match.level}</span>
+                    <p>
+                      {'camp' in match
+                        ? `Camp Site ${match.location.site + 1} · Slot ${match.location.index + 1}`
+                        : describeSource(match)}
+                    </p>
+                    <p>
+                      OT {match.originalTrainerName} · {match.originalTrainerId}
+                    </p>
+                    {!openable && (
+                      <p className="pc-muted">
+                        This match belongs to another game.
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    className="camp-upload-btn camp-upload-btn--primary"
+                    disabled={!openable}
+                    onClick={() => onOpenInCamp(match)}
+                  >
+                    {'camp' in match ? 'Open Site' : 'Open Cabin'} →
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
       </div>
-
-      <div className="pc-view-footer">
-        <button
-          type="button"
-          className="camp-upload-btn camp-upload-btn--primary"
-          disabled={!match || !canOpen(match)}
-          onClick={() => match && onOpenInCamp(match)}
-        >
-          View in Camp →
-        </button>
-        {match && !canOpen(match) && (
-          <span>This match belongs to another game.</span>
-        )}
-      </div>
-    </Panel>
+    </div>
   )
 }

@@ -112,7 +112,10 @@ describe('stored result round trip', () => {
       location: 'party',
       species: 2,
     })
-    expect(result.entries['2'].matches[0]).not.toHaveProperty('moves')
+    // Filterable names are kept; the rest of the Pokémon is not.
+    expect(result.entries['2'].matches[0]).toHaveProperty('moves', ['Tackle'])
+    expect(result.entries['2'].matches[0]).not.toHaveProperty('ivs')
+    expect(result.entries['2'].matches[0]).not.toHaveProperty('stats')
   })
 })
 

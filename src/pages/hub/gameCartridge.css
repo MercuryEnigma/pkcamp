@@ -10,21 +10,13 @@
   position: relative;
   grid-column: span 2;
   box-sizing: border-box;
-  aspect-ratio: 12 / 7;
+  aspect-ratio: 420 / 240;
   min-width: 0;
   min-height: 0;
-  margin-top: 0.45rem;
   /* Everything on the cartridge scales with its width (cqi), so it keeps
      its shape from a phone up to a wide desktop. */
   container-type: inline-size;
-  border: 2px solid #445244;
-  border-radius: 11px;
-  background: #77836f;
   color: var(--camp-text);
-  box-shadow:
-    inset 0 0 0 3px rgb(255 255 255 / 12%),
-    inset 0 -5px 0 rgb(49 62 50 / 18%),
-    var(--camp-shadow);
   transition:
     filter 0.12s ease,
     translate 0.12s ease;
@@ -44,29 +36,21 @@
 .game-cartridge[data-version='leafgreen'] {
   --arcade-version: #4f8f34;
 }
+/* The fill art is a mask, so it takes the version color; the outline art
+   drawn over it gives the cartridge a clear edge. */
 .game-cartridge::before {
   content: '';
   position: absolute;
-  top: -0.55rem;
-  right: -0.32rem;
-  left: -0.32rem;
-  height: 0.85rem;
-  border: 2px solid #445244;
-  border-bottom: 0;
-  border-radius: 12px 12px 0 0;
-  background: #77836f;
-  box-shadow: inset 0 5px 0 var(--arcade-version);
+  inset: 0;
+  background: var(--arcade-version);
+  mask: url('../../assets/gba-cartridge-fill.png') center / 100% 100% no-repeat;
 }
-.game-cartridge::after {
-  content: '';
+.game-cartridge-art {
   position: absolute;
-  bottom: 0.42rem;
-  left: 50%;
-  translate: -50% 0;
-  border-top: 0.48rem solid #4f5d4e;
-  border-right: 0.38rem solid transparent;
-  border-left: 0.38rem solid transparent;
-  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 16%));
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 .game-cartridge:nth-child(4) {
   grid-column: 2 / span 2;
@@ -92,7 +76,7 @@
 }
 .game-cartridge-label {
   position: absolute;
-  inset: 11cqi 5.5cqi 7cqi;
+  inset: 24% 15.2% 15.4%;
   display: flex;
   flex-direction: column;
   overflow: hidden;

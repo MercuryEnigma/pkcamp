@@ -1,5 +1,6 @@
 import type { Gen3GameId } from '../../services/saveLibrary'
 import { GAME_LABEL } from '../pokestorage/gameDisplay'
+import cartridgeOutline from '../../assets/gba-cartridge.png'
 import './gameCartridge.css'
 
 export function GameCartridge({
@@ -20,9 +21,7 @@ export function GameCartridge({
   const RomControl = onRom ? 'button' : 'span'
   return (
     <article className="game-cartridge" data-version={gameId}>
-      <span className="game-cartridge-mark" aria-hidden="true">
-        GAME BOY ADVANCE
-      </span>
+      <img className="game-cartridge-art" src={cartridgeOutline} alt="" />
       <div className="game-cartridge-label">
         <button
           type="button"

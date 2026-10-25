@@ -241,10 +241,8 @@ describe('CollectionsService session state', () => {
     service.openCollection(definition.id)
     service.updateWorkspace(definition.id, {
       selectedEntryId: 'pikachu',
-      matchIndex: 99,
       query: 'pika',
       filter: 'registered',
-      mobilePane: 'view',
       scrollTop: 240,
     })
 
@@ -253,10 +251,8 @@ describe('CollectionsService session state', () => {
     expect(snapshot.overflowIds).toEqual([])
     expect(snapshot.workspaces[definition.id]).toMatchObject({
       selectedEntryId: 'pikachu',
-      matchIndex: 0,
       query: 'pika',
       filter: 'registered',
-      mobilePane: 'view',
       scrollTop: 240,
     })
     const expected = [definition.id, builtInId].reduce(

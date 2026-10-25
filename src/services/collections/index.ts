@@ -26,15 +26,12 @@ import { toStoredMatch } from '../../pages/pokestorage/lab/collectionResults'
 
 export type CollectionsStatus =
   'idle' | 'loading' | 'scanning' | 'ready' | 'error'
-export type CollectionFilter = 'all' | 'registered' | 'missing'
-export type CollectionMobilePane = 'list' | 'view'
+export type CollectionFilter = 'all' | 'registered' | 'missing' | 'visiting'
 
 export interface CollectionWorkspace {
   selectedEntryId: string | null
-  matchIndex: number
   query: string
   filter: CollectionFilter
-  mobilePane: CollectionMobilePane
   scrollTop: number
 }
 
@@ -57,10 +54,8 @@ export interface CollectionsSnapshot {
 
 const EMPTY_WORKSPACE: CollectionWorkspace = Object.freeze({
   selectedEntryId: null,
-  matchIndex: 0,
   query: '',
   filter: 'all',
-  mobilePane: 'list',
   scrollTop: 0,
 })
 
@@ -255,14 +250,7 @@ function clampWorkspace(
     workspace.selectedEntryId && result?.entries[workspace.selectedEntryId]
       ? workspace.selectedEntryId
       : null
-  const count = selectedEntryId
-    ? (result?.entries[selectedEntryId]?.matches.length ?? 0)
-    : 0
-  return {
-    ...workspace,
-    selectedEntryId,
-    matchIndex: count > 0 ? Math.min(workspace.matchIndex, count - 1) : 0,
-  }
+  return { ...workspace, selectedEntryId }
 }
 
 export class CollectionsService {

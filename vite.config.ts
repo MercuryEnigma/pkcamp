@@ -2,7 +2,7 @@
 import { createReadStream, cpSync, existsSync } from 'node:fs'
 import { extname, join, resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, type Connect, type Plugin } from 'vite'
 
 /**
  * Public path (relative to `base`) the pkhex-wasm runtime is served from.
@@ -120,9 +120,39 @@ function mgbaWasmAssets(): Plugin {
   }
 }
 
+/**
+ * Redirects `<base>` without its trailing slash (e.g. `/pkcamp`) to `<base>`
+ * instead of showing Vite's "did you mean to visit ...?" page.
+ */
+function redirectBaseSlash(): Plugin {
+  const redirect = (base: string): Connect.NextHandleFunction => {
+    const bare = base.replace(/\/$/, '')
+    return (req, res, next) => {
+      const url = req.url ?? ''
+      if (bare && (url === bare || url.startsWith(`${bare}?`))) {
+        res.statusCode = 302
+        res.setHeader('Location', `${base}${url.slice(bare.length)}`)
+        res.end()
+        return
+      }
+      next()
+    }
+  }
+
+  return {
+    name: 'redirect-base-slash',
+    configureServer(server) {
+      server.middlewares.use(redirect(server.config.base))
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(redirect(server.config.base))
+    },
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), pkhexWasmAssets(), mgbaWasmAssets()],
+  plugins: [react(), redirectBaseSlash(), pkhexWasmAssets(), mgbaWasmAssets()],
   base: '/pkcamp/',
   build: {
     rolldownOptions: {

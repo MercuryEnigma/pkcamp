@@ -277,7 +277,7 @@ export function StartMenu({
           </div>
         </header>
         <div className="hub-start-body">
-          <h1>Select a game to start</h1>
+          <h1>Select a game to visit the campsite</h1>
           {!startup.ready && !startup.error && (
             <p role="status">Loading your settings…</p>
           )}
@@ -322,7 +322,7 @@ export function StartMenu({
             disabled={!startup.ready}
             onClick={() => afterSetup(onContinueWithoutSave)}
           >
-            Continue without a save
+            Continue to the campsite
           </button>
         </div>
       </section>

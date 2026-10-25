@@ -1,21 +1,30 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { collections } from '../../../services/collections'
 import type { StoredCollectionMatch } from '../../../services/storage'
-import { OptionGroup } from '../../hub/OptionGroup'
 import { useActiveGame } from '../../context/useActiveGame'
 import { useCollections } from '../../context/useCollections'
 import type { CampDestination } from '../PokeStorageMain'
 import { useSpriteResolver } from '../useStorage'
 import { BUILT_IN_COLLECTIONS } from './builtInCollections'
 import type { CollectionDefinition } from './collectionTypes'
-import { isRegistered } from './collectionTypes'
+import { isRegistered, registeredCount } from './collectionTypes'
+import { emptyDraft } from './builderDraft'
+import { CollectionBuilder } from './CollectionBuilder'
+import { CollectionGrid } from './CollectionGrid'
+import { CollectionHome } from './CollectionHome'
 import {
-  STATUS_FILTERS,
   collectionEntryLabel,
   entryDexNumber,
   type StatusFilter,
 } from './entryDisplay'
-import { PcCollectionTabs } from './PcCollectionTabs'
+import {
+  FILTER_FIELDS,
+  activeFilters,
+  entryMatchesFilters,
+  filterOptions,
+  type EntryFilters,
+} from './entryFilter'
+import { PcFilterScreen } from './PcFilterScreen'
 import { PokemonView } from './PokemonView'
 import { GEN_3_GAMES } from './labStore'
 import { useLabData } from './useLabData'
@@ -37,16 +46,14 @@ function entryIds(definition: CollectionDefinition): string[] {
   return ordered
 }
 
-const PANES = [
-  ['list', 'Collection'],
-  ['view', 'View'],
-] as const
+type Screen = 'home' | 'grid' | 'entry' | 'filters' | 'builder'
 
 /**
- * The PC: the collections added to research on the left, and the selected
- * entry's matching Pokémon on the right. On phones a toggle switches between
- * the two. All state lives in the `collections` service, so it survives Hub,
- * Camp and Lab navigation.
+ * The Pokédex terminal: the collection directory, one collection's grid, an
+ * entry's detail, the filters and the new-collection builder, as screens of
+ * one device. Research state lives in the `collections` service, so it
+ * survives Hub, Camp and Lab navigation; the screen, filters and builder
+ * draft last while this page is mounted.
  */
 export function CollectionView({
   onOpenInCamp,
@@ -61,7 +68,12 @@ export function CollectionView({
   const { gameId } = useActiveGame()
   const { uploads, errors: uploadErrors, upload } = useLabData()
   const resolver = useSpriteResolver()
-  const list = useRef<HTMLUListElement>(null)
+  const [screen, setScreen] = useState<Screen>('home')
+  const [draft, setDraft] = useState(emptyDraft)
+  const [entryFilters, setEntryFilters] = useState<EntryFilters>({})
+  const filters = useMemo(() => activeFilters(entryFilters), [entryFilters])
+  // The Pokédex button names the collection once one has been opened.
+  const [opened, setOpened] = useState(false)
 
   const currentId = state.currentId ?? state.enabledIds[0] ?? null
   const definition =
@@ -71,9 +83,7 @@ export function CollectionView({
   const result = state.results[definition.id] ?? null
   const filter: StatusFilter = workspace?.filter ?? 'all'
   const query = workspace?.query ?? ''
-  const pane = workspace?.mobilePane ?? 'list'
   const selectedId = workspace?.selectedEntryId ?? null
-  const matchIndex = workspace?.matchIndex ?? 0
   const patch = (change: Parameters<typeof collections.updateWorkspace>[1]) =>
     collections.updateWorkspace(definition.id, change)
 
@@ -85,28 +95,41 @@ export function CollectionView({
     void collections.refresh()
   }, [campReturns])
 
-  // Remember the list's scroll position across tabs and pages.
-  const scroll = useRef(0)
-  useLayoutEffect(() => {
-    if (list.current) list.current.scrollTop = workspace?.scrollTop ?? 0
-    // Restore only when the collection changes or the page returns.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [definition.id, campReturns])
-  useEffect(
-    () => () =>
-      collections.updateWorkspace(definition.id, {
-        scrollTop: scroll.current,
-      }),
-    [definition.id]
+  const definitionId = definition.id
+  const saveScroll = useCallback(
+    (scrollTop: number) =>
+      collections.updateWorkspace(definitionId, { scrollTop }),
+    [definitionId]
   )
 
   const ids = useMemo(() => entryIds(definition), [definition])
+  /** What the nav filters look at for one entry. */
+  const filterSubject = useCallback(
+    (id: string) => ({
+      label: collectionEntryLabel(definition, id),
+      species: entryDexNumber(definition.pokemon[id]),
+      constraints: definition.pokemon[id],
+      matches: result?.entries[id]?.matches ?? [],
+    }),
+    [definition, result]
+  )
   const rows = useMemo(() => {
     const needle = query.trim().toLowerCase()
     return ids.filter((id) => {
       const status = result?.entries[id]?.status
+      const found = result?.entries[id]?.matches ?? []
       if (filter === 'registered' && !isRegistered(status)) return false
       if (filter === 'missing' && isRegistered(status)) return false
+      if (
+        filter === 'visiting' &&
+        !found.some((match) => 'camp' in match || match.gameId === gameId)
+      )
+        return false
+      if (
+        filters.length > 0 &&
+        !entryMatchesFilters(filters, filterSubject(id))
+      )
+        return false
       if (!needle) return true
       const dex = entryDexNumber(definition.pokemon[id])
       return (
@@ -115,22 +138,60 @@ export function CollectionView({
         (dex !== null && String(dex).includes(needle))
       )
     })
-  }, [definition, filter, ids, query, result])
-
-  const totals = state.enabledIds.reduce(
-    (sum, id) => ({
-      owned: sum.owned + (state.results[id]?.owned ?? 0),
-      seen: sum.seen + (state.results[id]?.seen ?? 0),
-      total: sum.total + (state.results[id]?.total ?? 0),
-    }),
-    { owned: 0, seen: 0, total: 0 }
+  }, [definition, filterSubject, filters, filter, gameId, ids, query, result])
+  const statuses = useMemo(
+    () =>
+      Object.fromEntries(
+        ids.map((id) => [id, result?.entries[id]?.status] as const)
+      ),
+    [ids, result]
   )
+
+  const enabledDefinitions = useMemo(() => {
+    const all = [...state.definitions, ...uploads]
+    return state.enabledIds.flatMap((id) => {
+      const found = all.find((item) => item.id === id)
+      return found ? [found] : []
+    })
+  }, [state.definitions, state.enabledIds, uploads])
+  const available = useMemo(
+    () =>
+      [...state.definitions, ...uploads].filter(
+        (item, index, all) =>
+          !state.enabledIds.includes(item.id) &&
+          all.findIndex((other) => other.id === item.id) === index
+      ),
+    [state.definitions, state.enabledIds, uploads]
+  )
+  const firstEntryIds = useMemo(
+    () =>
+      Object.fromEntries(
+        enabledDefinitions.map((item) => [item.id, entryIds(item)[0]] as const)
+      ),
+    [enabledDefinitions]
+  )
+
+  const options = useMemo(
+    () => filterOptions(ids.map(filterSubject)),
+    [filterSubject, ids]
+  )
+  const entryStatus = selectedId
+    ? result?.entries[selectedId]?.status
+    : undefined
   const matches = selectedId ? (result?.entries[selectedId]?.matches ?? []) : []
+  // A selection left over from another collection has nothing to show.
+  const showEntry =
+    screen === 'entry' &&
+    selectedId !== null &&
+    !!definition.pokemon[selectedId]
+  const active: Screen = screen === 'entry' && !showEntry ? 'grid' : screen
 
   const addCollections = (added: string[]) => {
     collections.setEnabled([...state.enabledIds, ...added])
     collections.openCollection(added[0])
     void collections.refresh()
+    setOpened(true)
+    setScreen('grid')
   }
   const uploadCollection = async (file: File) => {
     const id = await upload(file)
@@ -154,110 +215,129 @@ export function CollectionView({
   }
 
   return (
-    <div className="pc" data-pane={pane}>
-      <OptionGroup
-        label="Panel"
-        options={PANES}
-        value={pane}
-        onChange={(next) => patch({ mobilePane: next })}
-      />
-      <div className="pc-left">
-        <PcCollectionTabs
-          definitions={[...state.definitions, ...uploads].filter(
-            (item, index, all) =>
-              all.findIndex((other) => other.id === item.id) === index
-          )}
-          enabledIds={state.enabledIds}
-          recentIds={state.recentIds}
-          currentId={definition.id}
-          onOpen={(id) => collections.openCollection(id)}
-          onAdd={addCollections}
-          onUpload={uploadCollection}
-          uploadErrors={uploadErrors}
-        />
-        <div className="pc-filters">
-          <input
-            type="search"
-            placeholder="Search name, number, or id"
-            aria-label="Search entries"
-            value={query}
-            onChange={(event) => patch({ query: event.target.value })}
-          />
-          <OptionGroup
-            label="Status filter"
-            options={STATUS_FILTERS.map((o) => [o.value, o.label] as const)}
-            value={filter}
-            onChange={(next) => patch({ filter: next })}
-          />
-        </div>
-        {state.error && <p role="alert">{state.error.message}</p>}
-        <ul
-          ref={list}
-          className="pc-entries"
-          aria-label="Entries"
-          onScroll={(event) => {
-            scroll.current = event.currentTarget.scrollTop
-          }}
+    <div className="pc">
+      <nav className="pc-nav" aria-label="Pokédex screens">
+        <button
+          type="button"
+          aria-pressed={active === 'home'}
+          onClick={() => setScreen('home')}
         >
-          {rows.map((id) => {
-            const status = result?.entries[id]?.status ?? 'unseen'
-            const dex = entryDexNumber(definition.pokemon[id])
-            return (
-              <li key={id}>
-                <button
-                  type="button"
-                  className="pc-entry"
-                  data-status={status}
-                  aria-pressed={id === selectedId}
-                  onClick={() =>
-                    patch({
-                      selectedEntryId: id,
-                      matchIndex: 0,
-                      mobilePane: 'view',
-                    })
-                  }
-                >
-                  <span>
-                    {dex !== null && `#${dex} `}
-                    {collectionEntryLabel(definition, id)}
-                  </span>
-                  <span>
-                    {status === 'owned'
-                      ? 'Owned'
-                      : status === 'seen'
-                        ? 'Seen'
-                        : 'Unseen'}
-                  </span>
-                </button>
-              </li>
-            )
-          })}
-          {rows.length === 0 && (
-            <li className="pc-empty">
-              {state.status === 'loading' || state.status === 'scanning'
-                ? 'Scanning…'
-                : 'No entries match.'}
-            </li>
-          )}
-        </ul>
+          Collections
+        </button>
+        {active === 'builder' && (
+          <button type="button" aria-pressed>
+            Add New Collection
+          </button>
+        )}
+        <button
+          type="button"
+          aria-pressed={active === 'grid' || active === 'entry'}
+          onClick={() => setScreen('grid')}
+        >
+          {opened ? definition.name : 'Pokédex'}
+        </button>
+        <button
+          type="button"
+          aria-pressed={active === 'filters'}
+          onClick={() => setScreen('filters')}
+        >
+          Filter{filters.length > 0 && ` (${filters.length})`}
+        </button>
+      </nav>
+      <div className="pc-screen">
+        {state.error && <p role="alert">{state.error.message}</p>}
+        {active === 'home' && (
+          <CollectionHome
+            definitions={enabledDefinitions}
+            results={state.results}
+            firstEntryIds={firstEntryIds}
+            resolver={resolver}
+            onOpen={(id) => {
+              collections.openCollection(id)
+              setOpened(true)
+              setScreen('grid')
+            }}
+            available={available}
+            onAdd={(id) => addCollections([id])}
+            onNew={() => setScreen('builder')}
+          />
+        )}
+        {active === 'builder' && (
+          <CollectionBuilder
+            draft={draft}
+            errors={uploadErrors}
+            onChange={setDraft}
+            onCreate={async (file) => {
+              const added = await uploadCollection(file)
+              if (added) setDraft(emptyDraft())
+              return added
+            }}
+            onCancel={() => {
+              setDraft(emptyDraft())
+              setScreen('home')
+            }}
+          />
+        )}
+        {active === 'filters' && (
+          <PcFilterScreen
+            filters={entryFilters}
+            options={options}
+            onApply={(next) => {
+              setEntryFilters(next)
+              setScreen('grid')
+            }}
+          />
+        )}
+        {active === 'grid' && (
+          <CollectionGrid
+            key={definition.id}
+            definition={definition}
+            rows={rows}
+            statuses={statuses}
+            registered={result ? registeredCount(result) : 0}
+            total={result?.total ?? ids.length}
+            selectedId={selectedId}
+            query={query}
+            filter={filter}
+            scanning={state.status === 'loading' || state.status === 'scanning'}
+            resolver={resolver}
+            initialScroll={workspace?.scrollTop ?? 0}
+            restoreKey={campReturns}
+            onScrollChange={saveScroll}
+            onQuery={(next) => patch({ query: next })}
+            onFilter={(next) => patch({ filter: next })}
+            onSelect={(id) => {
+              patch({ selectedEntryId: id })
+              setScreen('entry')
+            }}
+            filters={filters.map(({ field, text }) => ({
+              field,
+              label: `${FILTER_FIELDS.find(([name]) => name === field)?.[1]}: ${text}`,
+            }))}
+            onClearFilter={(field) =>
+              setEntryFilters((current) => ({ ...current, [field]: '' }))
+            }
+            onBack={() => setScreen('home')}
+          />
+        )}
+        {active === 'entry' && selectedId && (
+          <PokemonView
+            definition={definition}
+            entryId={selectedId}
+            registered={isRegistered(entryStatus)}
+            matches={matches}
+            resolver={resolver}
+            canOpen={(match) => 'camp' in match || match.gameId === gameId}
+            onOpenInCamp={open}
+            onBack={() => setScreen('grid')}
+          />
+        )}
       </div>
-
-      <div className="pc-right">
-        <p className="pc-progress" aria-live="polite">
-          Research progress · Owned {totals.owned} · Seen {totals.seen} /{' '}
-          {totals.total}
-        </p>
-        <PokemonView
-          definition={definition}
-          entryId={selectedId}
-          matches={matches}
-          matchIndex={matchIndex}
-          onMatchChange={(index) => patch({ matchIndex: index })}
-          resolver={resolver}
-          canOpen={(match) => 'camp' in match || match.gameId === gameId}
-          onOpenInCamp={open}
-        />
-      </div>
+      <footer className="pc-footer">
+        <span className="pc-footer-strip" aria-hidden="true" />
+        <span>pkcamp</span>
+        <span className="pc-label">Pokédex research system</span>
+      </footer>
     </div>
   )
 }

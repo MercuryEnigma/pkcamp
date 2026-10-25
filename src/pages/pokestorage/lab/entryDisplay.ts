@@ -252,10 +252,11 @@ export function formatRelative(iso: string, now = Date.now()): string {
   return 'just now'
 }
 
-export type StatusFilter = 'all' | 'registered' | 'missing'
+export type StatusFilter = 'all' | 'registered' | 'missing' | 'visiting'
 
 export const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'All' },
   { value: 'registered', label: 'Registered' },
   { value: 'missing', label: 'Missing' },
+  { value: 'visiting', label: 'Visiting' },
 ]

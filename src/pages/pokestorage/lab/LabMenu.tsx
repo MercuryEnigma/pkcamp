@@ -28,7 +28,7 @@ export function LabMenu({
         <SiteCard
           className="lab-menu-pc"
           title="PC"
-          description="Collections and research progress"
+          description="Pokédex collections and research progress"
           onClick={onSelectCollections}
         />
         <SiteCard

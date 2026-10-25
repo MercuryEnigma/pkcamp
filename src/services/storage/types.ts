@@ -79,6 +79,12 @@ export type StoredCollectionMatch = (
   originalTrainerId: number
   level: number
   shiny: boolean
+  /** Names, for filtering; absent in results stored before they were kept. */
+  moves?: string[]
+  ability?: string
+  nature?: string
+  heldItem?: string
+  ribbons?: string[]
 }
 
 /** One collection's last scan result, stored at pokedex/{collectionId}.json. */

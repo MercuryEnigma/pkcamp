@@ -41,6 +41,11 @@ export function toStoredMatch(scanned: ScannedPokemon): StoredMatch {
     originalTrainerId: node.originalTrainerId,
     level: node.level,
     shiny: node.shiny,
+    moves: node.moves.flatMap((move) => (move ? [move.name] : [])),
+    ...(node.ability ? { ability: node.ability.name } : {}),
+    ...(node.nature ? { nature: node.nature.name } : {}),
+    ...(node.heldItemName ? { heldItem: node.heldItemName } : {}),
+    ribbons: node.ribbons.map((ribbon) => ribbon.name),
   }
 }
 
