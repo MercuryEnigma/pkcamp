@@ -47,6 +47,8 @@ export interface StoredRom {
 export interface StorageSettings {
   /** Sprite source id, or null for the app default. */
   spriteSourceId: string | null
+  /** Color theme id, or null for the app default. */
+  themeId: string | null
 }
 
 /**

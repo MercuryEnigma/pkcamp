@@ -78,7 +78,7 @@
   color: var(--camp-text);
 }
 .arcade-stage[data-skin] .arcade-save-chip[data-status='saved'] {
-  color: var(--camp-forest);
+  color: var(--camp-leaf-text);
 }
 
 /* Short windows scroll the page; a skin sizes itself to what is left. */

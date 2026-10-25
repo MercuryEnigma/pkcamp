@@ -1,7 +1,14 @@
 import { locale } from '../../services/i18n/format'
 import { useTranslation } from 'react-i18next'
 import { useNavigationGuard } from './navigationGuard'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { zipSync } from 'fflate'
 import {
   ROSTER,
@@ -9,6 +16,11 @@ import {
   type Generation,
 } from '../../services/saveLibrary'
 import { initializeSpriteResolver } from '../../services/sprites'
+import {
+  applyTheme,
+  resolveTheme,
+  type ThemeId,
+} from '../../services/themes'
 import { type Camp, type StorageProvider } from '../../services/storage'
 import { dropboxAccount } from '../../services/storage/dropbox'
 import { minimumCampSiteCount, resizeCampSites } from './campPositions'
@@ -92,6 +104,7 @@ export function useSettingsForm({
   const dropboxStatus = useDropboxStatus()
   const [tab, setTab] = useState<SettingsTab>(initialTab)
   const [spriteSourceId, setSpriteSourceId] = useState(DEFAULT_SPRITE_SOURCE_ID)
+  const [themeId, setThemeId] = useState<ThemeId>(resolveTheme(null))
   const [settingsLoaded, setSettingsLoaded] = useState(false)
   const [siteCounts, setSiteCounts] = useState<SiteCounts | null>(null)
   const [selectedCabin, setSelectedCabin] =
@@ -126,6 +139,17 @@ export function useSettingsForm({
     [selectedSpriteSource]
   )
 
+  // The staged theme shows immediately but is only stored by Save; leaving
+  // Settings puts the saved theme back.
+  const savedThemeId = useRef(savedSettings?.themeId)
+  useEffect(() => {
+    savedThemeId.current = savedSettings?.themeId
+  }, [savedSettings?.themeId])
+  useLayoutEffect(() => {
+    if (settingsLoaded) applyTheme(themeId, { remember: false })
+  }, [settingsLoaded, themeId])
+  useLayoutEffect(() => () => void applyTheme(savedThemeId.current), [])
+
   const refreshBackups = useCallback(async () => {
     try {
       setBackups(await loadBackupStatuses(provider))
@@ -153,6 +177,7 @@ export function useSettingsForm({
           (source) => source.id === settings.spriteSourceId
         )
         setSpriteSourceId(stored?.id ?? DEFAULT_SPRITE_SOURCE_ID)
+        setThemeId(resolveTheme(settings.themeId))
         setSettingsLoaded(true)
       })
       .catch((cause: unknown) => {
@@ -361,6 +386,7 @@ export function useSettingsForm({
     settingsLoaded &&
     (spriteSourceId !==
       (savedSettings?.spriteSourceId ?? DEFAULT_SPRITE_SOURCE_ID) ||
+      themeId !== resolveTheme(savedSettings?.themeId) ||
       GENERATIONS.some(
         (generation) =>
           siteCounts &&
@@ -392,7 +418,8 @@ export function useSettingsForm({
         nextCamps.set(generation, resized)
       }
       setCamps(nextCamps)
-      if (settingsLoaded) await provider.saveSettings({ spriteSourceId })
+      if (settingsLoaded)
+        await provider.saveSettings({ spriteSourceId, themeId })
       setMessage(savedMessage)
     } catch (cause) {
       setMessage(storageErrorMessage(cause))
@@ -428,6 +455,8 @@ export function useSettingsForm({
     setSpriteSourceId,
     selectedSpriteSource,
     spriteResolver,
+    themeId,
+    setThemeId,
     siteCounts,
     setSiteCounts,
     selectedCabin,

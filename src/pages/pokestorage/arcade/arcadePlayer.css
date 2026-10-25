@@ -1,4 +1,4 @@
-/* Player shell and shared buttons. Shared colors: arcadeZone.css.
+/* Player shell and shared buttons. Colors: services/themes.
  * Base components come first; each responsive layout is defined once below. */
 html,
 #root {
@@ -19,11 +19,8 @@ body {
   --cab-pad-x: clamp(0.6rem, 2vw, 1.25rem);
   height: 100dvh;
   --cab-focus-on-dark: var(--camp-panel-hover);
-  --cab-edge: var(--camp-wood);
-  --cab-button-hover: #356447;
-  --cab-button-edge: #183a29;
-  --cab-muted: #d9cfb2;
-  --cab-focus: var(--camp-campfire);
+  --cab-edge: var(--camp-panel-border);
+  --cab-focus: var(--camp-accent);
 }
 .arcade-player > .camp-root {
   height: 100%;
@@ -39,9 +36,9 @@ body {
   flex: 1 1 0;
   align-items: stretch;
   position: relative;
-  background: var(--camp-canvas);
+  background: var(--camp-board);
   border-radius: 10px;
-  box-shadow: 0 4px 16px #24523a24;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--camp-leaf-shadow) 14.12%, transparent);
 }
 .arcade-message button {
   font: inherit;
@@ -50,8 +47,8 @@ body {
 }
 .arcade-message button {
   border: 1px solid var(--cab-button-edge);
-  background: var(--camp-forest);
-  color: #fff8e4;
+  background: var(--camp-leaf);
+  color: var(--camp-on-leaf-warm);
   box-shadow: 0 2px 0 var(--cab-button-edge);
 }
 .arcade-message button {
@@ -109,10 +106,10 @@ body {
   position: absolute;
   inset: 50% auto auto 50%;
   translate: -50% -50%;
-  background: var(--camp-forest);
-  color: #fff8e4;
-  border: 1px solid #183a29;
-  box-shadow: 0 3px #183a29;
+  background: var(--camp-leaf);
+  color: var(--camp-on-leaf-warm);
+  border: 1px solid var(--cab-button-edge);
+  box-shadow: 0 3px var(--cab-button-edge);
 }
 .arcade-player .arcade-power:enabled:active {
   box-shadow: 0 1px 0 var(--cab-edge);
@@ -120,9 +117,9 @@ body {
 }
 .arcade-player .arcade-power:disabled {
   opacity: 1;
-  color: #2b2a26;
-  background: #8e8a7d;
-  border-color: #5d5a51;
+  color: var(--cab-power-off-text);
+  background: var(--cab-power-off);
+  border-color: var(--cab-power-off-edge);
 }
 .arcade-speed {
   border: 1px solid var(--cab-button-edge);
@@ -132,9 +129,9 @@ body {
   justify-self: center;
   display: inline-grid;
   overflow: hidden;
-  border-color: var(--camp-wood);
-  background: var(--camp-paper);
-  box-shadow: 0 1px 0 var(--camp-wood);
+  border-color: var(--camp-panel-border);
+  background: var(--camp-surface);
+  box-shadow: 0 1px 0 var(--camp-panel-border);
 }
 .arcade-speed button {
   min-height: 2.75rem;
@@ -149,7 +146,7 @@ body {
 }
 .arcade-speed button + button {
   border-left: 1px solid var(--cab-button-edge);
-  border-left-color: var(--camp-wood);
+  border-left-color: var(--camp-panel-border);
 }
 .arcade-speed :focus-visible:not(:where(.arcade-menu *)) {
   outline-color: var(--cab-focus-on-dark);
@@ -164,8 +161,8 @@ body {
   overflow: hidden;
 }
 .arcade-speed button[aria-pressed='true'] {
-  background: var(--camp-forest);
-  color: #fff8e4;
+  background: var(--camp-leaf);
+  color: var(--camp-on-leaf-warm);
 }
 @media (hover: hover) {
   .arcade-message button:enabled:hover {

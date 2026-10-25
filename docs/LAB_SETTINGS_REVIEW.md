@@ -21,6 +21,49 @@ with the "Target viewport" section.
 > `.lab-collections-*`, `.lab-danger-*`). Everything else in this file is
 > still yours.
 
+## Theme setting (in progress, not in the spec)
+
+**Pass 6: the theme picker breaks the fit on Appearance.** At 1440×665 the
+panel now scrolls by 170px: the sprite preview and `Save Settings` are below
+the fold (it fit before). `ThemePicker` adds a second full module whose
+preview is about 160px tall, with empty space under the select, stacked
+above the sprite module.
+
+Suggested fix: one module, two columns, one preview.
+- Left column: `Theme` select, `Sprite resource` select, the resource link.
+- Right column: a single `Preview` that *is* the theme board (the staged
+  `--preview-*` colors) with the five sample sprites sitting on its card.
+  That shows both choices together and matches the spec's "left: settings,
+  right: preview" structure.
+- `Save Settings` at the bottom right (`.camp-confirm-btn` has
+  `margin: 0 auto`; set `margin-inline-start: auto`).
+
+Target: fits at 1440×665 with no scrolling, like the other three non-Arcade
+tabs.
+
+**Pass 5: the save warning below is resolved.** `useSettingsForm` saves its
+loaded `themeId` and `StartMenu` passes `startup.themeId`, so saving keeps
+the theme. Typecheck, lint, i18n, and all 569 tests pass. Arcade and Data at
+1440×665 render pixel-identical to before the theme tokens landed. Still to
+come: the theme picker itself on Appearance; `common:themes.night` is
+labeled but not yet in `availableThemes`.
+
+`StorageSettings` gained `themeId`, and `saveSettings` now writes
+`themeId: settings.themeId ?? null`. The tree doesn't typecheck yet:
+`hub/StartMenu.tsx:118` and `useSettingsForm.ts:395` still save
+`{ spriteSourceId }` alone.
+
+**Don't fix those by adding `themeId: null`.** That would reset the saved
+theme every time someone saves Appearance or finishes the first-run sprite
+dialog. Pass the current value instead: the form's loaded `themeId` in
+`useSettingsForm`, and a read-modify-write (`{ ...(await getSettings()),
+spriteSourceId }`) in `StartMenu`. A test that saves the sprite source and
+asserts the theme survives would lock this in.
+
+A theme picker isn't in the spec. If it goes on Appearance, it has to fit
+the 1440×665 budget alongside the sprite preview, and use flat fills with no
+gradients, per the project's style.
+
 ## Target viewport: 1440 × 665
 
 This is the owner's real browser window, about 1440×665 CSS px. It's much

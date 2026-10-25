@@ -14,7 +14,8 @@ Camp and Lab reuse settings/trade hooks, task panels, and `gbLinkTask` helpers,
 with one root navigation guard protecting edits, active tasks, and hardware
 settings-tab changes. Shared Settings exposes installed/latest GB-Link firmware
 and the automatic updater. `useStorageProvider` supplies wrapped
-storage, `useStorageSettings` subscribes to preferences, and `useSpriteResolver`
+storage, `useStorageSettings` subscribes to preferences, `useSavedTheme`
+applies the saved color theme, and `useSpriteResolver`
 follows saved source changes. Shared hooks/UI and Lab still live here;
 `Campsite` renders the Camp entry directly without a wrapper. [PLAN.md](PLAN.md) holds product descriptions and
 [ROADMAP.md](ROADMAP.md) holds task status.
@@ -30,5 +31,5 @@ flowchart TB
   Save & Camp --> Grid["PokemonStorageView · PokemonDetails · PokemonSlotIcon"]
   Save & Settings --> GBA["GbaSavePanel → shared task panel/helpers"]
   Settings --> Firmware["GbLinkFirmwareSettings → firmware updater"]
-  Save & Camp & Trade & Settings --> Shared["useStorage / navigationGuard<br/>useStorageSettings · useSpriteResolver · useNavigationGuard"]
+  Save & Camp & Trade & Settings --> Shared["useStorage / navigationGuard<br/>useStorageSettings · useSavedTheme · useSpriteResolver · useNavigationGuard"]
 ```

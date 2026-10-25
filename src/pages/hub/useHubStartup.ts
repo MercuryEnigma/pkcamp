@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useStorageSettings } from '../pokestorage/useStorage'
+import { useSavedTheme, useStorageSettings } from '../pokestorage/useStorage'
 import {
   preloadSpriteSource,
   spriteSource,
@@ -13,11 +13,13 @@ export function useHubStartup() {
   useEffect(() => {
     if (ready) preloadSpriteSource(sourceId)
   }, [ready, sourceId])
+  useSavedTheme()
 
   return {
     provider,
     ready,
     sourceId,
+    themeId: settings?.themeId ?? null,
     error: error?.message ?? retryError,
     retry: () => {
       setRetryError(null)

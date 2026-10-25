@@ -36,7 +36,7 @@
 }
 .transporter-steps button[aria-current='step'] {
   background: var(--camp-leaf);
-  color: #fff;
+  color: var(--camp-on-leaf);
 }
 .transporter-steps button > :last-child {
   margin-left: auto;

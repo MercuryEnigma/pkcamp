@@ -25,11 +25,14 @@ export function PcFilterScreen({
   filters,
   options,
   onApply,
+  onReset,
 }: {
   filters: EntryFilters
   /** Suggestions per text field, from what the collection holds. */
   options: Record<Exclude<EntryFilterField, 'type'>, readonly string[]>
   onApply: (filters: EntryFilters) => void
+  /** Clears the filters already applied to the grid. */
+  onReset: () => void
 }) {
   const { t } = useTranslation(['collections', 'common'] as const)
 
@@ -88,7 +91,14 @@ export function PcFilterScreen({
         ))}
       </div>
       <footer className="pc-filter-actions">
-        <button type="button" className="pc-reset" onClick={() => setDraft({})}>
+        <button
+          type="button"
+          className="pc-reset"
+          onClick={() => {
+            setDraft({})
+            onReset()
+          }}
+        >
           {t('PcFilterScreen.resetFilters')}
         </button>
         <button type="submit" className="pc-apply">

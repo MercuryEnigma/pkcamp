@@ -480,14 +480,23 @@ describe('Camp', () => {
 
 describe('settings', () => {
   it('defaults', async () => {
-    expect(await provider.getSettings()).toEqual({ spriteSourceId: null })
+    expect(await provider.getSettings()).toEqual({
+      spriteSourceId: null,
+      themeId: null,
+    })
   })
 
   it('round trips', async () => {
-    await provider.saveSettings({ spriteSourceId: 'gen5-bw' })
-    expect(await provider.getSettings()).toEqual({ spriteSourceId: 'gen5-bw' })
-    await provider.saveSettings({ spriteSourceId: null })
-    expect(await provider.getSettings()).toEqual({ spriteSourceId: null })
+    await provider.saveSettings({ spriteSourceId: 'gen5-bw', themeId: 'night' })
+    expect(await provider.getSettings()).toEqual({
+      spriteSourceId: 'gen5-bw',
+      themeId: 'night',
+    })
+    await provider.saveSettings({ spriteSourceId: null, themeId: null })
+    expect(await provider.getSettings()).toEqual({
+      spriteSourceId: null,
+      themeId: null,
+    })
   })
 
   it('ignores unknown or malformed stored fields', async () => {
@@ -496,12 +505,19 @@ describe('settings', () => {
         'settings.json',
         new TextEncoder().encode(JSON.stringify(value))
       )
-    await write({ spriteSourceId: 5, other: true })
-    expect(await provider.getSettings()).toEqual({ spriteSourceId: null })
+    const defaults = { spriteSourceId: null, themeId: null }
+    await write({ spriteSourceId: 5, themeId: false, other: true })
+    expect(await provider.getSettings()).toEqual(defaults)
     await write(null)
-    expect(await provider.getSettings()).toEqual({ spriteSourceId: null })
+    expect(await provider.getSettings()).toEqual(defaults)
     await write({})
-    expect(await provider.getSettings()).toEqual({ spriteSourceId: null })
+    expect(await provider.getSettings()).toEqual(defaults)
+    // Settings saved before themes existed keep their sprite source.
+    await write({ spriteSourceId: 'gen5-bw' })
+    expect(await provider.getSettings()).toEqual({
+      spriteSourceId: 'gen5-bw',
+      themeId: null,
+    })
   })
 })
 

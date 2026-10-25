@@ -12,6 +12,7 @@ import {
   CampsitesCard,
   DataStorageControls,
   SpriteSourcePicker,
+  ThemePicker,
   BackupStatusCard,
 } from '../SettingsSections'
 import { useSettingsForm, type SettingsTab } from '../useSettingsForm'
@@ -88,7 +89,7 @@ export function LabSettings({
         <header className="lab-settings-heading">
           <h2>{getTabs().find((item) => item.id === active)?.label}</h2>
           {active === 'backups' && <p>{t('LabSettings.manageTheSaveBackupForEachGame')}</p>}
-          {active === 'appearance' && <p>{t('LabSettings.chooseHowPokeMonAppearThroughoutPkcamp')}</p>}
+          {active === 'appearance' && <p>{t('LabSettings.chooseColorsAndHowPokeMonAppear')}</p>}
           {active === 'storage' && <p>{t('LabSettings.whereYourBackupsCampingPokeMonCollectionsAndSettingsAre')}</p>}
           {active === 'arcade' && <p>{t('ArcadeSettings.selectAnActionThenPressItsNewKeyEscCancels')}</p>}
         </header>
@@ -113,6 +114,7 @@ export function LabSettings({
 
         {active === 'appearance' && (
           <div className="lab-settings-appearance">
+            <ThemePicker form={form} />
             <SpriteSourcePicker form={form} />
           </div>
         )}

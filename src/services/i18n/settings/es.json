@@ -48,6 +48,7 @@
     "takeTheCampsiteOut": "Exportar el campamento",
     "downloadCampsiteZip": "Descargar campamento (.zip)",
     "deleteCampsite": "Eliminar campamento",
+    "theme": "Tema",
     "spriteResource": "Recurso de sprites",
     "viewResource": "Ver el recurso de {{value1}} ↗",
     "dropboxName": "Dropbox",
@@ -92,7 +93,7 @@
     "arcade": "Arcade",
     "settingsSaved": "Ajustes guardados.",
     "manageTheSaveBackupForEachGame": "Gestiona la copia de seguridad de cada juego.",
-    "chooseHowPokeMonAppearThroughoutPkcamp": "Elige cómo se muestran los Pokémon en pkCamp.",
+    "chooseColorsAndHowPokeMonAppear": "Elige los colores de pkCamp y cómo se muestran los Pokémon.",
     "whereYourBackupsCampingPokeMonCollectionsAndSettingsAre": "Dónde se guardan tus copias de seguridad, Pokémon del campamento, colecciones y ajustes.",
     "dropboxIsUnreachableYourDataIsReadOnlyUntilIt": "No se puede acceder a Dropbox. Tus datos solo se pueden consultar hasta que se restablezca la conexión.",
     "saveSettings": "Guardar ajustes"

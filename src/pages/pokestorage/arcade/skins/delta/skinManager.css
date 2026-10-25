@@ -37,14 +37,14 @@
   white-space: nowrap;
 }
 .skin-manager-choice:has(input:checked) {
-  border-color: var(--camp-forest);
+  border-color: var(--camp-leaf);
   background: var(--camp-panel-hover);
 }
 .skin-manager-choice input {
-  accent-color: var(--camp-forest);
+  accent-color: var(--camp-leaf);
 }
 .skin-manager-choice:has(input:focus-visible) {
-  outline: 3px solid var(--camp-forest);
+  outline: 3px solid var(--camp-leaf);
   outline-offset: 2px;
 }
 .skin-manager button {
@@ -60,7 +60,7 @@
   cursor: pointer;
 }
 .skin-manager button:focus-visible {
-  outline: 3px solid var(--camp-forest);
+  outline: 3px solid var(--camp-leaf);
   outline-offset: 2px;
 }
 .skin-manager-delete {

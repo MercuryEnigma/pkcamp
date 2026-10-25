@@ -43,7 +43,10 @@ const CAMP_MANIFEST_VERSION = 1
 const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
 const SAFE_NAME = /^[A-Za-z0-9-]+$/
 
-const DEFAULT_SETTINGS: StorageSettings = { spriteSourceId: null }
+const DEFAULT_SETTINGS: StorageSettings = {
+  spriteSourceId: null,
+  themeId: null,
+}
 
 interface CampManifestEntry {
   id: string
@@ -549,16 +552,21 @@ export class FileStoreProvider implements StorageProvider {
     if (!file) return { ...DEFAULT_SETTINGS }
     const stored = decodeJson(file.bytes) as Partial<StorageSettings> | null
     const spriteSourceId = stored?.spriteSourceId
+    const themeId = stored?.themeId
     return {
       ...DEFAULT_SETTINGS,
       ...(typeof spriteSourceId === 'string' ? { spriteSourceId } : {}),
+      ...(typeof themeId === 'string' ? { themeId } : {}),
     }
   }
 
   async saveSettings(settings: StorageSettings): Promise<void> {
     await this.store.write(
       SETTINGS_PATH,
-      encodeJson({ spriteSourceId: settings.spriteSourceId ?? null })
+      encodeJson({
+        spriteSourceId: settings.spriteSourceId ?? null,
+        themeId: settings.themeId ?? null,
+      })
     )
   }
 

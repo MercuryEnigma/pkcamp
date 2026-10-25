@@ -127,14 +127,14 @@
   flex: none;
   padding: 3.5cqi 5cqi;
   border-top: 1px solid var(--camp-border-soft);
-  color: #b23a1f;
+  color: var(--camp-danger-text);
   font-size: clamp(0.45rem, 5cqi, 0.85rem);
   line-height: 1.2;
   font-weight: 700;
   text-align: center;
 }
 .game-cartridge-rom[data-ready='true'] {
-  color: var(--camp-leaf);
+  color: var(--camp-leaf-text);
 }
 .game-cartridge-main:focus-visible,
 .game-cartridge-rom:focus-visible {

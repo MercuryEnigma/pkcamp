@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { i18n } from '../../services/i18n'
 import type { Gen3GameId } from '../../services/saveLibrary'
@@ -8,6 +9,12 @@ import { DropboxIcon } from './DropboxBadge'
 import { DEFAULT_CAMP_SITE_COUNT, MAX_CAMP_SITE_COUNT } from './campPositions'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from './spriteDisplay'
 import { SPRITE_SOURCES } from '../../services/sprites/catalog'
+import {
+  availableThemes,
+  resolveTheme,
+  themeLabel,
+  themeTokens,
+} from '../../services/themes'
 import { getGameLabel } from './gameDisplay'
 import { GbaSavePanel } from './GbaSavePanel'
 import {
@@ -360,6 +367,61 @@ export function CampsitesCard({ form }: { form: SettingsForm }) {
           </button>
         </div>
       )}
+    </div>
+  )
+}
+
+/** The Camp roles a theme preview paints, as `--preview-*` properties. */
+const THEME_PREVIEW_ROLES = [
+  'bg',
+  'board',
+  'surface',
+  'panel-border',
+  'leaf',
+  'on-leaf',
+  'text',
+  'muted',
+  'accent',
+]
+
+/** Theme picker with a preview of the staged, not yet saved, theme. */
+export function ThemePicker({ form }: { form: SettingsForm }) {
+  const { t } = useTranslation(['settings', 'common'] as const)
+
+  const { themeId, setThemeId } = form
+  const tokens = themeTokens(themeId)
+  const preview = Object.fromEntries(
+    THEME_PREVIEW_ROLES.map((role) => [
+      `--preview-${role}`,
+      tokens[`--camp-${role}`],
+    ])
+  ) as CSSProperties
+  return (
+    <div className="lab-appearance-controls lab-settings-module">
+      <label className="camp-settings-field">
+        <span>{t('SettingsSections.theme')}</span>
+        <select
+          className="camp-select"
+          value={themeId}
+          onChange={(event) => setThemeId(resolveTheme(event.target.value))}
+        >
+          {availableThemes.map((id) => (
+            <option key={id} value={id}>
+              {themeLabel(id)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="lab-theme-preview" style={preview} aria-hidden="true">
+        <div className="lab-theme-preview-board">
+          <span className="lab-theme-preview-header" />
+          <span className="lab-theme-preview-card">
+            <span className="lab-theme-preview-line" />
+            <span className="lab-theme-preview-line lab-theme-preview-line--muted" />
+            <span className="lab-theme-preview-button" />
+          </span>
+        </div>
+      </div>
     </div>
   )
 }

@@ -1,43 +1,18 @@
-/* Shared Camp palette for the Arcade player.
- * Per-game version colors accent cartridge edges and titles. */
+/* The Arcade player's zone. Colors are theme tokens (services/themes);
+ * per-game version colors accent cartridge edges and titles. */
 
 body:has(.arcade-zone) {
-  background: #5a7a52;
+  background: var(--camp-bg);
 }
 
 .camp-zone.arcade-zone {
-  --camp-dropbox-paper: #fff8e4;
-  --camp-dropbox-wood: #a66b3d;
-  --camp-dropbox-blue: #24523a;
-  accent-color: #24523a;
+  accent-color: var(--camp-leaf);
 }
 
 .arcade-zone .camp-root {
-  --camp-grass: #5a7a52;
-  --camp-canvas: #f6e8bd;
-  --camp-paper: #fff8e4;
-  --camp-wood: #a66b3d;
-  --camp-ink: #493522;
-  --camp-forest: #24523a;
-  --camp-campfire: #e96b3c;
-
-  --camp-bg: var(--camp-grass);
-  --camp-board: var(--camp-canvas);
-  --camp-surface: var(--camp-paper);
-  --camp-panel: #f0dca3;
-  --camp-panel-hover: #e8cb8a;
-  --camp-panel-border: var(--camp-wood);
-  --camp-border-soft: #e4d2a8;
-  --camp-text: var(--camp-ink);
-  --camp-muted: #7b6248;
-  --camp-accent: var(--camp-campfire);
-  --camp-accent-soft: rgb(233 107 60 / 18%);
-  --camp-leaf: var(--camp-forest);
-  --camp-shadow: 0 2px 4px rgb(73 53 34 / 18%);
-
   --arcade-version: #8a5a30;
 
-  background: var(--camp-grass);
+  background: var(--camp-bg);
   border-color: var(--camp-panel-border);
 }
 
@@ -58,7 +33,7 @@ body:has(.arcade-zone) {
 }
 
 .arcade-zone .camp-content {
-  box-shadow: 0 4px 16px rgb(59 39 22 / 22%);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--camp-shadow-color) 22%, transparent);
 }
 
 /* A wider Camp board with five cartridge-shaped game buttons. */
@@ -184,13 +159,13 @@ body:has(.arcade-zone) {
 .arcade-game-rom {
   padding: 0.6rem 0.9rem 0.65rem;
   border-top: 1px solid var(--camp-border-soft);
-  color: #b23a1f;
+  color: var(--camp-danger-text);
   font-size: 0.72rem;
   font-weight: 700;
   text-align: center;
 }
 .arcade-game-rom[data-ready='true'] {
-  color: var(--camp-leaf);
+  color: var(--camp-leaf-text);
 }
 @media (max-width: 42rem) {
   .arcade-game-grid {

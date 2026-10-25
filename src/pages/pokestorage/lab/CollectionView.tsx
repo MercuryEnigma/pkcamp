@@ -263,10 +263,11 @@ export function CollectionView({
         >
           {t('CollectionView.filter', {
             value1:
-              filters.length > 0 &&
-              t('collections:CollectionView.filterCount', {
-                length: filters.length,
-              }),
+              filters.length > 0
+                ? t('collections:CollectionView.filterCount', {
+                    length: filters.length,
+                  })
+                : '',
           })}
         </button>
       </nav>
@@ -312,6 +313,7 @@ export function CollectionView({
               setEntryFilters(next)
               setScreen('grid')
             }}
+            onReset={() => setEntryFilters({})}
           />
         )}
         {active === 'grid' && (

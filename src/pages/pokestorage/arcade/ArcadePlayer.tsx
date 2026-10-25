@@ -17,7 +17,11 @@ import { ROSTER, type Gen3GameId } from '../../../services/saveLibrary'
 import type { StorageProvider } from '../../../services/storage'
 import { PageHeader } from '../../hub/PageHeader'
 import { GAME_LABEL, getGameLabel } from '../gameDisplay'
-import { storageErrorMessage, useStorageProvider } from '../useStorage'
+import {
+  storageErrorMessage,
+  useSavedTheme,
+  useStorageProvider,
+} from '../useStorage'
 import {
   bootSaveFor,
   completeSnapshot,
@@ -95,6 +99,7 @@ export function ArcadePlayer() {
     ? t('ArcadePlayer.pokemon', { value1: GAME_LABEL[gameId] })
     : t('ArcadePlayer.arcade')
   const { provider, ready } = useStorageProvider()
+  useSavedTheme()
   /** The screen alone; fullscreen shows just the game. */
   const screenRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDialogElement>(null)

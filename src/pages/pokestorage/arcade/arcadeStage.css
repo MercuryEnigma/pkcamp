@@ -45,7 +45,7 @@
   overflow: hidden;
 }
 .arcade-save-chip[data-status='saved'] {
-  color: var(--camp-forest);
+  color: var(--camp-leaf-text);
 }
 .arcade-save-chip button {
   font: inherit;
@@ -54,8 +54,8 @@
   padding: 0.15rem 0.6rem;
   border: 1px solid var(--cab-button-edge);
   border-radius: 8px;
-  background: var(--camp-forest);
-  color: #fff8e4;
+  background: var(--camp-leaf);
+  color: var(--camp-on-leaf-warm);
   cursor: pointer;
   position: relative;
 }

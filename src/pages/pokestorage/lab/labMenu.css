@@ -29,16 +29,16 @@
   grid-area: settings;
 }
 .lab-menu-pc {
-  border-color: #173f2c;
-  background: linear-gradient(145deg, #2d6548, var(--camp-leaf));
-  color: #fff8e4;
+  border-color: var(--camp-leaf-edge);
+  background: linear-gradient(145deg, var(--camp-leaf-glow), var(--camp-leaf));
+  color: var(--camp-on-leaf-warm);
   box-shadow:
-    inset 0 1px rgb(255 255 255 / 14%),
-    0 5px 12px rgb(36 82 58 / 28%);
+    inset 0 1px color-mix(in srgb, var(--camp-highlight) 14%, transparent),
+    0 5px 12px color-mix(in srgb, var(--camp-leaf-shadow) 28%, transparent);
 }
 .lab-menu-pc:hover:not(:disabled) {
-  border-color: #102f20;
-  background: linear-gradient(145deg, #377657, #285e42);
+  border-color: var(--camp-leaf-hover-edge);
+  background: linear-gradient(145deg, var(--camp-leaf-hover-glow), var(--camp-leaf-hover));
 }
 .lab-menu-pc strong {
   font-size: clamp(2rem, 7cqmin, 4.25rem);
@@ -47,7 +47,7 @@
   background: var(--camp-panel);
 }
 .lab-menu-pc span {
-  color: rgb(255 248 228 / 82%);
+  color: color-mix(in srgb, var(--camp-on-leaf-warm) 82%, transparent);
   font-size: clamp(0.9rem, 2.2cqmin, 1.15rem);
 }
 .lab-menu-settings {
@@ -61,7 +61,7 @@
   padding: 0.5rem 0.85rem;
   border: 1px solid transparent;
   border-radius: 999px;
-  background: rgb(255 248 228 / 46%);
+  background: color-mix(in srgb, var(--camp-surface) 46%, transparent);
   color: var(--camp-text);
   font-size: 0.85rem;
   font-weight: 650;
@@ -73,7 +73,7 @@
 .lab-link:hover {
   border-color: var(--camp-border-soft);
   background: var(--camp-surface);
-  color: var(--camp-leaf);
+  color: var(--camp-leaf-text);
 }
 
 @media (max-width: 42rem) {

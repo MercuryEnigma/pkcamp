@@ -17,10 +17,10 @@
   padding: 0 0.75rem;
   font-size: 0.82rem;
   text-decoration: underline;
-  color: var(--camp-leaf);
+  color: var(--camp-leaf-text);
 }
 .arcade-menu-link:focus-visible {
-  outline: 3px solid var(--camp-forest);
+  outline: 3px solid var(--camp-leaf);
   outline-offset: 2px;
 }
 .arcade-binding {
@@ -46,8 +46,8 @@
   max-width: 65%;
   overflow: hidden;
   box-sizing: border-box;
-  border: 1px solid var(--camp-wood);
-  background: var(--camp-paper);
+  border: 1px solid var(--camp-panel-border);
+  background: var(--camp-surface);
   min-width: 2.25rem;
   height: 1.9rem;
   color: var(--camp-text);
@@ -82,7 +82,7 @@
 }
 .arcade-binding-group ul {
   border: 1px solid var(--camp-border-soft);
-  background: var(--camp-canvas);
+  background: var(--camp-board);
   border-radius: 8px;
   margin: 0;
   padding: 0;
@@ -103,7 +103,7 @@
   border-left: 1px solid var(--camp-border-soft);
 }
 .arcade-binding:focus-visible {
-  outline: 3px solid var(--camp-forest);
+  outline: 3px solid var(--camp-leaf);
   outline-offset: -3px;
 }
 .arcade-binding[aria-pressed='true'] {
@@ -148,7 +148,7 @@
   width: 1.25rem;
   height: 1.25rem;
   margin: 0;
-  accent-color: var(--camp-forest);
+  accent-color: var(--camp-leaf);
 }
 @media (hover: hover) {
   .arcade-binding:hover {

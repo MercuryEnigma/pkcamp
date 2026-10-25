@@ -52,7 +52,7 @@
   padding: 0.5rem 0.85rem 0.5rem 3.25rem;
   background: var(--camp-leaf);
   clip-path: polygon(1.6rem 0, 100% 0, 100% 100%, 0 100%);
-  color: #fff;
+  color: var(--camp-on-leaf);
 }
 .site-page-title {
   margin: 0;

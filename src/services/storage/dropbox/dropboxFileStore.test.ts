@@ -238,8 +238,11 @@ describe('FileStoreProvider over DropboxFileStore', () => {
     })
     expect((await provider.getRom(game))!.extension).toBe('gba')
 
-    await provider.saveSettings({ spriteSourceId: 'x' })
-    expect(await provider.getSettings()).toEqual({ spriteSourceId: 'x' })
+    await provider.saveSettings({ spriteSourceId: 'x', themeId: 'night' })
+    expect(await provider.getSettings()).toEqual({
+      spriteSourceId: 'x',
+      themeId: 'night',
+    })
 
     const camp = await provider.getCamp(3)
     camp.sites[0][0] = {
@@ -279,7 +282,7 @@ describe('prefetching through the cache', () => {
       importedAt: '',
     }
     await seed.saveCamp(3, camp)
-    await seed.saveSettings({ spriteSourceId: 'home' })
+    await seed.saveSettings({ spriteSourceId: 'home', themeId: null })
 
     const provider = new FileStoreProvider(
       new DropboxFileStore(tokens(), { fetch: fake.fetch, sleep }),
@@ -307,7 +310,10 @@ describe('prefetching through the cache', () => {
     expect(await provider.getSave('emerald')).toBeNull()
     expect((await provider.getCamp(3)).sites[0][4]?.id).toBe('abc')
     expect((await provider.getCamp(4)).sites).toHaveLength(10)
-    expect(await provider.getSettings()).toEqual({ spriteSourceId: 'home' })
+    expect(await provider.getSettings()).toEqual({
+      spriteSourceId: 'home',
+      themeId: null,
+    })
     expect(fake.requests).toEqual([])
   })
 })

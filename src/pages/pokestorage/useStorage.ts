@@ -1,5 +1,12 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import { spriteResolver } from '../../services/sprites/resources'
+import { applyTheme } from '../../services/themes'
 import {
   settingsSnapshot,
   subscribeSettings,
@@ -95,4 +102,13 @@ export function useSpriteResolver() {
   const { settings } = useStorageSettings()
   const sourceId = settings?.spriteSourceId ?? DEFAULT_SPRITE_SOURCE_ID
   return useMemo(() => spriteResolver(sourceId), [sourceId])
+}
+
+/** Applies the shared theme preference; until it loads, the boot hint stays. */
+export function useSavedTheme() {
+  const { settings, ready } = useStorageSettings()
+  const themeId = settings?.themeId
+  useLayoutEffect(() => {
+    if (ready) applyTheme(themeId)
+  }, [ready, themeId])
 }

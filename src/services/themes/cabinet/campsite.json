@@ -1,0 +1,11 @@
+{
+  "button-hover": "#356447",
+  "button-edge": "#183a29",
+  "shadow": "#183a29",
+  "backdrop": "#243428",
+  "alert": "#f7ddd2",
+  "alert-edge": "#d8a18e",
+  "power-off": "#8e8a7d",
+  "power-off-edge": "#5d5a51",
+  "power-off-text": "#2b2a26"
+}

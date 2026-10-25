@@ -7,21 +7,10 @@ body #root {
   text-align: left;
 }
 body {
-  background: #5a7a52;
+  background: var(--camp-bg);
 }
 
 .hub-root {
-  --camp-bg: #5a7a52;
-  --camp-board: #f6e8bd;
-  --camp-surface: #fff8e4;
-  --camp-panel: #f0dca3;
-  --camp-panel-hover: #e8cb8a;
-  --camp-panel-border: #a66b3d;
-  --camp-border-soft: #e4d2a8;
-  --camp-text: #493522;
-  --camp-muted: #7b6248;
-  --camp-leaf: #24523a;
-  --camp-shadow: 0 2px 4px rgb(73 53 34 / 18%);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -72,7 +61,7 @@ button {
   border: 2px solid var(--camp-panel-border);
   border-radius: 14px;
   background: var(--camp-board);
-  box-shadow: 0 4px 16px rgb(59 39 22 / 22%);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--camp-shadow-color) 22%, transparent);
 }
 .site-board {
   display: flex;
@@ -93,7 +82,7 @@ button {
   container-type: size;
 }
 .site-body a {
-  color: var(--camp-leaf);
+  color: var(--camp-leaf-text);
   text-underline-offset: 0.15em;
 }
 .site-body :is(input, select, textarea) {
@@ -210,7 +199,7 @@ button {
   margin: clamp(0.5rem, 2svh, 1.25rem) auto 0;
 }
 .hub-credits {
-  color: #fff8e4;
+  color: var(--camp-on-bg);
   font-size: 0.75rem;
   line-height: 1.45;
 }
@@ -219,7 +208,7 @@ button {
 }
 .hub-credits a,
 .hub-license {
-  color: #fff8e4;
+  color: var(--camp-on-bg);
 }
 .hub-license {
   flex: none;
@@ -254,7 +243,7 @@ button {
 .hub-primary-action {
   margin-top: 1rem;
   background: var(--camp-leaf);
-  color: white;
+  color: var(--camp-on-leaf);
 }
 .hub-acquire .camp-gba-task {
   margin-top: 1.25rem;
@@ -283,7 +272,7 @@ button {
   padding: 0.5rem 0.85rem;
   border: 1px solid transparent;
   border-radius: 999px;
-  background: rgb(255 248 228 / 46%);
+  background: color-mix(in srgb, var(--camp-surface) 46%, transparent);
   color: var(--camp-text);
   font: inherit;
   font-size: 0.85rem;
@@ -297,7 +286,7 @@ button {
 .hub-map-change:hover {
   border-color: var(--camp-border-soft);
   background: var(--camp-surface);
-  color: var(--camp-leaf);
+  color: var(--camp-leaf-text);
 }
 .hub-map-arcade {
   grid-area: arcade;
@@ -309,19 +298,19 @@ button {
   grid-area: lab;
 }
 .hub-map-camp {
-  border-color: #173f2c;
-  background: linear-gradient(145deg, #2d6548, var(--camp-leaf));
-  color: #fff8e4;
+  border-color: var(--camp-leaf-edge);
+  background: linear-gradient(145deg, var(--camp-leaf-glow), var(--camp-leaf));
+  color: var(--camp-on-leaf-warm);
   box-shadow:
-    inset 0 1px rgb(255 255 255 / 14%),
-    0 5px 12px rgb(36 82 58 / 28%);
+    inset 0 1px color-mix(in srgb, var(--camp-highlight) 14%, transparent),
+    0 5px 12px color-mix(in srgb, var(--camp-leaf-shadow) 28%, transparent);
 }
 .hub-map-camp:hover:not(:disabled) {
-  border-color: #102f20;
-  background: linear-gradient(145deg, #377657, #285e42);
+  border-color: var(--camp-leaf-hover-edge);
+  background: linear-gradient(145deg, var(--camp-leaf-hover-glow), var(--camp-leaf-hover));
   box-shadow:
-    inset 0 1px rgb(255 255 255 / 18%),
-    0 8px 16px rgb(36 82 58 / 30%);
+    inset 0 1px color-mix(in srgb, var(--camp-highlight) 18%, transparent),
+    0 8px 16px color-mix(in srgb, var(--camp-leaf-shadow) 30%, transparent);
 }
 .hub-map-camp strong {
   font-size: clamp(2rem, 7cqmin, 4.25rem);
@@ -330,7 +319,7 @@ button {
   background: var(--camp-panel);
 }
 .hub-map-camp span {
-  color: rgb(255 248 228 / 82%);
+  color: color-mix(in srgb, var(--camp-on-leaf-warm) 82%, transparent);
   font-size: clamp(0.9rem, 2.2cqmin, 1.15rem);
 }
 .hub-map-lab {
@@ -345,14 +334,14 @@ button {
   max-width: min(34rem, calc(100vw - 2rem));
   max-height: calc(100svh - 2rem);
   overflow: auto;
-  border: 1px solid #a66b3d;
+  border: 1px solid var(--camp-panel-border);
   border-radius: 12px;
   padding: 2rem;
-  background: #fff8e4;
-  color: #493522;
+  background: var(--camp-surface);
+  color: var(--camp-text);
 }
 .hub-dialog::backdrop {
-  background: #26302399;
+  background: color-mix(in srgb, var(--camp-backdrop) 60%, transparent);
 }
 .hub-dialog h2 {
   margin-top: 0;
@@ -369,10 +358,10 @@ button {
 .hub-source-label select {
   width: 100%;
   padding: 0.75rem;
-  border: 1px solid #a66b3d;
+  border: 1px solid var(--camp-panel-border);
   border-radius: 6px;
-  background: #fff8e4;
-  color: #493522;
+  background: var(--camp-surface);
+  color: var(--camp-text);
   font: inherit;
 }
 .hub-dialog-actions {

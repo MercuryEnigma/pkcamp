@@ -42,5 +42,9 @@
     "emerald": "Esmeralda",
     "firered": "Rojo Fuego",
     "leafgreen": "Verde Hoja"
+  },
+  "themes": {
+    "campsite": "Campamento",
+    "night": "Noche"
   }
 }

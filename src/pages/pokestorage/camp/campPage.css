@@ -35,7 +35,7 @@
   border: 1px solid var(--camp-border-soft);
   border-radius: 16px;
   background: var(--camp-surface);
-  box-shadow: 0 3px 9px rgb(73 53 34 / 12%);
+  box-shadow: 0 3px 9px color-mix(in srgb, var(--camp-shadow-color) 12%, transparent);
 }
 .camp-right:has(.camp-mode-nav) > .site-panel {
   border-bottom: 0;
@@ -52,7 +52,7 @@
   align-items: stretch;
   min-height: clamp(3.5rem, 6vw, 4.25rem);
   background: var(--camp-leaf);
-  color: #fff8e4;
+  color: var(--camp-on-leaf-warm);
 }
 .storage-grid-nav button {
   display: grid;
@@ -60,24 +60,24 @@
   min-width: 0;
   padding: 0;
   border: 0;
-  border-right: 1px solid rgb(255 248 228 / 25%);
-  background: rgb(255 248 228 / 9%);
-  color: #fff8e4;
+  border-right: 1px solid color-mix(in srgb, var(--camp-on-leaf-warm) 25%, transparent);
+  background: color-mix(in srgb, var(--camp-on-leaf-warm) 9%, transparent);
+  color: var(--camp-on-leaf-warm);
   font-size: 1.1rem;
   cursor: pointer;
 }
 .storage-grid-nav button:last-child {
   grid-column: 5;
   border-right: 0;
-  border-left: 1px solid rgb(255 248 228 / 25%);
+  border-left: 1px solid color-mix(in srgb, var(--camp-on-leaf-warm) 25%, transparent);
 }
 .storage-grid-nav button:hover {
-  background: rgb(255 248 228 / 22%);
+  background: color-mix(in srgb, var(--camp-on-leaf-warm) 22%, transparent);
 }
 .storage-grid-source {
   display: grid;
   place-items: center;
-  color: #dfb664;
+  color: var(--camp-on-leaf-accent);
 }
 .storage-grid-source[data-game='ruby'] {
   color: #c73d36;
@@ -97,7 +97,7 @@
 .storage-grid-source svg {
   width: min(2rem, 75%);
   aspect-ratio: 1;
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 20%));
+  filter: drop-shadow(0 1px 1px color-mix(in srgb, var(--camp-shadow-color) 20%, transparent));
 }
 /* Noun Project "gameboy advance cartridge" by Sanchez El Burrito (#221050):
    black outline over a body fill (label excluded) in the game color */
@@ -144,8 +144,8 @@
   overflow: hidden;
   border-radius: 10px;
   background: var(--camp-surface);
-  color: var(--camp-leaf);
-  box-shadow: 0 3px 9px rgb(73 53 34 / 12%);
+  color: var(--camp-leaf-text);
+  box-shadow: 0 3px 9px color-mix(in srgb, var(--camp-shadow-color) 12%, transparent);
   font-size: clamp(0.95rem, 1.7vw, 1.35rem);
   font-weight: 750;
   line-height: 1.2;
@@ -160,7 +160,7 @@
   place-items: center;
   min-height: 0;
   padding: clamp(0.55rem, 1.35vw, 1.15rem);
-  background: linear-gradient(155deg, var(--camp-surface), #fff9e9);
+  background: var(--camp-surface);
   container-type: size;
 }
 .storage-slots {
@@ -173,25 +173,25 @@
 .camp-page .storage-slots .camp-slot {
   position: relative;
   box-sizing: border-box;
-  border: 1px solid rgb(166 107 61 / 12%);
+  border: 1px solid color-mix(in srgb, var(--camp-panel-border) 12%, transparent);
   border-radius: 9px;
 }
 .camp-page .storage-slots .camp-slot--empty {
-  background: rgb(166 107 61 / 6%);
+  background: color-mix(in srgb, var(--camp-panel-border) 6%, transparent);
 }
 .camp-page .storage-slots .camp-slot--empty::before {
   content: '';
   position: absolute;
   inset: 38%;
-  border: 2px solid rgb(166 107 61 / 12%);
+  border: 2px solid color-mix(in srgb, var(--camp-panel-border) 12%, transparent);
   border-radius: 50%;
 }
 .camp-page .storage-slots .camp-slot--empty:hover {
-  border-color: rgb(166 107 61 / 38%);
-  background: rgb(240 220 163 / 45%);
+  border-color: color-mix(in srgb, var(--camp-panel-border) 38%, transparent);
+  background: color-mix(in srgb, var(--camp-panel) 45%, transparent);
 }
 .camp-page .storage-slots .camp-slot--pokemon {
-  background: #f7e9b8;
+  background: var(--camp-slot);
 }
 .camp-page .storage-slots .camp-slot--pokemon:hover {
   border-color: var(--camp-panel-border);
@@ -210,13 +210,13 @@
     .camp-slot--selected-blue,
     .camp-slot--selected-green
   ) {
-  border-color: #de7e24;
-  background: #ffe2a8;
-  box-shadow: inset 0 0 0 2px #de7e24;
+  border-color: var(--camp-slot-picked-edge);
+  background: var(--camp-slot-picked);
+  box-shadow: inset 0 0 0 2px var(--camp-slot-picked-edge);
 }
 .storage-slot-unused {
   border-radius: 9px;
-  background: rgb(166 107 61 / 4%);
+  background: color-mix(in srgb, var(--camp-panel-border) 4%, transparent);
 }
 
 .camp-side-footer,
@@ -239,29 +239,29 @@
       3.5rem
     );
   overflow: hidden;
-  border: 1px solid #91aa85;
-  border-top: 1px solid rgb(36 82 58 / 20%);
+  border: 1px solid var(--camp-mode-nav-edge);
+  border-top: 1px solid color-mix(in srgb, var(--camp-leaf) 20%, transparent);
   border-radius: 0 0 16px 16px;
-  background: #b9cca9;
-  color: var(--camp-leaf);
-  box-shadow: 0 3px 9px rgb(73 53 34 / 12%);
+  background: var(--camp-mode-nav);
+  color: var(--camp-leaf-text);
+  box-shadow: 0 3px 9px color-mix(in srgb, var(--camp-shadow-color) 12%, transparent);
 }
 .camp-mode-nav button {
   align-self: stretch;
   padding: 0;
   border: 0;
-  border-right: 1px solid rgb(36 82 58 / 25%);
-  background: rgb(255 248 228 / 22%);
-  color: var(--camp-leaf);
+  border-right: 1px solid color-mix(in srgb, var(--camp-leaf) 25%, transparent);
+  background: color-mix(in srgb, var(--camp-surface) 22%, transparent);
+  color: var(--camp-leaf-text);
   font-size: 1.1rem;
   cursor: pointer;
 }
 .camp-mode-nav button:last-child {
   border-right: 0;
-  border-left: 1px solid rgb(36 82 58 / 25%);
+  border-left: 1px solid color-mix(in srgb, var(--camp-leaf) 25%, transparent);
 }
 .camp-mode-nav button:hover {
-  background: rgb(255 248 228 / 55%);
+  background: color-mix(in srgb, var(--camp-surface) 55%, transparent);
 }
 .camp-mode-pill {
   margin: 0;
@@ -282,7 +282,7 @@
   border: 1px solid var(--camp-border-soft);
   border-radius: 16px;
   background: var(--camp-surface);
-  box-shadow: 0 3px 9px rgb(73 53 34 / 12%);
+  box-shadow: 0 3px 9px color-mix(in srgb, var(--camp-shadow-color) 12%, transparent);
 }
 .camp-details-view-header {
   display: grid;
@@ -295,7 +295,7 @@
   box-sizing: border-box;
   min-height: clamp(3.5rem, 6vw, 4.25rem);
   background: var(--camp-leaf);
-  color: #fff8e4;
+  color: var(--camp-on-leaf-warm);
 }
 .camp-details-view-shiny,
 .camp-details-view-level {
@@ -314,14 +314,14 @@
   fill: currentColor;
 }
 .camp-details-view-gender {
-  color: #dfb664;
+  color: var(--camp-on-leaf-accent);
   font-size: 1.1em;
 }
 .camp-details-view-gender[data-gender='Male'] {
-  color: #a8d0ef;
+  color: var(--camp-gender-male);
 }
 .camp-details-view-gender[data-gender='Female'] {
-  color: #f2bad0;
+  color: var(--camp-gender-female);
 }
 .camp-details-view-level {
   gap: 0.25rem;
@@ -339,8 +339,8 @@
   overflow: hidden;
   border-radius: 10px;
   background: var(--camp-surface);
-  color: var(--camp-leaf);
-  box-shadow: 0 3px 9px rgb(73 53 34 / 12%);
+  color: var(--camp-leaf-text);
+  box-shadow: 0 3px 9px color-mix(in srgb, var(--camp-shadow-color) 12%, transparent);
   font-size: clamp(0.95rem, 1.7vw, 1.35rem);
   font-weight: 750;
   line-height: 1.2;
@@ -358,7 +358,7 @@
   min-height: 0;
   padding: clamp(0.65rem, 1.35vw, 1.2rem);
   overflow: hidden;
-  background: linear-gradient(155deg, var(--camp-surface), #fff9e9);
+  background: var(--camp-surface);
 }
 .camp-page .camp-details-identity {
   display: flex;
@@ -368,14 +368,14 @@
   gap: 0.75rem;
   min-height: clamp(5.2rem, 10vw, 6.4rem);
   padding: 0 0 0.55rem;
-  border-bottom: 1px solid #e5cf9e;
+  border-bottom: 1px solid var(--camp-border-soft);
 }
 .camp-page .camp-details-identity-text {
   min-width: 0;
 }
 .camp-page .camp-details-species {
   border: 0;
-  color: #715942;
+  color: var(--camp-details-species);
   font-size: clamp(0.95rem, 1.6vw, 1.3rem);
   line-height: 1.25;
   text-transform: lowercase;
@@ -390,7 +390,7 @@
   height: clamp(4.2rem, 8vw, 5.5rem);
   border: 0;
   border-radius: 10px;
-  background: #f2e0ad;
+  background: var(--camp-details-sprite);
 }
 .camp-page .camp-sprite-credit {
   align-self: flex-end;
@@ -407,7 +407,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
   padding: clamp(0.7rem, 1.3vw, 1.15rem) 0;
-  border-bottom: 1px solid #e5cf9e;
+  border-bottom: 1px solid var(--camp-border-soft);
 }
 .camp-page .camp-details-pair--three {
   grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr));
@@ -418,18 +418,18 @@
 }
 .camp-page .camp-details-pair > .camp-details-field + .camp-details-field {
   padding: 0 0 0 0.8rem;
-  border-left: 1px solid #e5cf9e;
+  border-left: 1px solid var(--camp-border-soft);
 }
 .camp-page .camp-details-label,
 .camp-page .camp-details-section-title {
-  color: #796147;
+  color: var(--camp-details-label);
   font-size: clamp(0.67rem, 1vw, 0.8rem);
   font-weight: 750;
   letter-spacing: 0.035em;
   text-transform: uppercase;
 }
 .camp-page .camp-details-value {
-  color: #27271e;
+  color: var(--camp-details-value);
   font-size: clamp(0.85rem, 1.35vw, 1.1rem);
   line-height: 1.25;
   overflow-wrap: anywhere;
@@ -460,7 +460,7 @@
   grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 0;
   min-height: 0;
-  border-block: 1px solid #e5cf9e;
+  border-block: 1px solid var(--camp-border-soft);
 }
 .camp-page .camp-details-move-list li {
   align-items: center;
@@ -470,14 +470,14 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: #29271f;
+  color: var(--camp-details-value);
   font-size: clamp(0.78rem, 1.2vw, 0.98rem);
 }
 .camp-page .camp-details-move-list li:nth-child(even) {
-  border-left: 1px solid #e5cf9e;
+  border-left: 1px solid var(--camp-border-soft);
 }
 .camp-page .camp-details-move-list li:nth-child(n + 3) {
-  border-top: 1px solid #e5cf9e;
+  border-top: 1px solid var(--camp-border-soft);
 }
 .camp-page .camp-details-move-name {
   min-width: 0;
@@ -485,7 +485,7 @@
 }
 .camp-page .camp-details-move-pp {
   flex: none;
-  color: #846a4e;
+  color: var(--camp-details-pp);
   font-size: 0.78em;
   font-weight: 700;
   white-space: nowrap;
@@ -517,21 +517,21 @@
 .camp-page .camp-details-stats-header > span {
   padding: 0 0.3rem 0.35rem;
   border: 0;
-  color: #796147;
+  color: var(--camp-details-label);
   font-size: 0.83em;
   text-align: center;
 }
 .camp-page .camp-details-stat-row {
   min-height: 0;
   border-radius: 4px;
-  color: #514a3e;
+  color: var(--camp-details-stat-name);
   line-height: 1.1;
 }
 .camp-page .camp-details-stat-row:nth-child(even) {
-  background: #eaf0db;
+  background: var(--camp-details-row-even);
 }
 .camp-page .camp-details-stat-row:nth-child(odd) {
-  background: #fbefd8;
+  background: var(--camp-details-row-odd);
 }
 .camp-page .camp-details-stat-row > * {
   padding: 0 0.3rem;
@@ -542,7 +542,7 @@
   grid-template-columns: 8ch auto;
   align-items: center;
   gap: 0.3rem;
-  color: #4f493b;
+  color: var(--camp-details-stat-name);
 }
 .camp-page .camp-details-stat-name > span {
   white-space: nowrap;
@@ -553,7 +553,7 @@
   text-align: center;
 }
 .camp-page .camp-details-stat-value {
-  color: #233928;
+  color: var(--camp-details-stat-value);
 }
 .camp-view-nav {
   min-height: clamp(3.25rem, 5vw, 3.8rem);
@@ -615,7 +615,7 @@
 }
 .tool-selector button[aria-pressed='true'] {
   background: var(--camp-leaf);
-  color: #fff;
+  color: var(--camp-on-leaf);
 }
 
 .camp-bar {

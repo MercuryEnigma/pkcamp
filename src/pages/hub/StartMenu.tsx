@@ -115,7 +115,10 @@ export function StartMenu({
     setBusy(true)
     setError(null)
     try {
-      await startup.provider.saveSettings({ spriteSourceId: sourceId })
+      await startup.provider.saveSettings({
+        spriteSourceId: sourceId,
+        themeId: startup.themeId,
+      })
       setupDialog.current?.close()
       const action = pendingAction.current
       pendingAction.current = null

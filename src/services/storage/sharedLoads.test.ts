@@ -7,6 +7,7 @@ import {
   subscribeDataChanges,
   subscribeSettings,
 } from './sharedLoads'
+import type { StorageSettings } from './types'
 
 function setup() {
   const raw = new FileStoreProvider(new MemoryFileStore(), {
@@ -49,8 +50,11 @@ describe('shared storage loading', () => {
     await first.saveLabSettings({ sources: ['emerald'] })
     expect(await first.getLabSettings()).toEqual({ sources: ['emerald'] })
     expect(await second.getLabSettings()).toEqual({ sources: null })
-    await first.saveSettings({ spriteSourceId: 'first' })
-    expect(await second.getSettings()).toEqual({ spriteSourceId: null })
+    await first.saveSettings({ spriteSourceId: 'first', themeId: null })
+    expect(await second.getSettings()).toEqual({
+      spriteSourceId: null,
+      themeId: null,
+    })
   })
 
   it('notifies shared settings consumers after successful writes only', async () => {
@@ -59,15 +63,18 @@ describe('shared storage loading', () => {
     const unsubscribe = subscribeSettings(provider, changed)
     await provider.getSettings()
     changed.mockClear()
-    await provider.saveSettings({ spriteSourceId: 'new' })
+    await provider.saveSettings({ spriteSourceId: 'new', themeId: null })
     expect(changed).toHaveBeenCalledTimes(1)
     expect(settingsSnapshot(provider).settings?.spriteSourceId).toBe('new')
     const read = vi.spyOn(raw, 'getSettings')
-    expect(await provider.getSettings()).toEqual({ spriteSourceId: 'new' })
+    expect(await provider.getSettings()).toEqual({
+      spriteSourceId: 'new',
+      themeId: null,
+    })
     expect(read).not.toHaveBeenCalled()
     vi.spyOn(raw, 'saveSettings').mockRejectedValueOnce(new Error('offline'))
     await expect(
-      provider.saveSettings({ spriteSourceId: 'failed' })
+      provider.saveSettings({ spriteSourceId: 'failed', themeId: null })
     ).rejects.toThrow('offline')
     expect(settingsSnapshot(provider).settings?.spriteSourceId).toBe('new')
     expect(changed).toHaveBeenCalledTimes(1)
@@ -76,13 +83,13 @@ describe('shared storage loading', () => {
 
   it('does not let an old settings response overwrite a newer preference', async () => {
     const { raw, provider } = setup()
-    const old = deferred<{ spriteSourceId: string | null }>()
+    const old = deferred<StorageSettings>()
     vi.spyOn(raw, 'getSettings').mockReturnValueOnce(old.promise)
     const pending = provider.getSettings()
     await Promise.resolve()
-    await provider.saveSettings({ spriteSourceId: 'new' })
-    old.resolve({ spriteSourceId: 'old' })
-    expect(await pending).toEqual({ spriteSourceId: 'new' })
+    await provider.saveSettings({ spriteSourceId: 'new', themeId: null })
+    old.resolve({ spriteSourceId: 'old', themeId: null })
+    expect(await pending).toEqual({ spriteSourceId: 'new', themeId: null })
     expect(settingsSnapshot(provider).settings?.spriteSourceId).toBe('new')
   })
 
