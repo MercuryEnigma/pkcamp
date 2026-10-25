@@ -4,6 +4,7 @@ import type { Gen3GameId } from '../../services/saveLibrary'
 import type { SpriteRequest } from '../../services/sprites'
 import { CAMP_SITE_SIZE } from '../../services/storage'
 import { dropboxAccount } from '../../services/storage/dropbox'
+import { DropboxIcon } from './DropboxBadge'
 import { DEFAULT_CAMP_SITE_COUNT, MAX_CAMP_SITE_COUNT } from './campPositions'
 import { resolveSpriteDisplay, spriteDisplayImageSrc } from './spriteDisplay'
 import { SPRITE_SOURCES } from '../../services/sprites/catalog'
@@ -106,6 +107,35 @@ export function CabinPicker({ form }: { form: SettingsForm }) {
   )
 }
 
+/** Compact status module paired with the selected Cabin control. */
+export function BackupStatusCard({
+  form,
+  gameId,
+}: {
+  form: SettingsForm
+  gameId: Gen3GameId
+}) {
+  const { t } = useTranslation(['settings', 'common'] as const)
+  const status = form.backups?.[gameId]
+  const hasSave = status?.hasSave ?? false
+  return (
+    <section className="lab-backup-status lab-settings-module" aria-live="polite">
+      <span className={`lab-backup-status-mark${hasSave ? ' is-ready' : ''}`} aria-hidden="true" />
+      <div>
+        <h3>{t('SettingsSections.lastBackup')}</h3>
+        <p>
+          {form.backups === null
+            ? t('SettingsSections.checking')
+            : hasSave && status?.updatedAt
+              ? formatBackupDate(status.updatedAt)
+              : t('SettingsSections.noBackupOnFile')}
+        </p>
+        {hasSave && <small>{t('SettingsSections.backupOnFile')}</small>}
+      </div>
+    </section>
+  )
+}
+
 /** One Cabin's backup record with its transfer actions. */
 export function CabinBackupCard({
   form,
@@ -157,38 +187,19 @@ export function CabinBackupCard({
     </label>
   )
   return (
-    <div className="camp-cabin-card">
-      <div className="camp-cabin-head">
-        <strong className="camp-cabin-name">
-          {t('SettingsSections.cabin2', { value1: getGameLabel(gameId) })}
-        </strong>
-        {hasSave && status?.updatedAt && (
-          <span className="camp-cabin-date">
-            {t('SettingsSections.updated', {
-              value1: formatBackupDate(status.updatedAt),
-            })}
-          </span>
-        )}
-      </div>
-      <p className="camp-cabin-status">
-        {backups === null
-          ? t('SettingsSections.checking')
-          : hasSave
-            ? t('SettingsSections.backupOnFile')
-            : t('SettingsSections.noBackupOnFile')}
-      </p>
+    <div className="camp-cabin-card lab-backup-actions">
 
       {hasSave ? (
         <div className="camp-transfer-groups">
           <div className="camp-transfer-group">
-            <span className="camp-transfer-group-label">
+            <span className="camp-transfer-group-label lab-transfer-heading">
               {t('SettingsSections.bringASaveIntoCamp')}
             </span>
             {fromGbaBtn}
             {fromFileBtn}
           </div>
           <div className="camp-transfer-group">
-            <span className="camp-transfer-group-label">
+            <span className="camp-transfer-group-label lab-transfer-heading">
               {t('SettingsSections.takeThisSaveOut')}
             </span>
             <button
@@ -211,7 +222,7 @@ export function CabinBackupCard({
       ) : (
         <div className="camp-transfer-groups">
           <div className="camp-transfer-group">
-            <span className="camp-transfer-group-label">
+            <span className="camp-transfer-group-label lab-transfer-heading">
               {t('SettingsSections.addASave')}
             </span>
             {fromGbaBtn}
@@ -283,7 +294,7 @@ export function CampsitesCard({ form }: { form: SettingsForm }) {
     campsiteMinimum
   )
   return (
-    <div className="camp-cabin-card">
+    <div className="camp-cabin-card lab-campsites-card">
       <div className="camp-cabin-head">
         <strong className="camp-cabin-name">
           {t('SettingsSections.campsites')}
@@ -364,7 +375,7 @@ export function SpriteSourcePicker({ form }: { form: SettingsForm }) {
     selectedSpriteSource,
   } = form
   return (
-    <>
+    <div className="lab-appearance-controls lab-settings-module">
       <label className="camp-settings-field">
         <span>{t('SettingsSections.spriteResource')}</span>
         <select
@@ -379,7 +390,9 @@ export function SpriteSourcePicker({ form }: { form: SettingsForm }) {
           ))}
         </select>
       </label>
-      <div className="camp-sprite-preview-row">
+      <div className="lab-sprite-preview lab-settings-module">
+        <h3>{t('SettingsSections.preview')}</h3>
+        <div className="camp-sprite-preview-row">
         {getSpriteShowcase().map(({ key, label, request }) => {
           const display = resolveSpriteDisplay(spriteResolver, request)
           return (
@@ -394,6 +407,7 @@ export function SpriteSourcePicker({ form }: { form: SettingsForm }) {
             </div>
           )
         })}
+        </div>
       </div>
       <a
         className="camp-sprite-source-link"
@@ -405,86 +419,114 @@ export function SpriteSourcePicker({ form }: { form: SettingsForm }) {
           value1: selectedSpriteSource.label.split(' — ')[0],
         })}
       </a>
-    </>
+    </div>
   )
 }
 
-/** Active storage and the Dropbox connection. */
+type StorageState = 'connected' | 'connecting' | 'unreachable' | 'local'
+
+const getStorageStateLabel = (): Record<StorageState, string> => ({
+  connected: i18n.t('settings:SettingsSections.stateConnected'),
+  connecting: i18n.t('settings:SettingsSections.stateConnecting'),
+  unreachable: i18n.t('settings:SettingsSections.stateUnreachable'),
+  local: i18n.t('settings:SettingsSections.stateLocal'),
+})
+
+/** Active storage and the Dropbox connection, as one compact provider card. */
 export function DataStorageControls({ form }: { form: SettingsForm }) {
   const { t } = useTranslation(['settings', 'common'] as const)
 
   const { provider, offline, dropboxStatus, handleDropbox } = form
+  const configured = dropboxAccount.isConfigured()
   const inDropbox = provider.id === 'dropbox'
+  const state: StorageState =
+    dropboxStatus.state === 'connecting'
+      ? 'connecting'
+      : !inDropbox
+        ? 'local'
+        : offline || dropboxStatus.state === 'error'
+          ? 'unreachable'
+          : 'connected'
+  // While connecting, the card already names where the data is going.
+  const showsDropbox = inDropbox || state === 'connecting'
   return (
-    <>
-      <div className="camp-cabin-card camp-storage-location">
-        <div className="camp-cabin-head">
-          <strong className="camp-cabin-name">
-            {inDropbox
-              ? t('SettingsSections.storedOnDropbox')
-              : t('SettingsSections.storedLocallyInThisBrowser')}
+    <section
+      className="lab-storage-module lab-settings-module"
+      aria-labelledby="lab-storage-title"
+    >
+      <h3 id="lab-storage-title">{t('SettingsSections.storageProvider')}</h3>
+      <div className="lab-storage-provider">
+        <span className="lab-storage-icon">
+          {showsDropbox ? <DropboxIcon /> : <BrowserIcon />}
+        </span>
+        <span className="lab-storage-name">
+          <strong>
+            {showsDropbox
+              ? t('SettingsSections.dropboxName')
+              : t('SettingsSections.thisBrowser')}
           </strong>
-        </div>
-        <p className="camp-cabin-status">
-          {inDropbox
-            ? offline
-              ? t('SettingsSections.yourDataIsInYourDropboxAccountWhichCanT')
-              : t(
-                  'SettingsSections.yourDataIsSavedToYourDropboxAccountAndFollows'
-                )
-            : t('SettingsSections.yourDataIsSavedOnlyInThisBrowserOnThis')}
-        </p>
+          <span
+            className={`lab-storage-state lab-storage-state--${state}`}
+            title={dropboxStatus.message || undefined}
+          >
+            {getStorageStateLabel()[state]}
+          </span>
+        </span>
       </div>
-      {dropboxAccount.isConfigured() ? (
-        <>
-          <p className="camp-status">
-            {t('SettingsSections.dropbox', {
-              value1:
-                dropboxStatus.state === 'connected'
-                  ? 'connected'
-                  : dropboxStatus.state === 'connecting'
-                    ? 'connecting…'
-                    : dropboxStatus.state === 'error'
-                      ? 'unreachable'
-                      : t('settings:SettingsSections.notConnected'),
-              value2: dropboxStatus.message
-                ? t('settings:SettingsSections.statusDetail', {
-                    message: dropboxStatus.message,
-                  })
-                : '',
-            })}
-          </p>
-          <div className="camp-local-actions">
-            {provider.id === 'dropbox' ? (
-              <button
-                type="button"
-                className="camp-upload-btn camp-danger-btn"
-                onClick={() => void handleDropbox(false)}
-              >
-                {t('SettingsSections.disconnectDropbox')}
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="camp-upload-btn camp-upload-btn--primary"
-                disabled={dropboxStatus.state === 'connecting'}
-                onClick={() => void handleDropbox(true)}
-              >
-                {t('SettingsSections.connectDropbox')}
-              </button>
-            )}
-          </div>
-          <small>
-            {t(
-              'SettingsSections.connectingCopiesThisBrowserSDataToDropboxTheCopy'
-            )}
-          </small>
-        </>
-      ) : (
-        <p className="camp-status">
-          {t('SettingsSections.dropboxIsnTConfiguredForThisBuildSoYourData')}
-        </p>
-      )}
-    </>
+      {configured &&
+        (inDropbox ? (
+          <button
+            type="button"
+            className="camp-upload-btn"
+            onClick={() => void handleDropbox(false)}
+          >
+            {t('SettingsSections.disconnectDropbox')}
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="camp-upload-btn camp-upload-btn--primary"
+            disabled={state === 'connecting'}
+            onClick={() => void handleDropbox(true)}
+          >
+            {t('SettingsSections.connectDropbox')}
+          </button>
+        ))}
+      <p className="lab-storage-note">
+        {state === 'connected'
+          ? t('SettingsSections.savedToDropbox')
+          : state === 'unreachable'
+            ? t('SettingsSections.dropboxReadOnly')
+            : state === 'connecting'
+              ? t(
+                  'SettingsSections.connectingCopiesThisBrowserSDataToDropboxTheCopy'
+                )
+              : configured
+                ? `${t('SettingsSections.localOnlyWarning')} ${t(
+                    'SettingsSections.connectingCopiesThisBrowserSDataToDropboxTheCopy'
+                  )}`
+                : t(
+                    'SettingsSections.dropboxIsnTConfiguredForThisBuildSoYourData'
+                  )}
+      </p>
+    </section>
+  )
+}
+
+/** A browser window, for data kept in this browser. */
+function BrowserIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 9h18" />
+    </svg>
   )
 }

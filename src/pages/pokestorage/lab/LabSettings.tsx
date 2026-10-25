@@ -12,6 +12,7 @@ import {
   CampsitesCard,
   DataStorageControls,
   SpriteSourcePicker,
+  BackupStatusCard,
 } from '../SettingsSections'
 import { useSettingsForm, type SettingsTab } from '../useSettingsForm'
 import { ArcadeSettings } from './ArcadeSettings'
@@ -53,6 +54,9 @@ export function LabSettings({
   // The Arcade tab is not yet addressable by URL, so it is local state.
   const [arcade, setArcade] = useState(false)
   const active: SettingsTab | 'arcade' = arcade ? 'arcade' : form.tab
+  const showsSave =
+    active === 'appearance' ||
+    (active === 'backups' && selectedCabin === 'campsites')
 
   // A link such as the Dropbox badge can change the tab while this is open.
   const [shownTab, setShownTab] = useState(tab)
@@ -78,42 +82,49 @@ export function LabSettings({
         options={getTabs().map((item) => [item.id, item.label] as const)}
         value={active}
         onChange={choose}
+        mobileSelect
       />
-      <Panel label={getTabs().find((item) => item.id === active)?.label ?? ''}>
-        <h2>{getTabs().find((item) => item.id === active)?.label}</h2>
+      <Panel className="lab-settings-workstation" resetScrollOn={active} label={getTabs().find((item) => item.id === active)?.label ?? ''}>
+        <header className="lab-settings-heading">
+          <h2>{getTabs().find((item) => item.id === active)?.label}</h2>
+          {active === 'backups' && <p>{t('LabSettings.manageTheSaveBackupForEachGame')}</p>}
+          {active === 'appearance' && <p>{t('LabSettings.chooseHowPokeMonAppearThroughoutPkcamp')}</p>}
+          {active === 'storage' && <p>{t('LabSettings.whereYourBackupsCampingPokeMonCollectionsAndSettingsAre')}</p>}
+          {active === 'arcade' && <p>{t('ArcadeSettings.selectAnActionThenPressItsNewKeyEscCancels')}</p>}
+        </header>
 
         {active === 'backups' && (
-          <>
-            <p>{t('LabSettings.manageTheSaveBackupForEachGame')}</p>
-            <CabinPicker form={form} />
+          <div
+            className={`lab-settings-backup${
+              selectedCabin === 'campsites' ? ' lab-settings-backup--campsites' : ''
+            }`}
+          >
+            <div className="lab-settings-module lab-settings-cabin"><CabinPicker form={form} /></div>
             {selectedCabin === 'campsites' ? (
               <CampsitesCard form={form} />
             ) : (
-              <CabinBackupCard form={form} gameId={selectedCabin} />
+              <>
+                <BackupStatusCard form={form} gameId={selectedCabin} />
+                <CabinBackupCard form={form} gameId={selectedCabin} />
+              </>
             )}
-          </>
+          </div>
         )}
 
         {active === 'appearance' && (
-          <>
-            <p>{t('LabSettings.chooseHowPokeMonAppearThroughoutPkcamp')}</p>
+          <div className="lab-settings-appearance">
             <SpriteSourcePicker form={form} />
-          </>
+          </div>
         )}
 
         {active === 'storage' && (
-          <>
-            <p>
-              {t(
-                'LabSettings.whereYourBackupsCampingPokeMonCollectionsAndSettingsAre'
-              )}
-            </p>
+          <div className="lab-settings-data">
             <DataStorageControls form={form} />
             <LabCollectionData offline={offline} />
-          </>
+          </div>
         )}
 
-        {active === 'hardware' && <GbLinkFirmwareSettings />}
+        {active === 'hardware' && <div className="lab-settings-hardware"><GbLinkFirmwareSettings /></div>}
         {active === 'arcade' && <ArcadeSettings />}
 
         {offline && active !== 'hardware' && active !== 'arcade' && (
@@ -122,7 +133,7 @@ export function LabSettings({
           </p>
         )}
         {message && <p className="camp-status">{message}</p>}
-        {active !== 'hardware' && active !== 'arcade' && (
+        {showsSave && (
           <button
             type="button"
             className="camp-confirm-btn"

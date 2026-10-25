@@ -44,7 +44,7 @@ offers Cancel; leaving active work requires the shared navigation warning.
 - **GBA:** Emerald, FireRed and LeafGreen in every language, through the GB-Link
   in Wireless Adapter mode (firmware 2.2.7+), with the vendored
   gblink-wondercards distributor.
-- **Switch:** FireRed and LeafGreen on Nintendo Switch Online, through the ESP32
+- **Switch:** FireRed and LeafGreen on Nintendo Switch, through the ESP32
   board (firmware 2.1.0+, Switch keys required), with the vendored
   GB-Link-Switch-LDN gift distribution.
 

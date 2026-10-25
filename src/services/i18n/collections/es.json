@@ -72,9 +72,13 @@
     "historyCleared": "Se ha borrado el historial de «{{name}}».",
     "clearHistory": "Borrar historial",
     "pokeDexCollections": "Colecciones de la Pokédex",
-    "collectionsAndTheirRegisteredHistoryAreKeptInTheActive": "Las colecciones y el historial de sus registros se conservan en el almacenamiento activo. Las colecciones integradas no se pueden eliminar, solo se puede borrar su historial; el siguiente análisis lo reconstruirá a partir de tus partidas.",
+    "collection": "Colección",
+    "type": "Tipo",
+    "registered": "Registrados",
+    "actions": "Acciones",
     "loadingCollections": "Cargando colecciones…",
-    "deleteAllCollections": "Eliminar todas las colecciones",
+    "deleteAllHelp": "Elimina para siempre las colecciones subidas y todo el historial de registros. Las colecciones integradas se reconstruyen en el siguiente análisis.",
+    "deleteAllCollections": "Eliminar todas las colecciones…",
     "allCollectionDataDeleted": "Se han eliminado todos los datos de las colecciones."
   },
   "PcFilterScreen": {

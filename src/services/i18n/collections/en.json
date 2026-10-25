@@ -72,9 +72,13 @@
     "historyCleared": "\"{{name}}\" history cleared.",
     "clearHistory": "Clear history",
     "pokeDexCollections": "Pokédex Collections",
-    "collectionsAndTheirRegisteredHistoryAreKeptInTheActive": "Collections and their registered history are kept in the active storage. Built-in collections can't be deleted, only cleared; the next scan rebuilds them from your saves.",
+    "collection": "Collection",
+    "type": "Type",
+    "registered": "Registered",
+    "actions": "Actions",
     "loadingCollections": "Loading collections…",
-    "deleteAllCollections": "Delete all collections",
+    "deleteAllHelp": "Permanently removes uploaded collection history.",
+    "deleteAllCollections": "Delete all collections…",
     "allCollectionDataDeleted": "All collection data deleted."
   },
   "PcFilterScreen": {

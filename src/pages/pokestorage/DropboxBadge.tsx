@@ -15,6 +15,20 @@ const getBadgeLabel = (): Record<BadgeState, string> => ({
   ),
 })
 
+/** The Dropbox logo, sized and colored by its container. */
+export function DropboxIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      fill="currentColor"
+    >
+      <path d="M6 1.807 0 5.629l6 3.822 6.001-3.822zm12 0-6 3.822 6 3.822 6-3.822zM0 13.274l6 3.822 6.001-3.822L6 9.452zm18-3.822-6 3.822 6 3.822 6-3.822zM6 18.371l6.001 3.822 6-3.822-6-3.822z" />
+    </svg>
+  )
+}
+
 /**
  * Corner indicator for the Camp Zone showing whether the player's data is
  * going to Dropbox. Opens the Camp Office's Storage tab. Hidden when this
@@ -54,9 +68,7 @@ export function DropboxBadge({ onOpen }: { onOpen: () => void }) {
       title={title}
       aria-label={t('DropboxBadge.openStorageSettings', { label: label })}
     >
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M6 1.807 0 5.629l6 3.822 6.001-3.822zm12 0-6 3.822 6 3.822 6-3.822zM0 13.274l6 3.822 6.001-3.822L6 9.452zm18-3.822-6 3.822 6 3.822 6-3.822zM6 18.371l6.001 3.822 6-3.822-6-3.822z" />
-      </svg>
+      <DropboxIcon />
       <span className="camp-dropbox-badge-dot" aria-hidden="true" />
     </button>
   )

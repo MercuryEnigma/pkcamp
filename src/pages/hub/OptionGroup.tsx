@@ -10,6 +10,7 @@ export function OptionGroup<T extends string>({
   onChange,
   layout = 'row',
   disabled,
+  mobileSelect = false,
 }: {
   label: string
   options: readonly (readonly [T, string])[]
@@ -17,6 +18,7 @@ export function OptionGroup<T extends string>({
   onChange: (value: T) => void
   layout?: 'row' | 'rail' | 'grid'
   disabled?: boolean
+  mobileSelect?: boolean
 }) {
   return (
     <div
@@ -24,6 +26,20 @@ export function OptionGroup<T extends string>({
       role="group"
       aria-label={label}
     >
+      {mobileSelect && (
+        <label className="option-group-mobile-select">
+          <span>{label}</span>
+          <select
+            value={value}
+            disabled={disabled}
+            onChange={(event) => onChange(event.target.value as T)}
+          >
+            {options.map(([option, text]) => (
+              <option key={option} value={option}>{text}</option>
+            ))}
+          </select>
+        </label>
+      )}
       {options.map(([option, text]) => (
         <button
           key={option}
