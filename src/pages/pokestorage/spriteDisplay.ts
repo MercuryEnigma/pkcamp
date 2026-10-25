@@ -8,6 +8,7 @@ import {
   type SpriteResolver,
 } from '../../services/sprites'
 import { UNKNOWN_POKEMON_SPRITE } from '../../services/sprites'
+import { spriteAssetUrl } from '../../services/sprites/resources'
 
 /**
  * Page-level display decision, not a resolver behavior: `resolvePokemonSprite`
@@ -73,7 +74,7 @@ export function resolveSpriteDisplay(
 
 /** Resolves the `<img src>` for a display result, including the unknown placeholder. */
 export function spriteDisplayImageSrc(display: SpriteDisplay): string {
-  const path =
+  return spriteAssetUrl(
     display.kind === 'unknown' ? UNKNOWN_POKEMON_SPRITE : display.assetPath
-  return /^https?:\/\//.test(path) ? path : `${import.meta.env.BASE_URL}${path}`
+  )
 }

@@ -1,5 +1,6 @@
 import { i18n } from '../i18n'
 import { SPRITE_SOURCES, DEFAULT_SPRITE_SOURCE_ID } from './catalog'
+import type { SpriteManifestEntry, SpriteSourceDefinition } from './manifest'
 import { initializeSpriteResolver, type SpriteResolver } from './resolver'
 
 /** Bounded image loading; a new source replaces work that has not started. */
@@ -49,6 +50,11 @@ export class SpritePreloader {
   }
 }
 
+/** The `<img src>` for an asset path; local paths live under the app base. */
+export function spriteAssetUrl(path: string): string {
+  return /^https?:\/\//.test(path) ? path : `${import.meta.env.BASE_URL}${path}`
+}
+
 const preloader = new SpritePreloader(
   (path) =>
     new Promise<void>((resolve, reject) => {
@@ -60,18 +66,29 @@ const preloader = new SpritePreloader(
             i18n.t('services:resources.couldNotLoadSprite', { path: path })
           )
         )
-      image.src = path
+      image.src = spriteAssetUrl(path)
     })
 )
-let selectedSource: string | null | undefined
 const resolvers = new Map<string, SpriteResolver>()
 
 export function spriteSource(id: string | null | undefined) {
   return SPRITE_SOURCES.find((source) => source.id === id) ?? null
 }
 
+/**
+ * The source a page can actually show. A cross-origin-isolated page (the
+ * Arcade) blocks hosts without CORP headers, so it falls back to the default.
+ */
+function displayableSource(id: string | null | undefined) {
+  const fallback = spriteSource(DEFAULT_SPRITE_SOURCE_ID)!
+  const source = spriteSource(id) ?? fallback
+  return globalThis.crossOriginIsolated && !source.isolationSafe
+    ? fallback
+    : source
+}
+
 export function spriteResolver(id: string | null | undefined): SpriteResolver {
-  const source = spriteSource(id) ?? spriteSource(DEFAULT_SPRITE_SOURCE_ID)!
+  const source = displayableSource(id)
   let resolver = resolvers.get(source.id)
   if (!resolver) {
     resolver = initializeSpriteResolver({
@@ -84,14 +101,69 @@ export function spriteResolver(id: string | null | undefined): SpriteResolver {
   return resolver
 }
 
-/** Called by startup and when the saved appearance preference changes. */
-export function preloadSpriteSource(id: string | null) {
-  if (selectedSource === id) return
-  selectedSource = id
-  const source = spriteSource(id)
-  preloader.preload(
-    source?.manifest
-      .filter((entry) => !entry.shiny && !entry.form && !entry.gender)
-      .map((entry) => entry.assetPath) ?? []
-  )
+/** Every asset of a source, base forms first so common art is ready soonest. */
+function preloadOrder(source: SpriteSourceDefinition): string[] {
+  const isBase = (entry: SpriteManifestEntry) =>
+    !entry.shiny && !entry.form && !entry.gender
+  return [
+    ...source.manifest.filter(isBase),
+    ...source.manifest.filter((entry) => !isBase(entry)),
+  ].map((entry) => entry.assetPath)
 }
+
+export interface SpriteSnapshot {
+  /** The saved preference; null until settings load. */
+  selectedId: string | null
+  /** The source actually shown, after any isolation fallback. */
+  sourceId: string
+  resolver: SpriteResolver
+}
+
+/**
+ * The selected sprite source. Each app root selects the saved preference at
+ * startup and again when it changes; selecting starts preloading that
+ * source's art so later screens find it cached.
+ */
+export class SpriteService {
+  private snapshot: SpriteSnapshot
+  private listeners = new Set<() => void>()
+  private preloadedId: string | null = null
+  private preload: (paths: readonly string[]) => void
+
+  constructor(preload: (paths: readonly string[]) => void) {
+    this.preload = preload
+    const resolver = spriteResolver(null)
+    this.snapshot = { selectedId: null, sourceId: resolver.sourceId, resolver }
+  }
+
+  subscribe = (listener: () => void) => {
+    this.listeners.add(listener)
+    return () => {
+      this.listeners.delete(listener)
+    }
+  }
+
+  getSnapshot = () => this.snapshot
+
+  select(id: string | null | undefined) {
+    const selectedId = spriteSource(id)?.id ?? null
+    const source = displayableSource(selectedId)
+    if (this.preloadedId !== source.id) {
+      this.preloadedId = source.id
+      this.preload(preloadOrder(source))
+    }
+    if (
+      selectedId === this.snapshot.selectedId &&
+      source.id === this.snapshot.sourceId
+    )
+      return
+    this.snapshot = {
+      selectedId,
+      sourceId: source.id,
+      resolver: spriteResolver(selectedId),
+    }
+    for (const listener of this.listeners) listener()
+  }
+}
+
+export const sprites = new SpriteService((paths) => preloader.preload(paths))

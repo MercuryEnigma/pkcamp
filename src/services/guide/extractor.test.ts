@@ -50,6 +50,8 @@ describe('Gen III ROM primitives', () => {
     const secondName = 0x3185c8 + 22
     rom.set(encodeName('IVYSAUR'), secondName)
     rom[secondName + 7] = 0xff
+    // An unused "?" slot, like vanilla ROM species 252-276.
+    rom.set([0xac, 0xff], 0x3185c8 + 33)
     const stats = 0x3203cc + 28
     rom.set([45, 49, 49, 45, 65, 65, 12, 3, 45, 64], stats)
     rom.set([60, 62, 63, 60, 80, 80], 0x3203cc + 2 * 28)
@@ -69,6 +71,15 @@ describe('Gen III ROM primitives', () => {
       },
     })
     expect(dataset.species[2].evolutions.from).toEqual([1])
+    expect(
+      dataset.warnings.filter(({ code }) => code === 'unmapped-species')
+    ).toEqual([])
+    // This fixture has no level-up pointer table, which is a read failure.
+    expect(dataset.warnings).toContainEqual({
+      code: 'partial-data',
+      detail: 'level-up-moves-1',
+    })
+    expect(dataset.capabilities.levelUp).toBe('partial')
   })
 
   it('uses HexManiac pointer references for Ruby layouts', async () => {

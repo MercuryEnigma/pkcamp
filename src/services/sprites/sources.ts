@@ -190,6 +190,7 @@ export const POKEAPI_SOURCE: SpriteSourceDefinition = {
   manifest: POKEAPI_SPRITE_MANIFEST,
   formAliases: SPRITE_FORM_ALIASES as SpriteFormAliases,
   coverage: auditSpriteManifest(POKEAPI_SPRITE_MANIFEST, coverageTargets),
+  isolationSafe: true,
 }
 
 export const SHUFFLE_SOURCE: SpriteSourceDefinition = {
@@ -199,6 +200,7 @@ export const SHUFFLE_SOURCE: SpriteSourceDefinition = {
   manifest: SHUFFLE_SPRITE_MANIFEST,
   formAliases: SPRITE_FORM_ALIASES as SpriteFormAliases,
   coverage: auditSpriteManifest(SHUFFLE_SPRITE_MANIFEST, coverageTargets),
+  isolationSafe: true,
 }
 
 export const SPRITE_COVERAGE_TARGETS = coverageTargets

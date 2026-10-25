@@ -1,6 +1,10 @@
 import { useState, type ComponentProps, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { PokedexDataset, PokedexSpecies } from '../../../services/guide'
+import {
+  hasReadFailures,
+  type PokedexDataset,
+  type PokedexSpecies,
+} from '../../../services/guide'
 import { SpriteCredit } from '../SpriteCredit'
 import { spriteDisplayImageSrc, type SpriteDisplay } from '../spriteDisplay'
 import {
@@ -97,6 +101,11 @@ export function SpeciesDataPanel({
           ` · #${String(species.nationalDexNumber).padStart(3, '0')} ${species.name} · ${[...new Set(species.types)].join(' / ')}`}
       </h3>
       {children}
+      {dataset && hasReadFailures(dataset) && (
+        <p className="species-data-warning" role="status">
+          {t('partialReference')}
+        </p>
+      )}
       {species && dataset && (
         <>
           <GuideSectionHeader

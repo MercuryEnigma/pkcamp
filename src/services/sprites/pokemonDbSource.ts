@@ -137,4 +137,6 @@ export const POKEMONDB_SOURCE: SpriteSourceDefinition = {
     POKEMONDB_SPRITE_MANIFEST,
     SPRITE_COVERAGE_TARGETS
   ),
+  // img.pokemondb.net sends neither CORP nor CORS headers.
+  isolationSafe: false,
 }

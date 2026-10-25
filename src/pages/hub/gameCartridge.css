@@ -95,16 +95,31 @@
   background: transparent;
   color: inherit;
   font: inherit;
+}
+/* The save button covers the whole cartridge; only an actionable ROM row
+   sits above it. */
+.game-cartridge-main {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  padding: 0;
   cursor: pointer;
 }
-.game-cartridge-main {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-  padding: 4cqi 5cqi 0;
+.game-cartridge-main:focus-visible {
+  outline: none;
+}
+.game-cartridge-name,
+.game-cartridge-save,
+.game-cartridge-rom {
+  /* The label has a fixed height, so a wrapped status would push into the
+     game name. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .game-cartridge-name {
+  flex: none;
+  padding: 4cqi 5cqi 0;
   color: var(--arcade-version);
   font-size: clamp(0.5rem, 7cqi, 1.1rem);
   font-weight: 750;
@@ -112,10 +127,10 @@
   text-align: center;
 }
 .game-cartridge-save {
-  display: flex;
   flex: 1;
-  align-items: center;
-  justify-content: center;
+  align-content: center;
+  min-height: 0;
+  padding: 0 5cqi;
   color: var(--camp-muted);
   font-size: clamp(0.5rem, 7.5cqi, 1.2rem);
   font-weight: 650;
@@ -133,10 +148,17 @@
   font-weight: 700;
   text-align: center;
 }
+button.game-cartridge-rom {
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+}
+button.game-cartridge-rom:hover {
+  text-decoration: underline;
+}
 .game-cartridge-rom[data-ready='true'] {
   color: var(--camp-leaf-text);
 }
-.game-cartridge-main:focus-visible,
 .game-cartridge-rom:focus-visible {
   outline: 3px solid var(--camp-leaf);
   outline-offset: -3px;

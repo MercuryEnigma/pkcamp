@@ -1,5 +1,13 @@
 import type { PokedexDataset, PokedexSpecies } from './types'
 
+/**
+ * Whether the ROM failed to yield some data. A failed sidecar save is not a
+ * read failure, and features not extracted yet never produce warnings.
+ */
+export function hasReadFailures(dataset: PokedexDataset): boolean {
+  return dataset.warnings.some(({ code }) => code !== 'storage-unavailable')
+}
+
 export function getSpecies(
   dataset: PokedexDataset,
   nationalDexNumber: number

@@ -106,3 +106,66 @@ export function readMachineMoves(
   }
   return { moves, status: partial ? 'partial' : 'available' }
 }
+
+/** Tutor list length and compatibility row width; Ruby/Sapphire have none. */
+const TUTOR_LAYOUT: Partial<
+  Record<Gen3GameId, { count: number; row: number }>
+> = {
+  firered: { count: 15, row: 2 },
+  leafgreen: { count: 15, row: 2 },
+  emerald: { count: 30, row: 4 },
+}
+
+/** Whether the game has move tutors at all. */
+export function hasMoveTutors(gameId: Gen3GameId): boolean {
+  return gameId in TUTOR_LAYOUT
+}
+
+/**
+ * Tutor moves are a fixed list of move IDs; compatibility is one little-endian
+ * bitmask row per ROM species (bit N = list entry N).
+ */
+export function readTutorMoves(
+  bytes: Uint8Array,
+  list: number | undefined,
+  compatibility: number | undefined,
+  gameId: Gen3GameId,
+  move: MoveFactory
+): MoveTableResult {
+  const moves = new Map<number, PokedexMoveRef[]>()
+  const layout = TUTOR_LAYOUT[gameId]
+  if (
+    !layout ||
+    list === undefined ||
+    compatibility === undefined ||
+    list < 0 ||
+    compatibility < 0 ||
+    list + layout.count * 2 > bytes.length ||
+    compatibility + 412 * layout.row > bytes.length
+  )
+    return { moves, status: 'unavailable' }
+  const entries: (PokedexMoveRef | null)[] = []
+  let partial = false
+  for (let slot = 0; slot < layout.count; slot++) {
+    const id = bytes[list + slot * 2] | (bytes[list + slot * 2 + 1] << 8)
+    if (id === 0 || id === 0xffff) {
+      entries.push(null)
+      partial = true
+      continue
+    }
+    const entry = move(id)
+    if (!entry.romName) partial = true
+    entries.push(entry)
+  }
+  if (entries.every((entry) => !entry)) return { moves, status: 'unavailable' }
+  for (let speciesId = 1; speciesId < 412; speciesId++) {
+    const row = compatibility + speciesId * layout.row
+    const learned: PokedexMoveRef[] = []
+    for (let slot = 0; slot < layout.count; slot++) {
+      if (bytes[row + (slot >> 3)] & (1 << (slot & 7)) && entries[slot])
+        learned.push(entries[slot]!)
+    }
+    moves.set(speciesId, learned)
+  }
+  return { moves, status: partial ? 'partial' : 'available' }
+}

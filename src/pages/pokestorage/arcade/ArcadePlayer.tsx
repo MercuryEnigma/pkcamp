@@ -20,6 +20,7 @@ import { GAME_LABEL, getGameLabel } from '../gameDisplay'
 import {
   storageErrorMessage,
   useSavedTheme,
+  useSpriteStartup,
   useStorageProvider,
 } from '../useStorage'
 import {
@@ -102,10 +103,11 @@ export function ArcadePlayer() {
     : t('ArcadePlayer.arcade')
   const { provider, ready } = useStorageProvider()
   // Arcade is a separate document for emulator isolation. Hydrate the same
-  // GuideService here at startup, before the Guide dialog can be opened.
+  // Guide and sprite services here at startup, before the Guide can be opened.
   useEffect(() => {
     if (ready) void guide.select(gameId, provider)
   }, [gameId, provider, ready])
+  useSpriteStartup()
   useSavedTheme()
   /** The screen alone; fullscreen shows just the game. */
   const screenRef = useRef<HTMLDivElement>(null)
@@ -659,6 +661,13 @@ export function ArcadePlayer() {
     leave()
   }
 
+  const guideFromMenu = () => {
+    // The Guide takes over the menu's pause, so play stays paused.
+    if (pausedByRef.current === 'menu') pausedByRef.current = 'guide'
+    menuRef.current?.close()
+    setGuideOpen(true)
+  }
+
   const changeConfirmRestart = (next: boolean) => {
     setConfirmRestart(next)
     saveConfirmRestart(next)
@@ -962,6 +971,7 @@ export function ArcadePlayer() {
               fullscreen={fullscreen}
               toggleFullscreen={toggleFullscreen}
               exitFromMenu={exitFromMenu}
+              openGuide={guideFromMenu}
               bindings={bindings}
               capturing={capturing}
               captureKey={captureKey}

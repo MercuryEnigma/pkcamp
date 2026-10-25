@@ -141,11 +141,6 @@ export function PokedexGuide({
           </div>
         </div>
       )}
-      {dataset?.warnings.length ? (
-        <p className="pokedex-guide-warning">
-          {t('ArcadePlayer.partialReference')}
-        </p>
-      ) : null}
     </dialog>
   )
 }

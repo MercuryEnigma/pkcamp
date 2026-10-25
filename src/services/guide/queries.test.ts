@@ -4,6 +4,7 @@ import {
   getEggMoveFathers,
   getEggMoves,
   getEvolutionFamilyEdges,
+  hasReadFailures,
   type PokedexDataset,
   type PokedexSpecies,
 } from './index'
@@ -30,10 +31,22 @@ function species(
     evYield: {},
     abilities: [],
     breeding: { eggGroups: ['Field'], genderRatio: 127, hatchCycles: 20 },
+    profile: {
+      baseFriendship: 70,
+      growthRate: 'medium-slow',
+      safariFleeRate: 0,
+      color: 'green',
+    },
     heldItems: [],
     learnsets: { levelUp: [], egg: [], tmHm: [], tutor: [] },
     evolutions: { from: [], to: [] },
-    pokedex: { category: null, flavorText: [], height: null, weight: null },
+    pokedex: {
+      category: null,
+      flavorText: [],
+      height: null,
+      weight: null,
+      regionalNumber: null,
+    },
     encounters: [],
     ...options,
   }
@@ -258,5 +271,16 @@ describe('reference family and acquisition queries', () => {
         ],
       },
     ])
+  })
+})
+
+describe('read failures', () => {
+  it('ignores a failed save but reports anything the ROM did not yield', () => {
+    const data = dataset(species(1))
+    expect(hasReadFailures(data)).toBe(false)
+    data.warnings = [{ code: 'storage-unavailable' }]
+    expect(hasReadFailures(data)).toBe(false)
+    data.warnings.push({ code: 'unsupported-table', detail: 'pokedex' })
+    expect(hasReadFailures(data)).toBe(true)
   })
 })

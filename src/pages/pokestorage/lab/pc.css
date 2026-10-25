@@ -18,6 +18,7 @@
   --species-muted: var(--pc-muted);
   --species-sprite-well: var(--pc-sprite-well);
   --species-text: var(--pc-text);
+  --species-warning-surface: var(--pc-well);
 }
 .pc-label {
   color: var(--pc-muted);

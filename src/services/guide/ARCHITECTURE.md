@@ -58,6 +58,18 @@ for egg move streams, TM/HM dictionaries and compatibility masks, map banks,
 map names, and ordinary wild encounter headers. Missing or damaged tables have
 explicit capability states; they do not turn into verified empty results.
 
+`pokedex.ts` reads the Pokédex entry table (category, page text, height in
+decimetres, weight in hectograms), the regional Dex number (Hoenn order table,
+or National 1-151 for FR/LG), and the item table, whose names label wild held
+items from the base-stats row. The same row supplies base friendship, growth
+rate, Safari flee rate and color. All of it is cached in the sidecar; views do
+not show it yet. `learnsets.ts` also reads move tutors (15 in FR/LG, 30 in
+Emerald; Ruby/Sapphire have none) from their list and per-species bitmask.
+Warnings mean the ROM failed to yield data; features not extracted yet are
+not warnings. `hasReadFailures` drives the Species Data banner on the PC and
+in the Arcade; it ignores `storage-unavailable`, which is a save failure. In-game trades have one table per game; gifts, static
+encounters, fossils and egg gifts live only in event scripts and are not read.
+
 Evolution families include every branch and predecessor, ordered from the
 base or baby stage. `getEggMoves` follows predecessor links so evolved species
 also show inherited egg moves. `getEggMoveFathers` combines ROM learnsets,

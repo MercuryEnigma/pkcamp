@@ -1,7 +1,7 @@
 import type { Gen3GameId } from '../saveLibrary'
 
-export const POKEDEX_SCHEMA_VERSION = 1
-export const POKEDEX_EXTRACTOR_VERSION = '0.3.0'
+export const POKEDEX_SCHEMA_VERSION = 2
+export const POKEDEX_EXTRACTOR_VERSION = '0.5.0'
 
 export type PokedexWarningCode =
   | 'unsupported-rom'
@@ -67,9 +67,20 @@ export interface PokedexSpecies {
   abilities: string[]
   breeding: {
     eggGroups: string[]
+    /** ROM value: 0 always male, 254 always female, 255 genderless, else female share of 256. */
     genderRatio: number | null
     hatchCycles: number | null
   }
+  /** Base-stat metadata the guide does not show yet. */
+  profile: {
+    baseFriendship: number
+    growthRate: string
+    /** Safari Zone flee rate. */
+    safariFleeRate: number
+    /** Pokédex search color. */
+    color: string
+  }
+  /** Items wild Pokémon may hold: 50% common, 5% rare, 100% when both match. */
   heldItems: {
     itemId: number
     name: string | null
@@ -82,11 +93,18 @@ export interface PokedexSpecies {
     tutor: PokedexMoveRef[]
   }
   evolutions: PokedexEvolution
+  /** Pokédex entry; empty when the ROM's Pokédex table is unavailable. */
   pokedex: {
+    /** The species classification, e.g. "SEED" for "Seed Pokémon". */
     category: string | null
+    /** Entry text, one string per page. */
     flavorText: string[]
+    /** Decimetres. */
     height: number | null
+    /** Hectograms. */
     weight: number | null
+    /** Hoenn number (Ruby/Sapphire/Emerald) or Kanto number (FireRed/LeafGreen). */
+    regionalNumber: number | null
   }
   encounters: PokedexEncounter[]
 }

@@ -102,10 +102,6 @@
   min-width: 0;
   min-height: 0;
 }
-.pokedex-guide-warning {
-  padding: 0.6rem;
-  background: var(--camp-panel-hover);
-}
 /* The Species Data screen needs the dialog's full width before it stacks. */
 @media (max-width: 60rem) {
   .pokedex-guide-content {

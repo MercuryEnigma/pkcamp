@@ -53,6 +53,7 @@
   "levelUpMoves": "Level-up",
   "eggMoves": "Egg moves",
   "machineMoves": "TM/HM",
+  "tutorMoves": "Tutor",
   "level": "Level",
   "move": "Move",
   "machine": "Machine",
@@ -110,5 +111,6 @@
   "overviewSection": "Overview",
   "previousDataSection": "Previous data section",
   "nextDataSection": "Next data section",
-  "dataSectionPosition": "{{current}} / {{total}}"
+  "dataSectionPosition": "{{current}} / {{total}}",
+  "partialReference": "Some game data could not be read from this ROM."
 }

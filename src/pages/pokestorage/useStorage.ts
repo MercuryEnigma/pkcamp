@@ -1,11 +1,11 @@
 import {
   useEffect,
   useLayoutEffect,
-  useMemo,
   useState,
   useSyncExternalStore,
 } from 'react'
-import { spriteResolver } from '../../services/sprites/resources'
+import { sprites } from '../../services/sprites/resources'
+import { useSprites } from '../context/useSprites'
 import { applyTheme } from '../../services/themes'
 import {
   settingsSnapshot,
@@ -17,7 +17,6 @@ import {
   type StorageProvider,
 } from '../../services/storage'
 import { dropboxAccount } from '../../services/storage/dropbox'
-import { DEFAULT_SPRITE_SOURCE_ID } from '../../services/sprites/catalog'
 
 let initialized: Promise<void> | null = null
 
@@ -97,11 +96,21 @@ export function useStorageSettings() {
   return { ...snapshot, provider, ready: ready && snapshot.settings !== null }
 }
 
+/**
+ * Selects the saved sprite source once settings load and whenever it
+ * changes, which starts preloading its art. Each app root calls this.
+ */
+export function useSpriteStartup() {
+  const { ready, settings } = useStorageSettings()
+  const sourceId = settings?.spriteSourceId ?? null
+  useEffect(() => {
+    if (ready) sprites.select(sourceId)
+  }, [ready, sourceId])
+}
+
 /** The sprite resolver for the current, shared sprite preference. */
 export function useSpriteResolver() {
-  const { settings } = useStorageSettings()
-  const sourceId = settings?.spriteSourceId ?? DEFAULT_SPRITE_SOURCE_ID
-  return useMemo(() => spriteResolver(sourceId), [sourceId])
+  return useSprites().resolver
 }
 
 /** Applies the shared theme preference; until it loads, the boot hint stays. */

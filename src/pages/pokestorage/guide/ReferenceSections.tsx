@@ -5,6 +5,7 @@ import {
   getEggMoveFathers,
   getEggMoves,
   getEvolutionFamilyEdges,
+  hasMoveTutors,
   type AcquisitionStep,
   type PokedexDataset,
   type PokedexEncounter,
@@ -184,18 +185,20 @@ export function GuideOverview({
   )
 }
 
-type Category = 'levelUp' | 'egg' | 'tmHm'
+type Category = 'levelUp' | 'egg' | 'tmHm' | 'tutor'
 const CATEGORY_KEYS = {
   levelUp: 'levelUpMoves',
   egg: 'eggMoves',
   tmHm: 'machineMoves',
+  tutor: 'tutorMoves',
 } as const
 const CATEGORY_CAPABILITY = {
   levelUp: 'levelUp',
   egg: 'eggMoves',
   tmHm: 'tmHm',
+  tutor: 'tutorMoves',
 } as const
-const CATEGORIES = ['levelUp', 'egg', 'tmHm'] as const
+const CATEGORIES = ['levelUp', 'egg', 'tmHm', 'tutor'] as const
 
 export function GuideLearnsets({
   dataset,
@@ -207,12 +210,18 @@ export function GuideLearnsets({
   onSelect?: (id: number) => void
 }) {
   const { t } = useTranslation('pokedex')
-  const [category, setCategory] = useState<Category>('levelUp')
+  const [selected, setCategory] = useState<Category>('levelUp')
+  // Ruby and Sapphire have no move tutors, so they get no Tutor tab.
+  const categories = CATEGORIES.filter(
+    (value) => value !== 'tutor' || hasMoveTutors(dataset.game.id)
+  )
+  const category = categories.includes(selected) ? selected : 'levelUp'
   const eggs = getEggMoves(dataset, species.nationalDexNumber)
   const counts = {
     levelUp: species.learnsets.levelUp.length,
     egg: eggs.length,
     tmHm: species.learnsets.tmHm.length,
+    tutor: species.learnsets.tutor.length,
   }
   const status =
     dataset.capabilities[CATEGORY_CAPABILITY[category]] ?? 'unavailable'
@@ -245,17 +254,22 @@ export function GuideLearnsets({
               )
             })(),
           }))
-        : species.learnsets.tmHm.map((move) => ({
-            move: moveName(move.nationalMoveId, move.romName),
-            detail: move.machine
-              ? `${move.machine.kind.toUpperCase()}${String(move.machine.number).padStart(2, '0')}`
-              : '—',
-          }))
+        : category === 'tmHm'
+          ? species.learnsets.tmHm.map((move) => ({
+              move: moveName(move.nationalMoveId, move.romName),
+              detail: move.machine
+                ? `${move.machine.kind.toUpperCase()}${String(move.machine.number).padStart(2, '0')}`
+                : '—',
+            }))
+          : species.learnsets.tutor.map((move) => ({
+              move: moveName(move.nationalMoveId, move.romName),
+              detail: null,
+            }))
   return (
     <div className="guide-reference guide-learnsets">
       <GuideOptions
         label={t('moveCategories')}
-        options={CATEGORIES.map((value) => ({
+        options={categories.map((value) => ({
           value,
           label: t(CATEGORY_KEYS[value]),
           count: counts[value],
@@ -271,19 +285,24 @@ export function GuideLearnsets({
               <p className="guide-muted">{t('movesPartial')}</p>
             )}
             <GuideTable
-              columns={[
-                t('move'),
-                t(
-                  category === 'levelUp'
-                    ? 'level'
-                    : category === 'egg'
-                      ? 'potentialFathers'
-                      : 'machine'
-                ),
-              ]}
+              columns={
+                category === 'tutor'
+                  ? [t('move')]
+                  : [
+                      t('move'),
+                      t(
+                        category === 'levelUp'
+                          ? 'level'
+                          : category === 'egg'
+                            ? 'potentialFathers'
+                            : 'machine'
+                      ),
+                    ]
+              }
               rows={rows.map((row, index) => ({
                 key: index,
-                cells: [row.move, row.detail],
+                cells:
+                  category === 'tutor' ? [row.move] : [row.move, row.detail],
               }))}
               empty={t('noMoves')}
             />

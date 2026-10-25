@@ -1,6 +1,6 @@
 {
   "GameCartridge": {
-    "manageRom": "{{value1}}: {{romStatus}}. Manage ROM.",
+    "addRom": "{{value1}}: {{romStatus}}. Add a ROM.",
     "saveStatusLabel": "{{value1}}: {{saveStatus}}"
   },
   "StartMenu": {
@@ -41,10 +41,9 @@
     "romAdded": "ROM added.",
     "connectTheGbLinkToThisDeviceAndToA": "Connect the GB-Link to this device and to a powered-off GBA.",
     "insertAndPowerOnWhileHoldingStartSelect": "Insert {{value1}} and power on while holding START + SELECT.",
-    "checkingSave": "Checking save…",
+    "checking": "Checking…",
     "saveReady": "Save ready",
     "newGame": "New game",
-    "checkingRom": "Checking ROM…",
     "romReady": "ROM ready",
     "romNeeded": "ROM needed"
   }

@@ -26,6 +26,7 @@ export * from './types'
 export * from './queries'
 export * from './acquisition'
 export { extract, extractDirect } from './extractor'
+export { hasMoveTutors } from './learnsets'
 export { decodeGen3Text, readGen3RomHeader, readRomPointer } from './rom'
 
 export type GuideStatus =

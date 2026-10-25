@@ -389,18 +389,18 @@ button {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: auto auto auto;
     grid-template-areas:
-      'arcade camp'
-      'lab lab'
+      'camp camp'
+      'arcade lab'
       'change change';
     align-content: start;
     height: auto;
   }
-  .hub-map-arcade,
   .hub-map-camp {
-    aspect-ratio: 1;
-  }
-  .hub-map-lab {
     aspect-ratio: 2 / 1;
+  }
+  .hub-map-arcade,
+  .hub-map-lab {
+    aspect-ratio: 1;
   }
 }
 

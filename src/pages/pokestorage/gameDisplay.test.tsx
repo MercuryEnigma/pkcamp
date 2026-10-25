@@ -31,16 +31,16 @@ it('renders all five Spanish game names in the chooser, accessible labels, and s
       <GameCartridge
         gameId={gameId}
         saveStatus="Partida lista"
-        romStatus="ROM lista"
-        romReady
+        romStatus="Falta la ROM"
+        romReady={false}
         onSelect={() => {}}
         onRom={() => {}}
       />
     )
-    expect(cartridge).toContain(`class="game-cartridge-name">${name}</span>`)
+    expect(cartridge).toContain(`aria-hidden="true">${name}</span>`)
     expect(cartridge).toContain(`aria-label="${name}: Partida lista"`)
     expect(cartridge).toContain(
-      `aria-label="${name}: ROM lista. Gestionar ROM."`
+      `aria-label="${name}: Falta la ROM. Añadir una ROM."`
     )
     expect(cartridge).toContain(`data-version="${id}"`)
     const header = renderToStaticMarkup(

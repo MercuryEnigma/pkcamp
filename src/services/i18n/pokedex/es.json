@@ -53,6 +53,7 @@
   "levelUpMoves": "Por nivel",
   "eggMoves": "Movimientos huevo",
   "machineMoves": "MT/MO",
+  "tutorMoves": "Tutor",
   "level": "Nivel",
   "move": "Movimiento",
   "machine": "Máquina",
@@ -110,5 +111,6 @@
   "overviewSection": "Resumen",
   "previousDataSection": "Sección de datos anterior",
   "nextDataSection": "Sección de datos siguiente",
-  "dataSectionPosition": "{{current}} / {{total}}"
+  "dataSectionPosition": "{{current}} / {{total}}",
+  "partialReference": "No se pudieron leer algunos datos de esta ROM."
 }

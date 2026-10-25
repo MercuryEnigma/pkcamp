@@ -134,8 +134,8 @@
 
 /*
  * The Species Data screen: hero column beside the paged reference. Hosts set
- * --species-muted, --species-sprite-well and --species-text; Camp colours
- * are the fallback.
+ * --species-muted, --species-sprite-well, --species-text and
+ * --species-warning-surface; Camp colours are the fallback.
  */
 .species-data-view {
   display: grid;
@@ -196,6 +196,11 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+.species-data-warning {
+  padding: 0.5rem 0.6rem;
+  border-radius: 4px;
+  background: var(--species-warning-surface, var(--camp-panel-hover));
 }
 .species-data-panel {
   display: flex;

@@ -14,8 +14,20 @@ import {
   OPTIONAL_ANCHORS,
   type OptionalTables,
 } from './tableSources'
-import { readEggMoves, readMachineMoves } from './learnsets'
+import {
+  hasMoveTutors,
+  readEggMoves,
+  readMachineMoves,
+  readTutorMoves,
+} from './learnsets'
 import { readEncounters } from './encounters'
+import {
+  itemNames,
+  readHeldItems,
+  readPokedexEntries,
+  readProfile,
+  regionalNumber,
+} from './pokedex'
 
 /** Internal parser interface so each verified table layout can be added safely. */
 export interface Gen3RomParser {
@@ -314,17 +326,21 @@ function readLearnset(
   pointerTable: number,
   speciesId: number,
   moveName: (id: number) => string
-): { level: number; move: PokedexMoveRef }[] {
+): { level: number; move: PokedexMoveRef }[] | null {
   const start = readRomPointer(bytes, pointerTable + speciesId * 4)
-  if (start === null) return []
+  if (start === null) return null
   const result: { level: number; move: PokedexMoveRef }[] = []
+  let terminated = false
   for (
     let offset = start;
     offset + 2 <= bytes.length && result.length < 128;
     offset += 2
   ) {
     const packed = bytes[offset] | (bytes[offset + 1] << 8)
-    if (packed === 0xffff) break
+    if (packed === 0xffff) {
+      terminated = true
+      break
+    }
     const moveId = packed & 0x1ff
     const level = packed >> 9
     if (moveId === 0) continue
@@ -337,7 +353,8 @@ function readLearnset(
       },
     })
   }
-  return result
+  // An unterminated list ran into unrelated data.
+  return terminated ? result : null
 }
 
 const vanillaParser: Gen3RomParser = {
@@ -379,9 +396,11 @@ const vanillaParser: Gen3RomParser = {
     const abilityName = (id: number) =>
       tableName(bytes, anchors.abilities, id, 13)
     const result: Record<number, PokedexSpecies> = {}
-    const warnings: PokedexWarning[] = [
-      { code: 'partial-data', detail: 'pokedex-text-tutor-static-encounters' },
-    ]
+    // Warnings report data the ROM failed to yield. Features not extracted
+    // yet (static encounters, gifts, trades, special moves) are not warnings.
+    const warnings: PokedexWarning[] = []
+    let levelUpPartial = false
+    const itemName = itemNames(bytes, anchors.items)
     const moveRef = (id: number): PokedexMoveRef => ({
       romId: id,
       nationalMoveId: id > 0 && id <= 354 ? id : null,
@@ -395,9 +414,20 @@ const vanillaParser: Gen3RomParser = {
       header.gameId,
       moveRef
     )
+    const tutorMoves = readTutorMoves(
+      bytes,
+      anchors.tutors,
+      anchors.tutorCompatibility,
+      header.gameId,
+      moveRef
+    )
     for (const [detail, table] of [
       ['egg-moves', eggMoves],
       ['tm-hm-moves', machineMoves],
+      // Ruby and Sapphire have no tutors; that is not missing data.
+      ...(hasMoveTutors(header.gameId)
+        ? ([['tutor-moves', tutorMoves]] as const)
+        : []),
     ] as const) {
       if (table.status !== 'available')
         warnings.push({ code: 'unsupported-table', detail })
@@ -405,7 +435,8 @@ const vanillaParser: Gen3RomParser = {
 
     for (let romSpeciesId = 1; romSpeciesId < names.length; romSpeciesId++) {
       const name = names[romSpeciesId].trim()
-      if (!name) continue
+      // Unused slots (vanilla 252-276) are named "?"; they are not species.
+      if (!normalize(name)) continue
       const nationalDexNumber = nationalByRomId[romSpeciesId]
       if (nationalDexNumber === undefined) {
         warnings.push({
@@ -418,6 +449,19 @@ const vanillaParser: Gen3RomParser = {
       if (offset + 28 > bytes.length) break
       const row = bytes.subarray(offset, offset + 28)
       const evBits = row[10] | (row[11] << 8)
+      const levelUp = readLearnset(
+        bytes,
+        anchors.levelUp,
+        romSpeciesId,
+        moveName
+      )
+      if (!levelUp) {
+        levelUpPartial = true
+        warnings.push({
+          code: 'partial-data',
+          detail: `level-up-moves-${romSpeciesId}`,
+        })
+      }
       const current: PokedexSpecies = {
         nationalDexNumber,
         romSpeciesIds: [romSpeciesId],
@@ -460,15 +504,28 @@ const vanillaParser: Gen3RomParser = {
           genderRatio: row[16],
           hatchCycles: row[17],
         },
-        heldItems: [],
+        profile: readProfile(row),
+        heldItems: readHeldItems(row, itemName),
         learnsets: {
-          levelUp: readLearnset(bytes, anchors.levelUp, romSpeciesId, moveName),
+          levelUp: levelUp ?? [],
           egg: eggMoves.moves.get(romSpeciesId) ?? [],
           tmHm: machineMoves.moves.get(romSpeciesId) ?? [],
-          tutor: [],
+          tutor: tutorMoves.moves.get(romSpeciesId) ?? [],
         },
         evolutions: { from: [], to: [] },
-        pokedex: { category: null, flavorText: [], height: null, weight: null },
+        pokedex: {
+          category: null,
+          flavorText: [],
+          height: null,
+          weight: null,
+          regionalNumber: regionalNumber(
+            bytes,
+            anchors.regionalDex,
+            header.gameId,
+            romSpeciesId,
+            nationalDexNumber
+          ),
+        },
         encounters: [],
       }
       const existing = result[nationalDexNumber]
@@ -521,6 +578,18 @@ const vanillaParser: Gen3RomParser = {
         })
       }
     }
+    const pokedex = readPokedexEntries(
+      bytes,
+      anchors.pokedexStats,
+      header.gameId,
+      Object.values(result).map((species) => species.nationalDexNumber)
+    )
+    for (const [national, entry] of pokedex.entries)
+      Object.assign(result[national].pokedex, entry)
+    if (pokedex.status !== 'available')
+      warnings.push({ code: 'unsupported-table', detail: 'pokedex' })
+    if (!itemName) warnings.push({ code: 'unsupported-table', detail: 'items' })
+
     for (const source of Object.values(result)) {
       for (const evolution of source.evolutions.to) {
         result[evolution.nationalDexNumber]?.evolutions.from.push(
@@ -552,12 +621,13 @@ const vanillaParser: Gen3RomParser = {
         identity: 'available',
         stats: 'available',
         learnsets: 'partial',
-        levelUp: 'available',
+        levelUp: levelUpPartial ? 'partial' : 'available',
         eggMoves: eggMoves.status,
         tmHm: machineMoves.status,
-        tutorMoves: 'unavailable',
+        tutorMoves: tutorMoves.status,
         evolutions: 'available',
-        pokedex: 'unavailable',
+        pokedex: pokedex.status,
+        heldItems: itemName ? 'available' : 'partial',
         encounters: encounters.status,
       },
     }

@@ -65,6 +65,11 @@ export interface SpriteSourceDefinition {
   manifest: SpriteManifest
   formAliases?: SpriteFormAliases
   coverage: SpriteSourceCoverage
+  /**
+   * Its host sends Cross-Origin-Resource-Policy (or CORS) headers, so a
+   * cross-origin-isolated page such as the Arcade may show its images.
+   */
+  isolationSafe: boolean
 }
 
 /**

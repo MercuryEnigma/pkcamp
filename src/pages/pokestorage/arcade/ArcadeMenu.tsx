@@ -38,6 +38,7 @@ interface ArcadeMenuProps {
   fullscreen: boolean
   toggleFullscreen(): void
   exitFromMenu(): void
+  openGuide(): void
   bindings: KeyBindings
   capturing: Bindable | null
   captureKey(button: Bindable): void
@@ -70,6 +71,7 @@ export function ArcadeMenu({
   fullscreen,
   toggleFullscreen,
   exitFromMenu,
+  openGuide,
   bindings,
   capturing,
   captureKey,
@@ -123,6 +125,13 @@ export function ArcadeMenu({
             onClick={() => close()}
           >
             {running ? t('ArcadeMenu.keepPlaying') : t('ArcadeMenu.closeMenu')}
+          </button>
+          <button
+            type="button"
+            className="arcade-menu-item"
+            onClick={openGuide}
+          >
+            {t('ArcadeMenu.pokedexGuide')}
           </button>
           <div
             className="arcade-menu-setting"

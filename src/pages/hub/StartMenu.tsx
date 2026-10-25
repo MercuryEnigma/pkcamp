@@ -297,9 +297,6 @@ export function StartMenu({
         </header>
         <div className="hub-start-body">
           <h1>{t('StartMenu.selectAGameToVisitTheCampsite')}</h1>
-          {!startup.ready && !startup.error && (
-            <p role="status">{t('StartMenu.loadingYourSettings')}</p>
-          )}
           {(startup.error || current?.error) && (
             <p role="alert" className="camp-error">
               {startup.error ?? current?.error}{' '}
@@ -317,17 +314,17 @@ export function StartMenu({
                     key={id}
                     gameId={id}
                     onSelect={() => choose(id)}
-                    onRom={() => openRom(id)}
+                    onRom={files && !files.rom ? () => openRom(id) : undefined}
                     saveStatus={
                       !files
-                        ? t('start:StartMenu.checkingSave')
+                        ? t('start:StartMenu.checking')
                         : files.save
                           ? t('start:StartMenu.saveReady')
                           : t('start:StartMenu.newGame')
                     }
                     romStatus={
                       !files
-                        ? t('start:StartMenu.checkingRom')
+                        ? ''
                         : files.rom
                           ? t('start:StartMenu.romReady')
                           : t('start:StartMenu.romNeeded')

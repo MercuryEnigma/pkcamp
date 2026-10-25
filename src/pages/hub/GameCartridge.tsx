@@ -14,9 +14,11 @@ export function GameCartridge({
 }: {
   gameId: Gen3GameId
   saveStatus: string
+  /** Empty while the ROM is still being checked; the row keeps its height. */
   romStatus: string
   romReady: boolean
   onSelect: () => void
+  /** Only passed when the ROM is missing; the ROM row then adds one. */
   onRom?: () => void
 }) {
   const { t } = useTranslation(['start', 'common'] as const)
@@ -25,35 +27,44 @@ export function GameCartridge({
   return (
     <article className="game-cartridge" data-version={gameId}>
       <img className="game-cartridge-art" src={cartridgeOutline} alt="" />
+      {/* The covering save button names the game and save for screen
+          readers, so only an actionable ROM row is exposed here. */}
       <div className="game-cartridge-label">
-        <button
-          type="button"
-          className="game-cartridge-main"
-          onClick={onSelect}
-          aria-label={t('GameCartridge.saveStatusLabel', {
-            value1: getGameLabel(gameId),
-            saveStatus: saveStatus,
-          })}
-        >
-          <span className="game-cartridge-name">{getGameLabel(gameId)}</span>
-          <span className="game-cartridge-save">{saveStatus}</span>
-        </button>
+        <span className="game-cartridge-name" aria-hidden>
+          {getGameLabel(gameId)}
+        </span>
+        <span className="game-cartridge-save" aria-hidden>
+          {saveStatus}
+        </span>
         <RomControl
-          {...(onRom ? { type: 'button' as const, onClick: onRom } : {})}
+          {...(onRom
+            ? { type: 'button' as const, onClick: onRom }
+            : { 'aria-hidden': true })}
           className="game-cartridge-rom"
           data-ready={romReady}
           aria-label={
             onRom
-              ? t('GameCartridge.manageRom', {
+              ? t('GameCartridge.addRom', {
                   value1: getGameLabel(gameId),
                   romStatus: romStatus,
                 })
               : undefined
           }
         >
-          {romStatus}
+          {romStatus || ' '}
         </RomControl>
       </div>
+      {/* Covers the whole cartridge, so any click outside the ROM row opens
+          the save. */}
+      <button
+        type="button"
+        className="game-cartridge-main"
+        onClick={onSelect}
+        aria-label={t('GameCartridge.saveStatusLabel', {
+          value1: getGameLabel(gameId),
+          saveStatus: saveStatus,
+        })}
+      />
     </article>
   )
 }

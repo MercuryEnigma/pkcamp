@@ -141,4 +141,5 @@ export const PMDCOLLAB_SOURCE: SpriteSourceDefinition = {
     PMDCOLLAB_SPRITE_MANIFEST,
     SPRITE_COVERAGE_TARGETS
   ),
+  isolationSafe: true,
 }
