@@ -221,7 +221,7 @@ describe('exitDecision', () => {
       severity: 'warning',
       retry: false,
       download: true,
-      message: expect.stringContaining('changed somewhere else'),
+      message: expect.stringContaining('changed elsewhere'),
     })
   })
 

@@ -48,7 +48,7 @@ export function PokemonDetailsHeader({
       <span className="camp-details-view-end" aria-hidden="true" />
       <span
         className="camp-details-view-shiny"
-        title={pokemon?.shiny ? t('PokemonDetails.shiny') : undefined}
+        title={pokemon?.shiny ? t('common:pokemon.shiny') : undefined}
         aria-label={
           pokemon?.shiny ? t('PokemonDetails.shinyPokeMon') : undefined
         }

@@ -365,7 +365,7 @@ export const getStatusFilters = (): {
   label: string
 }[] => [
   { value: 'all', label: i18n.t('collections:entryDisplay.all') },
-  { value: 'registered', label: i18n.t('collections:entryDisplay.registered') },
+  { value: 'registered', label: i18n.t('collections:registered') },
   { value: 'missing', label: i18n.t('collections:entryDisplay.missing') },
   { value: 'visiting', label: i18n.t('collections:entryDisplay.visiting') },
 ]

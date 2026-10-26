@@ -43,7 +43,7 @@ export function StorageGrid({
       <div className="storage-grid-nav">
         <button
           type="button"
-          aria-label={t('StorageGrid.previous', { label: label })}
+          aria-label={t('common:storage.previous', { label: label })}
           onClick={onPrevious}
         >
           <span aria-hidden="true">◀</span>
@@ -63,7 +63,7 @@ export function StorageGrid({
         <span className="storage-grid-counterweight" aria-hidden="true" />
         <button
           type="button"
-          aria-label={t('StorageGrid.next', { label: label })}
+          aria-label={t('common:storage.next', { label: label })}
           onClick={onNext}
         >
           <span aria-hidden="true">▶</span>

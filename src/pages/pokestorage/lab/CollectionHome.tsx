@@ -72,7 +72,7 @@ export function CollectionHome({
     <div className="pc-screen-body">
       <header className="pc-summary">
         <div>
-          <h2>{t('CollectionHome.pokeDexResearchSystem')}</h2>
+          <h2>{t('researchSystem')}</h2>
           <span className="pc-label">
             {t('CollectionHome.researchProgress')}
           </span>
@@ -84,12 +84,12 @@ export function CollectionHome({
               total: formatNumber(totals.total),
             })}
           </strong>
-          <span className="pc-label">{t('CollectionHome.registered')}</span>
+          <span className="pc-label">{t('registered')}</span>
         </p>
         <PcMeter
           value={totals.registered}
           total={totals.total}
-          label={t('CollectionHome.registered')}
+          label={t('registered')}
         />
       </header>
       <h3 className="pc-label">{t('CollectionHome.collections')}</h3>

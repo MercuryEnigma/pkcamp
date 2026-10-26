@@ -142,7 +142,7 @@ export class DropboxFileStore implements FileStore {
       } catch {
         throw unavailable(
           i18n.t(
-            'services:dropboxFileStore.couldNotReachDropboxCheckYourConnectionAndTryAgain'
+            'services:dropbox.couldNotReach'
           )
         )
       }
@@ -176,7 +176,7 @@ export class DropboxFileStore implements FileStore {
       if (response.status >= 500) {
         throw unavailable(
           i18n.t(
-            'services:dropboxFileStore.dropboxIsHavingProblemsTryAgainShortly'
+            'services:dropbox.havingProblems'
           )
         )
       }

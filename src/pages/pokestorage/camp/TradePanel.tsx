@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Gen3GameId } from '../../../services/saveLibrary'
 import { Panel } from '../../hub/Panel'
@@ -11,10 +12,12 @@ import { useTradeSession } from '../useTradeSession'
 export function TradePanel({
   gameId,
   onTraded,
+  onEnd,
 }: {
   gameId: Gen3GameId | null
-  /** Called after a trade or revert changed what is stored. */
+  /** Called after a trade changed what is stored. */
   onTraded: () => void
+  onEnd: () => void
 }) {
   const { t } = useTranslation(['trade', 'common'] as const)
 
@@ -28,10 +31,21 @@ export function TradePanel({
     lastTrade,
     offline,
     startTrade,
-    undoTrade,
     cancelTrade,
     sideProps,
   } = useTradeSession({ initialGameId: gameId ?? undefined, onTraded })
+
+  const [stopping, setStopping] = useState(false)
+  const [ending, setEnding] = useState(false)
+  useEffect(() => {
+    if (!busy && ending) onEnd()
+  }, [busy, ending, onEnd])
+
+  const stop = () => {
+    setStopping(true)
+    if (lastTrade) setEnding(true)
+    cancelTrade()
+  }
 
   return (
     <Panel label={t('TradePanel.trade')} className="trade-panel">
@@ -68,38 +82,28 @@ export function TradePanel({
         <button
           type="button"
           className="camp-upload-btn camp-upload-btn--primary"
-          disabled={viaSwitch && busy ? false : !ready || busy}
-          onClick={() =>
-            viaSwitch && busy ? cancelTrade() : void startTrade()
-          }
+          disabled={(stopping && busy) || (!busy && !lastTrade && !ready)}
+          onClick={() => {
+            if (busy) stop()
+            else if (lastTrade) onEnd()
+            else {
+              setStopping(false)
+              void startTrade()
+            }
+          }}
         >
-          {viaSwitch
-            ? busy
-              ? t('TradePanel.stopLink')
-              : t('TradePanel.startLink')
-            : busy
-              ? t('TradePanel.trading')
-              : t('TradePanel.startTrade')}
+          {stopping && busy
+            ? t('TradePanel.stopping')
+            : lastTrade
+              ? t('TradePanel.endTrade')
+              : viaSwitch
+                ? busy
+                  ? t('TradePanel.stopLink')
+                  : t('TradePanel.startLink')
+                : busy
+                  ? t('TradePanel.cancelTrade')
+                  : t('TradePanel.startTrade')}
         </button>
-        {busy && !viaSwitch && (
-          <button
-            type="button"
-            className="camp-upload-btn"
-            onClick={cancelTrade}
-          >
-            {t('TradePanel.cancelTrade')}
-          </button>
-        )}
-        {!busy && lastTrade && (
-          <button
-            type="button"
-            className="camp-upload-btn"
-            disabled={offline}
-            onClick={() => void undoTrade()}
-          >
-            {t('TradePanel.revertTrade')}
-          </button>
-        )}
       </div>
 
       {offline && writesStorage && (

@@ -107,22 +107,19 @@ isolation succeeds. Against `vite preview`, **20 of 20 fresh headless-Chrome
 contexts** reached `crossOriginIsolated=true` and a controlled document through
 the page's automatic flow; none retained the reload flag.
 
-### Implemented, unverified
+## 2026-10-25 owner verification
 
-These have code but no recorded run: failed-write Retry, the conflict path,
-pausing on a provider switch, `beforeunload` on browser close/back, the
-new-game first save, pausing on a hidden tab, audio (headless), real
-multitouch, and rotation. An uploaded SAV deliberately loads into the session
-only: the player cannot game-match a save without PKHeX, so a file reaches the
+The project owner verified every current Arcade feature, including the Guide,
+on desktop and mobile. This covers the items previously listed as implemented
+but unverified: failed-write Retry, the conflict path, pausing on a provider
+switch or hidden tab, `beforeunload` on browser close/back, the new-game first
+save, audio, multitouch, and rotation.
+
+An uploaded SAV deliberately loads into the session only: the player cannot game-match a save without PKHeX, so a file reaches the
 Cabin only after the game writes a new, complete save and automatic sync
 stores it.
 
 ## Still required before adoption
 
 - GitHub Pages deployment plus repeat, hard-refresh, and direct-entry checks.
-- Sapphire, Emerald, FireRed, and LeafGreen round trips (only Ruby so far).
-- Desktop Safari/Firefox, plus real iOS Safari and Android Chrome: audio,
-  touch, rotation, app switching, and file pickers.
-- Dropbox session restoration across main-app/player navigation, failed
-  writes, and conflicts.
-- Lab refresh after an Arcade commit.
+- A published supported-browser matrix.

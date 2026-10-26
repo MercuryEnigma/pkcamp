@@ -75,7 +75,7 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
     setProgress(null)
     setStatus(
       device.state === 'connected'
-        ? t('GbLinkTaskPanel.starting')
+        ? t('common:status.starting')
         : t('GbLinkTaskPanel.connectingChooseYourGbLinkIfTheBrowserAsks')
     )
     try {
@@ -153,7 +153,7 @@ export function GbLinkTaskPanel(props: GbLinkTaskPanelProps) {
                 abortRef.current?.abort()
                 setStatus(
                   t(
-                    'GbLinkTaskPanel.cancellingCloseTheDeviceChooserIfItIsStillOpen'
+                    'common:status.cancellingDeviceChooser'
                   )
                 )
               } else props.onClose?.()

@@ -10,27 +10,32 @@ import {
   CabinBackupCard,
   CabinPicker,
   CampsitesCard,
+  CampsitesStatusCard,
   DataStorageControls,
   SpriteSourcePicker,
   ThemePicker,
   BackupStatusCard,
 } from '../SettingsSections'
 import { useSettingsForm, type SettingsTab } from '../useSettingsForm'
-import { ArcadeSettings } from './ArcadeSettings'
+import { ArcadeControlsSettings, ArcadeSkinSettings } from './ArcadeSettings'
 import { LabCollectionData } from './LabCollectionData'
 import './labSettings.css'
 
 export type { SettingsTab }
 
 const getTabs = (): ReadonlyArray<{
-  id: SettingsTab | 'arcade'
+  id: SettingsTab
   label: string
 }> => [
   { id: 'backups', label: i18n.t('settings:LabSettings.backupRestore') },
   { id: 'appearance', label: i18n.t('settings:LabSettings.appearance') },
   { id: 'storage', label: i18n.t('settings:LabSettings.data') },
   { id: 'hardware', label: i18n.t('settings:LabSettings.hardware') },
-  { id: 'arcade', label: i18n.t('settings:LabSettings.arcade') },
+  {
+    id: 'arcade-controls',
+    label: i18n.t('settings:LabSettings.arcadeControls'),
+  },
+  { id: 'arcade-skin', label: i18n.t('settings:LabSettings.arcadeSkin') },
 ]
 
 /** Every site setting, in tabs. Settings logic lives in `useSettingsForm`. */
@@ -42,7 +47,7 @@ export function LabSettings({
   tab: SettingsTab
   onTabChange: (tab: SettingsTab) => void
 }) {
-  const { t } = useTranslation(['settings', 'common'] as const)
+  const { t } = useTranslation(['settings', 'arcade', 'common'] as const)
 
   const confirmLeave = useConfirmNavigation()
   const { gameId } = useActiveGame()
@@ -51,28 +56,21 @@ export function LabSettings({
     initialCabin: gameId ?? undefined,
     savedMessage: t('LabSettings.settingsSaved'),
   })
-  const { selectedCabin, camps, siteCounts, saving, offline, message } = form
-  // The Arcade tab is not yet addressable by URL, so it is local state.
-  const [arcade, setArcade] = useState(false)
-  const active: SettingsTab | 'arcade' = arcade ? 'arcade' : form.tab
-  const showsSave =
-    active === 'appearance' ||
-    (active === 'backups' && selectedCabin === 'campsites')
+  const { selectedCabin, offline, message } = form
+  const active = form.tab
 
   // A link such as the Dropbox badge can change the tab while this is open.
   const [shownTab, setShownTab] = useState(tab)
   if (shownTab !== tab) {
     setShownTab(tab)
     form.setTab(tab)
-    setArcade(false)
   }
 
-  const choose = (next: SettingsTab | 'arcade') => {
+  const choose = (next: SettingsTab) => {
     if (next === active) return
     if ((active === 'hardware' || active === 'backups') && !confirmLeave())
       return
-    setArcade(next === 'arcade')
-    if (next !== 'arcade') onTabChange(next)
+    onTabChange(next)
   }
 
   return (
@@ -85,24 +83,41 @@ export function LabSettings({
         onChange={choose}
         mobileSelect
       />
-      <Panel className="lab-settings-workstation" resetScrollOn={active} label={getTabs().find((item) => item.id === active)?.label ?? ''}>
+      <Panel
+        className="lab-settings-workstation"
+        resetScrollOn={active}
+        label={getTabs().find((item) => item.id === active)?.label ?? ''}
+      >
         <header className="lab-settings-heading">
           <h2>{getTabs().find((item) => item.id === active)?.label}</h2>
-          {active === 'backups' && <p>{t('LabSettings.manageTheSaveBackupForEachGame')}</p>}
-          {active === 'appearance' && <p>{t('LabSettings.chooseColorsAndHowPokeMonAppear')}</p>}
-          {active === 'storage' && <p>{t('LabSettings.whereYourBackupsCampingPokeMonCollectionsAndSettingsAre')}</p>}
-          {active === 'arcade' && <p>{t('ArcadeSettings.selectAnActionThenPressItsNewKeyEscCancels')}</p>}
+          {active === 'backups' && (
+            <p>{t('LabSettings.manageTheSaveBackupForEachGame')}</p>
+          )}
+          {active === 'appearance' && (
+            <p>{t('LabSettings.chooseColorsAndHowPokeMonAppear')}</p>
+          )}
+          {active === 'storage' && (
+            <p>
+              {t(
+                'LabSettings.whereYourBackupsCampingPokeMonCollectionsAndSettingsAre'
+              )}
+            </p>
+          )}
+          {active === 'arcade-controls' && (
+            <p>{t('arcade:actions.rebindHint')}</p>
+          )}
         </header>
 
         {active === 'backups' && (
-          <div
-            className={`lab-settings-backup${
-              selectedCabin === 'campsites' ? ' lab-settings-backup--campsites' : ''
-            }`}
-          >
-            <div className="lab-settings-module lab-settings-cabin"><CabinPicker form={form} /></div>
+          <div className="lab-settings-backup">
+            <div className="lab-settings-module lab-settings-cabin">
+              <CabinPicker form={form} />
+            </div>
             {selectedCabin === 'campsites' ? (
-              <CampsitesCard form={form} />
+              <>
+                <CampsitesStatusCard form={form} />
+                <CampsitesCard form={form} />
+              </>
             ) : (
               <>
                 <BackupStatusCard form={form} gameId={selectedCabin} />
@@ -126,26 +141,24 @@ export function LabSettings({
           </div>
         )}
 
-        {active === 'hardware' && <div className="lab-settings-hardware"><GbLinkFirmwareSettings /></div>}
-        {active === 'arcade' && <ArcadeSettings />}
-
-        {offline && active !== 'hardware' && active !== 'arcade' && (
-          <p className="camp-status">
-            {t('LabSettings.dropboxIsUnreachableYourDataIsReadOnlyUntilIt')}
-          </p>
+        {active === 'hardware' && (
+          <div className="lab-settings-hardware">
+            <GbLinkFirmwareSettings />
+          </div>
         )}
-        {message && <p className="camp-status">{message}</p>}
-        {showsSave && (
-          <button
-            type="button"
-            className="camp-confirm-btn"
-            disabled={!camps || !siteCounts || saving || offline}
-            onClick={() => void form.handleSave()}
-          >
-            {saving
-              ? t('common:actions.saving')
-              : t('LabSettings.saveSettings')}
-          </button>
+        {active === 'arcade-controls' && <ArcadeControlsSettings />}
+        {active === 'arcade-skin' && <ArcadeSkinSettings />}
+
+        {offline &&
+          active !== 'hardware' &&
+          active !== 'arcade-controls' &&
+          active !== 'arcade-skin' && (
+            <p className="camp-status">
+              {t('LabSettings.dropboxIsUnreachableYourDataIsReadOnlyUntilIt')}
+            </p>
+          )}
+        {message && active !== 'backups' && (
+          <p className="camp-status">{message}</p>
         )}
       </Panel>
     </div>

@@ -106,7 +106,7 @@ export function ArcadeMenu({
       <div className="arcade-menu-view" hidden={menuView !== 'main'}>
         <header className="arcade-menu-header">
           <h2 id="arcade-menu-title-main">
-            {running ? t('ArcadeMenu.paused') : t('ArcadeMenu.menu2')}
+            {running ? t('actions.paused') : t('ArcadeMenu.menu2')}
           </h2>
         </header>
         {(running || sync.status === 'saving' || sync.status === 'saved') && (
@@ -124,14 +124,14 @@ export function ArcadeMenu({
             className="arcade-menu-item arcade-menu-item--primary"
             onClick={() => close()}
           >
-            {running ? t('ArcadeMenu.keepPlaying') : t('ArcadeMenu.closeMenu')}
+            {running ? t('actions.keepPlaying') : t('ArcadeMenu.closeMenu')}
           </button>
           <button
             type="button"
             className="arcade-menu-item"
             onClick={openGuide}
           >
-            {t('ArcadeMenu.pokedexGuide')}
+            {t('actions.pokedexGuide')}
           </button>
           <div
             className="arcade-menu-setting"
@@ -203,7 +203,7 @@ export function ArcadeMenu({
             className="arcade-menu-item"
             onClick={exitFromMenu}
           >
-            {t('ArcadeMenu.exitArcade')}
+            {t('actions.exitArcade')}
           </button>
         </div>
         <button
@@ -219,7 +219,7 @@ export function ArcadeMenu({
         {subView('buttons')}
         <div className="arcade-menu-body">
           <p className="arcade-menu-note">
-            {t('ArcadeMenu.selectAnActionThenPressItsNewKeyEscCancels')}
+            {t('actions.rebindHint')}
           </p>
           <KeyBindingEditor
             bindings={bindings}
@@ -251,7 +251,7 @@ export function ArcadeMenu({
           )}
           {sync.status === 'conflict' && (
             <p className="arcade-menu-alert">
-              {t('ArcadeMenu.theSaveInCampChangedSomewhereElseSoThisGame')}
+              {t('arcadeSync.campChangedElsewhere')}
             </p>
           )}
           <section
@@ -268,7 +268,7 @@ export function ArcadeMenu({
                 }
                 onClick={downloadSave}
               >
-                {t('ArcadeMenu.downloadSav')}
+                {t('actions.downloadSav')}
               </button>
               <button
                 type="button"
@@ -307,7 +307,7 @@ export function ArcadeMenu({
                 disabled={filesLocked}
                 onClick={() => chooseRom()}
               >
-                {rom ? t('ArcadeMenu.replaceRom') : t('ArcadeMenu.insertRom')}
+                {rom ? t('ArcadeMenu.replaceRom') : t('actions.insertRom')}
               </button>
             </div>
             {!rom && (

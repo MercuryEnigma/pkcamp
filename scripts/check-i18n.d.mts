@@ -9,3 +9,4 @@ export function findHardcodedCopy(
   filename?: string
 ): CopyViolation[]
 export function checkFiles(root?: string): CopyViolation[]
+export function findUnusedKeys(root?: string): string[]

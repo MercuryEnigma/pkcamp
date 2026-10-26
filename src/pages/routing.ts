@@ -12,7 +12,13 @@ export type LabMode =
   | 'dumps'
   | 'settings'
   | 'news'
-export type SettingsTab = 'backups' | 'appearance' | 'storage' | 'hardware'
+export type SettingsTab =
+  | 'backups'
+  | 'appearance'
+  | 'storage'
+  | 'hardware'
+  | 'arcade-controls'
+  | 'arcade-skin'
 
 export type AppRoute =
   | { page: 'start'; gameId: Gen3GameId | null }
@@ -45,6 +51,8 @@ const SETTINGS_TABS = new Set<SettingsTab>([
   'appearance',
   'storage',
   'hardware',
+  'arcade-controls',
+  'arcade-skin',
 ])
 
 function basePath(base: string): string {

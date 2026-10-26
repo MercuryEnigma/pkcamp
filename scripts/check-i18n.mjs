@@ -159,6 +159,75 @@ export function checkFiles(root = 'src') {
     })
 }
 
+function catalogKeys(catalog, prefix = '') {
+  return Object.entries(catalog).flatMap(([key, value]) =>
+    typeof value === 'object'
+      ? catalogKeys(value, `${prefix}${key}.`)
+      : [`${prefix}${key}`.replace(/_(one|other)$/, '')]
+  )
+}
+
+/**
+ * English keys no source file names. A key counts as used when a string
+ * literal spells it (with or without its namespace) or a template literal's
+ * static head is its prefix, as with `pokedex:evolutions.${method}`.
+ */
+export function findUnusedKeys(root = 'src') {
+  const literals = new Set()
+  const prefixes = []
+  for (const file of fs.readdirSync(root, { recursive: true })) {
+    if (
+      !/\.(ts|tsx)$/.test(file) ||
+      /(^|\/)(vendor|generated)\/|\.(test|spec)\.tsx?$|\.d\.ts$/.test(file)
+    )
+      continue
+    const filename = path.join(root, file)
+    const ast = ts.createSourceFile(
+      filename,
+      fs.readFileSync(filename, 'utf8'),
+      ts.ScriptTarget.Latest,
+      true,
+      file.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+    )
+    ;(function visit(node) {
+      if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node))
+        literals.add(node.text)
+      // A bare `namespace:` head names no key; cache keys share that shape.
+      else if (
+        ts.isTemplateExpression(node) &&
+        node.head.text &&
+        !/^[\w-]+:$/.test(node.head.text)
+      )
+        prefixes.push(node.head.text)
+      ts.forEachChild(node, visit)
+    })(ast)
+  }
+  const catalogs = path.join(root, 'services/i18n')
+  return fs
+    .readdirSync(catalogs, { withFileTypes: true })
+    .filter((entry) =>
+      fs.existsSync(path.join(catalogs, entry.name, 'en.json'))
+    )
+    .flatMap(({ name: namespace }) =>
+      catalogKeys(
+        JSON.parse(
+          fs.readFileSync(path.join(catalogs, namespace, 'en.json'), 'utf8')
+        )
+      )
+        .filter((key) => {
+          const full = `${namespace}:${key}`
+          return (
+            !literals.has(key) &&
+            !literals.has(full) &&
+            !prefixes.some(
+              (prefix) => key.startsWith(prefix) || full.startsWith(prefix)
+            )
+          )
+        })
+        .map((key) => `${namespace}:${key}`)
+    )
+}
+
 if (
   process.argv[1] &&
   path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
@@ -168,7 +237,11 @@ if (
     console.error(
       `${entry.file}:${entry.line}:${entry.column}: Untranslated UI copy: ${JSON.stringify(entry.text)}`
     )
-  if (violations.length) process.exitCode = 1
+  const unused = findUnusedKeys()
+  for (const key of unused) console.error(`Unused catalog key: ${key}`)
+  if (violations.length || unused.length) process.exitCode = 1
   else
-    console.log('PASS: JSX copy and presentation attributes use i18n catalogs.')
+    console.log(
+      'PASS: JSX copy uses i18n catalogs, and every catalog key is used.'
+    )
 }

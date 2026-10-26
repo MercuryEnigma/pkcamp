@@ -1,3 +1,4 @@
+import { activeGame } from '../../services/activeGame'
 import { locale } from '../../services/i18n/format'
 import { useTranslation } from 'react-i18next'
 import { useNavigationGuard } from './navigationGuard'
@@ -16,11 +17,7 @@ import {
   type Generation,
 } from '../../services/saveLibrary'
 import { initializeSpriteResolver } from '../../services/sprites'
-import {
-  applyTheme,
-  resolveTheme,
-  type ThemeId,
-} from '../../services/themes'
+import { applyTheme, resolveTheme, type ThemeId } from '../../services/themes'
 import { type Camp, type StorageProvider } from '../../services/storage'
 import { dropboxAccount } from '../../services/storage/dropbox'
 import { minimumCampSiteCount, resizeCampSites } from './campPositions'
@@ -29,6 +26,7 @@ import {
   SPRITE_SOURCES,
 } from '../../services/sprites/catalog'
 import { getGameLabel } from './gameDisplay'
+import { importCampPokemon } from './importCampPokemon'
 import { assertSaveMatchesCabin } from './saveVersion'
 import {
   storageErrorMessage,
@@ -76,7 +74,13 @@ export function formatBackupDate(date: Date): string {
   }).format(date)
 }
 
-export type SettingsTab = 'backups' | 'appearance' | 'storage' | 'hardware'
+export type SettingsTab =
+  | 'backups'
+  | 'appearance'
+  | 'storage'
+  | 'hardware'
+  | 'arcade-controls'
+  | 'arcade-skin'
 
 /** The GBA Lodge is a single generation; its cabins are the Gen 3 games. */
 export const GBA_GENERATION = 3 as const
@@ -246,7 +250,7 @@ export function useSettingsForm({
       setMessage(
         cause instanceof Error
           ? storageErrorMessage(cause)
-          : t('useSettingsForm.unableToOpenThatBackup')
+          : t('common:storage.unableToOpenThatBackup')
       )
     }
   }
@@ -288,6 +292,78 @@ export function useSettingsForm({
     anchor.download = `${gameId}.sav`
     anchor.click()
     URL.revokeObjectURL(url)
+  }
+
+  const campsiteAction = useRef(false)
+
+  // Keep Camp and collection subscribers current without discarding save edits.
+  const saveCampsite = async (camp: Camp) => {
+    const active = activeGame.getSnapshot()
+    if (active.status === 'ready' && active.provider === provider)
+      await activeGame.replaceCamp(camp)
+    else await provider.saveCamp(GBA_GENERATION, camp)
+  }
+
+  /** Pokémon uploads are saved immediately; site-count edits stay staged. */
+  const handleCampsiteUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file || !adapter || offline || campsiteAction.current) return
+    campsiteAction.current = true
+    setSaving(true)
+    setMessage(null)
+    try {
+      if (file.size > 100) throw new Error(t('useSettingsForm.chooseValidPk3'))
+      const { camp, position } = await importCampPokemon(
+        {
+          getCamp: (generation) => provider.getCamp(generation),
+          saveCamp: (_generation, camp) => saveCampsite(camp),
+        },
+        adapter,
+        file.name,
+        new Uint8Array(await file.arrayBuffer())
+      )
+      setCamps((current) => new Map(current).set(GBA_GENERATION, camp))
+      setMessage(
+        t('useSettingsForm.pokemonImported', {
+          site: position.site + 1,
+          slot: position.index + 1,
+        })
+      )
+    } catch (cause) {
+      setMessage(storageErrorMessage(cause))
+    } finally {
+      campsiteAction.current = false
+      setSaving(false)
+    }
+  }
+
+  /** The small Save beside the count changes only the Camp Site count. */
+  const handleSaveCampsiteCount = async () => {
+    if (!siteCounts || offline || campsiteAction.current) return
+    campsiteAction.current = true
+    setSaving(true)
+    setMessage(null)
+    try {
+      const camp = await provider.getCamp(GBA_GENERATION)
+      const next = {
+        sites: resizeCampSites(camp.sites, siteCounts[GBA_GENERATION]),
+      }
+      await saveCampsite(next)
+      setCamps((current) => new Map(current).set(GBA_GENERATION, next))
+      setSiteCounts((current) => ({
+        ...current!,
+        [GBA_GENERATION]: next.sites.length,
+      }))
+      setMessage(savedMessage)
+    } catch (cause) {
+      setMessage(storageErrorMessage(cause))
+    } finally {
+      campsiteAction.current = false
+      setSaving(false)
+    }
   }
 
   /** Bundle every Camping Pokémon in the GBA Lodge into one `.zip`. */
@@ -363,7 +439,7 @@ export function useSettingsForm({
       const emptied: Camp = {
         sites: camp.sites.map((site) => site.map(() => null)),
       }
-      await provider.saveCamp(GBA_GENERATION, emptied)
+      await saveCampsite(emptied)
       setCamps(new Map(camps).set(GBA_GENERATION, emptied))
       setMessage(t('useSettingsForm.gbaLodgeCampsiteDeleted'))
     } catch (cause) {
@@ -382,11 +458,19 @@ export function useSettingsForm({
     ) as SiteCounts
   }, [camps])
   const campsiteMinimum = minimumSiteCounts[GBA_GENERATION]
+  const savedSpriteSourceId =
+    savedSettings?.spriteSourceId ?? DEFAULT_SPRITE_SOURCE_ID
+  const savedTheme = resolveTheme(savedSettings?.themeId)
+  const appearanceChange = !settingsLoaded
+    ? null
+    : themeId !== savedTheme
+      ? 'theme'
+      : spriteSourceId !== savedSpriteSourceId
+        ? 'sprites'
+        : null
   const hasChanges =
     settingsLoaded &&
-    (spriteSourceId !==
-      (savedSettings?.spriteSourceId ?? DEFAULT_SPRITE_SOURCE_ID) ||
-      themeId !== resolveTheme(savedSettings?.themeId) ||
+    (appearanceChange !== null ||
       GENERATIONS.some(
         (generation) =>
           siteCounts &&
@@ -400,26 +484,13 @@ export function useSettingsForm({
       : t('useSettingsForm.youHaveUnsavedSettingsLeaveWithoutSavingThem')
   )
 
-  const handleSave = async () => {
-    if (!camps || !siteCounts) return
+  /** Saves the staged theme or sprite source without changing Camp Sites. */
+  const handleAppearanceSave = async () => {
+    if (!appearanceChange || offline) return
     setSaving(true)
     setMessage(null)
     try {
-      const nextCamps = new Map(camps)
-      for (const generation of GENERATIONS) {
-        const camp = camps.get(generation)!
-        const count = Math.max(
-          minimumSiteCounts[generation],
-          Math.floor(siteCounts[generation])
-        )
-        if (count === camp.sites.length) continue
-        const resized = { sites: resizeCampSites(camp.sites, count) }
-        await provider.saveCamp(generation, resized)
-        nextCamps.set(generation, resized)
-      }
-      setCamps(nextCamps)
-      if (settingsLoaded)
-        await provider.saveSettings({ spriteSourceId, themeId })
+      await provider.saveSettings({ spriteSourceId, themeId })
       setMessage(savedMessage)
     } catch (cause) {
       setMessage(storageErrorMessage(cause))
@@ -457,6 +528,7 @@ export function useSettingsForm({
     spriteResolver,
     themeId,
     setThemeId,
+    appearanceChange,
     siteCounts,
     setSiteCounts,
     selectedCabin,
@@ -474,10 +546,12 @@ export function useSettingsForm({
     handleBackupWrite,
     handleBackupExport,
     handleDownloadCampsite,
+    handleCampsiteUpload,
+    handleSaveCampsiteCount,
     handleBackupRemove,
     handleCampsiteRemove,
     campsiteMinimum,
-    handleSave,
+    handleAppearanceSave,
     handleDropbox,
   }
 }

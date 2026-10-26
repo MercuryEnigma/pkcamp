@@ -61,7 +61,7 @@ export function DropboxMenu({
               disabled={busy || status.state === 'connecting'}
               onClick={() => void connect()}
             >
-              {t('DropboxMenu.signInToDropbox')}
+              {t('common:actions.signInToDropbox')}
             </button>
           </>
         )}

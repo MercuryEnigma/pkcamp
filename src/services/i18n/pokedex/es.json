@@ -1,13 +1,5 @@
 {
   "unknownMove": "Movimiento desconocido",
-  "warnings": {
-    "storage-unavailable": "Los datos se cargaron, pero no se pudieron guardar para la próxima visita.",
-    "partial-data": "Algunos datos de referencia no están disponibles.",
-    "unmapped-species": "Algunas especies de la ROM no se pudieron asociar a la Pokédex Nacional.",
-    "unsupported-table": "No se pudieron leer algunas tablas de datos de la ROM.",
-    "unknown-game-revision": "No se pudo identificar con certeza esta revisión del juego.",
-    "unsupported-rom": "Este formato de ROM no es compatible."
-  },
   "evolutions": {
     "level": "Al nivel {{parameter}}",
     "level-atk-greater-def": "Al nivel {{parameter}}, Ataque superior a Defensa",
@@ -20,23 +12,17 @@
     "trade-item": "Intercambiar con {{parameter}}",
     "item": "Usar {{parameter}}",
     "beauty": "Belleza de al menos {{parameter}}",
-    "level-known-move": "Al nivel {{parameter}} mientras conoce un movimiento",
-    "level-party-species": "Al nivel {{level}} con la especie n.º {{species}} en el equipo",
     "level-extra-species": "Al nivel {{parameter}} con un espacio libre en el equipo",
-    "level-personality-low": "Al nivel {{parameter}}, según la personalidad",
-    "level-personality-high": "Al nivel {{parameter}}, según la personalidad",
+    "level-personality-low": "Al nivel {{parameter}} (aleatorio)",
+    "level-personality-high": "Al nivel {{parameter}} (aleatorio)",
     "level-extra-species-ball": "Al nivel {{parameter}}, con un espacio libre en el equipo y una Poké Ball en la Bolsa"
   },
-  "evolutionFamily": "Familia evolutiva",
   "overviewCategories": "Categorías del resumen",
   "overview": {
     "stats": "Estadísticas",
     "abilities": "Habilidades",
     "evolutions": "Evolución"
   },
-  "types": "Tipos",
-  "stat": "Estadística",
-  "value": "Valor",
   "total": "Total",
   "bstValue": "BST: {{total}}",
   "evsValue": "EVs: {{total}}",
@@ -57,12 +43,10 @@
   "level": "Nivel",
   "move": "Movimiento",
   "machine": "Máquina",
-  "hatchedAs": "Eclosiona como",
   "potentialFathers": "Posibles padres",
   "movesUnavailable": "Esta tabla de movimientos no está disponible.",
   "movesPartial": "No se pudieron leer algunos movimientos.",
   "noMoves": "No hay movimientos en esta categoría.",
-  "methodUnknown": "Encuentro salvaje",
   "unknownArea": "Zona sin nombre",
   "levelRange": "Nv. {{min}}–{{max}}",
   "specialCondition": "Requiere una condición de encuentro especial",
@@ -80,37 +64,24 @@
     "other": "Otros",
     "obtaining": "Obtención"
   },
-  "methods": {
-    "grass": "Hierba / cueva",
-    "surf": "Surf",
-    "rock-smash": "Golpe Roca",
-    "old-rod": "Caña Vieja",
-    "good-rod": "Caña Buena",
-    "super-rod": "Supercaña"
-  },
   "obtain": {
     "method": "Método",
     "evolution": "Evolución",
     "breeding": "Crianza",
-    "evolveFrom": "Evoluciona a {{species}} · {{requirement}}",
-    "breedFrom": "Cría con {{species}}",
-    "catchSource": "Encuentra a {{species}} aquí:",
     "evolvePrefix": "Evoluciona a ",
-    "breedPrefix": "Cría con ",
-    "catchPrefix": "Encuentra a ",
-    "catchSuffix": " aquí:"
-  },
-  "breeding": {
-    "ditto": "Cría con Ditto.",
-    "partner": "Usa una pareja compatible o Ditto.",
-    "incense": "Uno de los padres debe llevar {{item}}.",
-    "withoutIncense": "Ninguno de los padres debe llevar {{item}}.",
-    "mixedOffspring": "El huevo puede eclosionar como cualquiera de las dos especies."
+    "breedPrefix": "Cría con "
   },
   "speciesData": "Datos de la especie",
   "overviewSection": "Resumen",
   "previousDataSection": "Sección de datos anterior",
   "nextDataSection": "Sección de datos siguiente",
   "dataSectionPosition": "{{current}} / {{total}}",
-  "partialReference": "No se pudieron leer algunos datos de esta ROM."
+  "partialReference": "No se pudieron leer algunos datos de esta ROM.",
+  "status": {
+    "loading": "Cargando datos del juego…",
+    "unsupported": "No hay datos de Pokédex compatibles para la ROM seleccionada.",
+    "missingRom": "Añade una ROM de este juego para ver sus datos de referencia.",
+    "loadFailed": "No se pudieron cargar los datos del juego. Inténtalo de nuevo.",
+    "notInRom": "Esta especie no aparece en los datos de la ROM seleccionada."
+  }
 }

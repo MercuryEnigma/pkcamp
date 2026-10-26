@@ -9,7 +9,6 @@ import {
   formatRelativeTime,
 } from './format'
 import { Dialog } from '../../pages/hub/Dialog'
-import { NewsPage } from '../../pages/NewsPage'
 import { PatchNotes } from '../../pages/pokestorage/lab/PatchNotes'
 import {
   getBindingName,
@@ -17,7 +16,11 @@ import {
 } from '../../pages/pokestorage/arcade/keyBindings'
 import { bootSaveFor } from '../../pages/pokestorage/arcade/arcadeSession'
 import { getMysteryGifts } from '../mysteryGift/gifts'
-import { findHardcodedCopy, checkFiles } from '../../../scripts/check-i18n.mjs'
+import {
+  findHardcodedCopy,
+  checkFiles,
+  findUnusedKeys,
+} from '../../../scripts/check-i18n.mjs'
 
 const namespaces = [
   'common',
@@ -78,10 +81,10 @@ describe('page-based i18n', () => {
     ).toBe('Room 2 of 14')
     expect(
       i18n.t('settings:SettingsSections.minimumCampSites', { count: 1 })
-    ).toContain('1 Camp Site:')
+    ).toContain('1 Camp Site needed')
     expect(
       i18n.t('settings:SettingsSections.minimumCampSites', { count: 2 })
-    ).toContain('2 Camp Sites:')
+    ).toContain('2 Camp Sites needed')
   })
 
   it('resolves helper labels at call time while preserving keyboard codes and gift ids', async () => {
@@ -143,14 +146,9 @@ describe('page-based i18n', () => {
     expect(html).toContain(
       'href="https://github.com/tornadus/frlg-ldn-trade">Projekt</a> machte dies möglich.'
     )
-    expect(renderToStaticMarkup(<NewsPage />)).toContain(
-      'building off of <a href="https://github.com/tornadus/frlg-ldn-trade">'
-    )
-    for (const markup of [html, renderToStaticMarkup(<NewsPage />)]) {
-      expect(markup).not.toContain('[object Object]')
-      expect(markup).not.toContain('{{')
-      expect(markup).toContain('https://www.youtube-nocookie.com/embed/')
-    }
+    expect(html).not.toContain('[object Object]')
+    expect(html).not.toContain('{{')
+    expect(html).toContain('https://www.youtube-nocookie.com/embed/')
   })
 })
 
@@ -179,5 +177,9 @@ describe('UI copy guard', () => {
 
   it('audits every application React file', () => {
     expect(checkFiles()).toEqual([])
+  })
+
+  it('finds no unused English catalog keys', () => {
+    expect(findUnusedKeys()).toEqual([])
   })
 })

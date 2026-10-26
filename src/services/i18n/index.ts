@@ -4,5 +4,4 @@ export {
   evolutionDescription,
   itemName,
   moveName,
-  pokedexWarning,
 } from './pokedexTerms'

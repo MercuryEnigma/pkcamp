@@ -57,8 +57,8 @@ export function PokedexGuide({
     >
       <header className="pokedex-guide-header">
         <div>
-          <p>{dataset?.game.title ?? t('ArcadePlayer.guide')}</p>
-          <h2 id="pokedex-guide-title">{t('ArcadePlayer.pokedexGuide')}</h2>
+          <p>{dataset?.game.title ?? t('actions.guide')}</p>
+          <h2 id="pokedex-guide-title">{t('actions.pokedexGuide')}</h2>
         </div>
         <button
           type="button"
@@ -69,30 +69,29 @@ export function PokedexGuide({
         </button>
       </header>
       {status === 'unsupported' && (
-        <p role="status">{t('ArcadePlayer.referenceUnavailable')}</p>
+        <p role="status">{t('pokedex:status.unsupported')}</p>
       )}
       {(status === 'idle' || status === 'unavailable') && (
-        <p role="status">{t('ArcadePlayer.referenceMissing')}</p>
+        <p role="status">{t('pokedex:status.missingRom')}</p>
       )}
       {status === 'error' && (
         <div role="status">
-          <p>{t('ArcadePlayer.referenceLoadFailed')}</p>
+          <p>{t('pokedex:status.loadFailed')}</p>
           <button type="button" onClick={() => void guide.refresh()}>
             {t('common:actions.retry')}
           </button>
         </div>
       )}
       {!dataset && status === 'loading' && (
-        <p role="status">{t('ArcadePlayer.loadingReference')}</p>
+        <p role="status">{t('pokedex:status.loading')}</p>
       )}
       {dataset && (
         <div className="pokedex-guide-content">
           <section
             className="pokedex-guide-list"
-            aria-label={t('ArcadePlayer.speciesSearch')}
           >
             <label>
-              {t('ArcadePlayer.searchSpecies')}
+              {t('common:searchPokemon')}
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}

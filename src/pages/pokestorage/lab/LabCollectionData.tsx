@@ -137,7 +137,7 @@ export function LabCollectionData({ offline }: { offline: boolean }) {
                   <th scope="col" className="lab-data-type">
                     {t('LabCollectionData.type')}
                   </th>
-                  <th scope="col">{t('LabCollectionData.registered')}</th>
+                  <th scope="col">{t('registered')}</th>
                   <th scope="col">
                     <span className="lab-visually-hidden">
                       {t('LabCollectionData.actions')}

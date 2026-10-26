@@ -1,35 +1,4 @@
 {
-  "NewsPage": {
-    "pkCamp": "PK Camp",
-    "toolsAndUpdatesForRetroPokeMonEnjoyersPart1Managed": "Tools and updates for Retro Pokémon enjoyers.<part1/>Managed by <part2>MercuryEnigma</part2>",
-    "projects": "Projects",
-    "mysteryEventOnSwitchFrlg": "Mystery Event on Switch FrLg",
-    "mysteryEventForUnmoddedFireredLeafgreenOnTheSwitchSystems": "Mystery Event for unmodded FireRed & LeafGreen on the Switch systems.",
-    "ribbonHelper": "Ribbon Helper",
-    "battleAndContestLookupToolForRibbonCollecting": "Battle and contest lookup tool for ribbon collecting.",
-    "new": "NEW!",
-    "updates": "Updates",
-    "whatIsMysteryGift": "What is Mystery Gift?",
-    "soWhatExactlyIsMysteryGiftIsItSafeWhat": "So what exactly is Mystery Gift? Is it safe? What can it do?",
-    "mysteryGiftIsAFeatureGamefreakProgrammedInTheOriginal": "Mystery Gift is a feature GameFreak programmed in the original FireRed / LeafGreen that allowed for event distribution. It was primarily used for sending the AuroraTicket and MysticTicket items via the wireless adapter. But it is much flexible and able to run almost any code sent. They have specific methods for receiving items, pokemon, and eggs. There is also support for things like sprites and music.",
-    "mysteryGiftContainsTwoMainComponentsAWonderCardAnd": "Mystery Gift contains two main components: a Wonder Card and the script to run when you talk to the deliveryman on the 2nd floor of the Pokémon Center. The Wonder Card contains text to provide instructions for the player. The script is code stored in a special place on the file to run when needed and keep it isolated. If you delete the Wonder Card in the Mystery Gift menu, it also deletes the script so it is easy to remove any Mystery Gift data.",
-    "toUnlockMysteryGiftGoTheAnyPokemartAndInteract": "To unlock Mystery Gift: Go the any PokeMart and interact with the questionnaire on the counter and put in: LINK TOGETHER WITH ALL",
-    "discoverThisFanMadeMysteryGiftAtPokemonWorldsIn": "Discover this fan-made Mystery Gift at Pokemon Worlds in SF",
-    "watchOnYoutube": "Watch on YouTube →",
-    "mysteryGiftLiveAtPokeMonWorldsXp": "Mystery Gift live at Pokémon Worlds / XP!",
-    "comingToSanFranciscoForPokemonWorldsXpComeFind": "Coming to San Francisco for Pokemon Worlds / XP? Come find the first-of-its-kind mystery gift distribution for Switch FireRed/LeafGreen! Receive a rare egg that unlocks a LEGENDARY experience!",
-    "makeSureYouUnlockMysteryGiftFirstGoTheAny": "Make sure you unlock Mystery Gift first. Go the any PokeMart and interact with the questionnaire on the counter and put in: LINK TOGETHER WITH ALL",
-    "noteThisIsAFanMadeProjectIMTaking": "NOTE: This is a fan-made project. I'm taking huge care to test and make sure it is as proper and bug-free as possible. But as with all non-official methods, there is always a small chance for unintended behavior, so use at your own risk.",
-    "workingMysteryGiftPrototype": "Working Mystery Gift prototype",
-    "weHaveAWorkingPrototypeOfMysteryEventForAn": "We have a working prototype of Mystery Event for an unmodded Switch or Switch 2 FireRed / LeafGreen game. Come to Pokémon Worlds / XP in San Francisco to get an exclusive look!",
-    "thisWasAcheivedByBuildingOffOfPart1TornadusS": "This was acheived by building off of <part1>tornadus's FRLG LDN trade project</part1>. By extending this project to support hosting trades and wireless adapter interactions, we can now send custom mystery gift events to stock, unmodded Switch 1 and Switch 2 FireRed / LeafGreen games with a simple linux and Wifi-USB adapter!",
-    "moreDetailsWillComeUpAsTheTeamWorksOn": "More details will come up as the team works on streamlining it so it is easy for anyone to try!",
-    "mysteryEventOnSwitchFireredLeafgreenPrototypeDemo": "Mystery Event on Switch FireRed / LeafGreen — prototype demo",
-    "ribbonHelperIsLive": "Ribbon Helper is live",
-    "forThoseLookingToRibbonMasterTheirCherishedPokeMon": "For those looking to ribbon master their cherished Pokémon before Pokemon Bank closes down, I created a tool to help look up battle and contest info to make it as accessible as possible. There is also a full set of guides for all ribbons, resources for figuring out which games Pokemon can go to, and a tool to create a single HOME screenshot.",
-    "openRibbonHelper": "Open Ribbon Helper →",
-    "pokeMonIsNintendoCreaturesIncGameFreakIncThis": "Pokémon is © Nintendo / Creatures Inc. / GAME FREAK inc. This is an unofficial fan site with no affiliation."
-  },
   "PatchNotes": {
     "mysteryGiftLiveAtPokeMonWorldsXp": "Mystery Gift live at Pokémon Worlds / XP!",
     "comingToSanFranciscoForPokemonWorldsXpComeFind": "Coming to San Francisco for Pokemon Worlds / XP? Come find the first-of-its-kind mystery gift distribution for Switch FireRed/LeafGreen! Receive a rare egg that unlocks a LEGENDARY experience!",
@@ -46,6 +15,5 @@
     "openRibbonHelper": "Open Ribbon Helper",
     "watchOnYoutube": "Watch on YouTube →",
     "pokeMonIsNintendoCreaturesIncGameFreakIncThis": "Pokémon is © Nintendo / Creatures Inc. / GAME FREAK inc. This is an unofficial fan site with no affiliation."
-  },
-  "heading": "News & Updates"
+  }
 }

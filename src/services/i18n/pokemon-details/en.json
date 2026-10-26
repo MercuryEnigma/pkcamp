@@ -1,17 +1,16 @@
 {
   "PokemonDetails": {
-    "shiny": "Shiny",
     "shinyPokeMon": "Shiny Pokémon",
     "pokeMon": "Pokémon",
     "lv": "Lv. {{level}}",
     "genderlessOrUnknown": "Genderless or unknown",
-    "originalTrainer": "Original Trainer",
+    "originalTrainer": "Original trainer",
     "trainerId": "Trainer ID",
     "sid": "SID",
     "ribbons": "Ribbons",
     "noRibbons": "No ribbons",
     "ability": "Ability",
-    "heldItem": "Held Item",
+    "heldItem": "Held item",
     "noHeldItem": "No held item",
     "nature": "Nature",
     "moves": "Moves",
@@ -30,13 +29,11 @@
   },
   "PokemonSlotIcon": {
     "emptySlot": "Empty slot",
-    "egg": "Egg",
-    "lv": "Lv. {{level}}",
-    "shiny": "Shiny"
+    "lv": "Lv. {{level}}"
   },
   "pokemonDetailsPages": {
     "overview": "Overview",
-    "movesTraits": "Moves & Traits",
+    "movesTraits": "Moves & traits",
     "stats": "Stats"
   },
   "natures": {

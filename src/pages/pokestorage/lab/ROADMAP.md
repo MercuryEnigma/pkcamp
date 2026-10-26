@@ -25,13 +25,6 @@
 - [x] Keep unsupported operations unavailable with a reason.
 - [x] Record player-confirmed hardware coverage for backup/restore and previously discussed recovery cases.
 
-### Repair
-
-- [ ] Define supported Ruby/Sapphire versions and hardware for berry repair.
-- [ ] Define RTC diagnosis/reset support and explain each operation before confirmation.
-- [ ] Require diagnosis and a successful backup before applicable changes.
-- [ ] Implement verified repair/reset with result and recovery guidance.
-
 ### Switch save download
 
 - [ ] Prove save extraction over ESP32 with a Mystery Gift script.

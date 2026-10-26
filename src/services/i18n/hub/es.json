@@ -2,8 +2,7 @@
   "DropboxMenu": {
     "dropbox": "Dropbox",
     "dropboxConnectedYourSavesSettingsAndCollectionsAreSynced": "Dropbox conectado. Tus partidas, ajustes y colecciones están sincronizados.",
-    "signInToDropboxToUseYourSavesSettingsAnd": "Inicia sesión en Dropbox para usar tus partidas, ajustes y colecciones en varios dispositivos o continúa con el almacenamiento del navegador.",
-    "signInToDropbox": "Iniciar sesión en Dropbox"
+    "signInToDropboxToUseYourSavesSettingsAnd": "Inicia sesión en Dropbox para usar tus partidas, ajustes y colecciones en varios dispositivos o continúa con el almacenamiento del navegador."
   },
   "SourceLink": {
     "pkcampSourceCodeOnGithubOpensInANewTab": "Código fuente de pkCamp en GitHub (se abre en una pestaña nueva)",
@@ -22,7 +21,6 @@
     "changeGame": "Cambiar de juego"
   },
   "LanguageMenu": {
-    "language": "Idioma",
-    "displayLanguage": "Idioma de la interfaz"
+    "language": "Idioma"
   }
 }

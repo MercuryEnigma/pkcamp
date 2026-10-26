@@ -38,7 +38,7 @@ const getWhere = (): Record<GiftTarget, string> => ({
 
 const getSteps = (): Record<GiftTarget, string[]> => ({
   gba: [
-    i18n.t('mystery-gifts:MysteryGifts.connectGbLinkToYourComputerAndGba'),
+    i18n.t('common:hardware.connectGbLink'),
     i18n.t('mystery-gifts:MysteryGifts.useAGameBoyColorLinkCable'),
     i18n.t('mystery-gifts:MysteryGifts.turnOnTheGameStayOnTheMainMenu'),
     i18n.t('mystery-gifts:MysteryGifts.pressStartBelowAndChooseYourGbLink'),
@@ -75,7 +75,7 @@ interface Message {
 function statusMessage(status: GiftStatus, target: GiftTarget): Message | null {
   const who =
     status.player?.name ||
-    i18n.t('mystery-gifts:MysteryGifts.the', { value1: getConsole()[target] })
+    getConsole()[target]
   switch (status.stage) {
     case 'open':
       return { headline: getWhere()[target] }
@@ -112,7 +112,7 @@ function statusMessage(status: GiftStatus, target: GiftTarget): Message | null {
         headline: i18n.t('mystery-gifts:MysteryGifts.sending', {
           value1:
             status.event?.label ??
-            i18n.t('mystery-gifts:MysteryGifts.theCard2'),
+            i18n.t('mystery-gifts:MysteryGifts.wonderCard'),
         }),
         hint: i18n.t(
           'mystery-gifts:MysteryGifts.keepThisPageOpenUntilTheGameSaysTheCard'
@@ -128,9 +128,9 @@ function statusMessage(status: GiftStatus, target: GiftTarget): Message | null {
 function resultMessage(result: GiftResult, target: GiftTarget): Message {
   const who =
     result.player?.name ||
-    i18n.t('mystery-gifts:MysteryGifts.the2', { value1: getConsole()[target] })
+    getConsole()[target]
   const name =
-    result.event?.label ?? i18n.t('mystery-gifts:MysteryGifts.theCard')
+    result.event?.label ?? i18n.t('mystery-gifts:MysteryGifts.wonderCard')
   switch (result.outcome) {
     case 'sent':
       return {
@@ -318,7 +318,7 @@ export function MysteryGifts() {
         if (attempt.current === controller) {
           attempt.current = null
           setPhase('idle')
-          setMessage({ headline: t('MysteryGifts.cancelled') })
+          setMessage({ headline: t('common:status.cancelled') })
         }
         return
       }
@@ -337,7 +337,7 @@ export function MysteryGifts() {
       setPhase('idle')
       setMessage({
         headline: controller.signal.aborted
-          ? t('MysteryGifts.cancelled')
+          ? t('common:status.cancelled')
           : describeError(cause),
       })
     }
@@ -377,7 +377,7 @@ export function MysteryGifts() {
     if (!link) {
       setMessage({
         headline: t(
-          'MysteryGifts.cancellingCloseTheDeviceChooserIfItIsStillOpen'
+          'common:status.cancellingDeviceChooser'
         ),
       })
       return
@@ -411,7 +411,7 @@ export function MysteryGifts() {
           <p>{getGames()[target]}</p>
           <h2>{t('MysteryGifts.chooseAGift')}</h2>
           <OptionGroup
-            label={t('MysteryGifts.chooseGift')}
+            label={t('MysteryGifts.chooseAGift')}
             layout="grid"
             options={getMysteryGifts().map(
               (item) => [item.id, item.label] as const
@@ -465,7 +465,7 @@ export function MysteryGifts() {
                 onClick={() => void open()}
               >
                 {phase === 'opening'
-                  ? t('mystery-gifts:MysteryGifts.starting')
+                  ? t('common:status.starting')
                   : t('common:actions.start')}
               </button>
             ) : (

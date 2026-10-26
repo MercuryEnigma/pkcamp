@@ -50,8 +50,8 @@ export interface TradeDevices {
 
 export interface RunTradeOptions {
   adapter: PokemonSaveAdapter
-  /** Stored in place of the Pokémon the GBA sent, which stock GB-Link can't return. */
-  loadPlaceholder(): Promise<Uint8Array>
+  /** Called after received Pokémon have been persisted, even while the room is open. */
+  onCommitted?(writes: TradeWrite[]): void
   onEvent?(event: TradeDeviceEvent): void
   /** Defaults to the shared app devices. */
   devices?: TradeDevices
@@ -133,37 +133,70 @@ export async function runTrade(
     ]
   }
 
+  const party: (Uint8Array | null)[] = [pk3, null, null, null, null, null]
   if (other.device === 'esp32') {
-    // Switch rooms need two Pokémon; the companion is never offered.
     const companion = await companionOf(devices, options.adapter, local, pk3)
     if (!companion) {
       throw new Error(
         i18n.t('services:tradeRoutes.twoPokeMonAreRequiredToEnterASwitchTrade')
       )
     }
-    const result = await devices.esp32.trade({
-      party: [pk3, companion, null, null, null, null],
-      selectedSlot: 0,
-      signal,
-      onEvent: options.onEvent,
-    })
-    const received = result.trades.findLast(
-      (trade) => trade.slot === 0
-    )?.received
-    if (!received)
-      throw new Error(
-        i18n.t('services:tradeRoutes.theRoomClosedWithoutCompletingATrade')
-      )
-    return write(received)
+    party[1] = companion
   }
 
-  const result = await devices.gbLink.trade({
-    party: [pk3, null, null, null, null, null],
-    selectedSlot: 0,
-    signal,
-    onEvent: options.onEvent,
-  })
-  return write(result.trades[0]?.received ?? (await options.loadPlaceholder()))
+  // Capture received bytes immediately. Writes are serialized and drained even
+  // if closing the room rejects the device session. An abort cannot discard a
+  // Pokémon already received, or replace a slot with an invented placeholder.
+  let pending = Promise.resolve()
+  let expected = pk3
+  let receivedCount = 0
+  const writes: TradeWrite[] = []
+  const receive = (received: Uint8Array) => {
+    const bytes = received.slice()
+    receivedCount++
+    pending = pending.then(async () => {
+      await writeSlot(devices, options.adapter, local, expected, bytes)
+      expected = bytes
+      writes[0] = { side: local, before: pk3, after: bytes.slice() }
+      options.onCommitted?.([...writes])
+    })
+    // The session may stay open for minutes before we await this promise.
+    void pending.catch(() => {})
+  }
+  let sessionError: unknown
+  try {
+    const device = other.device === 'esp32' ? devices.esp32 : devices.gbLink
+    const result = await device.trade({
+      party,
+      selectedSlot: 0,
+      signal,
+      onEvent: (event) => {
+        if (
+          event.type === 'trade-completed' &&
+          event.slot === 0 &&
+          !signal.aborted
+        )
+          receive(event.received)
+        options.onEvent?.(event)
+      },
+    })
+    // Support devices that return their received PK3 without emitting events.
+    if (receivedCount === 0 && !signal.aborted) {
+      const received = result.trades.findLast(
+        (trade) => trade.slot === 0
+      )?.received
+      if (received) receive(received)
+    }
+  } catch (error) {
+    sessionError = error
+  }
+  await pending
+  if (writes.length > 0) return writes
+  if (sessionError) throw sessionError
+  signal.throwIfAborted()
+  throw new Error(
+    i18n.t('services:tradeRoutes.theRoomClosedWithoutCompletingATrade')
+  )
 }
 
 /** GBA ↔ Switch: a live relay. Nothing is written in PkCamp. */

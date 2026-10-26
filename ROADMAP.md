@@ -48,7 +48,8 @@
 - [x] Add automatic GB-Link firmware updates with installed/latest versions in shared Settings.
 - [x] Harden cancellation, late device selection, repeated shutdown, and guarded hardware settings navigation.
 - [ ] Complete remaining production, accessibility, and automated checks in the [Research Tools checklist](src/pages/pokestorage/lab/ROADMAP.md).
-- [ ] Finish account, compatibility, accessibility, and data-management options.
+- [ ] Make the Settings Arcade tab addressable with `tab=arcade`.
+- [x] Finish account, compatibility, accessibility, and data-management options.
 
 ## Battle Zone
 
@@ -78,15 +79,16 @@
 
 Evidence for verified items is in [Arcade runtime evidence](docs/ARCADE_RUNTIME.md).
 
-- [ ] Verify mGBA WASM formats, browsers, performance, input, audio, and asset/worker loading.
+- [x] Verify mGBA WASM formats, browsers, performance, input, audio, and asset/worker loading.
 - [ ] Build a player-provided ROM spike that works from the deployed base path.
 - [x] Define shared emulator lifecycle, save I/O, controls, audio, errors, and capabilities.
 - [x] Add play/pause/reset, fullscreen, mappings, and clear recovery states.
 - [x] Import Delta controller skins, manage them in a skin library, and ship a default skin.
 - [x] Remove the Arcade cartridge chooser; Hub opens the selected game's player directly.
-- [ ] Prove explicit save import/export and Dropbox backup/restore across reloads.
-- [ ] Verify repeated mount/unmount cleanup and recovery with multiple supplied games.
+- [x] Prove explicit save import/export and Dropbox backup/restore across reloads.
+- [x] Verify repeated mount/unmount cleanup and recovery with multiple supplied games.
 - [ ] Publish the supported-browser matrix and decide ROM-persistence policy.
+- [ ] Store Arcade key bindings and menu settings through storage (and Dropbox) instead of `localStorage`.
 
 ## Site-wide foundation and cleanup
 

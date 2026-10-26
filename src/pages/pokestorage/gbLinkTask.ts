@@ -4,7 +4,7 @@ import type { GbaCartInfo } from '../../services/gbaSaveDump/gbaCartClient'
 // Shared text and helpers for GB-Link tasks (GbLinkTaskPanel and Mystery Gifts).
 
 export const getConnectStep = () =>
-  i18n.t('camp:gbLinkTask.connectTheGbLinkToThisComputerAndYourGba')
+  i18n.t('common:hardware.connectGbLink')
 export const getBootStep = () =>
   i18n.t('camp:gbLinkTask.insertTheCartridgeAndPowerOnWhileHoldingStartSelect')
 
@@ -22,7 +22,7 @@ export function gbLinkErrorMessage(
 /** Builds a GbLinkTaskPanel `describeError`. `retry` follows a failure. */
 export function taskErrorMessage({
   fallback,
-  cancelled = i18n.t('camp:gbLinkTask.cancelled'),
+  cancelled = i18n.t('common:status.cancelled'),
   retry,
 }: { fallback?: string; cancelled?: string; retry?: string } = {}) {
   return (cause: unknown, wasCancelled: boolean): string => {

@@ -1,12 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigationGuard } from './navigationGuard'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import ribbondolUrl from '../../assets/trade/ribbondol.pk3?url'
 import type { Gen3GameId } from '../../services/saveLibrary'
 import {
   esp32TradeDevice,
   gbLinkTradeDevice,
-  revertTrade,
   runTrade,
   tradeAvailability,
   type TradeSide,
@@ -29,7 +27,7 @@ import { useStorageOffline } from './useStorage'
 export interface TradeViewProps {
   /** Receives the box open for `initialGameId`, to reopen in its Cabin. */
   onBack?: (box?: number) => void
-  /** Called after a trade or revert changed what is stored. */
+  /** Called after a trade changed what is stored. */
   onTraded?: () => void
   initialGameId?: Gen3GameId
   /** Box to open for `initialGameId`, e.g. the one open in its Cabin. */
@@ -38,7 +36,7 @@ export interface TradeViewProps {
 
 /**
  * State and actions of a two-sided trade: both sides, the running trade,
- * revert, and cancel. Pages only lay out the result and supply its text.
+ * receipt, and cancellation. Pages only lay out the result and supply its text.
  */
 export function useTradeSession({
   onBack,
@@ -64,7 +62,7 @@ export function useTradeSession({
   // Bumped after device connects so the Start button re-evaluates.
   const [, setDeviceRevision] = useState(0)
   const [switchKeysReady, setSwitchKeysReady] = useState<boolean | null>(null)
-  // What the last trade overwrote in PkCamp, for "Revert trade".
+  // Receipts already saved in PkCamp, including while the room is open.
   const [lastTrade, setLastTrade] = useState<TradeWrite[] | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const { adapter } = usePkHex()
@@ -116,31 +114,17 @@ export function useTradeSession({
         : t('useTradeSession.startingTrade')
     )
     setLastTrade(null)
-    let usedPlaceholder = false
     try {
-      let placeholder: Uint8Array | null = null
-      const loadPlaceholder = async (): Promise<Uint8Array> => {
-        if (!placeholder) {
-          const response = await fetch(ribbondolUrl)
-          if (!response.ok)
-            throw new Error(t('useTradeSession.couldNotLoadRibbondolPk3'))
-          placeholder = new Uint8Array(await response.arrayBuffer())
-        }
-        return placeholder.slice()
-      }
-      if (!relay && (left.device === 'gb-link' || right.device === 'gb-link')) {
-        setMessage(t('useTradeSession.preparingTrade'))
-        await loadPlaceholder()
-      }
       const writes = await runTrade(left, right, controller.signal, {
         adapter: pkAdapter,
         onEvent: (event) => {
           const status = statusForEvent(event)
           if (status) setMessage(status)
         },
-        loadPlaceholder: async () => {
-          usedPlaceholder = true
-          return loadPlaceholder()
+        onCommitted: (writes) => {
+          setLastTrade(writes)
+          setReload((value) => value + 1)
+          setMessage(t('useTradeSession.tradeComplete'))
         },
       })
       if (relay) {
@@ -148,11 +132,7 @@ export function useTradeSession({
         return
       }
       setLastTrade(writes)
-      setMessage(
-        usedPlaceholder
-          ? t('useTradeSession.tradeCompleteTheGbLinkCannotReturnYourNewPoke')
-          : t('useTradeSession.tradeComplete')
-      )
+      setMessage(t('useTradeSession.tradeComplete'))
       // The selected slots changed; start over with fresh grids.
       setLeft(clearSelection)
       setRight(clearSelection)
@@ -162,24 +142,6 @@ export function useTradeSession({
       setMessage(describeError(cause))
     } finally {
       if (abortRef.current === controller) abortRef.current = null
-      setBusy(false)
-    }
-  }
-
-  const undoTrade = async () => {
-    if (!lastTrade || !adapter) return
-    setBusy(true)
-    try {
-      await revertTrade(lastTrade, { adapter })
-      setLastTrade(null)
-      setLeft(clearSelection)
-      setRight(clearSelection)
-      setReload((value) => value + 1)
-      onTraded?.()
-      setMessage(t('useTradeSession.tradeRevertedInPkcampPokeMonOnAGameBoy'))
-    } catch (cause) {
-      setMessage(describeError(cause))
-    } finally {
       setBusy(false)
     }
   }
@@ -251,7 +213,6 @@ export function useTradeSession({
     lastTrade,
     offline,
     startTrade,
-    undoTrade,
     cancelTrade,
     handleBack,
     sideProps,

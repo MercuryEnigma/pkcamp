@@ -103,7 +103,7 @@ function withCartridge<T>(
     options.onStatus?.(i18n.t('services:readGbaSave.checkingTheCartridge'))
     const info = await cart.readInfo()
     if (!info)
-      throw new Error(i18n.t('services:readGbaSave.noGbaCartridgeWasDetected'))
+      throw new Error(i18n.t('services:gbaCartClient.noGbaCartridgeWasDetected'))
     options.onCartridge?.(info)
     const game = gen3GameIdFromCode(info.code)
     const { gameId } = options

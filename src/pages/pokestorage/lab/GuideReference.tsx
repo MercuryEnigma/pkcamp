@@ -21,7 +21,7 @@ export function GuideReference({
   dataset: PokedexDataset | null
   onSelectSpecies: (id: number) => void
 }) {
-  const { t } = useTranslation(['lab', 'common'] as const)
+  const { t } = useTranslation(['lab', 'pokedex', 'common'] as const)
 
   return (
     <SpeciesDataPanel
@@ -32,22 +32,22 @@ export function GuideReference({
     >
       {status === 'loading' && (
         <p className="pc-muted" role="status">
-          {t('PokemonView.loadingReference')}
+          {t('pokedex:status.loading')}
         </p>
       )}
       {status === 'unsupported' && (
         <p className="pc-muted" role="status">
-          {t('PokemonView.referenceUnavailable')}
+          {t('pokedex:status.unsupported')}
         </p>
       )}
       {(status === 'idle' || status === 'unavailable') && (
         <p className="pc-muted" role="status">
-          {t('PokemonView.referenceMissing')}
+          {t('pokedex:status.missingRom')}
         </p>
       )}
       {status === 'error' && (
         <div role="status">
-          <p className="pc-muted">{t('PokemonView.referenceLoadFailed')}</p>
+          <p className="pc-muted">{t('pokedex:status.loadFailed')}</p>
           <button
             type="button"
             className="pc-chip"
@@ -58,7 +58,7 @@ export function GuideReference({
         </div>
       )}
       {status === 'ready' && !species && (
-        <p className="pc-muted">{t('PokemonView.notInReferenceRom')}</p>
+        <p className="pc-muted">{t('pokedex:status.notInRom')}</p>
       )}
     </SpeciesDataPanel>
   )

@@ -72,12 +72,10 @@ describe('translated catalogs', () => {
     await i18n.changeLanguage('es')
     const html = renderToStaticMarkup(<PokeTransporter />)
     expect(html).toContain(
-      'Los Pokémon transferidos se eliminan del juego de origen.'
+      'Los Pokémon transferidos se eliminan del juego de origen para siempre.'
     )
-    expect(html).toContain('Se modificarán ambas partidas guardadas.')
-    expect(html).toContain(
-      'las copias no oficiales pueden provocar la pérdida de Pokémon.'
-    )
+    expect(html).toContain('Se modificarán ambos juegos.')
+    expect(html).not.toContain('copias no oficiales')
     expect(
       i18n.t(
         'transporter:PokeTransporter.insertTheGbaGameThatWillReceiveYourPokeMon'

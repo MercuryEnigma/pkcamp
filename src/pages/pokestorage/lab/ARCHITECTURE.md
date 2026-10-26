@@ -1,15 +1,15 @@
 # Lab architecture
 
-`LabMain` switches between Celio's menu, collections, Trade Table, Research
-Tools, Settings, and Patch Notes. Collections evaluate validated definitions
-against committed Cabin saves and Camp Sites through `collectionService`:
-`updateCollections` takes any definitions and sources, marks matches owned and
-previously owned entries seen (both count as registered), and stores complete
-results. The hub runs it on Start and after save data changes; an open Lab
-re-reads what it stores. Source choices, uploads, and rebuildable
-results/history live in active storage; Settings → Data deletes them. Visiting a source location
-preserves the Lab screen and suspends its navigation guards while hidden.
-Trading and settings reuse Camp's shared logic and panels.
+`LabMain` is route-driven (`/lab/?mode=`) and switches between Celio's menu,
+the PC, Poké Transporter GB, Research Tools, Settings, and Patch Notes. The PC
+(`CollectionView`) reads and writes its tabs, filters, selected entry, and match
+through the shared `collections` service, which rescans the selected committed
+save plus Camp Sites whenever `activeGame` commits a change. The entry screen
+(`PokemonView`) adds a Reference tab with `guide` data. Source choices, uploads, and rebuildable
+results/history live in active storage; Settings → Data deletes them. Visiting a
+source location keeps the Lab mounted (hidden) with its navigation guards
+suspended, so Back returns to the same entry. Settings reuses Camp's shared
+sections; trading lives only in Camp.
 
 Research Tools opens saves, dumps, Mystery Gifts, and transporter workspaces.
 `GbLinkTaskPanel` and `gbLinkTask` share task presentation, instructions,
@@ -23,11 +23,12 @@ permitted GB-Link without the chooser. Leaving Research Tools also releases it.
 
 ```mermaid
 flowchart TB
-  Lab["LabMain"] --> Collections["Collections → scan committed sources"]
-  Collections --> Service["collectionService.updateCollections"]
-  Hub["Hub: Start · data changes"] --> Service
+  Lab["LabMain"] --> PC["PC: CollectionView"]
+  PC --> Service["collections service"]
+  Active["activeGame commits"] --> Service
   Service --> Storage["StorageProvider: definitions, sources, results"]
-  Lab --> Shared["Shared Trade Table / Settings"]
+  PC --> Guide["PokemonView Reference tab → guide"]
+  Lab --> Shared["Shared Settings"]
   Shared --> Firmware["GB-Link firmware updater"]
   Lab --> Tools["Research Tools"]
   Tools --> Tasks["Save/dump/transporter tasks"]

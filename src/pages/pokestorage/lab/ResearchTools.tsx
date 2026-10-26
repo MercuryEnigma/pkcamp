@@ -17,20 +17,20 @@ export function ResearchTools({
   return (
     <nav
       className="research-tools"
-      aria-label={t('ResearchTools.researchTools')}
+      aria-label={t('tools.researchTools')}
     >
       <SiteCard
-        title={t('ResearchTools.mysteryGifts')}
+        title={t('tools.mysteryGifts')}
         description={t('ResearchTools.sendWonderCardsToAGbaOrTheSwitch')}
         onClick={onOpenGifts}
       />
       <SiteCard
-        title={t('ResearchTools.cartridgeSaves')}
+        title={t('tools.cartridgeSaves')}
         description={t('ResearchTools.backUpAndRestoreGbaCartridgeSaves')}
         onClick={onOpenSaves}
       />
       <SiteCard
-        title={t('ResearchTools.romBiosDumps')}
+        title={t('tools.romBiosDumps')}
         description={t('ResearchTools.downloadCartridgeRomsAndTheGbaBios')}
         onClick={onOpenDumps}
       />

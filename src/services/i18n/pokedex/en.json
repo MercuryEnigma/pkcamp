@@ -1,13 +1,5 @@
 {
   "unknownMove": "Unknown move",
-  "warnings": {
-    "storage-unavailable": "Reference data loaded, but could not be saved for the next visit.",
-    "partial-data": "Some reference details are unavailable.",
-    "unmapped-species": "Some ROM species could not be matched to the National Pokédex.",
-    "unsupported-table": "Some ROM data tables could not be read.",
-    "unknown-game-revision": "This game revision could not be identified confidently.",
-    "unsupported-rom": "This ROM layout is not supported."
-  },
   "evolutions": {
     "level": "At level {{parameter}}",
     "level-atk-greater-def": "At level {{parameter}}, Attack higher than Defense",
@@ -20,23 +12,17 @@
     "trade-item": "Trade while holding {{parameter}}",
     "item": "Use {{parameter}}",
     "beauty": "Beauty of at least {{parameter}}",
-    "level-known-move": "At level {{parameter}} while knowing a move",
-    "level-party-species": "At level {{level}} with species #{{species}} in the party",
     "level-extra-species": "At level {{parameter}} with an extra party slot available",
-    "level-personality-low": "At level {{parameter}}, based on personality",
-    "level-personality-high": "At level {{parameter}}, based on personality",
+    "level-personality-low": "At level {{parameter}} (random)",
+    "level-personality-high": "At level {{parameter}} (random)",
     "level-extra-species-ball": "At level {{parameter}}, with a free party slot and a Poké Ball in the Bag"
   },
-  "evolutionFamily": "Evolution family",
   "overviewCategories": "Overview categories",
   "overview": {
     "stats": "Stats",
     "abilities": "Abilities",
     "evolutions": "Evolution"
   },
-  "types": "Types",
-  "stat": "Stat",
-  "value": "Value",
   "total": "Total",
   "bstValue": "BST: {{total}}",
   "evsValue": "EVs: {{total}}",
@@ -57,12 +43,10 @@
   "level": "Level",
   "move": "Move",
   "machine": "Machine",
-  "hatchedAs": "Hatch as",
   "potentialFathers": "Potential fathers",
   "movesUnavailable": "This move table is unavailable.",
   "movesPartial": "Some moves could not be read.",
   "noMoves": "No moves listed for this category.",
-  "methodUnknown": "Wild encounter",
   "unknownArea": "Unnamed area",
   "levelRange": "Lv. {{min}}–{{max}}",
   "specialCondition": "Requires a special encounter condition",
@@ -80,37 +64,24 @@
     "other": "Other",
     "obtaining": "Obtaining"
   },
-  "methods": {
-    "grass": "Grass / cave",
-    "surf": "Surfing",
-    "rock-smash": "Rock Smash",
-    "old-rod": "Old Rod",
-    "good-rod": "Good Rod",
-    "super-rod": "Super Rod"
-  },
   "obtain": {
     "method": "Method",
     "evolution": "Evolution",
     "breeding": "Breeding",
-    "evolveFrom": "Evolve {{species}} · {{requirement}}",
-    "breedFrom": "Breed {{species}}",
-    "catchSource": "Find {{species}} here:",
     "evolvePrefix": "Evolve ",
-    "breedPrefix": "Breed ",
-    "catchPrefix": "Find ",
-    "catchSuffix": " here:"
-  },
-  "breeding": {
-    "ditto": "Breed with Ditto.",
-    "partner": "Use a compatible partner, or Ditto.",
-    "incense": "A parent must hold {{item}}.",
-    "withoutIncense": "Neither parent should hold {{item}}.",
-    "mixedOffspring": "The egg can hatch as either species in this pair."
+    "breedPrefix": "Breed "
   },
   "speciesData": "Species Data",
   "overviewSection": "Overview",
   "previousDataSection": "Previous data section",
   "nextDataSection": "Next data section",
   "dataSectionPosition": "{{current}} / {{total}}",
-  "partialReference": "Some game data could not be read from this ROM."
+  "partialReference": "Some game data could not be read from this ROM.",
+  "status": {
+    "loading": "Loading game data…",
+    "unsupported": "No Pokédex data for this ROM.",
+    "missingRom": "Add a ROM for this game to see its data.",
+    "loadFailed": "Game data could not be loaded. Try again.",
+    "notInRom": "This Pokémon isn’t in this ROM’s data."
+  }
 }

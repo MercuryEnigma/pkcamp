@@ -27,7 +27,7 @@ export function assertSaveMatchesCabin(
     (exact === 'RubySapphire' && RUBY_SAPPHIRE.has(gameId))
   if (!matches) {
     throw new Error(
-      i18n.t('camp:saveVersion.thisIsASaveNotASave', {
+      i18n.t('services:activeGame.thisIsASaveNotASave', {
         aggregated: save.version.aggregated,
         value2: getGameLabel(gameId),
       })

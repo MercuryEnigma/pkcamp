@@ -36,13 +36,13 @@ export function LabMenu({
         />
         <SiteCard
           className="lab-menu-transporter"
-          title={t('LabMenu.transporter')}
+          title={t('tools.transporter')}
           description={t('LabMenu.moveGen12PokeMonIntoGen3')}
           onClick={onSelectTransporter}
         />
         <SiteCard
           className="lab-menu-tools"
-          title={t('LabMenu.researchTools')}
+          title={t('tools.researchTools')}
           description={t('LabMenu.giftsCartridgeSavesAndDumps')}
           onClick={onSelectResearch}
         />
@@ -53,7 +53,7 @@ export function LabMenu({
           onClick={onSelectSettings}
         />
         <button type="button" className="lab-link" onClick={onSelectNews}>
-          {t('LabMenu.patchNotes')}
+          {t('tools.patchNotes')}
         </button>
       </nav>
     </SitePage>

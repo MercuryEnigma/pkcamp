@@ -3,8 +3,10 @@
 `runTrade` pairs Gen 3 save backups, Camp Sites, GB-Link GBA, or ESP32 Switch
 sources through device adapters. Stored writes validate source bytes and
 preserve positions; `revertTrade` reverses recorded PkCamp writes only.
-GBA ↔ Switch is a live relay. GB-Link stored exchanges disclose the tracked
-production placeholder when firmware cannot return received Pokémon. Shared
+Received Pokémon are persisted as soon as the device reports a completed
+trade, while the room is still open. Closing or cancelling drains those writes;
+without received Pokémon bytes, stored saves and Camp Sites stay unchanged.
+GBA ↔ Switch is a live relay. Shared
 connections and exclusive operations also support saves, dumps, gifts, and
 multiboot; cancellation rejects late selections, and repeated disconnect calls
 wait for the same cleanup. Closing a USB transport closes the device before

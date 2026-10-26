@@ -190,7 +190,7 @@ export class GbLinkTradeDevice implements TradeDevice {
         this.id,
         'unsupported',
         i18n.t(
-          'services:gbLinkTradeDevice.thisBrowserSupportsNeitherWebusbNorWebSerial'
+          'services:gbLinkTransport.thisBrowserSupportsNeitherWebusbNorWebSerial'
         )
       )
     }

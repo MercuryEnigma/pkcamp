@@ -3,7 +3,7 @@ import type { Camp } from '../../../services/storage'
 import type { CampScanStatus, ScannedPokemon } from './collectionTypes'
 
 /** Camp Pokémon in a Camp, without reading any of them. */
-export function campPokemonCount(camp: Camp): number {
+function campPokemonCount(camp: Camp): number {
   return camp.sites.reduce(
     (sum, site) => sum + site.filter((pokemon) => pokemon !== null).length,
     0

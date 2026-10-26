@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { i18n } from '../../../services/i18n'
 import { formatList } from '../../../services/i18n/format'
 import { useState } from 'react'
@@ -95,7 +95,7 @@ export function CartridgeSaves() {
       key="read"
       title={t('CartridgeSaves.backUpACartridgeSave')}
       steps={[getConnectStep(), getBootStep()]}
-      progressLabel={t('CartridgeSaves.readingTheSave')}
+      progressLabel={t('common:status.readingTheSave')}
       onBusyChange={setBusy}
       describeError={describeReadError}
       run={async (task) => {
@@ -118,8 +118,8 @@ export function CartridgeSaves() {
       steps={[
         getConnectStep(),
         t(
-          'cartridge-saves:CartridgeSaves.insertAndPowerOnWhileHoldingStartSelect',
-          { label: restoreLabel }
+          'common:hardware.insertAndBoot',
+          { value1: restoreLabel }
         ),
       ]}
       note={t(
@@ -179,8 +179,11 @@ export function CartridgeSaves() {
               {t('CartridgeSaves.downloadTheSaveFromAGbaCartridgeTheGameIs')}
             </p>
             <p>
-              {t('CartridgeSaves.switchSaveDownloadIs')}{' '}
-              <span className="lab-tag">{t('CartridgeSaves.inResearch')}</span>
+              <Trans
+                ns="cartridge-saves"
+                i18nKey="CartridgeSaves.switchSaveDownloadComingSoon"
+                components={{ tag: <span className="lab-tag" /> }}
+              />
             </p>
           </>
         ) : (

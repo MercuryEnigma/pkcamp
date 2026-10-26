@@ -24,8 +24,8 @@ import { CampSelectionPanel, SaveSelectionPanel } from './TradeSelectionPanels'
 
 /*
  * One side of a two-sided trade page: its source picker and either a Pokémon
- * grid (stored sources) or a device connection panel (hardware). Shared by
- * the Camp Zone Trading Post and the Lab Zone Trade Table.
+ * grid (stored sources) or a device connection panel (hardware). Used by
+ * both sides of the Camp Zone trade mode.
  */
 
 const MAX_KEYS_SIZE = 1024 * 1024
@@ -47,7 +47,7 @@ const getSourceOptions = (): readonly { label: string; side: TradeSide }[] => [
     side: { device: 'save-backup', gameId } as TradeSide,
   })),
   {
-    label: i18n.t('trade:TradeSidePanel.campSites'),
+    label: i18n.t('common:storage.campSites'),
     side: { device: 'camp-site' },
   },
   {
@@ -198,18 +198,17 @@ function DevicePanel({
             })}
           </strong>
           <p>
-            {release && (
-              <Trans
-                ns="trade"
-                i18nKey="TradeSidePanel.downloadFirmwareLink"
-                components={{
-                  firmwareLink: (
-                    <a href={release.url} target="_blank" rel="noreferrer" />
-                  ),
-                }}
-              />
-            )}
-            {t('TradeSidePanel.manualFirmwareSteps')}
+            <Trans
+              ns="trade"
+              i18nKey="TradeSidePanel.manualFirmwareSteps"
+              components={{
+                firmwareLink: release ? (
+                  <a href={release.url} target="_blank" rel="noreferrer" />
+                ) : (
+                  <span />
+                ),
+              }}
+            />
           </p>
           <button
             type="button"
@@ -257,7 +256,7 @@ function DevicePanel({
           {!device.supported
             ? t('TradeSidePanel.useAChromiumBasedBrowserSuchAsChromeOrEdge')
             : connected
-              ? t('TradeSidePanel.chooseAPokeMonOnYourDuringTheTrade', {
+              ? t('TradeSidePanel.chooseThePokeMonOnYourDuringTheTrade', {
                   value1: isGba ? 'Game Boy Advance' : 'Switch',
                 })
               : t('TradeSidePanel.connectYourToChooseAPokeMonDuringTheTrade', {

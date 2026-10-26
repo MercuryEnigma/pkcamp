@@ -65,8 +65,8 @@ threaded runtime on static hosting. The main app remains outside that scope;
 shared storage initializes independently in each document.
 
 Production-preview bootstrap, raw save round trips, and browser layout evidence
-are recorded in the runtime reference. GitHub Pages, Dropbox, all five retail
-games, and physical iOS/Android checks remain release verification tasks. If the
+are recorded in the runtime reference, along with the owner's desktop and
+mobile verification. GitHub Pages deployment checks remain. If the
 threaded runtime fails a target browser, evaluate a single-threaded binding with
 explicit save I/O and emulator-owned persistence disabled.
 

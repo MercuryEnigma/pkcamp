@@ -85,9 +85,9 @@ export function PokemonSlotIcon({
   const title = [
     slot.nickname || display.label,
     slot.isEgg
-      ? t('PokemonSlotIcon.egg')
+      ? t('common:pokemon.egg')
       : t('PokemonSlotIcon.lv', { level: slot.level }),
-    slot.shiny ? t('PokemonSlotIcon.shiny') : null,
+    slot.shiny ? t('common:pokemon.shiny') : null,
   ]
     .filter(Boolean)
     .join(' · ')

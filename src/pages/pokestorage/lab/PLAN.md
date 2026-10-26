@@ -20,8 +20,7 @@ action per step and clear progress, results, and recovery guidance.
 **Cartridge Saves** downloads GBA saves to the computer and restores a selected
 Gen 3 save to a matching cartridge. Restore requires matching game/size checks
 and a successful backup of the original cartridge save before any write.
-Repair is planned for Ruby/Sapphire berry and RTC issues, with diagnosis and
-backup before changes. Switch save download via Mystery Gift remains research;
+Switch save download via Mystery Gift remains research;
 Switch restore, erase, and general GB/GBC save management are outside this
 workspace's scope.
 
@@ -59,7 +58,7 @@ console transfer being completed.
 
 ## Deferred scope
 
-Repair, Switch save download, GB/GBC ROM dumping, and stronger hash/recovery
+Switch save download, GB/GBC ROM dumping, and stronger hash/recovery
 features need their own supported-device and failure contracts. Later ideas
 include R/S Mystery Event, GameCube events, cartridge authenticity checks,
 Save Inspector, emulator handoff/conversion, and additional generations.

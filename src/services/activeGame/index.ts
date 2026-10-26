@@ -577,7 +577,7 @@ export class ActiveGameService {
     const current = this.requireReady()
     if (!this.adapter || !this.committedCamp)
       throw new Error(
-        i18n.t('services:activeGame.theCommittedActiveGameIsUnavailable')
+        'The committed active game is unavailable.'
       )
     const save = current.saveBytes ? this.adapter.load(current.saveBytes) : null
     try {

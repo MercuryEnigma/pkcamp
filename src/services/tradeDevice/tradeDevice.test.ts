@@ -358,7 +358,7 @@ describe('Esp32TradeDevice', () => {
       await running
       expect(messages).toEqual([
         'GBA cable link open.',
-        "Linked to the Switch's room.",
+        "Linked to the Switch’s room.",
         'Ready to trade.',
       ])
     })

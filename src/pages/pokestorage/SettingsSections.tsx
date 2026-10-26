@@ -105,7 +105,7 @@ export function CabinPicker({ form }: { form: SettingsForm }) {
       >
         {GEN_3_GAMES.map((gameId) => (
           <option key={gameId} value={gameId}>
-            {t('SettingsSections.cabin2', { value1: getGameLabel(gameId) })}
+            {t('common:storage.cabin', { value1: getGameLabel(gameId) })}
           </option>
         ))}
         <option value="campsites">{t('SettingsSections.campsites')}</option>
@@ -126,8 +126,14 @@ export function BackupStatusCard({
   const status = form.backups?.[gameId]
   const hasSave = status?.hasSave ?? false
   return (
-    <section className="lab-backup-status lab-settings-module" aria-live="polite">
-      <span className={`lab-backup-status-mark${hasSave ? ' is-ready' : ''}`} aria-hidden="true" />
+    <section
+      className="lab-backup-status lab-settings-module"
+      aria-live="polite"
+    >
+      <span
+        className={`lab-backup-status-mark${hasSave ? ' is-ready' : ''}`}
+        aria-hidden="true"
+      />
       <div>
         <h3>{t('SettingsSections.lastBackup')}</h3>
         <p>
@@ -178,12 +184,12 @@ export function CabinBackupCard({
         if (confirmReplaceBackup(gameId)) setGbaAction({ gameId, mode: 'read' })
       }}
     >
-      {t('SettingsSections.fromGba')}
+      {t('common:storage.fromGba')}
     </button>
   )
   const fromFileBtn = (
     <label className="camp-transfer-btn">
-      {t('SettingsSections.fromFile')}
+      {t('common:storage.fromFile')}
       <input
         className="camp-file-input--hidden"
         type="file"
@@ -195,7 +201,6 @@ export function CabinBackupCard({
   )
   return (
     <div className="camp-cabin-card lab-backup-actions">
-
       {hasSave ? (
         <div className="camp-transfer-groups">
           <div className="camp-transfer-group">
@@ -230,7 +235,7 @@ export function CabinBackupCard({
         <div className="camp-transfer-groups">
           <div className="camp-transfer-group">
             <span className="camp-transfer-group-label lab-transfer-heading">
-              {t('SettingsSections.addASave')}
+              {t('common:storage.addASave')}
             </span>
             {fromGbaBtn}
             {fromFileBtn}
@@ -238,16 +243,23 @@ export function CabinBackupCard({
         </div>
       )}
 
-      {hasSave && (
+      {(hasSave || form.message) && (
         <div className="camp-cabin-footer">
-          <button
-            type="button"
-            className="camp-text-btn camp-text-btn--danger"
-            disabled={offline}
-            onClick={() => void handleBackupRemove(gameId)}
-          >
-            {t('SettingsSections.removeBackup')}
-          </button>
+          {form.message && (
+            <p className="lab-backup-message" role="status">
+              {form.message}
+            </p>
+          )}
+          {hasSave && (
+            <button
+              type="button"
+              className="camp-text-btn camp-text-btn--danger"
+              disabled={offline}
+              onClick={() => void handleBackupRemove(gameId)}
+            >
+              {t('SettingsSections.removeBackup')}
+            </button>
+          )}
         </div>
       )}
 
@@ -279,50 +291,31 @@ export function CabinBackupCard({
   )
 }
 
-/** The GBA Lodge Camp Site count and campsite download. */
-export function CampsitesCard({ form }: { form: SettingsForm }) {
+/** The Camp Site count occupies the same module as a Cabin's backup status. */
+export function CampsitesStatusCard({ form }: { form: SettingsForm }) {
   const { t } = useTranslation(['settings', 'common'] as const)
-
-  const {
-    siteCounts,
-    setSiteCounts,
-    saving,
-    offline,
-    camps,
-    campsiteMinimum,
-    handleDownloadCampsite,
-    handleCampsiteRemove,
-  } = form
-  const hasCampers = (camps?.get(GBA_GENERATION)?.sites ?? []).some((site) =>
-    site.some((pokemon) => pokemon !== null)
-  )
+  const { siteCounts, camps, campsiteMinimum, setSiteCounts, saving, offline } =
+    form
   const siteCount = Math.max(
     siteCounts?.[GBA_GENERATION] ?? DEFAULT_CAMP_SITE_COUNT,
     campsiteMinimum
   )
+  const unchanged = siteCount === camps?.get(GBA_GENERATION)?.sites.length
   return (
-    <div className="camp-cabin-card lab-campsites-card">
-      <div className="camp-cabin-head">
-        <strong className="camp-cabin-name">
-          {t('SettingsSections.campsites')}
-        </strong>
-      </div>
-      <p className="camp-cabin-status">
-        {t('SettingsSections.eachCampSiteAddsCampingPokeMonSpacesToThe', {
-          CAMP_SITE_SIZE: CAMP_SITE_SIZE,
-        })}
-      </p>
-
-      <label className="camp-settings-field">
+    <section className="lab-settings-module lab-campsites-count">
+      <label className="camp-settings-field" htmlFor="camp-site-count">
         <span>{t('SettingsSections.numberOfCampSites')}</span>
+      </label>
+      <div className="lab-campsites-count-controls">
         <input
+          id="camp-site-count"
           className="camp-number-input"
           type="number"
           min={campsiteMinimum}
           max={MAX_CAMP_SITE_COUNT}
           step={1}
           value={siteCount}
-          disabled={!siteCounts || saving}
+          disabled={!siteCounts || saving || offline}
           onChange={(event) => {
             const next =
               Number.parseInt(event.target.value, 10) || campsiteMinimum
@@ -334,37 +327,95 @@ export function CampsitesCard({ form }: { form: SettingsForm }) {
               ),
             }))
           }}
+          aria-describedby="camp-site-count-help"
         />
-        <small>
-          {t('SettingsSections.minimumCampSites', { count: campsiteMinimum })}
-        </small>
-      </label>
+        <button
+          type="button"
+          className="camp-upload-btn"
+          disabled={!siteCounts || saving || offline || unchanged}
+          onClick={() => void form.handleSaveCampsiteCount()}
+        >
+          {saving ? t('common:actions.saving') : t('common:actions.save')}
+        </button>
+      </div>
+      <small id="camp-site-count-help">
+        {t('SettingsSections.eachCampSiteAddsCampingPokeMonSpacesToThe', {
+          CAMP_SITE_SIZE,
+        })}{' '}
+        {t('SettingsSections.minimumCampSites', { count: campsiteMinimum })}
+      </small>
+    </section>
+  )
+}
 
+/** Camp imports and ZIP exports use the Cabin's two transfer sections. */
+export function CampsitesCard({ form }: { form: SettingsForm }) {
+  const { t } = useTranslation(['settings', 'common'] as const)
+  const {
+    adapter,
+    offline,
+    saving,
+    camps,
+    handleCampsiteUpload,
+    handleDownloadCampsite,
+    handleCampsiteRemove,
+  } = form
+  const hasCampers = (camps?.get(GBA_GENERATION)?.sites ?? []).some((site) =>
+    site.some((pokemon) => pokemon !== null)
+  )
+  return (
+    <div className="camp-cabin-card lab-backup-actions">
       <div className="camp-transfer-groups">
         <div className="camp-transfer-group">
-          <span className="camp-transfer-group-label">
-            {t('SettingsSections.takeTheCampsiteOut')}
+          <span className="camp-transfer-group-label lab-transfer-heading">
+            {t('SettingsSections.bringASaveIntoCamp')}
+          </span>
+          <label className="camp-transfer-btn">
+            {t('common:storage.fromFile')}
+            <input
+              className="camp-file-input--hidden"
+              type="file"
+              accept=".pk3"
+              disabled={!adapter || !camps || offline || saving}
+              onChange={(event) => void handleCampsiteUpload(event)}
+              aria-describedby="camp-pokemon-upload-help"
+            />
+          </label>
+          <small id="camp-pokemon-upload-help">
+            {t('SettingsSections.importPk3Hint')}
+          </small>
+        </div>
+        <div className="camp-transfer-group">
+          <span className="camp-transfer-group-label lab-transfer-heading">
+            {t('SettingsSections.takeThisSaveOut')}
           </span>
           <button
             type="button"
             className="camp-transfer-btn"
+            disabled={!camps || !hasCampers || saving}
             onClick={() => void handleDownloadCampsite()}
           >
             {t('SettingsSections.downloadCampsiteZip')}
           </button>
         </div>
       </div>
-
-      {hasCampers && (
+      {(hasCampers || form.message) && (
         <div className="camp-cabin-footer">
-          <button
-            type="button"
-            className="camp-text-btn camp-text-btn--danger"
-            disabled={offline || saving}
-            onClick={() => void handleCampsiteRemove()}
-          >
-            {t('SettingsSections.deleteCampsite')}
-          </button>
+          {form.message && (
+            <p className="lab-backup-message" role="status">
+              {form.message}
+            </p>
+          )}
+          {hasCampers && (
+            <button
+              type="button"
+              className="camp-text-btn camp-text-btn--danger"
+              disabled={offline || saving}
+              onClick={() => void handleCampsiteRemove()}
+            >
+              {t('SettingsSections.deleteCampsite')}
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -388,7 +439,14 @@ const THEME_PREVIEW_ROLES = [
 export function ThemePicker({ form }: { form: SettingsForm }) {
   const { t } = useTranslation(['settings', 'common'] as const)
 
-  const { themeId, setThemeId } = form
+  const {
+    themeId,
+    setThemeId,
+    appearanceChange,
+    saving,
+    offline,
+    handleAppearanceSave,
+  } = form
   const tokens = themeTokens(themeId)
   const preview = Object.fromEntries(
     THEME_PREVIEW_ROLES.map((role) => [
@@ -400,17 +458,32 @@ export function ThemePicker({ form }: { form: SettingsForm }) {
     <div className="lab-appearance-controls lab-settings-module">
       <label className="camp-settings-field">
         <span>{t('SettingsSections.theme')}</span>
-        <select
-          className="camp-select"
-          value={themeId}
-          onChange={(event) => setThemeId(resolveTheme(event.target.value))}
-        >
-          {availableThemes.map((id) => (
-            <option key={id} value={id}>
-              {themeLabel(id)}
-            </option>
-          ))}
-        </select>
+        <span className="lab-theme-actions">
+          <select
+            className="camp-select"
+            value={themeId}
+            disabled={saving || offline || appearanceChange === 'sprites'}
+            onChange={(event) => setThemeId(resolveTheme(event.target.value))}
+          >
+            {availableThemes.map((id) => (
+              <option key={id} value={id}>
+                {themeLabel(id)}
+              </option>
+            ))}
+          </select>
+          {appearanceChange === 'theme' && (
+            <button
+              type="button"
+              className="camp-confirm-btn"
+              disabled={saving || offline}
+              onClick={() => void handleAppearanceSave()}
+            >
+              {saving
+                ? t('common:actions.saving')
+                : t('LabSettings.saveSettings')}
+            </button>
+          )}
+        </span>
       </label>
       <div className="lab-theme-preview" style={preview} aria-hidden="true">
         <div className="lab-theme-preview-board">
@@ -435,40 +508,59 @@ export function SpriteSourcePicker({ form }: { form: SettingsForm }) {
     setSpriteSourceId,
     spriteResolver,
     selectedSpriteSource,
+    appearanceChange,
+    saving,
+    offline,
+    handleAppearanceSave,
   } = form
   return (
     <div className="lab-appearance-controls lab-settings-module">
       <label className="camp-settings-field">
         <span>{t('SettingsSections.spriteResource')}</span>
-        <select
-          className="camp-select"
-          value={spriteSourceId}
-          onChange={(event) => setSpriteSourceId(event.target.value)}
-        >
-          {SPRITE_SOURCES.map((source) => (
-            <option key={source.id} value={source.id}>
-              {source.label}
-            </option>
-          ))}
-        </select>
+        <span className="lab-theme-actions">
+          <select
+            className="camp-select"
+            value={spriteSourceId}
+            disabled={saving || offline || appearanceChange === 'theme'}
+            onChange={(event) => setSpriteSourceId(event.target.value)}
+          >
+            {SPRITE_SOURCES.map((source) => (
+              <option key={source.id} value={source.id}>
+                {source.label}
+              </option>
+            ))}
+          </select>
+          {appearanceChange === 'sprites' && (
+            <button
+              type="button"
+              className="camp-confirm-btn"
+              disabled={saving || offline}
+              onClick={() => void handleAppearanceSave()}
+            >
+              {saving
+                ? t('common:actions.saving')
+                : t('LabSettings.saveSettings')}
+            </button>
+          )}
+        </span>
       </label>
       <div className="lab-sprite-preview lab-settings-module">
         <h3>{t('SettingsSections.preview')}</h3>
         <div className="camp-sprite-preview-row">
-        {getSpriteShowcase().map(({ key, label, request }) => {
-          const display = resolveSpriteDisplay(spriteResolver, request)
-          return (
-            <div className="camp-sprite-preview-item" key={key}>
-              <img
-                className="camp-sprite-preview-img"
-                src={spriteDisplayImageSrc(display)}
-                alt={display.label}
-                title={display.label}
-              />
-              <span className="camp-sprite-preview-label">{label}</span>
-            </div>
-          )
-        })}
+          {getSpriteShowcase().map(({ key, label, request }) => {
+            const display = resolveSpriteDisplay(spriteResolver, request)
+            return (
+              <div className="camp-sprite-preview-item" key={key}>
+                <img
+                  className="camp-sprite-preview-img"
+                  src={spriteDisplayImageSrc(display)}
+                  alt={display.label}
+                  title={display.label}
+                />
+                <span className="camp-sprite-preview-label">{label}</span>
+              </div>
+            )
+          })}
         </div>
       </div>
       <a

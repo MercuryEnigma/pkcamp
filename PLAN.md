@@ -41,7 +41,7 @@ require; scans produce rebuildable owned/seen/unseen records with history and
 source locations. A player can visit a matching Cabin box or Camp Site and
 return to the same entry. Unsaved editor changes do not count toward research.
 
-The Trade Table shares Camp's trade engine, and Settings manages the same
+Trading lives only in Camp's Trade mode. Lab Settings manages the same
 account, backups, appearance, and data. Patch Notes remains reachable. Research
 Tools helps players preserve cartridges, send event content, and move Pokémon
 forward from older generations. Cartridge restores require a pre-write backup;
@@ -97,8 +97,8 @@ require the project owner's involvement.
 The approved organization direction separates `app/`, sibling zone pages,
 shared `features/`, UI/hooks/styles in `shared/`, and framework-free services.
 Remove confirmed unused code after preserving reachable behavior. Keep i18n
-as a site-wide service with shared configuration/catalogs; translating
-inline screen text is a separate follow-up. Multi-device conflict policy,
+as a site-wide service with per-area English and Spanish (Spain) catalogs;
+screen text uses translation keys, enforced by `check:i18n`. Multi-device conflict policy,
 retention, identity/provenance, reward schemas, sprite licensing/hosting, and
 the browser/device support matrix remain design decisions.
 

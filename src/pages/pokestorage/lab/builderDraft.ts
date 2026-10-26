@@ -191,9 +191,9 @@ export function draftProblems(draft: CollectionDraft): string[] {
 export function summarizeEntry(entry: DraftEntry): string {
   return [
     entry.shiny === 'yes'
-      ? i18n.t('collections:builderDraft.shiny')
+      ? i18n.t('common:pokemon.shiny')
       : entry.shiny === 'no'
-        ? i18n.t('collections:builderDraft.notShiny')
+        ? i18n.t('common:pokemon.notShiny')
         : '',
     ...entry.ribbons.map((ribbon) =>
       i18n.t('collections:builderDraft.ribbon', { ribbon: ribbon })

@@ -389,7 +389,7 @@ export function CollectionView({
         <span className="pc-footer-strip" aria-hidden="true" />
         <span>{'pkcamp'}</span>
         <span className="pc-label">
-          {t('CollectionView.pokeDexResearchSystem')}
+          {t('researchSystem')}
         </span>
       </footer>
     </div>

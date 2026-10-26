@@ -50,8 +50,8 @@ export type SpriteResolution = SpriteAvailableResult | SpriteFallbackResult
 function buildLabel(request: SpriteRequest): string {
   const parts: string[] = [request.displayName]
   if (request.formId) parts.push(`(${request.formId})`)
-  if (request.shiny) parts.push(i18n.t('services:resolver.shiny'))
-  if (request.egg) parts.push(i18n.t('services:resolver.egg'))
+  if (request.shiny) parts.push(i18n.t('common:pokemon.shiny'))
+  if (request.egg) parts.push(i18n.t('common:pokemon.egg'))
   return parts.join(' ')
 }
 

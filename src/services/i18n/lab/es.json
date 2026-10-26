@@ -1,22 +1,11 @@
 {
-  "LabMain": {
-    "transporter": "Transportador",
-    "researchTools": "Herramientas de investigación",
-    "mysteryGifts": "Regalos misteriosos",
-    "cartridgeSaves": "Partidas de cartuchos",
-    "romBiosDumps": "Extracción de ROM / BIOS",
-    "patchNotes": "Notas de actualización"
-  },
   "LabMenu": {
     "lab": "Laboratorio",
     "pc": "PC",
     "pokeDexCollectionsAndResearchProgress": "Colecciones de la Pokédex y progreso de investigación",
-    "transporter": "Transportador",
     "moveGen12PokeMonIntoGen3": "Transfiere Pokémon de las generaciones 1 y 2 a la generación 3",
-    "researchTools": "Herramientas de investigación",
     "giftsCartridgeSavesAndDumps": "Regalos, partidas de cartuchos y extracción de datos",
-    "backupsAppearanceDataAndHardware": "Copias de seguridad, apariencia, datos y dispositivos",
-    "patchNotes": "Notas de actualización"
+    "backupsAppearanceDataAndHardware": "Copias de seguridad, apariencia, datos y dispositivos"
   },
   "PokemonView": {
     "species": "Especie",
@@ -28,7 +17,6 @@
     "pokeMon": "Pokémon",
     "registered": "Registrado",
     "requirements": "Requisitos",
-    "collectionRequirement": "Requisito de la colección",
     "movesTraits": "Movimientos y rasgos",
     "yourMatches": "Tus coincidencias",
     "currentlyFound": "Encontrados actualmente ({{length}})",
@@ -40,17 +28,6 @@
     "openSite": "Abrir parcela",
     "openCabin": "Abrir cabaña",
     "romReference": "Datos de la especie",
-    "loadingReference": "Cargando datos del juego…",
-    "referenceUnavailable": "No hay datos de Pokédex compatibles para la ROM seleccionada.",
-    "notInReferenceRom": "Esta especie no aparece en los datos de la ROM seleccionada.",
-    "baseStats": "Estadísticas base",
-    "stats": "Estadísticas",
-    "abilities": "Habilidades",
-    "levelUpMoves": "Movimientos por nivel",
-    "evolutions": "Evoluciones",
-    "evolutionUnavailable": "Datos de evolución no disponibles",
-    "encounters": "Encuentros salvajes",
-    "encountersUnavailable": "Datos de encuentros no disponibles",
     "hp": "PS",
     "attackShort": "Atq",
     "defenseShort": "Def",
@@ -61,19 +38,12 @@
     "collectionAndMatches": "Mis Pokémon",
     "previousMatch": "Pokémon anterior",
     "nextMatch": "Pokémon siguiente",
-    "matchPosition": "{{current}} / {{total}}",
-    "referenceMissing": "Añade una ROM de este juego para ver sus datos de referencia.",
-    "referenceLoadFailed": "No se pudieron cargar los datos del juego. Inténtalo de nuevo.",
-    "move": "Movimiento"
+    "matchPosition": "{{current}} / {{total}}"
   },
   "ResearchTools": {
-    "researchTools": "Herramientas de investigación",
-    "mysteryGifts": "Regalos misteriosos",
     "sendWonderCardsToAGbaOrTheSwitch": "Envía tarjetas misteriosas a una GBA o a la Switch.",
-    "cartridgeSaves": "Partidas de cartuchos",
     "backUpAndRestoreGbaCartridgeSaves": "Crea copias de seguridad y restaura partidas de cartuchos de GBA.",
-    "romBiosDumps": "Extracción de ROM / BIOS",
-    "downloadCartridgeRomsAndTheGbaBios": "Descarga las ROM de los cartuchos y la BIOS de la GBA."
+    "downloadCartridgeRomsAndTheGbaBios": "Descarga las ROM de los cartuchos de GBA y la BIOS de la GBA."
   },
   "ToolPage": {
     "choices": "Opciones",
@@ -91,5 +61,13 @@
     "deleteAllUploadedCollectionsAndClearTheSavedHistoryOf": "¿Eliminar todas las colecciones subidas y borrar el historial guardado de todas las colecciones? Esta acción no se puede deshacer.",
     "notDeleted": "No se ha eliminado: {{f}}",
     "collectionFailure": "{{name}}: {{value2}}"
+  },
+  "tools": {
+    "transporter": "Transportador",
+    "researchTools": "Herramientas de investigación",
+    "mysteryGifts": "Regalos misteriosos",
+    "cartridgeSaves": "Partidas de cartuchos",
+    "romBiosDumps": "Extracción de ROM / BIOS",
+    "patchNotes": "Notas de actualización"
   }
 }

@@ -26,6 +26,27 @@ describe('pkCamp routes', () => {
     })
   })
 
+  it('keeps each Arcade settings tab in the URL', () => {
+    expect(
+      at('/pkcamp/lab/', '?game=emerald&mode=settings&tab=arcade-controls')
+    ).toEqual({
+      kind: 'route',
+      route: {
+        page: 'lab',
+        gameId: 'emerald',
+        mode: 'settings',
+        tab: 'arcade-controls',
+      },
+    })
+    expect(
+      routeHref(
+        'lab',
+        { gameId: 'emerald', mode: 'settings', tab: 'arcade-skin' },
+        base
+      )
+    ).toBe('/pkcamp/lab/?game=emerald&mode=settings&tab=arcade-skin')
+  })
+
   it('canonicalizes Camp defaults and no-game Campsites', () => {
     expect(at('/pkcamp/camp/', '?game=leafgreen')).toEqual({
       kind: 'redirect',

@@ -103,12 +103,12 @@ export function PokeTransporter() {
           title={t('PokeTransporter.backUp2', {
             value1:
               active === 'gb'
-                ? t('transporter:PokeTransporter.gbGbcSource2')
+                ? t('transporter:PokeTransporter.gbGbcSource')
                 : t('transporter:PokeTransporter.gbaDestination'),
           })}
           onBusyChange={setBusy}
           onClose={() => setActive(null)}
-          progressLabel={t('PokeTransporter.readingTheSave')}
+          progressLabel={t('common:status.readingTheSave')}
           describeError={getTaskerror()}
           afterStartSteps={
             active === 'gb'

@@ -28,13 +28,13 @@ type LabRoute = Extract<AppRoute, { page: 'lab' }>
 
 const getTitle = (): Record<LabMode, string> => ({
   collection: 'PC',
-  transporter: i18n.t('lab:LabMain.transporter'),
-  tools: i18n.t('lab:LabMain.researchTools'),
-  gifts: i18n.t('lab:LabMain.mysteryGifts'),
-  saves: i18n.t('lab:LabMain.cartridgeSaves'),
-  dumps: i18n.t('lab:LabMain.romBiosDumps'),
+  transporter: i18n.t('lab:tools.transporter'),
+  tools: i18n.t('lab:tools.researchTools'),
+  gifts: i18n.t('lab:tools.mysteryGifts'),
+  saves: i18n.t('lab:tools.cartridgeSaves'),
+  dumps: i18n.t('lab:tools.romBiosDumps'),
   settings: i18n.t('common:actions.settings'),
-  news: i18n.t('lab:LabMain.patchNotes'),
+  news: i18n.t('lab:tools.patchNotes'),
 })
 /** Each mode's Back target; the three tools return to Research Tools. */
 const PARENT: Record<LabMode, LabMode | null> = {

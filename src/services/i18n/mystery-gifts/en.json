@@ -3,7 +3,6 @@
     "switch": "Switch",
     "readyNowChooseMysteryGiftOnYourGba": "Ready! Now choose MYSTERY GIFT on your GBA.",
     "readyNowChooseMysteryGiftOnYourSwitch": "Ready! Now choose MYSTERY GIFT on your Switch.",
-    "connectGbLinkToYourComputerAndGba": "Connect GB-Link to your computer and GBA.",
     "useAGameBoyColorLinkCable": "Use a Game Boy Color link cable.",
     "turnOnTheGameStayOnTheMainMenu": "Turn on the game. Stay on the main menu.",
     "pressStartBelowAndChooseYourGbLink": "Press Start below and choose your GB-Link.",
@@ -17,8 +16,6 @@
     "chooseWonderCardsFriendGblink": "Choose WONDER CARDS → FRIEND → GBLINK.",
     "forEmeraldFireredAndLeafgreenOnAGbaThroughThe": "For Emerald, FireRed and LeafGreen on a GBA, through the GB-Link.",
     "forFireredAndLeafgreenOnNintendoSwitchOnlineThroughThe": "For FireRed and LeafGreen on Nintendo Switch, through the ESP32 board.",
-    "the": "The {{value1}}",
-    "the2": "the {{value1}}",
     "theLinkEnded": "The link ended.",
     "theAlreadyHasThisWonderCardSendItAgainOr": "The {{value1}} already has this Wonder Card. Send it again, or keep the one it has?",
     "thisCardWasChosenForADifferentGameSendIt": "This card was chosen for a different game. Send it anyway?",
@@ -28,12 +25,10 @@
     "pressStartToSendAnotherGift": "Press Start to send another gift.",
     "chooseAnotherGiftAboveToSendAgain": "Choose another gift above to send again.",
     "stopped": "Stopped: {{message}}",
-    "cancelled": "Cancelled.",
     "thenChooseWirelessCommunication": "Then choose WIRELESS COMMUNICATION.",
     "thenChooseWonderCardsFriendGblink": "Then choose WONDER CARDS → FRIEND → GBLINK.",
     "closingTheGroup": "Closing the group…",
     "theBoardRestartsBeforeItIsReadyAgain": "The board restarts before it is ready again.",
-    "cancellingCloseTheDeviceChooserIfItIsStillOpen": "Cancelling… Close the device chooser if it is still open.",
     "chooseYourHardware": "Choose your hardware",
     "chooseAGift": "Choose a gift",
     "moreGiftsForTheOnGblinkIo": "More gifts for the {{value1}} on gblink.io →",
@@ -56,7 +51,6 @@
     "sending": "Sending {{value1}}…",
     "keepThisPageOpenUntilTheGameSaysTheCard": "Keep this page open until the game says the card was received.",
     "finishingTheLink": "Finishing the link…",
-    "theCard": "The card",
     "deliveredTo": "{{name}}: delivered to {{who}}.",
     "waitForTheGameToSavePickUpYourGift": "Wait for the game to save. Pick up your gift upstairs in a Pokémon Center.",
     "notSentAlreadyHadThisWonderCard": "Not sent: {{who}} already had this Wonder Card.",
@@ -68,8 +62,6 @@
     "theLinkDroppedBeforeTheCardWasDelivered": "The link dropped before the card was delivered.",
     "theMysteryGiftExchangeFailed": "The Mystery Gift exchange failed.",
     "esp32Board": "ESP32 board",
-    "theCard2": "the card",
-    "starting": "Starting…",
-    "chooseGift": "Choose a gift"
+    "wonderCard": "Wonder Card"
   }
 }

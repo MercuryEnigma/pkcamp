@@ -30,7 +30,7 @@ export async function openSwitchGift(
     const event = findEvent(id)
     if (!event)
       throw new Error(
-        i18n.t('services:switchGift.unknownMysteryGift', { id: id })
+        i18n.t('services:mysteryGift.unknownMysteryGift', { id: id })
       )
     return event
   }
@@ -104,7 +104,7 @@ export async function openSwitchGift(
     await starting
     signal?.throwIfAborted()
     if (stopped)
-      throw new Error(i18n.t('services:switchGift.theMysteryGiftGroupStopped'))
+      throw new Error(i18n.t('services:mysteryGift.theMysteryGiftGroupStopped'))
   } catch (error) {
     await stop()
     throw error

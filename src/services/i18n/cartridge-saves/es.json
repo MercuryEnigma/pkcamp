@@ -1,40 +1,32 @@
 {
   "GbaSavePanel": {
-    "cabin": "Cabaña de {{value1}}",
     "restoreToGba": "Restaurar {{cabin}} en la GBA",
     "backUpFromGba": "Crear copia de seguridad de {{cabin}} desde la GBA",
-    "readingTheSave": "Leyendo la partida",
     "sendingTheBackup": "Enviando la copia de seguridad",
-    "ifTheInitialBackupCompletedItIsStoredAsThe": "Si se ha completado la copia inicial, se conserva como copia de seguridad del cartucho en esta cabaña.",
+    "ifTheInitialBackupCompletedItIsStoredAsThe": "Si se ha completado la copia de seguridad, la partida anterior del cartucho está en esta cabaña.",
     "savingTheBackup": "Guardando la copia de seguridad de {{value1}}…",
-    "theCartridgeSaveWasOverwritten": "Se ha sobrescrito la partida del cartucho.",
-    "insertAndPowerOnWhileHoldingStartSelect": "Inserta {{value1}} y enciende la consola mientras mantienes pulsados START + SELECT.",
-    "theCartridgeSCurrentSaveWillBeBackedUpBefore": "Se creará una copia de seguridad de la partida actual del cartucho antes de escribir {{cabin}} en él."
+    "theCartridgeSaveWasOverwritten": "Se ha sobrescrito la partida del cartucho."
   },
   "CartridgeSaves": {
     "backUp": "Crear copia de seguridad",
     "restore": "Restaurar",
     "isASaveRestoreSupportsRubySapphireEmeraldFireredAnd": "{{name}} es una partida de {{aggregated}}. La restauración es compatible con Ruby, Sapphire, Emerald, FireRed y LeafGreen.",
-    "or": " o ",
     "isnTASaveFilePkhexCanRead": "{{name}} no es un archivo de guardado que PKHeX pueda leer.",
     "backUpACartridgeSave": "Crear copia de seguridad de una partida del cartucho",
-    "readingTheSave": "Leyendo la partida",
     "downloaded": "Se ha descargado {{name}}.",
     "restore2": "Restaurar {{name}}",
     "sendingTheSave": "Enviando la partida",
     "overwriteTheSaveOnTheCartridgeWith": "¿Sobrescribir la partida del cartucho de {{label}} con {{name}}?",
-    "ifTheFirstStepFinishedItsPreviousSaveIsThat": "Si se ha completado el primer paso, la partida anterior se conserva como copia de seguridad del cartucho en la cabaña de ese juego.",
+    "ifTheFirstStepFinishedItsPreviousSaveIsThat": "Si se ha completado la copia de seguridad, la partida anterior del cartucho está en la cabaña de ese juego.",
     "restoredToTheCartridgeItsPreviousSaveIsTheCabin": "Se ha restaurado {{name}} en el cartucho de {{label}}. Su partida anterior se conserva como copia de seguridad del cartucho en la cabaña de {{label3}}.",
     "chooseATask": "Elige una tarea",
     "downloadTheSaveFromAGbaCartridgeTheGameIs": "Descarga la partida de un cartucho de GBA. El juego se detecta a partir del cartucho.",
-    "switchSaveDownloadIs": "La descarga de partidas de Switch está",
-    "inResearch": "En investigación",
     "chooseARubySapphireEmeraldFireredOrLeafgreenSavFile": "Elige un archivo .sav de Ruby, Sapphire, Emerald, FireRed o LeafGreen. El cartucho debe corresponder al archivo. Una partida de Ruby o Sapphire sirve para cualquiera de los dos cartuchos.",
     "saveFile": "Archivo de guardado",
     "saveToolsAreStillLoading": "Las herramientas de guardado aún se están cargando…",
     "isAPokeMonSave": "{{name}} es una partida de Pokémon {{label}}.",
     "chooseASaveFileToRestore": "Elige un archivo de guardado para restaurar.",
-    "insertAndPowerOnWhileHoldingStartSelect": "Inserta {{label}} y enciende la consola mientras mantienes pulsados START + SELECT.",
-    "theCartridgeSCurrentSaveIsStoredFirstAsIts": "Primero se guarda la partida actual del cartucho como copia de seguridad del cartucho en la cabaña de su juego."
+    "theCartridgeSCurrentSaveIsStoredFirstAsIts": "Primero se guarda una copia de la partida actual del cartucho en su cabaña.",
+    "switchSaveDownloadComingSoon": "Descarga de partidas de Switch: <tag>próximamente</tag>"
   }
 }

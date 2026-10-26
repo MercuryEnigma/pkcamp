@@ -202,7 +202,7 @@ export function StartMenu({
             </h1>
             <p>
               {files?.save
-                ? t('StartMenu.yourSaveIsReadyYouCanContinueOrReplaceIt')
+                ? t('StartMenu.saveReady')
                 : t('StartMenu.uploadASaveFileOrReadItFromACartridge')}
             </p>
             {files?.save && (
@@ -257,12 +257,12 @@ export function StartMenu({
                   value1: getGameLabel(gameId),
                 })}
                 steps={[
-                  t('start:StartMenu.connectTheGbLinkToThisDeviceAndToA'),
-                  t('start:StartMenu.insertAndPowerOnWhileHoldingStartSelect', {
+                  t('common:hardware.connectGbLink'),
+                  t('common:hardware.insertAndBoot', {
                     value1: getGameLabel(gameId),
                   }),
                 ]}
-                progressLabel={t('StartMenu.readingTheSave')}
+                progressLabel={t('common:status.readingTheSave')}
                 startLabel={t('common:actions.continue')}
                 onClose={() => setDeviceTask(null)}
                 describeError={(cause, cancelled) =>
@@ -410,7 +410,7 @@ export function StartMenu({
               disabled={busy || status.state === 'connecting'}
               onClick={() => void connect()}
             >
-              {t('StartMenu.signInToDropbox')}
+              {t('common:actions.signInToDropbox')}
             </button>
           </>
         )}
@@ -482,8 +482,8 @@ export function StartMenu({
           <GbLinkTaskPanel
             title={t('StartMenu.readRom', { value1: getGameLabel(romGameId) })}
             steps={[
-              t('start:StartMenu.connectTheGbLinkToThisDeviceAndToA'),
-              t('start:StartMenu.insertAndPowerOnWhileHoldingStartSelect', {
+              t('common:hardware.connectGbLink'),
+              t('common:hardware.insertAndBoot', {
                 value1: getGameLabel(romGameId),
               }),
             ]}

@@ -1,6 +1,5 @@
 {
   "PokemonDetails": {
-    "shiny": "Variocolor",
     "shinyPokeMon": "Pokémon variocolor",
     "pokeMon": "Pokémon",
     "lv": "Nv. {{level}}",
@@ -30,9 +29,7 @@
   },
   "PokemonSlotIcon": {
     "emptySlot": "Espacio vacío",
-    "egg": "Huevo",
-    "lv": "Nv. {{level}}",
-    "shiny": "Variocolor"
+    "lv": "Nv. {{level}}"
   },
   "pokemonDetailsPages": {
     "overview": "Resumen",

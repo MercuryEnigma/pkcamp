@@ -54,9 +54,3 @@ export function evolutionDescription(
     parameter: resolvedParameter === null ? '' : String(resolvedParameter),
   })
 }
-
-export function pokedexWarning(code: string): string {
-  return translate(`pokedex:warnings.${code}`, {
-    defaultValue: i18n.t('pokedex:warnings.partial-data'),
-  })
-}

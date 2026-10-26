@@ -17,8 +17,8 @@ import { PcCombobox } from './PcCombobox'
 const getSpeciesLabels = () => getSpeciesOptions().map((option) => option.label)
 const getShiny = (): readonly [ShinyRule, string][] => [
   ['any', i18n.t('collections:CollectionBuilder.any')],
-  ['yes', i18n.t('collections:CollectionBuilder.shiny')],
-  ['no', i18n.t('collections:CollectionBuilder.notShiny')],
+  ['yes', i18n.t('common:pokemon.shiny')],
+  ['no', i18n.t('common:pokemon.notShiny')],
 ]
 
 /** The Pokémon form, as typed; species is resolved when it names an option. */
@@ -134,11 +134,11 @@ function EntryFields({
         />
       </Field>
       <div className="pc-field pc-span-3">
-        <span className="pc-label">{t('CollectionBuilder.shiny')}</span>
+        <span className="pc-label">{t('common:pokemon.shiny')}</span>
         <div
           className="pc-segment"
           role="group"
-          aria-label={t('CollectionBuilder.shiny')}
+          aria-label={t('common:pokemon.shiny')}
         >
           {getShiny().map(([value, label]) => (
             <button

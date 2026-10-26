@@ -29,7 +29,7 @@ async function loadSender() {
   const find = (id: string): GiftEvent => {
     const event = events.find((candidate) => candidate.id === id)
     if (!event)
-      throw new Error(i18n.t('services:gbaGift.unknownMysteryGift', { id: id }))
+      throw new Error(i18n.t('services:mysteryGift.unknownMysteryGift', { id: id }))
     return event
   }
   return { ...wonder, ...rfu1, ...ticker, find }
@@ -158,11 +158,11 @@ export async function openGbaGift(
     await delay(300)
     signal.throwIfAborted()
     if (stopped)
-      throw new Error(i18n.t('services:gbaGift.theMysteryGiftGroupStopped'))
+      throw new Error(i18n.t('services:mysteryGift.theMysteryGiftGroupStopped'))
     await transport.sendCommand(GB_LINK_COMMAND.setVoltage3V3)
     signal.throwIfAborted()
     if (stopped)
-      throw new Error(i18n.t('services:gbaGift.theMysteryGiftGroupStopped'))
+      throw new Error(i18n.t('services:mysteryGift.theMysteryGiftGroupStopped'))
     const ready = new Promise<boolean>((resolve) => {
       const timer = setTimeout(() => done(false), 3000)
       const remove = transport.onStatus((status) => {
@@ -187,7 +187,7 @@ export async function openGbaGift(
     }
     signal.throwIfAborted()
     if (stopped)
-      throw new Error(i18n.t('services:gbaGift.theMysteryGiftGroupStopped'))
+      throw new Error(i18n.t('services:mysteryGift.theMysteryGiftGroupStopped'))
     session.start()
     stopTicker = sender.startTicker(() => session.tick())
   } catch (error) {

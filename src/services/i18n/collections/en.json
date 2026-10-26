@@ -1,8 +1,6 @@
 {
   "CollectionBuilder": {
     "any": "Any",
-    "shiny": "Shiny",
-    "notShiny": "Not shiny",
     "collectionDetails": "Collection details",
     "name": "Name *",
     "description": "Description",
@@ -34,9 +32,6 @@
   },
   "CollectionGrid": {
     "collections": "‹ Collections",
-    "registered": "Registered",
-    "searchPokeMon": "Search Pokémon…",
-    "searchEntries": "Search entries",
     "statusFilter": "Status filter",
     "entries": "Entries",
     "owned": "Owned",
@@ -45,9 +40,7 @@
     "noEntriesMatch": "No entries match."
   },
   "CollectionHome": {
-    "pokeDexResearchSystem": "Pokédex research system",
     "researchProgress": "Research progress",
-    "registered": "Registered",
     "collections": "Collections",
     "registered2": "{{name}} registered",
     "newCollection": "+ New collection",
@@ -58,10 +51,9 @@
   "CollectionView": {
     "pokeDexScreens": "Pokédex screens",
     "collections": "Collections",
-    "addNewCollection": "Add New Collection",
+    "addNewCollection": "Add new collection",
     "pokeDex": "Pokédex",
     "filter": "Filter{{value1}}",
-    "pokeDexResearchSystem": "Pokédex research system",
     "activeFilter": "{{value1}}: {{text}}",
     "filterCount": " ({{length}})"
   },
@@ -74,7 +66,6 @@
     "pokeDexCollections": "Pokédex Collections",
     "collection": "Collection",
     "type": "Type",
-    "registered": "Registered",
     "actions": "Actions",
     "loadingCollections": "Loading collections…",
     "deleteAllHelp": "Permanently removes uploaded collection history.",
@@ -99,26 +90,16 @@
     "giveTheCollectionAName": "Give the collection a name.",
     "theNameNeedsAtLeastOneLetterOrDigit": "The name needs at least one letter or digit.",
     "addAtLeastOnePokeMon": "Add at least one Pokémon.",
-    "shiny": "Shiny",
-    "notShiny": "Not shiny",
     "ribbon": "{{ribbon}} Ribbon",
     "nature": "Nature {{nature}}",
     "ability": "Ability {{ability}}",
     "knows": "Knows {{move}}",
     "ot": "OT {{ot}}",
     "id": "ID {{trainerId}}",
-    "all": "All",
     "unownFormLabel": "{{name}} {{letter}}"
   },
   "builtInCollections": {
     "builtInCollectionIsInvalid": "Built-in collection {{name}} is invalid:\n{{value2}}"
-  },
-  "collectionResults": {
-    "theSelectedCabinsChangedSinceTheLastScan": "The selected Cabins changed since the last scan.",
-    "aSelectedCabinHasASaveThatWasNotScanned": "A selected Cabin has a save that was not scanned yet.",
-    "aCabinSaveChangedSinceTheLastScan": "A Cabin save changed since the last scan.",
-    "campSitesChangedSinceTheLastScan": "Camp Sites changed since the last scan.",
-    "collectionChanged": "The collection changed since the last scan."
   },
   "collectionTypes": {
     "owned": "Owned",
@@ -158,7 +139,6 @@
     "slot": "{{game}} · {{box}} slot {{value3}}",
     "justNow": "just now",
     "all": "All",
-    "registered": "Registered",
     "missing": "Missing",
     "visiting": "Visiting",
     "gender": "Gender: {{value1}}",
@@ -194,10 +174,6 @@
     "anEntryHasNoConstraints": "An entry has no constraints.",
     "isNotSupportedYet": "\"{{unsupported}}\" is not supported yet."
   },
-  "labStore": {
-    "campSites": "Camp Sites",
-    "cabin": "{{value1}} Cabin"
-  },
   "validateCollection": {
     "mustBeAnObject": "{{path}}: must be an object",
     "needsAtLeastOneConstraintItWouldMatchAnything": "{{path}}: needs at least one constraint (it would match anything)",
@@ -223,7 +199,7 @@
     "unknownField": "{{key}}: unknown field",
     "schemaMustBeAString": "$schema: must be a string",
     "schemaversionMustBeTheString1": "schemaVersion: must be the string \"1\"",
-    "schemaversionIsNotSupportedThisVersionOfPkcampReads": "schemaVersion: \"{{schemaVersion}}\" is not supported (this version of PkCamp reads \"{{SUPPORTED_SCHEMA_VERSION}}\")",
+    "schemaversionIsNotSupportedThisVersionOfPkcampReads": "schemaVersion: \"{{schemaVersion}}\" is not supported (this version of pkCamp reads \"{{SUPPORTED_SCHEMA_VERSION}}\")",
     "idMustBeAString": "id: must be a string",
     "idMustBe1LettersDigitsOrHyphensItBecomes": "id: must be 1-{{MAX_ID_LENGTH}} letters, digits, or hyphens (it becomes a file name)",
     "nameMustBeANonEmptyString2": "name: must be a non-empty string",
@@ -234,7 +210,7 @@
     "gen3-in-game-trades": {
       "name": "Gen 3 In-Game Trades",
       "metadata": {
-        "description": "Every in-game trade Pokémon from Ruby, Sapphire, Emerald, FireRed, and LeafGreen, still unevolved. Matched by species, OT, and TID; any language's OT counts."
+        "description": "Every in-game trade Pokémon from Ruby, Sapphire, Emerald, FireRed, and LeafGreen, still unevolved. Matched by species, OT, and TID; any language’s OT counts."
       },
       "groups": {
         "ruby-sapphire": {
@@ -294,5 +270,7 @@
         }
       }
     }
-  }
+  },
+  "researchSystem": "Pokédex research system",
+  "registered": "Registered"
 }

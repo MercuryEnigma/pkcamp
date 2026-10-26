@@ -1,8 +1,6 @@
 {
   "CollectionBuilder": {
     "any": "Cualquiera",
-    "shiny": "Variocolor",
-    "notShiny": "No variocolor",
     "collectionDetails": "Datos de la colección",
     "name": "Nombre *",
     "description": "Descripción",
@@ -34,9 +32,6 @@
   },
   "CollectionGrid": {
     "collections": "‹ Colecciones",
-    "registered": "Registrados",
-    "searchPokeMon": "Buscar Pokémon…",
-    "searchEntries": "Buscar entradas",
     "statusFilter": "Filtro de estado",
     "entries": "Entradas",
     "owned": "En posesión",
@@ -45,9 +40,7 @@
     "noEntriesMatch": "Ninguna entrada coincide."
   },
   "CollectionHome": {
-    "pokeDexResearchSystem": "Sistema de investigación de la Pokédex",
     "researchProgress": "Progreso de investigación",
-    "registered": "Registrados",
     "collections": "Colecciones",
     "registered2": "{{name}}: registrados",
     "newCollection": "+ Nueva colección",
@@ -61,7 +54,6 @@
     "addNewCollection": "Añadir nueva colección",
     "pokeDex": "Pokédex",
     "filter": "Filtrar{{value1}}",
-    "pokeDexResearchSystem": "Sistema de investigación de la Pokédex",
     "activeFilter": "{{value1}}: {{text}}",
     "filterCount": " ({{length}})"
   },
@@ -74,7 +66,6 @@
     "pokeDexCollections": "Colecciones de la Pokédex",
     "collection": "Colección",
     "type": "Tipo",
-    "registered": "Registrados",
     "actions": "Acciones",
     "loadingCollections": "Cargando colecciones…",
     "deleteAllHelp": "Elimina para siempre las colecciones subidas y todo el historial de registros. Las colecciones integradas se reconstruyen en el siguiente análisis.",
@@ -99,26 +90,16 @@
     "giveTheCollectionAName": "Ponle un nombre a la colección.",
     "theNameNeedsAtLeastOneLetterOrDigit": "El nombre debe contener al menos una letra o un dígito.",
     "addAtLeastOnePokeMon": "Añade al menos un Pokémon.",
-    "shiny": "Variocolor",
-    "notShiny": "No variocolor",
     "ribbon": "Cinta {{ribbon}}",
     "nature": "Naturaleza: {{nature}}",
     "ability": "Habilidad: {{ability}}",
     "knows": "Conoce {{move}}",
     "ot": "EO {{ot}}",
     "id": "ID {{trainerId}}",
-    "all": "Todos",
     "unownFormLabel": "{{name}} {{letter}}"
   },
   "builtInCollections": {
     "builtInCollectionIsInvalid": "La colección integrada {{name}} no es válida:\n{{value2}}"
-  },
-  "collectionResults": {
-    "theSelectedCabinsChangedSinceTheLastScan": "Las cabañas seleccionadas han cambiado desde el último análisis.",
-    "aSelectedCabinHasASaveThatWasNotScanned": "Una de las cabañas seleccionadas tiene una partida que aún no se ha analizado.",
-    "aCabinSaveChangedSinceTheLastScan": "La partida de una cabaña ha cambiado desde el último análisis.",
-    "campSitesChangedSinceTheLastScan": "Las parcelas han cambiado desde el último análisis.",
-    "collectionChanged": "La colección ha cambiado desde el último análisis."
   },
   "collectionTypes": {
     "owned": "En posesión",
@@ -158,7 +139,6 @@
     "slot": "{{game}} · {{box}}, espacio {{value3}}",
     "justNow": "ahora mismo",
     "all": "Todos",
-    "registered": "Registrados",
     "missing": "Sin registrar",
     "visiting": "De visita",
     "gender": "Género: {{value1}}",
@@ -194,10 +174,6 @@
     "anEntryHasNoConstraints": "Una entrada no tiene restricciones.",
     "isNotSupportedYet": "«{{unsupported}}» aún no es compatible."
   },
-  "labStore": {
-    "campSites": "Parcelas",
-    "cabin": "Cabaña de {{value1}}"
-  },
   "validateCollection": {
     "mustBeAnObject": "{{path}}: debe ser un objeto",
     "needsAtLeastOneConstraintItWouldMatchAnything": "{{path}}: necesita al menos una restricción (de lo contrario, coincidiría con cualquier Pokémon)",
@@ -223,7 +199,7 @@
     "unknownField": "{{key}}: campo desconocido",
     "schemaMustBeAString": "$schema: debe ser una cadena de texto",
     "schemaversionMustBeTheString1": "schemaVersion: debe ser la cadena «1»",
-    "schemaversionIsNotSupportedThisVersionOfPkcampReads": "schemaVersion: «{{schemaVersion}}» no es compatible (esta versión de PkCamp admite «{{SUPPORTED_SCHEMA_VERSION}}»)",
+    "schemaversionIsNotSupportedThisVersionOfPkcampReads": "schemaVersion: «{{schemaVersion}}» no es compatible (esta versión de pkCamp admite «{{SUPPORTED_SCHEMA_VERSION}}»)",
     "idMustBeAString": "id: debe ser una cadena de texto",
     "idMustBe1LettersDigitsOrHyphensItBecomes": "id: debe contener entre 1 y {{MAX_ID_LENGTH}} letras, dígitos o guiones (se usa como nombre de archivo)",
     "nameMustBeANonEmptyString2": "name: debe ser una cadena de texto no vacía",
@@ -294,5 +270,7 @@
         }
       }
     }
-  }
+  },
+  "researchSystem": "Sistema de investigación de la Pokédex",
+  "registered": "Registrados"
 }

@@ -17,7 +17,7 @@ export class SpritePreloader {
     this.concurrency = concurrency
     if (!Number.isInteger(concurrency) || concurrency < 1)
       throw new Error(
-        i18n.t('services:resources.spriteConcurrencyMustBeAPositiveInteger')
+        'Sprite concurrency must be a positive integer.'
       )
   }
 

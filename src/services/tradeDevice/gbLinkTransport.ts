@@ -286,7 +286,7 @@ export class BrowserGbLinkTransport implements GbLinkTransport {
   async sendData(payload: Uint8Array): Promise<void> {
     if (payload.length > GB_LINK_MAX_PAYLOAD) {
       throw new RangeError(
-        i18n.t('services:gbLinkTransport.aGbLinkDataPayloadCannotExceed64Bytes')
+        'A GB-Link data payload cannot exceed 64 bytes.'
       )
     }
     await this.write(GB_LINK_SERIAL_CHANNEL.data, DATA_ENDPOINT, payload)

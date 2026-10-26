@@ -2,8 +2,7 @@
   "DropboxMenu": {
     "dropbox": "Dropbox",
     "dropboxConnectedYourSavesSettingsAndCollectionsAreSynced": "Dropbox connected. Your saves, settings, and collections are synced.",
-    "signInToDropboxToUseYourSavesSettingsAnd": "Sign in to Dropbox to use your saves, settings, and collections across devices, or continue with browser storage.",
-    "signInToDropbox": "Sign in to Dropbox"
+    "signInToDropboxToUseYourSavesSettingsAnd": "Sign in to Dropbox to use your saves, settings, and collections across devices, or continue with browser storage."
   },
   "SourceLink": {
     "pkcampSourceCodeOnGithubOpensInANewTab": "pkCamp source code on GitHub (opens in a new tab)",
@@ -22,7 +21,6 @@
     "changeGame": "Change game"
   },
   "LanguageMenu": {
-    "language": "Language",
-    "displayLanguage": "Display language"
+    "language": "Language"
   }
 }

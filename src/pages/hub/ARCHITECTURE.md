@@ -48,14 +48,3 @@ page never scrolls as a whole; long content scrolls inside a `Panel`.
 Styles live in `siteComponents.css` (cards, panels, options), `pageHeader.css`
 and `hub.css` (frame, Start, Hub). The Hub and Lab menus position their cards
 with one `grid-template-areas`; the other pages use flex ratios.
-
-## Lab and Camp
-
-`LabMain` is route-driven: `/lab/?mode=` picks the page, and it stays mounted
-(hidden) while Camp is open from a PC entry. The PC reads and writes everything
-(tabs, filter, selected entry, match) through the `collections` service.
-
-`CampPage` works on the `activeGame` working copy. Moves, group moves and
-Camp Site swaps are draft edits until Save; leaving with a draft asks first and
-then discards it. Trade mode reuses `useTradeSession`, which still writes
-storage directly, so `CampPage` reloads `activeGame` after a trade.

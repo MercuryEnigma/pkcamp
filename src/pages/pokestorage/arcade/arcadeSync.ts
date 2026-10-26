@@ -173,7 +173,7 @@ export function exitDecision(state: SyncState, running: boolean): ExitDecision {
     }) as const
   if (state.status === 'conflict' && state.pending) {
     return warn(
-      i18n.t('arcade:arcadeSync.theSaveInCampWasChangedSomewhereElseSoThis')
+      i18n.t('arcade:arcadeSync.campChangedElsewhere')
     )
   }
   if (state.status === 'failed' && state.pending) {

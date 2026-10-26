@@ -62,7 +62,7 @@ export const getBindingName = (): Readonly<Record<Bindable, string>> => ({
   menu: i18n.t('arcade:keyBindings.menu'),
   mute: i18n.t('arcade:keyBindings.muteSound'),
   speed: i18n.t('arcade:keyBindings.speedToggle'),
-  guide: i18n.t('arcade:keyBindings.guide'),
+  guide: i18n.t('arcade:actions.guide'),
   restart: i18n.t('arcade:keyBindings.restart'),
 })
 

@@ -35,7 +35,7 @@ type Side = 'left' | 'right'
 const nodeCache = new WeakMap<CampPokemon, PokemonNode | null>()
 
 const getMessage = (): Record<StorageTool, string> => ({
-  view: i18n.t('camp:CampPage.chooseACamperToViewTheirDetails'),
+  view: i18n.t('camp:CampPage.selectAPokeMonToViewItsDetails'),
   moveOne: i18n.t('camp:CampPage.selectAPokeMonThenChooseItsDestination'),
   groupMove: i18n.t('camp:CampPage.selectTwoCornersOfAGroupThenItsTopLeft'),
 })
@@ -380,13 +380,13 @@ export function CampPage({
   const partyOpen = leftKind === 'save' && leftIndex >= boxCount
   const trading = mode === 'trade'
 
-  if (state.status === 'loading' || state.status === 'idle')
+  if (!trading && (state.status === 'loading' || state.status === 'idle'))
     return (
       <SitePage page={t('CampPage.camp')} gameId={gameId} onBack={onBack}>
         <p role="status">{t('common:actions.loading')}</p>
       </SitePage>
     )
-  if (state.status === 'error')
+  if (!trading && state.status === 'error')
     return (
       <SitePage page={t('CampPage.camp')} gameId={gameId} onBack={onBack}>
         <p role="alert">
@@ -404,7 +404,11 @@ export function CampPage({
     >
       <div className="camp-page">
         {trading ? (
-          <TradePanel gameId={gameId} onTraded={reloadGame} />
+          <TradePanel
+            gameId={gameId}
+            onTraded={reloadGame}
+            onEnd={() => goMode('move')}
+          />
         ) : (
           <div className="camp-stage">
             <div className="camp-side camp-left">
@@ -532,7 +536,7 @@ export function CampPage({
                   </button>
                   <p className="camp-mode-pill">
                     {mode === 'campsite'
-                      ? t('CampPage.campsite2')
+                      ? t('CampPage.campSite')
                       : t('CampPage.boxes', { value1: getGameLabel(gameId!) })}
                   </p>
                   <button
@@ -552,21 +556,13 @@ export function CampPage({
           </div>
         )}
 
-        <div className="camp-bar">
-          {trading ? (
-            <button
-              type="button"
-              className="camp-upload-btn camp-bar-center"
-              onClick={() => goMode('move')}
-            >
-              {t('CampPage.endTrade')}
-            </button>
-          ) : (
+        {!trading && (
+          <div className="camp-bar">
             <p className="camp-bar-message" role="status">
               {message}
             </p>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </SitePage>
   )

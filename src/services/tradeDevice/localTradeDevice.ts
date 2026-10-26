@@ -66,9 +66,7 @@ abstract class LocalTradeDevice implements TradeDevice {
       new TradeDeviceError(
         this.id,
         'invalid-party',
-        i18n.t('services:localTradeDevice.tradesRunThroughRuntrade', {
-          label: this.label,
-        })
+        `${this.label} trades run through runTrade.`
       )
     )
   }
@@ -156,7 +154,7 @@ export class SaveBackupTradeDevice extends LocalTradeDevice {
 
 export class CampSiteTradeDevice extends LocalTradeDevice {
   readonly id = 'camp-site'
-  readonly label = i18n.t('services:localTradeDevice.campSites')
+  readonly label = i18n.t('common:storage.campSites')
 
   private async findSlot(slot: CampSlot, expected: Uint8Array) {
     const camp = await storage.getCamp(GENERATION)

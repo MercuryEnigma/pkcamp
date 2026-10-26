@@ -82,19 +82,19 @@ export function CollectionGrid({
           <strong>
             {registered} / {total}
           </strong>
-          <span className="pc-label">{t('CollectionGrid.registered')}</span>
+          <span className="pc-label">{t('registered')}</span>
         </p>
         <PcMeter
           value={registered}
           total={total}
-          label={t('CollectionGrid.registered')}
+          label={t('registered')}
         />
       </header>
       <div className="pc-filters">
         <input
           type="search"
-          placeholder={t('CollectionGrid.searchPokeMon')}
-          aria-label={t('CollectionGrid.searchEntries')}
+          placeholder={t('common:searchPokemon')}
+          aria-label={t('common:searchPokemon')}
           value={query}
           onChange={(event) => onQuery(event.target.value)}
         />

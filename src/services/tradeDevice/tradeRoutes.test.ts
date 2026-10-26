@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { PokemonSaveAdapter } from '../pkhex'
-import { TradeDeviceError } from './types.ts'
+import { TradeDeviceError, type TradeRequest } from './types.ts'
 import {
   revertTrade,
   runTrade,
@@ -40,7 +40,7 @@ function makeDevices({
   const campSite = local()
   const esp32 = {
     runLink: vi.fn(async () => {}),
-    trade: vi.fn(async () => ({
+    trade: vi.fn(async (_request: TradeRequest) => ({
       trades: [{ slot: 0, sent: bytes(1), received: bytes(9) }],
       party: [],
     })),
@@ -49,7 +49,7 @@ function makeDevices({
   const gbLink = {
     firmwareVersion: vi.fn(async (): Promise<string | null> => '2.2.7'),
     linkAdapter: vi.fn(async () => lease),
-    trade: vi.fn(async () => ({
+    trade: vi.fn(async (_request: TradeRequest) => ({
       trades:
         gbLinkReceived === undefined
           ? []
@@ -71,7 +71,7 @@ function options(devices: TradeDevices) {
   return {
     adapter,
     devices,
-    loadPlaceholder: vi.fn(async () => bytes(77)),
+    onCommitted: vi.fn(),
   }
 }
 
@@ -161,6 +161,56 @@ describe('runTrade', () => {
     )
   })
 
+  it('serializes multiple receipts in one room without writing the final result twice', async () => {
+    const { devices, esp32, saveBackup } = makeDevices()
+    esp32.trade.mockImplementationOnce(async (request) => {
+      request.onEvent!({ type: 'trade-completed', slot: 0, received: bytes(8) })
+      request.onEvent!({ type: 'trade-completed', slot: 0, received: bytes(9) })
+      return {
+        trades: [{ slot: 0, sent: bytes(8), received: bytes(9) }],
+        party: [],
+      }
+    })
+    const writes = await runTrade(
+      save('ruby', 1),
+      sw,
+      new AbortController().signal,
+      options(devices)
+    )
+    expect(saveBackup.write).toHaveBeenCalledTimes(2)
+    expect(saveBackup.write).toHaveBeenNthCalledWith(
+      1,
+      adapter,
+      { gameId: 'ruby', box: 0, index: 1 },
+      bytes(1),
+      bytes(8)
+    )
+    expect(saveBackup.write).toHaveBeenNthCalledWith(
+      2,
+      adapter,
+      { gameId: 'ruby', box: 0, index: 1 },
+      bytes(8),
+      bytes(9)
+    )
+    expect(writes).toEqual([
+      { side: save('ruby', 1), before: bytes(1), after: bytes(9) },
+    ])
+  })
+
+  it('leaves the save unchanged when the Switch room closes before receipt', async () => {
+    const { devices, esp32, saveBackup } = makeDevices()
+    esp32.trade.mockResolvedValueOnce({ trades: [], party: [] })
+    await expect(
+      runTrade(
+        save('ruby', 1),
+        sw,
+        new AbortController().signal,
+        options(devices)
+      )
+    ).rejects.toThrow('without completing a trade')
+    expect(saveBackup.write).not.toHaveBeenCalled()
+  })
+
   it('requires a companion for the Switch', async () => {
     const { devices, esp32 } = makeDevices({ companion: null })
     await expect(
@@ -169,30 +219,115 @@ describe('runTrade', () => {
     expect(esp32.trade).not.toHaveBeenCalled()
   })
 
-  it('writes the placeholder after a GB-Link trade', async () => {
-    const { devices, gbLink, saveBackup } = makeDevices()
+  it('leaves the save unchanged when GB-Link cannot return the received Pokémon', async () => {
+    const { devices, saveBackup } = makeDevices()
+    await expect(
+      runTrade(
+        gba,
+        save('ruby', 1),
+        new AbortController().signal,
+        options(devices)
+      )
+    ).rejects.toThrow('without completing a trade')
+    expect(saveBackup.write).not.toHaveBeenCalled()
+  })
+
+  it('persists a received Pokémon before the room closes and keeps it on cancellation', async () => {
+    const { devices, esp32, saveBackup } = makeDevices()
+    const controller = new AbortController()
     const opts = options(devices)
-    await runTrade(gba, save('ruby', 1), new AbortController().signal, opts)
-    expect(gbLink.trade).toHaveBeenCalledWith(
-      expect.objectContaining({
-        party: [bytes(1), null, null, null, null, null],
-        selectedSlot: 0,
+    let request!: TradeRequest
+    esp32.trade.mockImplementationOnce(async (value) => {
+      request = value
+      return new Promise((_resolve, reject) => {
+        value.signal!.addEventListener('abort', () =>
+          reject(value.signal!.reason)
+        )
       })
-    )
-    expect(opts.loadPlaceholder).toHaveBeenCalledOnce()
+    })
+    const running = runTrade(save('ruby', 1), sw, controller.signal, opts)
+    await vi.waitFor(() => expect(request).toBeDefined())
+    request.onEvent!({ type: 'trade-completed', slot: 0, received: bytes(9) })
+    await vi.waitFor(() => expect(opts.onCommitted).toHaveBeenCalledOnce())
     expect(saveBackup.write).toHaveBeenCalledWith(
       adapter,
       { gameId: 'ruby', box: 0, index: 1 },
       bytes(1),
-      bytes(77)
+      bytes(9)
     )
+    controller.abort()
+    expect(await running).toEqual([
+      { side: save('ruby', 1), before: bytes(1), after: bytes(9) },
+    ])
+    expect(saveBackup.write).toHaveBeenCalledOnce()
+  })
+
+  it('waits for a received Pokémon to finish saving after cancellation', async () => {
+    const { devices, esp32, saveBackup } = makeDevices()
+    const controller = new AbortController()
+    let finishSave!: () => void
+    saveBackup.write.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finishSave = resolve
+        })
+    )
+    esp32.trade.mockImplementationOnce(async (request) => {
+      request.onEvent!({ type: 'trade-completed', slot: 0, received: bytes(9) })
+      controller.abort()
+      throw controller.signal.reason
+    })
+    let settled = false
+    const running = runTrade(
+      save('ruby', 1),
+      sw,
+      controller.signal,
+      options(devices)
+    ).then((writes) => {
+      settled = true
+      return writes
+    })
+    await vi.waitFor(() => expect(finishSave).toBeDefined())
+    expect(settled).toBe(false)
+    finishSave()
+    expect(await running).toHaveLength(1)
+  })
+
+  it('ignores received data arriving after cancellation', async () => {
+    const { devices, esp32, saveBackup } = makeDevices()
+    const controller = new AbortController()
+    esp32.trade.mockImplementationOnce(async (request) => {
+      controller.abort()
+      request.onEvent!({ type: 'trade-completed', slot: 0, received: bytes(9) })
+      return {
+        trades: [{ slot: 0, sent: bytes(1), received: bytes(9) }],
+        party: [],
+      }
+    })
+    await expect(
+      runTrade(save('ruby', 1), sw, controller.signal, options(devices))
+    ).rejects.toThrow()
+    expect(saveBackup.write).not.toHaveBeenCalled()
+  })
+
+  it('reports persistence failure even when the room is cancelled', async () => {
+    const { devices, esp32, saveBackup } = makeDevices()
+    const controller = new AbortController()
+    saveBackup.write.mockRejectedValueOnce(new Error('save failed'))
+    esp32.trade.mockImplementationOnce(async (request) => {
+      request.onEvent!({ type: 'trade-completed', slot: 0, received: bytes(9) })
+      controller.abort()
+      throw controller.signal.reason
+    })
+    await expect(
+      runTrade(save('ruby', 1), sw, controller.signal, options(devices))
+    ).rejects.toThrow('save failed')
   })
 
   it('prefers a PK3 returned by the GB-Link', async () => {
     const { devices, saveBackup } = makeDevices({ gbLinkReceived: 8 })
     const opts = options(devices)
     await runTrade(save('ruby', 1), gba, new AbortController().signal, opts)
-    expect(opts.loadPlaceholder).not.toHaveBeenCalled()
     expect(saveBackup.write).toHaveBeenCalledWith(
       adapter,
       { gameId: 'ruby', box: 0, index: 1 },
@@ -261,7 +396,6 @@ describe('runTrade', () => {
       expect(campSite.write).not.toHaveBeenCalled()
       expect(gbLink.trade).not.toHaveBeenCalled()
       expect(esp32.trade).not.toHaveBeenCalled()
-      expect(opts.loadPlaceholder).not.toHaveBeenCalled()
     })
 
     it('releases the adapter when the link fails', async () => {
@@ -333,8 +467,8 @@ describe('revertTrade', () => {
     )
   })
 
-  it('puts back the Pokémon replaced by the GB-Link placeholder', async () => {
-    const { devices, saveBackup } = makeDevices()
+  it('puts back the Pokémon replaced by a received GB-Link Pokémon', async () => {
+    const { devices, saveBackup } = makeDevices({ gbLinkReceived: 8 })
     const writes = await runTrade(
       save('ruby', 1),
       gba,
@@ -348,7 +482,7 @@ describe('revertTrade', () => {
     expect(saveBackup.write).toHaveBeenLastCalledWith(
       adapter,
       { gameId: 'ruby', box: 0, index: 1 },
-      bytes(77),
+      bytes(8),
       bytes(1)
     )
   })

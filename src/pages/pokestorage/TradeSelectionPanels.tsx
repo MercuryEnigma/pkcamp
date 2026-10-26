@@ -43,7 +43,7 @@ function BoxNav({
         type="button"
         className="camp-nav-btn"
         onClick={() => onCycle(-1)}
-        aria-label={t('TradeSelectionPanels.previous', { label: label })}
+        aria-label={t('common:storage.previous', { label: label })}
       >
         ←
       </button>
@@ -55,7 +55,7 @@ function BoxNav({
         type="button"
         className="camp-nav-btn"
         onClick={() => onCycle(1)}
-        aria-label={t('TradeSelectionPanels.next', { label: label })}
+        aria-label={t('common:storage.next', { label: label })}
       >
         →
       </button>
@@ -158,7 +158,7 @@ export function SaveSelectionPanel({
       setActionError(
         cause instanceof Error
           ? storageErrorMessage(cause)
-          : t('TradeSelectionPanels.unableToOpenThatBackup')
+          : t('common:storage.unableToOpenThatBackup')
       )
     }
   }
@@ -189,7 +189,7 @@ export function SaveSelectionPanel({
         </p>
         <div className="camp-transfer-group">
           <span className="camp-transfer-group-label">
-            {t('TradeSelectionPanels.addASave')}
+            {t('common:storage.addASave')}
           </span>
           <button
             type="button"
@@ -197,10 +197,10 @@ export function SaveSelectionPanel({
             disabled={gbaReading || offline}
             onClick={() => setGbaReading(true)}
           >
-            {t('TradeSelectionPanels.fromGba')}
+            {t('common:storage.fromGba')}
           </button>
           <label className="camp-transfer-btn">
-            {t('TradeSelectionPanels.fromFile')}
+            {t('common:storage.fromFile')}
             <input
               className="camp-file-input--hidden"
               type="file"

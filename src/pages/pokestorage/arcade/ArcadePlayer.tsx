@@ -98,9 +98,8 @@ export function ArcadePlayer() {
   const gameName = gameId
     ? t('ArcadePlayer.pokeMon', { value1: getGameLabel(gameId) })
     : t('ArcadePlayer.arcade')
-  const fileBase = gameId
-    ? t('ArcadePlayer.pokemon', { value1: GAME_LABEL[gameId] })
-    : t('ArcadePlayer.arcade')
+  // Download filenames stay English, like GAME_LABEL.
+  const fileBase = gameId ? `Pokemon ${GAME_LABEL[gameId]}` : 'Arcade'
   const { provider, ready } = useStorageProvider()
   // Arcade is a separate document for emulator isolation. Hydrate the same
   // Guide and sprite services here at startup, before the Guide can be opened.
@@ -764,12 +763,12 @@ export function ArcadePlayer() {
     : loadingFiles
       ? t('common:actions.loading')
       : busy
-        ? t('arcade:ArcadePlayer.starting')
+        ? t('common:status.starting')
         : gameId && !rom
           ? t('arcade:ArcadePlayer.romNeeded')
           : running
             ? paused
-              ? t('arcade:ArcadePlayer.paused2')
+              ? t('arcade:actions.paused')
               : t('arcade:ArcadePlayer.playing')
             : t('arcade:ArcadePlayer.readyToPlay')
 
@@ -861,7 +860,7 @@ export function ArcadePlayer() {
                   disabled={filesLocked}
                   onClick={() => romInputRef.current?.click()}
                 >
-                  {t('ArcadePlayer.insertRom')}
+                  {t('actions.insertRom')}
                 </button>
               </p>
             )}
@@ -892,7 +891,7 @@ export function ArcadePlayer() {
                         {running
                           ? t('ArcadePlayer.resume')
                           : busy
-                            ? t('ArcadePlayer.starting')
+                            ? t('common:status.starting')
                             : bootBytes !== save
                               ? t('ArcadePlayer.continue')
                               : t('ArcadePlayer.play')}

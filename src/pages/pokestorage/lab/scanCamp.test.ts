@@ -9,7 +9,7 @@ import {
   type Camp,
   type CampPokemon,
 } from '../../../services/storage'
-import { campFingerprint, campPokemonCount, scanCamp } from './scanCamp'
+import { campFingerprint, scanCamp } from './scanCamp'
 import { makeNode } from './testHelpers'
 
 const adapter = initializePokemonSaveAdapter({
@@ -70,8 +70,8 @@ describe('campFingerprint', () => {
     expect(campFingerprint(camp())).not.toBe(base)
   })
 
-  it('counts stored Camp Pokémon', () => {
-    expect(campPokemonCount(camp())).toBe(0)
-    expect(campPokemonCount(camp([0, 3, pikachu], [1, 0, mew]))).toBe(2)
+  it('starts with the stored Camp Pokémon count', () => {
+    expect(campFingerprint(camp())).toMatch(/^0:/)
+    expect(campFingerprint(camp([0, 3, pikachu], [1, 0, mew]))).toMatch(/^2:/)
   })
 })

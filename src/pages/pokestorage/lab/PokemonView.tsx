@@ -224,7 +224,7 @@ export function PokemonView({
               aria-label={t('PokemonView.requirements')}
             >
               <h3 className="pc-label">
-                {t('PokemonView.collectionRequirement')}
+                {t('PokemonView.requirements')}
               </h3>
               <dl>
                 {identity.map((field) => (

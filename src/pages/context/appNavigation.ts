@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next'
 import { createContext, useContext } from 'react'
 
 export interface AppLocation {
@@ -20,12 +19,7 @@ export interface AppNavigation {
 export const AppNavigationContext = createContext<AppNavigation | null>(null)
 
 export function useAppNavigation(): AppNavigation {
-  const { t } = useTranslation(['camp', 'common'] as const)
-
   const value = useContext(AppNavigationContext)
-  if (!value)
-    throw new Error(
-      t('appNavigation.useappnavigationRequiresNavigationprovider')
-    )
+  if (!value) throw new Error('useAppNavigation requires NavigationProvider')
   return value
 }

@@ -93,7 +93,7 @@ async function postToken(
     throw new StorageUnavailableError(
       'dropbox',
       i18n.t(
-        'services:dropboxAuth.couldNotReachDropboxCheckYourConnectionAndTryAgain'
+        'services:dropbox.couldNotReach'
       )
     )
   }
@@ -113,7 +113,7 @@ async function postToken(
   if (!response.ok) {
     throw new StorageUnavailableError(
       'dropbox',
-      i18n.t('services:dropboxAuth.dropboxIsHavingProblemsTryAgainShortly')
+      i18n.t('services:dropbox.havingProblems')
     )
   }
   const data = (await response.json()) as {

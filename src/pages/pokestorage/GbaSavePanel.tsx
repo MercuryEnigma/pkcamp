@@ -39,7 +39,7 @@ export function GbaSavePanel(props: GbaSavePanelProps) {
 
   const { gameId } = props
   const { adapter } = usePkHex()
-  const cabin = t('GbaSavePanel.cabin', { value1: getGameLabel(gameId) })
+  const cabin = t('common:storage.cabin', { value1: getGameLabel(gameId) })
 
   return (
     <GbLinkTaskPanel
@@ -51,21 +51,20 @@ export function GbaSavePanel(props: GbaSavePanelProps) {
       steps={[
         getConnectStep(),
         t(
-          'cartridge-saves:GbaSavePanel.insertAndPowerOnWhileHoldingStartSelect',
+          'common:hardware.insertAndBoot',
           { value1: getGameLabel(gameId) }
         ),
       ]}
       note={
         props.mode === 'write'
           ? t(
-              'cartridge-saves:GbaSavePanel.theCartridgeSCurrentSaveWillBeBackedUpBefore',
-              { cabin: cabin }
+              'cartridge-saves:CartridgeSaves.theCartridgeSCurrentSaveIsStoredFirstAsIts'
             )
           : undefined
       }
       progressLabel={
         props.mode === 'read'
-          ? t('GbaSavePanel.readingTheSave')
+          ? t('common:status.readingTheSave')
           : t('GbaSavePanel.sendingTheBackup')
       }
       startLabel={t('common:actions.continue')}

@@ -19,15 +19,8 @@
     "download": "Download",
     "default": "Default",
     "yes": "Yes",
-    "no": "No"
-  },
-  "areas": {
-    "pokemon": "Pokémon",
-    "pokedex": "Pokédex",
-    "shop": "Shop",
-    "safari": "Safari Zone",
-    "pelago": "Pelago Zone",
-    "options": "Options"
+    "no": "No",
+    "signInToDropbox": "Sign in to Dropbox"
   },
   "document": {
     "mainTitle": "pkCamp",
@@ -46,5 +39,31 @@
   "themes": {
     "campsite": "Campsite",
     "night": "Night"
+  },
+  "searchPokemon": "Search Pokémon",
+  "hardware": {
+    "insertAndBoot": "Insert {{value1}} and power on while holding START + SELECT.",
+    "connectGbLink": "Connect the GB-Link to this computer and your GBA."
+  },
+  "status": {
+    "cancellingDeviceChooser": "Cancelling… Close the device chooser if it is still open.",
+    "readingTheSave": "Reading the save",
+    "cancelled": "Cancelled.",
+    "starting": "Starting…"
+  },
+  "storage": {
+    "cabin": "{{value1}} Cabin",
+    "campSites": "Camp Sites",
+    "previous": "Previous {{label}}",
+    "next": "Next {{label}}",
+    "addASave": "Add a save",
+    "fromGba": "From GBA",
+    "fromFile": "From file",
+    "unableToOpenThatBackup": "Unable to open that backup."
+  },
+  "pokemon": {
+    "shiny": "Shiny",
+    "notShiny": "Not shiny",
+    "egg": "Egg"
   }
 }

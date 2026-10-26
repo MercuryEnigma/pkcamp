@@ -15,18 +15,13 @@ import { SkinManager } from '../arcade/skins/delta/SkinManager'
 import { useSkinLibrary } from '../arcade/skins/delta/useSkinLibrary'
 
 /**
- * The Arcade's key bindings, restart confirmation, and controller skins. These
- * are the same settings, and the same controls, as the Arcade's pause menu, so
- * a change here applies the next time the Arcade opens.
+ * The Arcade's key bindings and restart confirmation. These are the same
+ * controls as the Arcade pause menu, so a change applies on the next launch.
  */
-export function ArcadeSettings() {
-  const { t } = useTranslation(['settings', 'common'] as const)
-
+export function ArcadeControlsSettings() {
   const [bindings, setBindings] = useState(loadKeyBindings)
   const [confirmRestart, setConfirmRestart] = useState(loadConfirmRestart)
   const [capturing, setCapturing] = useState<Bindable | null>(null)
-  const skinLibrary = useSkinLibrary()
-
   useEffect(() => {
     if (!capturing) return
     const onKey = (event: KeyboardEvent) => {
@@ -59,10 +54,20 @@ export function ArcadeSettings() {
           saveKeyBindings(DEFAULT_KEY_BINDINGS)
         }}
       />
-      <section className="lab-arcade-skin" aria-labelledby="settings-skin">
-        <h3 id="settings-skin">{t('ArcadeSettings.controllerSkin')}</h3>
-        <SkinManager library={skinLibrary} />
-      </section>
     </div>
+  )
+}
+
+/** Controller skin library, separated from controls so it has its own URL. */
+export function ArcadeSkinSettings() {
+  const { t } = useTranslation('settings')
+  const skinLibrary = useSkinLibrary()
+  return (
+    <section
+      className="lab-arcade-skin"
+      aria-label={t('ArcadeSettings.controllerSkin')}
+    >
+      <SkinManager library={skinLibrary} />
+    </section>
   )
 }

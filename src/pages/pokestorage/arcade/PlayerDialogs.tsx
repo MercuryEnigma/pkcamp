@@ -65,7 +65,7 @@ export function PlayerDialogs({
               )}
               {decision.download && (
                 <button type="button" onClick={downloadSave}>
-                  {t('PlayerDialogs.downloadSav')}
+                  {t('actions.downloadSav')}
                 </button>
               )}
             </div>
@@ -77,7 +77,7 @@ export function PlayerDialogs({
               onClick={() => exitRef.current?.close()}
             >
               {running
-                ? t('PlayerDialogs.keepPlaying')
+                ? t('actions.keepPlaying')
                 : t('PlayerDialogs.stayHere')}
             </button>
             <button
@@ -85,7 +85,7 @@ export function PlayerDialogs({
               className="arcade-menu-item"
               onClick={navigateAway}
             >
-              {t('PlayerDialogs.exitArcade')}
+              {t('actions.exitArcade')}
             </button>
           </div>
         </div>
@@ -110,7 +110,7 @@ export function PlayerDialogs({
               className="arcade-menu-item arcade-menu-item--primary"
               onClick={() => restartRef.current?.close()}
             >
-              {t('PlayerDialogs.keepPlaying')}
+              {t('actions.keepPlaying')}
             </button>
             <button
               type="button"
